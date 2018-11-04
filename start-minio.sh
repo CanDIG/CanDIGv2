@@ -2,13 +2,9 @@
 
 set -xe
 
-if [ ! -d "$(pwd)/mnt/minio1" ]; then
-  mkdir -p $(pwd)/mnt/minio1/data
-fi
-
 if [ ! -d "$(pwd)/etc/minio" ]; then
-  mkdir -p $(pwd)/etc/minio
-  #cp $(pwd)/minio-sample.config.json $(pwd)/etc/minio/config.json
+  mkdir -p $(pwd)/etc/minio/{config,data}
+  #cp $(pwd)/lib/minio/sample.config.json $(pwd)/etc/minio/config/config.json
 fi
 
 if [ ! -f "$(pwd)/credentials" ]; then
@@ -30,6 +26,6 @@ docker run \
   -e MINIO_SECRET_KEY="$KEY" \
   -e MINIO_REGION="candig" \
   -e MINIO_DOMAIN="candig.com" \
-  -v $(pwd)/mnt/minio1/data:/data \
-  -v $(pwd)/etc/minio:/etc/minio \
+  -v $(pwd)/etc/minio/data:/data \
+  -v $(pwd)/etc/minio/config:/root/.minio \
   minio/minio server /data
