@@ -22,6 +22,6 @@ docker run \
   -e MINIO_SECRET_KEY="$KEY" \
   -e MINIO_REGION="candig" \
   -e MINIO_DOMAIN="candig.com" \
-  -v ./etc/minio/data:/data \
-  -v ./etc/minio/config:/root/.minio \
+  -v $(pwd)/etc/minio/data:/data \
+  -v $(pwd)/etc/minio/config:/root/.minio \
   minio/minio server /data
