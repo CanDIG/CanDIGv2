@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+  reverse-proxy:
+    image: traefik
+    networks:
+      - traefik_net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "80:80"
+    deploy:
+      placement:
+        constraints:
+          - "node.hostname==swarm-manager-01"
+      labels:
+        - "traefik.port=8080"
+        - "traefik.docker.network=traefik_net"
+        - "traefik.frontend.rule=Host:traefik.${TRAEFIK_IP}.xip.io"
+    command:
+      - traefik
+      - --docker
+      - --docker.swarmMode
+      - --docker.domain=${TRAEFIK_IP}.xip.io
+      - --docker.watch
+      - --api
+
+networks:
+  traefik_net:
+    external: true

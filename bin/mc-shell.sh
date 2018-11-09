@@ -2,12 +2,12 @@
 
 set -xe
 
-if [ ! -d "$(pwd)/etc/mc" ]; then
-  mkdir -p $(pwd)/etc/mc/{config,data}
-  #cp $(pwd)/lib/mc/sample.config.json $(pwd)/etc/mc/config/config.json
+if [ ! -d "../etc/mc" ]; then
+  mkdir -p ../etc/mc/{config,data}
+  #cp ../lib/mc/sample.config.json ../etc/mc/config/config.json
 fi
 
-if [ -f "$(pwd)/minio_secret_key" ]; then
+if [ -f "../minio_secret_key" ]; then
   access_key=$(cat minio_access_key)
   secret_key=$(cat minio_secret_key)
 else
@@ -16,8 +16,8 @@ fi
 
 docker run -it \
   --name=mc_shell \
-  -v $(pwd)/etc/mc/data:/data \
-  -v $(pwd)/etc/mc/config:/root/.mc \
+  -v ../etc/mc/data:/data \
+  -v ../etc/mc/config:/root/.mc \
   --entrypoint=/bin/sh \
   minio/mc
 

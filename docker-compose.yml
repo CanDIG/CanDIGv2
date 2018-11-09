@@ -1,22 +1,32 @@
 # tested on docker-engine 18.06.0
 version: '3.7'
+
+x-deploy:
+  &default-restart
+  restart_policy:
+    delay: 10s
+    max_attempts: 10
+    window: 60s
+
 services:
   minio-server:
     image: minio/minio:latest
     volumes:
       - ./etc/minio/data:/data
+      - ./lib/minio/config:/root/.minioli
+    networks:
+      - traefik_net
     ports:
       - "9000:9000"
-    networks:
-      - overlay
     environment:
       - MINIO_REGION: us-east-1
       - MINIO_DOMAIN: candig.com
     secrets:
       - source: minio_access_key
-        target: access_key
+        target: acess_key
       - source: minio_secret_key
         target: secret_key
+    deploy: *default-restart
     command: ["server", "/data"]
 
   ga4gh-dos:
@@ -25,7 +35,9 @@ services:
     depends_on:
       - minio-server
     networks:
-      - overlay
+      - traefik_net
+    deploy: *default-restart
+
 
   htsget-client:
     build: ./lib/htsget
@@ -33,7 +45,12 @@ services:
     depends_on:
       - ga4gh-dos
     networks:
-      - overlay
+      - traefik_net
+    deploy:  *default-restart
+
+networks:
+  traefik_net:
+    external: true
 
 secrets:
   minio_access_key:
