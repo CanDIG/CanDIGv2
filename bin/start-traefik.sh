@@ -4,8 +4,8 @@
 
 set -xe
 
-if [ ! -d "../etc/trafik" ]; then
-  mkdir -p ../etc/trafik/{config,data}
+if [ ! -d "./etc/trafik" ]; then
+  mkdir -p ./etc/trafik/{config,data}
 fi
 
 docker network create \
@@ -13,4 +13,4 @@ docker network create \
     --attachable \
     traefik_net
 
-docker stack deploy --compose-file ../lib/traefik/traefik-net.yml traefik 
+docker stack deploy --compose-file ./lib/traefik/traefik-net.yml traefik 

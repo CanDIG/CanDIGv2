@@ -4,4 +4,4 @@ set -xe
 
 docker rm -v $(docker ps -aq)
 
-sudo rm -rf ../etc
+sudo rm -rf ./etc
