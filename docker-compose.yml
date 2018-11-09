@@ -19,8 +19,8 @@ services:
     ports:
       - "9000:9000"
     environment:
-      - MINIO_REGION: us-east-1
-      - MINIO_DOMAIN: candig.com
+      - MINIO_REGION="us-east-1"
+      - MINIO_DOMAIN="candig.com"
     secrets:
       - source: minio_access_key
         target: acess_key
