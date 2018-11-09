@@ -4,11 +4,11 @@ services:
   reverse-proxy:
     image: traefik
     networks:
-      - traefik_net
+      - ${DOCKER_NET:-bridge} 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "80:80"
+      - ${TRAEFIK_PORT:-80}:80
     deploy:
       placement:
         constraints:

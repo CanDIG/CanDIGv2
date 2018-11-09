@@ -11,4 +11,3 @@ RUN pip install -r dos_connect/requirements.txt
 
 RUN pip install -r dos_connect/server/requirements.txt
 
-ENTRYPOINT ["ga4gh_dos_server"]

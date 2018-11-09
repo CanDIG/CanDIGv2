@@ -10,17 +10,17 @@ x-deploy:
 
 services:
   minio-server:
-    image: minio/minio:latest
+    image: minio/minio:${MINIO_VERSION:-latest}
     volumes:
-      - ./etc/minio/data:/data
-      - ./lib/minio/config:/root/.minioli
+      - ${PWD}/etc/minio/data:/data
+      - ${PWD}/lib/minio/config:/root/.minio
     networks:
-      - traefik_net
+      - ${DOCKER_NET:-bridge} 
     ports:
-      - "9000:9000"
+      - ${MINIO_UI_PORT:-9000}:9000
     environment:
-      - MINIO_REGION="us-east-1"
-      - MINIO_DOMAIN="candig.com"
+      - MINIO_REGION="${MINIO_REGION:-us-east-1}"
+      - MINIO_DOMAIN="${MINIO_DOMAIN:-candig.com}"
     secrets:
       - source: minio_access_key
         target: acess_key
@@ -30,23 +30,22 @@ services:
     command: ["server", "/data"]
 
   ga4gh-dos:
-    build: ./lib/ga4gh-dos-schemas
-    image: ga4gh-drs-server:latest
+    build: ${PWD}/lib/ga4gh-dos-schemas
+    image: ga4gh-drs-server:${DOS_VERSION:-latest}
     depends_on:
       - minio-server
     networks:
-      - traefik_net
+      - ${DOCKER_NET:-bridge}
     deploy: *default-restart
 
-
   htsget-client:
-    build: ./lib/htsget
-    image: htsget-client:latest
+    build: ${PWD}/lib/htsget
+    image: htsget-client:${HTSGET_VERSION:-latest}
     depends_on:
       - ga4gh-dos
     networks:
-      - traefik_net
-    deploy:  *default-restart
+      - ${DOCKER_NET:-bridge}
+    deploy: *default-restart
 
 networks:
   traefik_net:
