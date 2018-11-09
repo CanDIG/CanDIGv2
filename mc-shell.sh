@@ -7,9 +7,9 @@ if [ ! -d "$(pwd)/etc/mc" ]; then
   #cp $(pwd)/lib/mc/sample.config.json $(pwd)/etc/mc/config/config.json
 fi
 
-if [ -f "$(pwd)/credentials" ]; then
-  access_key=$(sed -n 1p credentials)
-  secret_key=$(sed -n 2p credentials)
+if [ -f "$(pwd)/minio_secret_key" ]; then
+  access_key=$(cat minio_access_key)
+  secret_key=$(cat minio_secret_key)
 else
   echo "WARNING: no credentials file found, configure mc shell manually!"
 fi

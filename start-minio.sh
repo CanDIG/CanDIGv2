@@ -7,16 +7,12 @@ if [ ! -d "$(pwd)/etc/minio" ]; then
   #cp $(pwd)/lib/minio/sample.config.json $(pwd)/etc/minio/config/config.json
 fi
 
-if [ ! -f "$(pwd)/credentials" ]; then
+if [ ! -f "$(pwd)/minio_secret_key" ]; then
   KEY=$(dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev)
-
-  cat <<EOF > $(pwd)/credentials
-admin
-$KEY
-EOF
-
+  echo 'admin' > $(pwd)/minio_access_key
+  echo $KEY > $(pwd)/minio_secret_key
 else
-  KEY=$(sed -n 2p credentials)
+  KEY=$(cat minio_secret_key)
 fi
 
 docker run \
