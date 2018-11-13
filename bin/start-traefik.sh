@@ -13,4 +13,4 @@ docker network create \
     --attachable \
     traefik_net
 
-docker stack deploy --compose-file ./lib/traefik/traefik-net.yml traefik 
+docker stack deploy --compose-file ./lib/traefik/traefik-net.yml traefik

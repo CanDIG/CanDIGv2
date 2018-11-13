@@ -20,7 +20,7 @@ services:
       - ${MINIO_UI_PORT:-9000}:9000
     environment:
       - MINIO_REGION="${MINIO_REGION:-us-east-1}"
-      - MINIO_DOMAIN="${MINIO_DOMAIN:-candig.com}"
+      - MINIO_DOMAIN="${MINIO_DOMAIN:-localhost}"
     secrets:
       - source: minio_access_key
         target: acess_key
@@ -47,9 +47,9 @@ services:
       - ${DOCKER_NET:-bridge}
     deploy: *default-restart
 
-networks:
-  traefik_net:
-    external: true
+#networks:
+  #traefik_net:
+    #external: true
 
 secrets:
   minio_access_key:
