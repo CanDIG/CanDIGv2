@@ -1,0 +1,24 @@
+# tested on docker-engine 18.06.0
+version: '3.7'
+
+x-deploy:
+  &default-restart
+  restart_policy:
+    delay: 10s
+    max_attempts: 10
+    window: 60s
+
+services:
+ ga4gh-dos:
+    build: ${DIR}/lib/ga4gh-dos-schemas
+      args:
+        dos_version: ${DOS_VERSION:-0.4.2}
+    image: ga4gh-drs-server:${DOS_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET:-bridge}
+    deploy: *default-restart
+
+networks:
+  traefik_net:
+    external: true
+

@@ -11,6 +11,8 @@ services:
   consul:
     image: consul
     command: -server -bootstrap -log-level debug -ui-dir /ui
+    networks:
+      - ${DOCKER_NET:-bridge}
     ports:
       - "8400:8400"
       - "8500:8500"
@@ -21,4 +23,8 @@ services:
       - "8301/udp"
       - "8302"
       - "8302/udp"
+    deploy: *default-restart
 
+networks:
+  traefik_net:
+    external: true

@@ -10,10 +10,7 @@ services:
     ports:
       - ${TRAEFIK_PORT:-80}:80
       - ${TRAEFIK_UI_PORT:-8080}:8080
-    #deploy:
-      #placement:
-        #constraints:
-          #- "node.hostname==swarm-manager-01"
+    deploy:
       labels:
         - "traefik.port=${TRAEFIK_UI_PORT:-8080}"
         - "traefik.docker.network=${DOCKER_NET:-bridge}"
@@ -26,7 +23,7 @@ services:
       - --consulcatalog.endpoint=consul:${CONSUL_HTTP_PORT:-8500}
       - --docker
       - --docker.${DOCKER_MODE:-network}
-      - --docker.domain=${MINIO_DOMAIN:localhost}
+      - --docker.domain=${MINIO_DOMAIN:-localhost}
       - --docker.watch
 
 networks:
