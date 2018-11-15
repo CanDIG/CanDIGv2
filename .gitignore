@@ -1,4 +1,4 @@
 /etc
 minio_access_key
 minio_secret_key
-NA12878_2.bam
+*.bam

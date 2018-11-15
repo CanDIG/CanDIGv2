@@ -1,14 +1,14 @@
 version: '3.7'
 
 services:
-  reverse-proxy:
+  traefik-net:
     image: traefik
     networks:
       - ${DOCKER_NET:-bridge}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - ${TRAEFIK_PORT:-80}:80
+      - ${TRAEFIK_HTTP_PORT:-80}:80
       - ${TRAEFIK_UI_PORT:-8080}:8080
     deploy:
       labels:
