@@ -1,0 +1,22 @@
+# tested on docker-engine 18.06.0
+version: '3.7'
+
+x-deploy:
+  &default-restart
+  restart_policy:
+    delay: 10s
+    max_attempts: 10
+    window: 60s
+
+services:
+ htsget-client:
+    build: ${DIR}/lib/htsget
+    image: htsget-client:${HTSGET_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET:-bridge}
+    deploy: *default-restart
+
+networks:
+  traefik_net:
+    external: true
+
