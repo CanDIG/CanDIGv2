@@ -10,15 +10,16 @@ x-deploy:
 
 services:
  ga4gh-dos:
-    build: ${DIR}/lib/ga4gh-dos-schemas
+    build: ${DIR}/lib/ga4gh-dos
       args:
         dos_version: ${DOS_VERSION:-0.4.2}
     image: ga4gh-drs-server:${DOS_VERSION:-latest}
+    network_mode: ${DOCKER_MODE:-bridge}
     networks:
-      - ${DOCKER_NET:-bridge}
+      - ${DOCKER_NET:-bridge-net}
     deploy: *default-restart
 
 networks:
-  traefik_net:
+  ${DOCKER_NET:-bridge-net}:
     external: true
 

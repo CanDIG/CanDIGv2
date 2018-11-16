@@ -9,15 +9,16 @@ x-deploy:
     window: 60s
 
 services:
- htsget-client:
+ htsget:
     build: ${DIR}/lib/htsget
     image: htsget-client:${HTSGET_VERSION:-latest}
+    network_mode: ${DOCKER_MODE:-bridge}
     networks:
-      - ${DOCKER_NET:-bridge}
+      - ${DOCKER_NET:-bridge-net}
     deploy: *default-restart
     cmd: ["watch", "htsget", "-V"]
 
 networks:
-  traefik_net:
+  ${DOCKER_NET:-bridge-net}:
     external: true
 

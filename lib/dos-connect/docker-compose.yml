@@ -12,11 +12,12 @@ services:
   dos-connect:
     build: ${DIR}/lib/dos-connect
     image: dos-connect:${DOS_CONNECT_VERSION:-latest}
+    network_mode: ${DOCKER_MODE:-bridge}
     networks:
-      - ${DOCKER_NET:-bridge}
+      - ${DOCKER_NET:-bridge-net}
     deploy: *default-restart
 
 networks:
-  traefik_net:
+  ${DOCKER_NET:-bridge-net}:
     external: true
 

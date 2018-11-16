@@ -9,13 +9,13 @@ x-deploy:
     window: 60s
 
 services:
-  minio-server:
-    image: minio/minio:${MINIO_VERSION:-latest}
+  mc:
+    image: minio/mc:${MINIO_VERSION:-latest}
     volumes:
-      - minio-data:/data
-      - minio-config:/root/.minio
+      - mc-config:/root/.mc
+    network_mode: ${DOCKER_MODE:-bridge}
     networks:
-      - ${DOCKER_NET:-bridge}
+      - ${DOCKER_NET:-bridge-net}
     ports:
       - ${MINIO_UI_PORT:-9000}:9000
     environment:
@@ -27,16 +27,14 @@ services:
       - source: minio_secret_key
         target: secret_key
     deploy: *default-restart
-    command: ["server", "/data"]
+    entrypoint: ["watch", "mc", "version"]
 
 networks:
-  traefik_net:
+  ${DOCKER_NET:-bridge-net}:
     external: true
 
 volumes:
-  minio-data:
-    external: true
-  minio-config:
+  mc-config:
     external: true
 
 secrets:
