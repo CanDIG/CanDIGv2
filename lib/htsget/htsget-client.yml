@@ -15,6 +15,7 @@ services:
     networks:
       - ${DOCKER_NET:-bridge}
     deploy: *default-restart
+    cmd: ["watch", "htsget", "-V"]
 
 networks:
   traefik_net:

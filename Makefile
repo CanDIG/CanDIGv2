@@ -5,12 +5,13 @@ export $(shell sed 's/=.*//' $(env))
 
 DIR=$(PWD)
 
-all: clean docker-volumes minio-server minio-shell ga4gh-dos htsget-client
+all: clean deploy-all
 
 clean:
 	docker stack rm `docker stack ls | awk '{print $1}'`
 	docker rm -v `docker ps -aq`
-	docker network rm $(DOCKER_NET)
+	docker network rm traefik-net
+	docker volume rm `docker volume ls -q`
 	sudo rm -rf $(DIR)/etc minio_access_key minio_secret_key
 
 consul:
@@ -49,3 +50,9 @@ minio-shell:
 traefik:
 	docker stack deploy --compose-file $(DIR)/lib/traefik/traefik-net.yml traefik-net
 
+deploy-all: deploy-net deploy-traefik deploy-minio deploy-dos deploy-htsget
+deploy-net: docker-swarm docker-net
+deploy-traefik: deploy-net consul traefik-net
+deploy-minio: docker-volumes minio-secrets minio-server minio-shell
+deploy-dos: ga4gh-dos
+deploy-hstget: htsget-client
