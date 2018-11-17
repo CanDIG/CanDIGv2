@@ -1,9 +1,9 @@
-FROM alpine:latest
+FROM python:alpine
 MAINTAINER CanDIG
 
 WORKDIR /root
 
-RUN apk add python py-pip git
+RUN apk add git
 
 RUN git clone git@github.com:ohsu-comp-bio/dos_connect.git
 

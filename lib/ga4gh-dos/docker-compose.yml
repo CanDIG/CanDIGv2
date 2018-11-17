@@ -10,13 +10,16 @@ x-deploy:
 
 services:
  ga4gh-dos:
-    build: ${DIR}/lib/ga4gh-dos
+    build:
+      context: ${PWD}/lib/ga4gh-dos
       args:
         dos_version: ${DOS_VERSION:-0.4.2}
     image: ga4gh-drs-server:${DOS_VERSION:-latest}
     network_mode: ${DOCKER_MODE:-bridge}
-    networks:
-      - ${DOCKER_NET:-bridge-net}
+    #networks:
+      #- ${DOCKER_NET:-bridge-net}
+    ports:
+      - ${DOS_PORT:-8080}:8080
     deploy: *default-restart
 
 networks:

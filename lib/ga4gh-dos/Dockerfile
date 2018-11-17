@@ -1,9 +1,11 @@
-FROM alpine:latest
+FROM python:alpine
 MAINTAINER CanDIG
+
+ARG dos_version
 
 WORKDIR /root
 
-RUN apk add python py-pip git
+#RUN apk add python py-pip git
 
 RUN pip install ga4gh-dos-schemas==$dos_version
 

@@ -10,13 +10,17 @@ x-deploy:
 
 services:
  htsget:
-    build: ${DIR}/lib/htsget
+    build:
+      context: ${PWD}/lib/htsget
+      args:
+        htsget_version: ${HTSGET_VERSION:-0.2.5}
+        dos_version: ${DOS_VERSION:-0.4.2}
     image: htsget-client:${HTSGET_VERSION:-latest}
     network_mode: ${DOCKER_MODE:-bridge}
-    networks:
-      - ${DOCKER_NET:-bridge-net}
+    #networks:
+      #- ${DOCKER_NET:-bridge-net}
     deploy: *default-restart
-    cmd: ["watch", "htsget", "-V"]
+    entrypoint: ["watch", "htsget", "-V"]
 
 networks:
   ${DOCKER_NET:-bridge-net}:

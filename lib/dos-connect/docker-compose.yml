@@ -10,11 +10,14 @@ x-deploy:
 
 services:
   dos-connect:
-    build: ${DIR}/lib/dos-connect
+    build:
+      context: ${PWD}/lib/dos-connect
     image: dos-connect:${DOS_CONNECT_VERSION:-latest}
     network_mode: ${DOCKER_MODE:-bridge}
-    networks:
-      - ${DOCKER_NET:-bridge-net}
+    #networks:
+      #- ${DOCKER_NET:-bridge-net}
+    ports:
+      - ${DOS_CONNECT_PORT:8080}:8080
     deploy: *default-restart
 
 networks:

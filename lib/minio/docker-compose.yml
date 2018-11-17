@@ -15,16 +15,18 @@ services:
       - minio-data:/data
       - minio-config:/root/.minio
     network_mode: ${DOCKER_MODE:-bridge}
-    networks:
-      - ${DOCKER_NET:-bridge-net}
+#    networks:
+#      - ${DOCKER_NET:-bridge-net}
     ports:
       - ${MINIO_UI_PORT:-9000}:9000
     environment:
       - MINIO_REGION="${MINIO_REGION:-us-east-1}"
       - MINIO_DOMAIN="${MINIO_DOMAIN:-localhost}"
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=miniosecret
     secrets:
       - source: minio_access_key
-        target: acess_key
+        target: access_key
       - source: minio_secret_key
         target: secret_key
     deploy: *default-restart
