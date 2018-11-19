@@ -1,6 +1,86 @@
 # CanDIG v2 PoC
 - - -
 
+## Overview
+
+The CanDIG v2 project is a collection of heterogeneos services designed to work together to facilitate end to end
+dataflow for genomic data. 
+
+## Project Structure
+
+```bash
+
+├── .env - docker-compose and Makefile global variables
+├── lib - contains modules of servies/apps
+│   ├── ga4gh-dos - example service, make compose-ga4gh-dos
+│   │   ├── demo.py
+│   │   ├── docker-compose.yml
+│   │   ├── Dockerfile
+│   │   └── gdc_dos.py
+├── Makefile - actions for repeatable testing/deployment
+
+```
+
+## `.env` Environment File
+
+The `.env` file in the project root directory contains a set of global variables that are used as reference to
+the various parameters, plugins, and config options that operators can modify for testing purposes.
+
+Some of the functionality that is controlled through `.env` are:
+  * change docker network, driver, and swarm host
+  * modify ports, protocols, and plugins for various services
+  * version control and app pinning
+  * pre-defined "sane" defaults for turnkey deployment
+
+Compose supports declaring default environment variables in an environment file named `.env` placed in the folder
+where the `docker-compose` command is executed (current working directory). Similarly, when deploying CanDIGv2 
+using `make`, `.env` is imported by `make` and all uncommented variables are added as environment variables via 
+`export`.
+
+These evironment variables can be read in `docker-compose` scripts through the variable substitution operator
+`${VAR:-default}`. 
+
+```yaml
+
+# example compose YAML using variable substitution with default option
+services:
+  consul:
+    image: progrium/consul
+    network_mode: ${DOCKER_MODE:-bridge}
+...
+
+```
+## `make` Deployment
+
+```bash
+
+# view available options
+make
+
+# initialize docker swarm and create required docker networks
+make init
+
+# deploy/test all modules in lib/ using docker-compose
+make compose
+
+# deploy/test all modules in lib/ using docker stack
+make stack
+
+# deploy/test individual modules using docker-compose
+# $module is the name of the sub-folder in lib/
+module=ga4gh-dos
+make compose-${module}
+
+# deploy/test indivudual modules using docker stack
+# $module is the name of the sub-folder in lib/
+module=igv.js
+make stack-${module}
+
+# cleanup environment
+make clean
+
+``` 
+
 ## `mc` Client Examples
 
 ```bash
