@@ -1,0 +1,37 @@
+doctype html
+html
+	head
+		title= title
+		meta(charset='utf-8')
+		meta(name='viewport', content='width=device-width, initial-scale=1, user-scalable=no')
+		link(rel='stylesheet', href='assets/css/main.css')
+		//if lte IE 9
+			link(rel='stylesheet', href='assets/css/ie9.css')
+		noscript
+			link(rel='stylesheet', href='assets/css/noscript.css')
+	body
+		// Wrapper
+		#wrapper
+			// Header
+			header#header
+				.logo
+					span.icon.fa-diamond
+				.content
+					.inner
+						br
+						br
+						br
+						h1= message1
+						h2= message2
+						h3= message3
+						br
+						br
+						br
+		// BG
+		#bg
+		// Scripts
+		script(src='assets/js/jquery.min.js')
+		script(src='assets/js/skel.min.js')
+		script(src='assets/js/util.js')
+		script(src='assets/js/main.js')
+		script(src='igv.min.js/')

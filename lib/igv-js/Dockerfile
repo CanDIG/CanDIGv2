@@ -1,10 +1,21 @@
 FROM alpine:latest
 MAINTAINER CanDIG
+ENV NODE_ENV=production
 
-WORKDIR /root
+WORKDIR /var/www
 
-RUN apk update && apk upgrade
+RUN apk update
+RUN apk add nodejs yarn
 
-RUN apk add nodejs npm
+ADD package.json .
 
-RUN npm install igv express
+RUN yarn add express --save
+RUN yarn add pug --save
+RUN yarn add helmet --save
+RUN yarn add compression --save
+RUN yarn add igv --save
+
+ADD app.js .
+COPY html /var/www/html
+
+ENTRYPOINT ["/usr/bin/node", "app.js"]
