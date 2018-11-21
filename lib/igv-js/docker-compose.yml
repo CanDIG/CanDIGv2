@@ -12,9 +12,7 @@ services:
  igv-js:
     build:
       context: ${PWD}/lib/igv-js
-      args:
-        # placeholder for runtime args
-    image: igvjs-client:${IGVJS_VERSION:-latest}
+    image: igv-js:${IGVJS_VERSION:-latest}
     network_mode: ${DOCKER_MODE:-bridge}
     #networks:
       #- ${DOCKER_NET:-bridge-net}
