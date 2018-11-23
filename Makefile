@@ -30,6 +30,10 @@ stack:
 	# TODO: implement method to load all modules from $PWD/lib/
 
 
+build-%:
+	docker-compose -f $(DIR)/lib/$*/docker-compose.yml build
+
+
 docker-net:
 	docker network create --subnet=10.10.0.0/16 --attachable bridge-net
 	docker network create --driver overlay --opt encrypted --attachable traefik-net
