@@ -17,5 +17,6 @@ RUN yarn add igv --save
 
 ADD app.js .
 COPY html /var/www/html
+RUN cp node_modules/igv/dist/igv.min.js html/assets/js/
 
 ENTRYPOINT ["/usr/bin/node", "app.js"]
