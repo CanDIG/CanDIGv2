@@ -5,11 +5,39 @@ env ?= .env
 include $(env)
 export $(shell sed 's/=.*//' $(env))
 
-DIR=$(PWD)
-
+DIR = $(PWD)
+MODULES = $(shell ls $(DIR)/lib/)
 
 all:
-	# TODO: add documentation here
+	@echo '# view available options'
+	@echo 'make'
+	@echo
+	@echo '# initialize docker swarm and create required docker networks'
+	@echo 'make init'
+	@echo
+	@echo '# deploy/test all modules in lib/ using docker-compose'
+	@echo 'make compose'
+	@echo
+	@echo '# deploy/test all modules in lib/ using docker stack'
+	@echo 'make stack'
+	@echo
+	@echo '# (re)build service image and deploy/test using docker-compose'
+	@echo '# $$module is the name of the sub-folder in lib/'
+	@echo 'module=htsget-server'
+	@echo 'make build-$$module'
+	@echo
+	@echo '# deploy/test individual modules using docker-compose'
+	@echo '# $$module is the name of the sub-folder in lib/'
+	@echo 'module=ga4gh-dos'
+	@echo 'make compose-$$module'
+	@echo
+	@echo '# deploy/test indivudual modules using docker stack'
+	@echo '# $$module is the name of the sub-folder in lib/'
+	@echo 'module=igv-js'
+	@echo 'make stack-$$module'
+	@echo
+	@echo '# cleanup environment'
+	@echo 'make clean'
 
 
 clean:
@@ -23,11 +51,11 @@ clean:
 
 
 compose:
-	# TODO: implement method to load all modules from $PWD/lib/
+	docker-compose $(foreach MODULE, $(MODULES), -f $(DIR)/lib/$(MODULE)/docker-compose.yml ) up
 
 
 stack:
-	# TODO: implement method to load all modules from $PWD/lib/
+	docker stack deploy $(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml ) CanDIGv2
 
 
 build-%:
@@ -35,7 +63,7 @@ build-%:
 
 
 docker-net:
-	docker network create --subnet=10.10.0.0/16 --attachable bridge-net
+	docker network create --driver bridge --subnet=10.10.0.0/16 --attachable bridge-net
 	docker network create --driver overlay --opt encrypted --attachable traefik-net
 
 
@@ -70,3 +98,5 @@ init: docker-swarm docker-net docker-volumes minio-secrets
 # test print global variables
 print-%:
 	@echo '$*=$($*)'
+
+.PHONY all clean compose stack docker-net docker-swarm docker-swarm docker-volumes minio-secrets init

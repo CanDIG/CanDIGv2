@@ -4,7 +4,7 @@
 ## Overview
 
 The CanDIG v2 project is a collection of heterogeneos services designed to work together to facilitate end to end
-dataflow for genomic data. 
+dataflow for genomic data.
 
 ## Project Structure
 
@@ -30,15 +30,15 @@ Some of the functionality that is controlled through `.env` are:
   * change docker network, driver, and swarm host
   * modify ports, protocols, and plugins for various services
   * version control and app pinning
-  * pre-defined "sane" defaults for turnkey deployment
+  * pre-defined defaults for turnkey deployment
 
 Compose supports declaring default environment variables in an environment file named `.env` placed in the folder
-where the `docker-compose` command is executed (current working directory). Similarly, when deploying CanDIGv2 
-using `make`, `.env` is imported by `make` and all uncommented variables are added as environment variables via 
+where the `docker-compose` command is executed (current working directory). Similarly, when deploying CanDIGv2
+using `make`, `.env` is imported by `make` and all uncommented variables are added as environment variables via
 `export`.
 
 These evironment variables can be read in `docker-compose` scripts through the variable substitution operator
-`${VAR:-default}`. 
+`${VAR:-default}`.
 
 ```yaml
 
@@ -66,6 +66,11 @@ make compose
 # deploy/test all modules in lib/ using docker stack
 make stack
 
+# (re)build service image and deploy/test using docker-compose
+# $module is the name of the sub-folder in lib/
+module=htsget-server
+make build-${module}
+
 # deploy/test individual modules using docker-compose
 # $module is the name of the sub-folder in lib/
 module=ga4gh-dos
@@ -73,13 +78,13 @@ make compose-${module}
 
 # deploy/test indivudual modules using docker stack
 # $module is the name of the sub-folder in lib/
-module=igv.js
+module=igv-js
 make stack-${module}
 
 # cleanup environment
 make clean
 
-``` 
+```
 
 ## `mc` Client Examples
 
@@ -120,6 +125,6 @@ curl -X GET http://localhost:8080/ga4gh/dos/v1/dataobjects -d checksum=41b47ce1c
 ```
 ## References
 
-[Minio Client Quickstart]: (https://docs.minio.io/docs/minio-client-quickstart-guide#add-a-cloud-storage-service)
-[GA4GH DRS Schemas]: (https://github.com/ga4gh/data-repository-service-schemas)
-[GA4GH DOS Server Quickstart]: (https://data-object-service.readthedocs.io/en/latest/quickstart.html)
+* [1][Minio Client Quickstart](https://docs.minio.io/docs/minio-client-quickstart-guide#add-a-cloud-storage-service)
+* [2][GA4GH DRS Schemas](https://github.com/ga4gh/data-repository-service-schemas)
+* [3][GA4GH DOS Server Quickstart](https://data-object-service.readthedocs.io/en/latest/quickstart.html)

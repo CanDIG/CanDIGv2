@@ -17,7 +17,7 @@ services:
     #networks:
       #- ${DOCKER_NET:-bridge-net}
     ports:
-      - ${DOS_CONNECT_PORT:8080}:8080
+      - ${DOS_CONNECT_PORT:-8080}:8080
     deploy: *default-restart
 
 networks:
