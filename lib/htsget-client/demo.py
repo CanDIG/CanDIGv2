@@ -36,4 +36,6 @@ na12878_2.created = local_time
 
 c.CreateDataObject(body={'data_object': na12878_2}).result()
 
-c.GetDataObject(data_object_id='na12878_2').result()
+response = c.GetDataObject(data_object_id='na12878_2').result()
+
+print(response)

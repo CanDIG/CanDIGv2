@@ -9,9 +9,9 @@ x-deploy:
     window: 60s
 
 services:
- htsget:
+ htsget-client:
     build:
-      context: ${PWD}/lib/htsget
+      context: ${PWD}/lib/htsget-client
       args:
         htsget_version: ${HTSGET_VERSION:-0.2.5}
         dos_version: ${DOS_VERSION:-0.4.2}
