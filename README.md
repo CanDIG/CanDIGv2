@@ -71,6 +71,9 @@ make stack
 module=htsget-server
 make build-${module}
 
+# (re)build service image for all modules in lib/
+make images
+
 # deploy/test individual modules using docker-compose
 # $module is the name of the sub-folder in lib/
 module=ga4gh-dos

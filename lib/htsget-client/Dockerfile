@@ -6,6 +6,7 @@ ARG htsget_version
 
 WORKDIR /root
 
+RUN apk update
 #RUN apk add python py-pip
 COPY demo.py .
 

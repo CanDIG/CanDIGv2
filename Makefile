@@ -26,6 +26,9 @@ all:
 	@echo 'module=htsget-server'
 	@echo 'make build-$$module'
 	@echo
+	@echo '# (re)build service image for all modules in lib/'
+	@echo 'make images'
+	@echo
 	@echo '# deploy/test individual modules using docker-compose'
 	@echo '# $$module is the name of the sub-folder in lib/'
 	@echo 'module=ga4gh-dos'
@@ -60,6 +63,9 @@ stack:
 
 build-%:
 	docker-compose -f $(DIR)/lib/$*/docker-compose.yml build
+
+images:
+	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 
 
 docker-net:
@@ -99,4 +105,4 @@ init: docker-swarm docker-net docker-volumes minio-secrets
 print-%:
 	@echo '$*=$($*)'
 
-.PHONY all clean compose stack docker-net docker-swarm docker-swarm docker-volumes minio-secrets init
+.PHONY: all clean compose stack docker-net docker-swarm docker-swarm docker-volumes minio-secrets init images
