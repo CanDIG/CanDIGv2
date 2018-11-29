@@ -1,0 +1,26 @@
+# tested on docker-engine 18.06.0
+version: '3.7'
+
+x-deploy:
+  &default-restart
+  restart_policy:
+    delay: 10s
+    max_attempts: 10
+    window: 60s
+
+services:
+ htsnexus-server:
+    build:
+      context: ${PWD}/lib/htsnexus-server
+    image: htsnexus-server:${HTSNEXUS_VERSION:-latest}
+    network_mode: ${DOCKER_MODE:-bridge}
+    #networks:
+      #- ${DOCKER_NET:-bridge-net}
+    ports:
+      - ${HTSNEXUS_PORT:-48444}:48444
+    deploy: *default-restart
+
+networks:
+  ${DOCKER_NET:-bridge-net}:
+    external: true
+
