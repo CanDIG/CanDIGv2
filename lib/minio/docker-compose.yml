@@ -1,12 +1,4 @@
-# tested on docker-engine 18.06.0
 version: '3.7'
-
-x-deploy:
-  &default-restart
-  restart_policy:
-    delay: 10s
-    max_attempts: 10
-    window: 60s
 
 services:
   minio:
@@ -14,36 +6,17 @@ services:
     volumes:
       - minio-data:/data
       - minio-config:/root/.minio
-    network_mode: ${DOCKER_MODE:-bridge}
-#    networks:
-#      - ${DOCKER_NET:-bridge-net}
+    networks:
+      - ${DOCKER_NET:-bridge-net}
     ports:
       - ${MINIO_UI_PORT:-9000}:9000
     environment:
       - MINIO_REGION="${MINIO_REGION:-us-east-1}"
       - MINIO_DOMAIN="${MINIO_DOMAIN:-localhost}"
-      - MINIO_ACCESS_KEY=minio
-      - MINIO_SECRET_KEY=miniosecret
     secrets:
       - source: minio_access_key
         target: access_key
       - source: minio_secret_key
         target: secret_key
-    deploy: *default-restart
     command: ["server", "/data"]
 
-networks:
-  ${DOCKER_NET:-bridge-net}:
-    external: true
-
-volumes:
-  minio-data:
-    external: true
-  minio-config:
-    external: true
-
-secrets:
-  minio_access_key:
-    external: true
-  minio_secret_key:
-    external: true

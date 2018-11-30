@@ -3,9 +3,8 @@ version: '3.7'
 services:
   traefik:
     image: traefik
-    network_mode: ${DOCKER_MODE:-bridge}
-    #networks:
-      #- ${DOCKER_NET:-bridge-net}
+    networks:
+      - ${DOCKER_NET:-bridge-net}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
@@ -13,19 +12,18 @@ services:
       - ${TRAEFIK_UI_PORT:-8080}:8080
     deploy:
       labels:
-        - "traefik.port=${TRAEFIK_UI_PORT:-8080}"
-        - "traefik.docker.network=${DOCKER_NET:-bridge-net}"
-        - "traefik.frontend.rule=Host:traefik.${MINIO_DOMAIN:-localhost}"
+        - traefik.enable=true
+        - traefik.port=${TRAEFIK_UI_PORT:-8080}
+        - traefik.docker.network=${DOCKER_NET:-bridge-net}
+        #- traefik.frontend.rule=Host:traefik.${MINIO_DOMAIN:-localhost}
     command:
       - traefik
       - --api
-#      - --consul
-#      - --consul.endpoint=${CONSUL_PROTOCOL:-http}://consul-server:${CONSUL_HTTP_PORT:-8500}
       - --docker
-      #- --docker.${TRAEFIK_MODE:-network}
+      - --docker.swarmmode=${TRAEFIK_SWARM:-false}
+      - --docker.network=${TRAEFIK_NET:-bridge-net}
       - --docker.domain=${MINIO_DOMAIN:-localhost}
       - --docker.watch
+      - --consul
+      - --consul.endpoint=${CONSUL_PROTOCOL:-http}://consul:${CONSUL_HTTP_PORT:-8500}
 
-networks:
-  ${DOCKER_NET:-bridge-net}:
-    external: true

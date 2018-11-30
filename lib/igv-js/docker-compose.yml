@@ -1,26 +1,13 @@
 # tested on docker-engine 18.06.0
 version: '3.7'
 
-x-deploy:
-  &default-restart
-  restart_policy:
-    delay: 10s
-    max_attempts: 10
-    window: 60s
-
 services:
  igv-js:
     build:
-      context: ${PWD}/lib/igv-js
+      context: $PWD/lib/igv-js
     image: igv-js:${IGVJS_VERSION:-latest}
-    network_mode: ${DOCKER_MODE:-bridge}
-    #networks:
-      #- ${DOCKER_NET:-bridge-net}
+    networks:
+      - ${DOCKER_NET:-bridge-net}
     ports:
       - ${IGVJS_PORT:-80}:80
-    deploy: *default-restart
-
-networks:
-  ${DOCKER_NET:-bridge-net}:
-    external: true
 

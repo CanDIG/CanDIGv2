@@ -6,7 +6,8 @@ include $(env)
 export $(shell sed 's/=.*//' $(env))
 
 DIR = $(PWD)
-MODULES = $(shell ls $(DIR)/lib/)
+#MODULES = $(shell ls $(DIR)/lib/)
+MODULES = consul traefik minio ga4gh-dos htsnexus-server igv-js
 
 all:
 	@echo '# view available options'
@@ -54,18 +55,18 @@ clean:
 
 
 compose:
-	docker-compose $(foreach MODULE, $(MODULES), -f $(DIR)/lib/$(MODULE)/docker-compose.yml ) up
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml $(foreach MODULE, $(MODULES), -f $(DIR)/lib/$(MODULE)/docker-compose.yml ) up
 
 
 stack:
-	docker stack deploy $(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml ) CanDIGv2
+	docker stack deploy --compose-file $(DIR)/lib/swarm/docker-compose.yml $(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml ) CanDIGv2
 
 
 build-%:
-	docker-compose -f $(DIR)/lib/$*/docker-compose.yml build
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build
 
 images:
-	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
+	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 
 
 docker-net:
@@ -84,18 +85,18 @@ docker-volumes:
 
 
 compose-%:
-	docker-compose -f $(DIR)/lib/$*/docker-compose.yml up
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml up
 
 
 stack-%:
-	docker stack deploy --compose-file $(DIR)/lib/$*/docker-compose.yml $*
+	docker stack deploy --compose-file $(DIR)/lib/swarm/docker-compose.yml --compose-file $(DIR)/lib/$*/docker-compose.yml $*
 
 
 minio-secrets:
 	echo admin > minio_access_key
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio_secret_key
-	docker secret create minio_access_key minio_access_key
-	docker secret create minio_secret_key minio_secret_key
+	docker secret create minio_access_key $(DIR)/minio_access_key
+	docker secret create minio_secret_key $(DIR)/minio_secret_key
 
 
 init: docker-swarm docker-net docker-volumes minio-secrets
