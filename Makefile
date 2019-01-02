@@ -9,40 +9,46 @@ DIR = $(PWD)
 #MODULES = $(shell ls $(DIR)/lib/)
 MODULES = consul traefik minio ga4gh-dos htsnexus-server igv-js
 
-all:
-	@echo '# view available options'
-	@echo 'make'
-	@echo
-	@echo '# initialize docker swarm and create required docker networks'
-	@echo 'make init'
-	@echo
-	@echo '# deploy/test all modules in lib/ using docker-compose'
-	@echo 'make compose'
-	@echo
-	@echo '# deploy/test all modules in lib/ using docker stack'
-	@echo 'make stack'
-	@echo
-	@echo '# (re)build service image and deploy/test using docker-compose'
-	@echo '# $$module is the name of the sub-folder in lib/'
-	@echo 'module=htsget-server'
-	@echo 'make build-$$module'
-	@echo
-	@echo '# (re)build service image for all modules in lib/'
-	@echo 'make images'
-	@echo
-	@echo '# deploy/test individual modules using docker-compose'
-	@echo '# $$module is the name of the sub-folder in lib/'
-	@echo 'module=ga4gh-dos'
-	@echo 'make compose-$$module'
-	@echo
-	@echo '# deploy/test indivudual modules using docker stack'
-	@echo '# $$module is the name of the sub-folder in lib/'
-	@echo 'module=igv-js'
-	@echo 'make stack-$$module'
-	@echo
-	@echo '# cleanup environment'
-	@echo 'make clean'
+define help
+# view available options
+make
 
+# initialize docker swarm and create required docker networks
+make init
+
+# deploy/test all modules in lib/ using docker-compose
+make compose
+
+# deploy/test all modules in lib/ using docker stack
+make stack
+
+# (re)build service image and deploy/test using docker-compose
+# $$module is the name of the sub-folder in lib/
+module=htsget-server
+make build-$$module
+
+# (re)build service image for all modules in lib/
+make images
+
+# deploy/test individual modules using docker-compose
+# $$module is the name of the sub-folder in lib/
+module=ga4gh-dos
+make compose-$$module
+
+# deploy/test indivudual modules using docker stack
+# $$module is the name of the sub-folder in lib/
+module=igv-js
+make stack-$$module
+
+# cleanup environment
+make clean
+
+endef
+
+export help
+
+all:
+	@printf "$$help"
 
 clean:
 	docker stack rm `docker stack ls | awk '{print $1}'`
