@@ -61,7 +61,7 @@ clean:
 
 
 compose:
-	docker-compose -f $(DIR)/lib/compose/docker-compose.yml $(foreach MODULE, $(MODULES), -f $(DIR)/lib/$(MODULE)/docker-compose.yml ) up
+	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml up -d;)
 
 
 stack:
