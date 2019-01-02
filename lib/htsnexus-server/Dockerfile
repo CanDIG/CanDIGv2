@@ -1,5 +1,5 @@
 FROM ubuntu:trusty
-MAINTAINER CanDIG
+LABEL maintainer=CanDIG
 
 WORKDIR /root
 

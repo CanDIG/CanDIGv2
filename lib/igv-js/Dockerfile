@@ -1,5 +1,5 @@
 FROM alpine:latest
-MAINTAINER CanDIG
+LABEL maintainer=CanDIG
 ENV NODE_ENV=production
 
 WORKDIR /var/www

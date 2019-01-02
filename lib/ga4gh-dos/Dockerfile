@@ -1,5 +1,5 @@
 FROM python:alpine
-MAINTAINER CanDIG
+LABEL maintainer=CanDIG
 
 ARG dos_version
 
