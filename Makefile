@@ -77,6 +77,11 @@ images:
 
 docker-net:
 	docker network create --driver bridge --subnet=10.10.0.0/16 --attachable bridge-net
+	docker network create --driver bridge --subnet=10.10.0.0/16 --attachable \
+		-o com.docker.network.bridge.enable_icc=false \
+		-o com.docker.network.bridge.name=docker_gwbridge \
+		-o com.docker.network.bridge.enable_ip_masquerade=true \
+		docker_gwbridge
 	docker network create --driver overlay --opt encrypted --attachable traefik-net
 
 
@@ -105,7 +110,7 @@ minio-secrets:
 	docker secret create minio_secret_key $(DIR)/minio_secret_key
 
 
-init: docker-swarm docker-net docker-volumes minio-secrets
+init: docker-net docker-volumes docker-swarn minio-secrets
 
 
 # test print global variables
