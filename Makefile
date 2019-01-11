@@ -52,9 +52,11 @@ all:
 
 clean:
 	docker stack rm `docker stack ls | awk '{print $1}'`
-	docker rm -v `docker ps -aq`
-	docker network rm bridge-net traefik-net
+	docker stop `docker ps -q`
 	docker secret rm `docker secret ls -q`
+	docker swarm leave --force
+	docker network rm bridge-net traefik-net docker_gwbridge
+	docker rm -v `docker ps -aq`
 	docker volume rm `docker volume ls -q`
 	docker rmi `docker images -q`
 	rm -f minio_access_key minio_secret_key
