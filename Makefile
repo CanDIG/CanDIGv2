@@ -7,7 +7,7 @@ export $(shell sed 's/=.*//' $(env))
 
 DIR = $(PWD)
 #MODULES = $(shell ls $(DIR)/lib/)
-MODULES = consul traefik minio ga4gh-dos htsnexus-server igv-js
+MODULES = consul traefik minio ga4gh-dos htsnexus-server toil igv-js
 
 define help
 # view available options
