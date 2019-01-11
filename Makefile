@@ -93,6 +93,7 @@ docker-volumes:
 	docker volume create minio-config
 	docker volume create minio-data
 	docker volume create mc-config
+	docker volume create toil-jobstore
 
 
 compose-%:

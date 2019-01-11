@@ -1,0 +1,46 @@
+version: '3.7'
+
+services:
+  toil-master:
+    image: candig/toil:${TOIL_VERSION:-latest}
+    volumes:
+      - toil-jobstore:/jobStoreParentDir
+    networks:
+      - ${DOCKER_NET:-bridge-net}
+    ports:
+      - ${TOIL_PORT:-5050}:5050
+    environment:
+      - MESOS_SYSTEMD_ENABLE_SUPPORT=false
+    secrets:
+      - source: minio_access_key
+        target: access_key
+      - source: minio_secret_key
+        target: secret_key
+    entrypoint: ["mesos-master"]
+    command:
+      - --registry=in_memory
+      - --ip=${TOIL_IP:-127.0.0.1}
+      - --port=${TOIL_PORT:-5050}
+      - --allocation_interval=500ms
+
+  toil-worker:
+    image: candig/toil:${TOIL_VERSION:-latest}
+    volumes:
+      - toil-jobstore:/jobStoreParentDir
+    networks:
+      - ${DOCKER_NET:-bridge-net}
+    environment:
+      - MESOS_SYSTEMD_ENABLE_SUPPORT=false
+    secrets:
+      - source: minio_access_key
+        target: access_key
+      - source: minio_secret_key
+        target: secret_key
+    entrypoint: ["mesos-slave"]
+    command:
+      - --work_dir=/var/lib/mesos
+      - --master=toil-master:5050
+      - --ip=${TOIL_IP:-127.0.0.1}
+      - --attributes=preeemtable:false
+      - --resources=cpus:2
+

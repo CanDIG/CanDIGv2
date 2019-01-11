@@ -9,9 +9,9 @@ from collections import Counter
 
 
 # step 1: load file from object store
-minioClient = Minio('localhost:9000',
+minioClient = Minio('172.16.18.244:9000',
                     access_key='admin',
-                    secret_key='IjoEBEwSfUO2VtisyPv11A=',
+                    secret_key='PaBunouPcfwE8/s+bRr8eA=',
                     secure=False)
 
 # get a full object

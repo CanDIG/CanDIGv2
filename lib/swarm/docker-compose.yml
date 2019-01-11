@@ -12,6 +12,8 @@ volumes:
     external: true
   mc-config:
     external: true
+  toil-jobstore:
+    external: true
 
 secrets:
   minio_access_key:
