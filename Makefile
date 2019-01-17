@@ -47,8 +47,14 @@ endef
 
 export help
 
+
 all:
 	@printf "$$help"
+
+
+build-%:
+	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build
+
 
 clean:
 	docker stack rm `docker stack ls | awk '{print $1}'`
@@ -66,20 +72,13 @@ compose:
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml up -d;)
 
 
-stack:
-	docker stack deploy --compose-file $(DIR)/lib/swarm/docker-compose.yml $(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml ) CanDIGv2
-
-
-build-%:
-	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build
-
-images:
-	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
+compose-%:
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml up
 
 
 docker-net:
-	docker network create --driver bridge --subnet=10.10.1.0/24 --attachable bridge-net
-	docker network create --driver bridge --subnet=10.10.2.0/24 --attachable \
+	docker network create --driver bridge --subnet=$(DOCKER_BRIDGE_IP) --attachable bridge-net
+	docker network create --driver bridge --subnet=$(DOCKER_GWBRIDGE_IP) --attachable \
 		-o com.docker.network.bridge.enable_icc=false \
 		-o com.docker.network.bridge.name=docker_gwbridge \
 		-o com.docker.network.bridge.enable_ip_masquerade=true \
@@ -87,8 +86,8 @@ docker-net:
 
 
 docker-swarm:
-	docker swarm init --advertise-addr $(DOCKER_SWARM_IP)
-	docker network create --driver overlay --opt encrypted --attachable traefik-net
+	docker swarm init --advertise-addr $(DOCKER_ADVERTISE_IP) --listen-addr $(DOCKER_LISTEN_IP)
+	docker network create --driver overlay --ingress --opt encrypted=true traefik-net
 
 
 docker-volumes:
@@ -98,12 +97,11 @@ docker-volumes:
 	docker volume create toil-jobstore
 
 
-compose-%:
-	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml up
+images:
+	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 
 
-stack-%:
-	docker stack deploy --compose-file $(DIR)/lib/swarm/docker-compose.yml --compose-file $(DIR)/lib/$*/docker-compose.yml $*
+init: docker-net docker-volumes docker-swarm minio-secrets
 
 
 minio-secrets:
@@ -113,11 +111,19 @@ minio-secrets:
 	docker secret create minio_secret_key $(DIR)/minio_secret_key
 
 
-init: docker-net docker-volumes docker-swarm minio-secrets
-
-
 # test print global variables
 print-%:
 	@echo '$*=$($*)'
 
-.PHONY: all clean compose stack docker-net docker-swarm docker-swarm docker-volumes minio-secrets init images
+
+stack:
+	docker stack deploy --compose-file $(DIR)/lib/swarm/docker-compose.yml $(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml ) CanDIGv2
+
+
+stack-%:
+	docker stack deploy --compose-file $(DIR)/lib/swarm/docker-compose.yml --compose-file $(DIR)/lib/$*/docker-compose.yml $*
+
+
+.PHONY: all clean compose docker-net docker-swarm docker-swarm docker-volumes minio-secrets images init minio-secrets stack
+
+
