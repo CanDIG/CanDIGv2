@@ -117,11 +117,11 @@ print-%:
 
 
 stack:
-	docker stack deploy --compose-file $(DIR)/lib/swarm/docker-compose.yml $(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml ) CanDIGv2
+	docker stack deploy --orchestrator $(DOCKER_MODE) --namespace $(DOCKER_NAMESPACE) --compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml $(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml ) CanDIGv2
 
 
 stack-%:
-	docker stack deploy --compose-file $(DIR)/lib/swarm/docker-compose.yml --compose-file $(DIR)/lib/$*/docker-compose.yml $*
+	docker stack deploy --orchestrator $(DOCKER_MODE) --namespace $(DOCKER_NAMESPACE) --compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml --compose-file $(DIR)/lib/$*/docker-compose.yml $*
 
 
 .PHONY: all clean compose docker-net docker-swarm docker-swarm docker-volumes minio-secrets images init minio-secrets stack

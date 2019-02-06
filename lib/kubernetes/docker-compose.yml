@@ -1,0 +1,32 @@
+# tested on docker-engine 18.06.0
+version: '3.7'
+
+networks:
+  traefik-net:
+    external: true
+
+volumes:
+  minio-data:
+    external: true
+  minio-config:
+    external: true
+  mc-config:
+    external: true
+  toil-jobstore:
+    external: true
+
+secrets:
+  minio_access_key:
+    external: true
+  minio_secret_key:
+    external: true
+
+x-deploy:
+  &default-restart
+  restart_policy:
+    delay: 10s
+    max_attempts: 10
+    window: 60s
+  labels:
+    - traefik.enable=true
+    - traefik.docker.network=${TRAEFIK_NET:-traefik-net}
