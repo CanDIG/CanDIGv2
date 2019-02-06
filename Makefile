@@ -22,6 +22,9 @@ make compose
 # deploy/test all modules in lib/ using docker stack
 make stack
 
+# deploy/test all modules in lib/ using kubernetes
+make kubernetes
+
 # (re)build service image and deploy/test using docker-compose
 # $$module is the name of the sub-folder in lib/
 module=htsget-server
@@ -104,6 +107,47 @@ images:
 init: docker-net docker-volumes docker-swarm minio-secrets
 
 
+kubectl:
+	mkdir -p $(DIR)/bin
+	curl \
+		-LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl \
+		-o $(DIR)/bin/kubectl
+	chmod 755 $(DIR)/bin/kubectl
+
+
+kubernetes: init images kubectl minikube
+	docker stack deploy \
+		--orchestrator $(DOCKER_MODE) \
+		--namespace $(DOCKER_NAMESPACE) \
+		--compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+		$(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+		CanDIGv2
+
+
+kube-%:
+	docker stack deploy \
+		--orchestrator $(DOCKER_MODE) \
+		--namespace $(DOCKER_NAMESPACE) \
+		--compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+		--compose-file $(DIR)/lib/$*/docker-compose.yml \
+		$*
+
+
+minikube:
+	mkdir -p $(DIR)/bin
+	curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o $(DIR)/bin/minikube
+	chmod 755 $(DIR)/bin/minikube
+	minikube start \
+		--bootstrapper kubeadm \
+		--container-runtime $(MINIKUBE_CRI) \
+	        --cpus $(MINIKUBE_CPUS) \
+	        --memory $(MINIKUBE_MEM) \
+	        --disk-size $(MINIKUBE_DISK) \
+	        --network-plugin cni \
+	        --enable-default-cni \
+		--vm-driver $(MINIKUBE_DRIVER)
+
+
 minio-secrets:
 	echo admin > minio_access_key
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio_secret_key
@@ -116,14 +160,20 @@ print-%:
 	@echo '$*=$($*)'
 
 
-stack:
-	docker stack deploy --orchestrator $(DOCKER_MODE) --namespace $(DOCKER_NAMESPACE) --compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml $(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml ) CanDIGv2
+stack: init images
+	docker stack deploy \
+		--compose-file $(DIR)/lib/stack/docker-compose.yml \
+		$(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+		CanDIGv2
 
 
 stack-%:
-	docker stack deploy --orchestrator $(DOCKER_MODE) --namespace $(DOCKER_NAMESPACE) --compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml --compose-file $(DIR)/lib/$*/docker-compose.yml $*
+	docker stack deploy \
+		--compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+		--compose-file $(DIR)/lib/$*/docker-compose.yml \
+		$*
 
 
-.PHONY: all clean compose docker-net docker-swarm docker-swarm docker-volumes minio-secrets images init minio-secrets stack
+.PHONY: all clean compose docker-net docker-swarm docker-swarm docker-volumes images init kubectl kubernetes minikube minio-secrets stack
 
 
