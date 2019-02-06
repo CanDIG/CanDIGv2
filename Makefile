@@ -90,7 +90,7 @@ docker-net:
 
 docker-swarm:
 	docker swarm init --advertise-addr $(DOCKER_ADVERTISE_IP) --listen-addr $(DOCKER_LISTEN_IP)
-	docker network create --driver overlay --ingress --opt encrypted=true traefik-net
+	docker network create --driver overlay --opt encrypted=true traefik-net
 
 
 docker-volumes:
@@ -109,9 +109,7 @@ init: docker-net docker-volumes docker-swarm minio-secrets
 
 kubectl:
 	mkdir -p $(DIR)/bin
-	curl \
-		-LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl \
-		-o $(DIR)/bin/kubectl
+	curl -LOo $(DIR)/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
 	chmod 755 $(DIR)/bin/kubectl
 
 
@@ -135,7 +133,7 @@ kube-%:
 
 minikube:
 	mkdir -p $(DIR)/bin
-	curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o $(DIR)/bin/minikube
+	curl -Lo $(DIR)/bin/minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 	chmod 755 $(DIR)/bin/minikube
 	minikube start \
 		--bootstrapper kubeadm \
