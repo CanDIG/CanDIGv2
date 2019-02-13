@@ -131,6 +131,12 @@ kube-%:
 		$*
 
 
+miniconda:
+	mkdir -p $(DIR)/bin
+	curl -Lo $(DIR)/bin/miniconda_install.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+	bash $(DIR)/bin/miniconda_install.sh -b
+
+
 minikube:
 	mkdir -p $(DIR)/bin
 	curl -Lo $(DIR)/bin/minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -172,6 +178,14 @@ stack-%:
 		$*
 
 
-.PHONY: all clean compose docker-net docker-swarm docker-swarm docker-volumes images init kubectl kubernetes minikube minio-secrets stack
+toil-hpc:
+	source $(HOME)/miniconda3/etc/conda.sh
+	conda create -y -n toil-hpc python=2
+	conda activate toil-hpc
+	pip install -y toil[all]
+
+
+.PHONY: all clean compose docker-net docker-swarm docker-swarm docker-volumes images \
+	init kubectl kubernetes miniconda minikube minio-secrets stack toil-hpc
 
 
