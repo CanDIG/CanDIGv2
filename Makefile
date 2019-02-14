@@ -143,7 +143,7 @@ print-%:
 
 stack:
 	docker stack deploy \
-		--compose-file $(DIR)/lib/stack/docker-compose.yml \
+		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
 		$(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
 		CanDIGv2
 
