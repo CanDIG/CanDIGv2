@@ -3,6 +3,7 @@ minio_access_key
 minio_secret_key
 *.bam
 .venv
+site.env
 /bin
 swarm_manager_token
 swarm_worker_token
