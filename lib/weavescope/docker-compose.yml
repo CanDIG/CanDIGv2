@@ -1,0 +1,41 @@
+version '3.7'
+
+services:
+  weave-app:
+    image: weaveworks/scope:${WEAVE_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET:-bridge-net}
+    ports:
+      - "${WEAVE_UI_PORT:-4040}:4040"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${WEAVE_UI_PORT:-4040}
+        - traefik.docker.network=${DOCKER_NET:-bridge-net}
+        - traefik.frontend.rule=Host:weave-app.${MINIO_DOMAIN:-localhost}
+      command:
+        - /home/weave/scope
+        - --mode=app
+
+  weave-probe:
+    image: weaveworks/scope-swarm-launcher
+    networks:
+      - ${DOCKER_NET:-bridge-net}
+   command:
+      - /bin/sh
+      - -c
+      - |
+        scope launch --mode=probe --probe-only --probe.docker.bridge=docker0 --probe.docker=true 0.0.0.0:4040
+        docker logs --follow weavescope
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: global
