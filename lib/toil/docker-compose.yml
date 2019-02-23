@@ -8,7 +8,21 @@ services:
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:
-      - ${TOIL_PORT:-5050}:5050
+      - "${TOIL_PORT:-5050}:5050"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_polcy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${TOIL_PORT:-5050}
+        - traefik.docker.network=${DOCKER_NET:-bridge-net}
+        - traefik.frontend.rule=Host:toil-master.${MINIO_DOMAIN:-localhost}
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
     secrets:
@@ -29,6 +43,20 @@ services:
       - toil-jobstore:/jobStoreParentDir
     networks:
       - ${DOCKER_NET:-bridge-net}
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_polcy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${TOIL_PORT:-5050}
+        - traefik.docker.network=${DOCKER_NET:-bridge-net}
+        - traefik.frontend.rule=Host:toil-worker.${MINIO_DOMAIN:-localhost}
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
     secrets:
@@ -42,5 +70,5 @@ services:
       - --master=toil-master:5050
       - --ip=${TOIL_IP:-127.0.0.1}
       - --attributes=preeemtable:false
-      - --resources=cpus:2
+      - --resources=cpus:4
 

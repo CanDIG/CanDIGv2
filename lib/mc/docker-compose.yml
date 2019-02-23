@@ -8,6 +8,15 @@ services:
       - mc-config:/root/.mc
     networks:
       - ${DOCKER_NET:-bridge-net}
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_polcy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     environment:
       - MINIO_REGION="${MINIO_REGION:-us-east-1}"
       - MINIO_DOMAIN="${MINIO_DOMAIN:-localhost}"

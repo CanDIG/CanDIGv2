@@ -11,5 +11,19 @@ services:
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:
-      - ${DOS_PORT:-8080}:8080
+      - "${DOS_PORT:-8080}:8080"
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_polcy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${DOS_PORT:-8080}
+        - traefik.docker.network=${DOCKER_NET:-bridge-net}
+        - traefik.frontend.rule=Host:dos.${MINIO_DOMAIN:-localhost}
 
