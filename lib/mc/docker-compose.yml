@@ -12,7 +12,7 @@ services:
       placement:
         constraints:
           - node.role == worker
-      restart_polcy:
+      restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
