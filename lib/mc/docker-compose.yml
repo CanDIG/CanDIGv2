@@ -11,7 +11,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.role == worker
+          - node.role == manager
       restart_policy:
         condition: on-failure
         delay: 5s

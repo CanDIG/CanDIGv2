@@ -12,7 +12,7 @@ export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
 #MODULES = $(shell ls $(DIR)/lib/)
-MODULES = weavescope consul traefik minio ga4gh-dos htsnexus-server toil igv-js
+MODULES = weavescope consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js
 
 define help
 # view available options
