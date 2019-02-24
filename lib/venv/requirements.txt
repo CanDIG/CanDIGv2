@@ -1,3 +1,5 @@
 docker-compose
 grip
 toil[all]
+dask
+dask-jobqueue

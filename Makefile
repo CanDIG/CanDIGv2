@@ -12,7 +12,7 @@ export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
 #MODULES = $(shell ls $(DIR)/lib/)
-MODULES = consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js
+MODULES = consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js jupyter
 
 define help
 # view available options
@@ -96,7 +96,7 @@ docker-volumes:
 	docker volume create toil-jobstore
 
 images:
-	$(foreach MODULE, $(MODULES), DOCKER_BUILDKIT=1 docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
+	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 
 init: virtualenv docker-net docker-volumes init-$(DOCKER_MODE)
 

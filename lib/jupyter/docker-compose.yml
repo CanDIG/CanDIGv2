@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+  jupyter:
+    build:
+      context: $PWD/lib/jupyter
+    image: candig/jupter-lab:latest
+    networks:
+      - ${DOCKER_NET:-bridge-net}
+    ports:
+      - "${JUPYTER_UI_PORT:-8888}:8888"
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${JUPYTER_UI_PORT:-8888}
+        - traefik.docker.network=${DOCKER_NET:-bridge-net}
+        - traefik.frontend.rule=Host:jupyter.${MINIO_DOMAIN:-localhost}
+    environment:
+      #- NOTEBOOK_DIR=${JUPYTER_NOTEBOOK_DIR:-/notebooks}
+      #- JPY_PORT=${JUPYTER_UI_PORT:-8888}
+      #- JPY_USR=${JUPYTER_USER:-jovyan}
+       - JUPYTER_ENABLE_LAB=${JUPYTER_LAB:-yes}
+    command:
+      - start-notebook.sh
+      - --ip=0.0.0.0
+      - --port=${JUPYTER_UI_PORT:-8888}
+      - --notebook-dir="${JUPYTER_NOTEBOOK_DIR:-/notebooks}"
+      - --no-browser
+      - --NotebookApp.iopub_data_rate_limit=10000000000
+      #- --allow-root
+      #- --NotebookApp.token=
