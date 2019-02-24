@@ -91,7 +91,7 @@ docker-net:
 
 docker-volumes:
 	docker volume create minio-config
-	docker volume create minio-data --opt 0=size=$(MINIO_VOLUME_SIZE)
+	docker volume create minio-data --opt o=size=$(MINIO_VOLUME_SIZE)
 	docker volume create mc-config
 	docker volume create toil-jobstore
 
