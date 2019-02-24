@@ -56,8 +56,10 @@ git clone https://github.com/MaayanLab/biojupies.git
 pushd biojupies
 conda env create --clone base -n biojupies
 source activate biojupies
-Rscript docker-v2/requirements.R
-pip install -r docker-v2/requirements.txt
+#TODO: fix broken dependencies
+#Rscript docker-v2/requirements.R
+#pip install -r docker-v2/requirements.txt
 python docker-v2/download-libraries.py
+python -m ipykernel install --user --name biojupies
 source deactivate
 popd
