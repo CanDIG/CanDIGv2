@@ -4,5 +4,6 @@ toil[all]
 dask
 dask-jobqueue
 dask-ml
+dask-xgboost
 distributed
 htsget

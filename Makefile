@@ -69,11 +69,11 @@ clean:
 	docker stop `docker ps -q`
 	docker secret rm `docker secret ls -q`
 	docker swarm leave --force
-	docker network rm bridge-net traefik-net docker_gwbridge
+	docker network rm bridge-net traefik-net agent-net docker_gwbridge
 	docker rm -v `docker ps -aq`
 	docker volume rm `docker volume ls -q`
 	docker rmi `docker images -q`
-	rm -f minio_access_key minio_secret_key
+	rm -f minio_access_key minio_secret_key portainer_user portainer_secret swarm_manager_token swarm_worker_token
 
 compose:
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml up -d;)
@@ -89,23 +89,35 @@ docker-net:
 		-o com.docker.network.bridge.enable_ip_masquerade=true \
 		docker_gwbridge
 
+docker-secrets:
+	echo admin > minio_access_key
+	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio_secret_key
+	echo admin > portainer_user
+	docker run --rm httpd:2.4-alpine htpasswd -nbB admin \
+		`dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev` \
+		| cut -d ":" -f 2 > $(DIR)/portainer_secret
+	docker secret create minio_access_key $(DIR)/minio_access_key
+	docker secret create minio_secret_key $(DIR)/minio_secret_key
+	docker secret create portainer_user   $(DIR)/portainer_user
+	docker secret create portainer_secret $(DIR)/portainer_secret
+
 docker-volumes:
 	docker volume create minio-config
 	docker volume create minio-data --opt o=size=$(MINIO_VOLUME_SIZE)
 	docker volume create mc-config
 	docker volume create toil-jobstore
-	docker volume create portainer_data
+	docker volume create portainer-data
 
 images:
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 
 init: virtualenv docker-net docker-volumes init-$(DOCKER_MODE)
 
-init-compose: minio-secrets
+init-compose: docker-secrets
 
-init-swarm: swarm-init minio-secrets
+init-swarm: swarm-init docker-secrets
 
-init-kubernetes: kubectl minikube minio-secrets
+init-kubernetes: kubectl minikube docker-secrets
 
 kubectl:
 	mkdir -p $(DIR)/bin
@@ -137,18 +149,6 @@ minikube:
 	        --cpus $(MINIKUBE_CPUS) --memory $(MINIKUBE_MEM) --disk-size $(MINIKUBE_DISK) \
 	        --network-plugin cni --enable-default-cni --vm-driver $(MINIKUBE_DRIVER)
 
-minio-secrets:
-	echo admin > minio_access_key
-	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio_secret_key
-	echo admin > portainer_user
-	docker run --rm httpd:2.4-alpine htpasswd -nbB admin \
-		$(dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev) \
-		| cut -d ":" -f 2 > $(DIR)/portainer_secret
-	docker secret create minio_access_key $(DIR)/minio_access_key
-	docker secret create minio_secret_key $(DIR)/minio_secret_key
-	docker secret create portainer_user   $(DIR)/portainer_user
-	docker secret create portainer_secret $(DIR)/portainer_secret
-
 # test print global variables
 print-%:
 	@echo '$*=$($*)'
@@ -170,7 +170,7 @@ swarm-init:
 	docker swarm join-token manager -q > swarm_manager_token
 	docker swarm join-token worker -q > swarm_worker_token
 	docker network create --driver overlay --opt encrypted=true traefik-net
-	docker network create --driver overlay --opt encrypted=true agent_network
+	docker network create --driver overlay --opt encrypted=true agent-net
 
 swarm-join:
 	docker swarm join --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP) \
@@ -182,11 +182,12 @@ virtualenv:
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 	bash $(DIR)/bin/miniconda_install.sh -f -b
 	source $(HOME)/miniconda3/etc/profile.d/conda.sh
-	conda create -y -n $(VENV_NAME) python=$(VENV_PYTHON)
+	conda env create -n $(VENV_NAME) -f $(DIR)/etc/conda/environment.yml python=$(VENV_PYTHON)
 	conda activate $(VENV_NAME)
-	pip install -r $(DIR)/lib/venv/requirements.txt
+	#pip install -r $(DIR)/etc/venv/requirements.txt
 
-.PHONY: all clean compose docker-net docker-volumes images init init-compose init-swarm init-kubernetes \
-	kubectl kubernetes minikube minio-secrets stack swarm-init swarm-join virtualenv
+.PHONY: all clean compose docker-net docker-secrets docker-volumes \
+	images init init-compose init-swarm init-kubernetes \
+	kubectl kubernetes minikube stack swarm-init swarm-join virtualenv
 
 

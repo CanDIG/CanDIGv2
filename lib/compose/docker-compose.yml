@@ -4,7 +4,7 @@ version: '3.7'
 networks:
   bridge-net:
     external: true
-  agent_network:
+  agent-net:
     driver: overlay
     attachable: true
 
@@ -17,7 +17,7 @@ volumes:
     external: true
   toil-jobstore:
     external: true
-  portainer_data:
+  portainer-data:
     driver: local
 
 secrets:
