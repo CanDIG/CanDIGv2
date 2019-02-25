@@ -21,9 +21,9 @@ services:
         - traefik.port=${WEAVE_UI_PORT:-4040}
         - traefik.docker.network=${DOCKER_NET:-bridge-net}
         - traefik.frontend.rule=Host:weave-app.${MINIO_DOMAIN:-localhost}
-      command:
-        - /home/weave/scope
-        - --mode=app
+    command:
+      - /home/weave/scope
+      - --mode=app
 
   weave-probe:
     image: weaveworks/scope-swarm-launcher

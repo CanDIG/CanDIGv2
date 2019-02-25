@@ -2,7 +2,7 @@
 version: '3.7'
 
 services:
- igv-js:
+  igv-js:
     build:
       context: $PWD/lib/igv-js
     image: igv-js:${IGVJS_VERSION:-latest}

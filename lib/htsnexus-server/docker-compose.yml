@@ -2,7 +2,7 @@
 version: '3.7'
 
 services:
- htsnexus-server:
+  htsnexus-server:
     build:
       context: $PWD/lib/htsnexus-server
     image: htsnexus-server:${HTSNEXUS_VERSION:-latest}
