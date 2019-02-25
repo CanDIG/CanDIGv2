@@ -24,7 +24,10 @@ services:
 
   portainer:
     image: portainer/portainer
-    command: -H tcp://tasks.agent:9001 --tlsskipverify
+    command:
+      - -H tcp://tasks.agent:9001
+      - --tlsskipverify
+      - --admin-password-file /var/run/secrets/secret_key
     ports:
       - "${PORTAINER_UI_PORT:-9000}:9000"
     volumes:
@@ -48,4 +51,9 @@ services:
         - traefik.port=${PORTAINER_UI_PORT:-9000}
         - traefik.docker.network=${DOCKER_NET:-bridge-net}
         - traefik.frontend.rule=Host:portainer.${MINIO_DOMAIN:-localhost}
+    secrets:
+      - source: portainer_user
+        target: user_name
+      - source: portainer_secret
+        target: secret_key
 

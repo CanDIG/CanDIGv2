@@ -24,6 +24,10 @@ secrets:
     external: true
   minio_secret_key:
     external: true
+  portainer_user:
+    external: true
+  portainer_secret:
+    external: true
 
 x-deploy:
   &default-restart
