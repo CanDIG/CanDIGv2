@@ -29,7 +29,7 @@ services:
     image: weaveworks/scope-swarm-launcher
     networks:
       - ${DOCKER_NET:-bridge-net}
-   command:
+    command:
       - /bin/sh
       - -c
       - |
