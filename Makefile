@@ -12,7 +12,7 @@ export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
 #MODULES = $(shell ls $(DIR)/lib/)
-MODULES = consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js jupyter
+MODULES = portainer consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js jupyter
 
 define help
 # view available options

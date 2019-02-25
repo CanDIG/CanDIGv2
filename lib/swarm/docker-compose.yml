@@ -4,6 +4,9 @@ version: '3.7'
 networks:
   traefik-net:
     external: true
+  agent_network:
+    driver: overlay
+    attachable: true
 
 volumes:
   minio-data:
@@ -14,6 +17,8 @@ volumes:
     external: true
   toil-jobstore:
     external: true
+  portainer_data:
+    driver: local
 
 secrets:
   minio_access_key:
