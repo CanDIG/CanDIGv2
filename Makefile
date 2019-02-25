@@ -94,6 +94,7 @@ docker-volumes:
 	docker volume create minio-data --opt o=size=$(MINIO_VOLUME_SIZE)
 	docker volume create mc-config
 	docker volume create toil-jobstore
+	docker volume create portainer_data
 
 images:
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
@@ -163,6 +164,7 @@ swarm-init:
 	docker swarm join-token manager -q > swarm_manager_token
 	docker swarm join-token worker -q > swarm_worker_token
 	docker network create --driver overlay --opt encrypted=true traefik-net
+	docker network create --driver overlay --opt encrypted=true agent_network
 
 swarm-join:
 	docker swarm join --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP) \
