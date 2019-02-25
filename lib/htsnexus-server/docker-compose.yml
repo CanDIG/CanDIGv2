@@ -24,5 +24,8 @@ services:
         - traefik.port=${HTSNEXUS_PORT:-48444}
         - traefik.docker.network=${DOCKER_NET:-bridge-net}
         - traefik.frontend.rule=Host:htsget.${MINIO_DOMAIN:-localhost}
-    command: ["--bind", "0.0.0.0", "--port", "${HTSNEXUS_PORT:-48444}", "test/test.db"]
+      command:
+      - --bind 0.0.0.0
+      - --port ${HTSNEXUS_PORT:-48444}
+      - "test/test.db"
 

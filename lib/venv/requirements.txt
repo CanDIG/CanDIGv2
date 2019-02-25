@@ -3,3 +3,6 @@ grip
 toil[all]
 dask
 dask-jobqueue
+dask-ml
+distributed
+htsget
