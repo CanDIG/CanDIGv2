@@ -44,9 +44,7 @@ services:
     networks:
       - ${DOCKER_NET:-bridge-net}
     deploy:
-      placement:
-        constraints:
-          - node.role == worker
+      mode: global
       restart_policy:
         condition: on-failure
         delay: 5s
