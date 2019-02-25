@@ -1,6 +1,7 @@
 minio_access_key
 minio_secret_key
 portainer_user
+portainer_key
 portainer_secret
 swarm_manager_token
 swarm_worker_token

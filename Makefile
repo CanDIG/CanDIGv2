@@ -93,9 +93,8 @@ docker-secrets:
 	echo admin > minio_access_key
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio_secret_key
 	echo admin > portainer_user
-	docker run --rm httpd:2.4-alpine htpasswd -nbB admin \
-		`dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev` \
-		| cut -d ":" -f 2 > $(DIR)/portainer_secret
+	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > portainer_key
+	docker run --rm httpd:2.4-alpine htpasswd -nbB admin `cat $($(DIR)/portainer_key)` | cut -d ":" -f 2 > $(DIR)/portainer_secret
 	docker secret create minio_access_key $(DIR)/minio_access_key
 	docker secret create minio_secret_key $(DIR)/minio_secret_key
 	docker secret create portainer_user   $(DIR)/portainer_user
