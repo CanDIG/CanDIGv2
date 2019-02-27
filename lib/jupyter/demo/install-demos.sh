@@ -63,3 +63,12 @@ python docker-v2/download-libraries.py
 python -m ipykernel install --user --name biojupies
 source deactivate
 popd
+
+git clone https://github.com/CanDIG/CanDIGv2
+
+pushd CanDIGv2
+conda env create -f etc/conda/environment.yml
+source activate candig
+python -m ipykernel install --user --name candig
+source deactivate
+popd
