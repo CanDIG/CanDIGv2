@@ -11,5 +11,14 @@ services:
     image: htsget-client:${HTSGET_VERSION:-latest}
     networks:
       - ${DOCKER_NET:-bridge-net}
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     entrypoint: ["watch", "htsget", "-V"]
 
