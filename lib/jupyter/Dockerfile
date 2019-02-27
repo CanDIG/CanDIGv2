@@ -35,6 +35,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     texlive-xetex \
     unzip \
     nano \
+    htop \
     && rm -rf /var/lib/apt/lists/*
 
 # R pre-requisites
