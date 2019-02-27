@@ -7,3 +7,4 @@ dask-ml
 dask-xgboost
 distributed
 htsget
+minio
