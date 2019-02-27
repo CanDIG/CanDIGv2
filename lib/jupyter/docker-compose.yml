@@ -5,8 +5,8 @@ services:
     build:
       context: $PWD/lib/jupyter
     image: candig/jupter-lab:latest
-    volumes:
-      - jupyter-data:/notebooks
+    #volumes:
+      #- jupyter-data:/notebooks
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:

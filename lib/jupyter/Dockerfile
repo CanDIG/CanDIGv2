@@ -177,3 +177,5 @@ RUN chown -R $NB_UID:$NB_GID /notebooks /library /download
 USER $NB_UID
 
 #RUN jupyterhub token jovyan
+
+RUN bash /notebooks/demo/install-demos.sh
