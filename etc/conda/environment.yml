@@ -1,4 +1,4 @@
-name: candig                                                                                                                                                                                                                         [242/7
+name: candig
 channels:
   - defaults
 dependencies:
@@ -59,7 +59,7 @@ dependencies:
   - scikit-learn=0.20.2=py27hd81dba3_0
   - scipy=1.2.1=py27h7c811a0_0
   - setuptools=40.8.0=py27_0
-  - singledispatch=3.4.0.3=py27_0                                                                                                                                                                                                    [181/7
+  - singledispatch=3.4.0.3=py27_0
   - six=1.12.0=py27_0
   - sortedcontainers=2.1.0=py27_0
   - sqlite=3.26.0=h7b6447c_0
@@ -73,7 +73,7 @@ dependencies:
   - zict=0.1.3=py27_0
   - zlib=1.2.11=h7b6447c_3
   - zstd=1.3.7=h0b5b093_0
-  - pip:                                                                                                                                                                                                                             [167/7
+  - pip:
     - adal==1.2.1
     - ansible==2.5.0a1
     - antlr4-python2-runtime==4.7.2
