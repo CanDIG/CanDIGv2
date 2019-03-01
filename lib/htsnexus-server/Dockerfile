@@ -19,7 +19,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --reinstall autoconf
 
 RUN git clone https://github.com/dnanexus-rnd/htsnexus.git
 
-COPY demo.sh .
 
 WORKDIR /root/htsnexus
 RUN cp client/htsnexus.py /usr/bin/htsnexus
@@ -30,5 +29,8 @@ RUN cmake . && make
 
 WORKDIR /root/htsnexus/server
 RUN make all test
+
+COPY demo.sh .
+RUN bash demo.sh
 
 ENTRYPOINT ["./server.sh"]
