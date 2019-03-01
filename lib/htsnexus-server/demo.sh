@@ -27,10 +27,12 @@ curl -LO https://s3.amazonaws.com/1000genomes/phase3/data/NA20276/alignment/NA20
 curl -X POST -H 'Content-Type: application/json' \
     --data '{"data_object":
               {"id": "1000genomes-NA20276",
+	       "created": "2019-02-28-22:52:37",
                "name": "1000genomes_phase3_alignments_sequence_20150526_NA20276",
-               "checksums": [{"checksum": "41b47ce1cc21b558409c19b892e1c0d1", "type": "md5"}],
-               "urls": [{"url": "http://hgdownload.cse.ucsc.edu/goldenPath/hg38/chromosomes/chr22.fa.gz"}],
-               "size": "12255678"}}' http://localhost:8080/ga4gh/dos/v1/dataobjects
-htsnexus_index_bam /root/server/test/test.sql 1000genomes_low_coverage NA20276 /root/NA20276.mapped.ILLUMINA.bwa.ASW.low_coverage.20120522.bam
+               "checksums": [{"checksum": "2c6346b629099efa22ab0ac78acf9e06", "type": "md5"}],
+               "urls": [{"url": "http://minio:9000/candig/1000genomes/phase3/data/NA20276/alignment/NA20276.mapped.ILLUMINA.bwa.ASW.low_coverage.20120522.bam"}],
+               "size": "13720976621"}}' http://ga4gh-dos:8080/ga4gh/dos/v1/dataobjects
+
+/root/htsnexus/indexer/htsnexus_index_bam /root/htsnexus/server/test/test.sql 1000genomes_low_coverage NA20276 /root/NA20276.mapped.ILLUMINA.bwa.ASW.low_coverage.20120522.bam http://ga4gh-dos:8080/ga4gh/dos/v1/dataobjects/1000genomes-NA20276
 
 popd
