@@ -5,7 +5,7 @@ services:
   dos-connect:
     build:
       context: ${PWD}/lib/dos-connect
-    image: dos-connect:${DOS_CONNECT_VERSION:-latest}
+    image: candig/dos-connect:${DOS_CONNECT_VERSION:-latest}
     network_mode: ${DOCKER_MODE:-bridge}
     networks:
       - ${DOCKER_NET:-bridge-net}

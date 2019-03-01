@@ -5,7 +5,7 @@ services:
   htsnexus-server:
     build:
       context: $PWD/lib/htsnexus-server
-    image: htsnexus-server:${HTSNEXUS_VERSION:-latest}
+    image: candig/htsnexus-server:${HTSNEXUS_VERSION:-latest}
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:

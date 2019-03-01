@@ -7,7 +7,7 @@ services:
       context: $PWD/lib/ga4gh-dos
       args:
         dos_version: ${DOS_VERSION:-0.4.2}
-    image: ga4gh-drs-server:${DOS_VERSION:-latest}
+    image: candig/ga4gh-drs-server:${DOS_VERSION:-latest}
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:
