@@ -35,4 +35,4 @@ RUN test/htsnexus_integration_tests.sh && \
 #COPY demo.sh .
 #RUN bash demo.sh
 
-ENTRYPOINT ["$PWD/server/server.sh"]
+ENTRYPOINT ["server/server.sh"]
