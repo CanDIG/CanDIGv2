@@ -179,8 +179,6 @@ swarm-init:
 swarm-join:
 	docker swarm join --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP) \
 		--token `cat $(DIR)/swarm_$(SWARM_MODE)_token` $(SWARM_MANAGER_IP)
-	docker network create --driver overlay --opt encrypted=true traefik-net
-	docker network create --driver overlay --opt encrypted=true agent-net
 
 toil-docker:
 	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker
