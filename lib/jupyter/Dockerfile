@@ -49,6 +49,7 @@ RUN apt-get update && apt-get install --quiet --yes \
   r-cran-rodbc \
   gfortran \
   ffmpeg \
+  aria2 \
   gcc && \
   rm -rf /var/lib/apt/lists/*
 
