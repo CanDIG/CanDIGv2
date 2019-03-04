@@ -42,9 +42,9 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
 
 sudo systemctl enable docker
 
-sudo systemctl start docker 
+sudo systemctl start docker
 
-sudo usermod -aG docker $(whoami)`    
+sudo usermod -aG docker `whoami`
 ```
 
 ### CentOS 7
@@ -71,11 +71,11 @@ sudo yum remove -y docker \
   docker-latest-logrotate \
   docker-logrotate \
   docker-engine
-  
+
 sudo yum install -y yum-utils \
   device-mapper-persistent-data \
   lvm2
-  
+
 sudo yum-config-manager -y \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
@@ -86,7 +86,7 @@ sudo yum install -y docker-ce docker-ce-cli containerd.io
 
 sudo systemctl enable docker
 
-sudo systemctl start docker 
+sudo systemctl start docker
 
 sudo usermod -aG docker $(whoami)`
 ```
