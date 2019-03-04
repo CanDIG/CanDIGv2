@@ -89,6 +89,10 @@ docker-net:
 		-o com.docker.network.bridge.enable_ip_masquerade=true \
 		docker_gwbridge
 
+docker-push:
+	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
+	$(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
+
 docker-secrets:
 	echo admin > minio_access_key
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio_secret_key
@@ -121,7 +125,7 @@ init-kubernetes: kubectl minikube docker-secrets
 
 kubectl:
 	mkdir -p $(DIR)/bin
-	curl -LOo $(DIR)/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+	curl -LOo $(DIR)/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
 	chmod 755 $(DIR)/bin/kubectl
 
 kubernetes:
@@ -178,7 +182,6 @@ swarm-join:
 
 toil-docker:
 	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker
-	$(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
 
 virtualenv:
 	mkdir -p $(DIR)/bin
@@ -194,5 +197,4 @@ virtualenv:
 	images init init-compose init-swarm init-kubernetes \
 	kubectl kubernetes minikube stack swarm-init swarm-join \
 	toil-docker virtualenv
-
 

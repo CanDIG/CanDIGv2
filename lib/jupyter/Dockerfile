@@ -1,14 +1,12 @@
-# Copyright (c) Jupyter Development Team.
-# Distributed under the terms of the Modified BSD License.
 ARG BASE_CONTAINER=jupyter/base-notebook
 FROM $BASE_CONTAINER
 
-LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
+LABEL maintainer="CanDIG <info@distributedgenomics.ca"
 
 USER root
 
 # Install all OS dependencies for fully functional notebook server
-RUN apt-get update && apt-get install -yq --no-install-recommends \
+RUN apt-get update && apt-get install --quiet --yes \
   build-essential \
   emacs \
   git \
@@ -39,34 +37,30 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
   libssl-dev \
   libssl1.0.0 \
   default-jre \
-  && rm -rf /var/lib/apt/lists/*
-
-# R pre-requisites
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends \
+  gnupg2 \
+  curl \
+  apt-transport-https \
+  ca-certificates \
+  software-properties-common \
   fonts-dejavu \
   tzdata \
   unixodbc \
   unixodbc-dev \
   r-cran-rodbc \
   gfortran \
+  ffmpeg \
   gcc && \
-  rm -rf /var/lib/apt/lists/*
-
-# ffmpeg for matplotlib anim
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends ffmpeg && \
   rm -rf /var/lib/apt/lists/*
 
 # docker-client support
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
   add-apt-repository \
-    "deb [arch=amd64] https://download.docker.com/linux/debian `lsb_release -cs` stable"
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu `lsb_release -cs` stable"
 
 RUN apt-get update && \
-  apt-get install gnupg2 docker-ce docker-ce-cli containerd.io && \
+  apt-get install --quiet --yes docker-ce docker-ce-cli containerd.io && \
   rm -rf /var/lib/apt/lists/* && \
-  usermod -aG docker $NB_UID
+  usermod -aG docker $NB_USER
 
 USER $NB_UID
 
