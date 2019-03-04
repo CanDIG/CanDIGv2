@@ -7,7 +7,7 @@ services:
     image: candig/jupyter-lab:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      #- /var/lib/docker/volumes:/var/lib/docker/volumes
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
       #- jupyter-data:/notebooks
     networks:
       - ${DOCKER_NET:-bridge-net}
