@@ -36,6 +36,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     unzip \
     nano \
     htop \
+    libssl-dev \
+    libssl1.0.0 \
     && rm -rf /var/lib/apt/lists/*
 
 # R pre-requisites
@@ -83,7 +85,7 @@ RUN conda install --quiet --yes \
     'r-hexbin=1.27*' && \
     conda clean -tipsy && \
     fix-permissions $CONDA_DIR && \
-fix-permissions /home/$NB_USER
+    fix-permissions /home/$NB_USER
 
 # Install Python 3 packages
 # Remove pyqt and qt pulled in for matplotlib since we're only ever going to
