@@ -180,4 +180,4 @@ USER $NB_UID
 
 #RUN jupyterhub token jovyan
 
-RUN bash /notebooks/demo/install-demos.sh
+#RUN bash /notebooks/demo/install-demos.sh
