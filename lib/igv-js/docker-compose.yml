@@ -5,7 +5,7 @@ services:
   igv-js:
     build:
       context: $PWD/lib/igv-js
-    image: igv-js:${IGVJS_VERSION:-latest}
+    image: candig/igv-js:${IGVJS_VERSION:-latest}
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:
