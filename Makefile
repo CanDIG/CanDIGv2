@@ -108,7 +108,7 @@ docker-volumes:
 	docker volume create portainer-data
 	docker volume create jupyter-data
 
-images:
+images: toil-docker
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 
 init: virtualenv docker-net docker-volumes init-$(DOCKER_MODE)
@@ -176,6 +176,10 @@ swarm-join:
 	docker swarm join --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP) \
 		--token `cat $(DIR)/swarm_$(SWARM_MODE)_token` $(SWARM_MANAGER_IP)
 
+toil-docker:
+	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker
+	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker_push
+
 virtualenv:
 	mkdir -p $(DIR)/bin
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
@@ -188,6 +192,7 @@ virtualenv:
 
 .PHONY: all clean compose docker-net docker-secrets docker-volumes \
 	images init init-compose init-swarm init-kubernetes \
-	kubectl kubernetes minikube stack swarm-init swarm-join virtualenv
+	kubectl kubernetes minikube stack swarm-init swarm-join \
+	toil-docker virtualenv
 
 
