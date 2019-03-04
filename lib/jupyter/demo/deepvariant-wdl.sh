@@ -19,21 +19,17 @@ DATA_DIR="${INPUT_DIR}/data"
 #TRUTH_VCF="${DATA_DIR}/HG002_GRCh37_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-22_v.3.3.2_highconf_triophased.vcf.gz"
 #TRUTH_BED="${DATA_DIR}/HG002_GRCh37_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
 
-REF="${DATA_DIR}/ucsc.hg19.chr20.unittest.fasta.gz"
-BAM="${DATA_DIR}/NA12878_S1.chr20.10_10p1mb.bam"
-BAI="${DATA_DIR}/NA12878_S1.chr20.10_10p1mb.bai"
+#N_SHARDS="64"
 
-N_SHARDS="64"
+#OUTPUT_DIR="${BASE}/output"
+#EXAMPLES="${OUTPUT_DIR}/HG002.examples.tfrecord@${N_SHARDS}.gz"
+#GVCF_TFRECORDS="${OUTPUT_DIR}/HG002.gvcf.tfrecord@${N_SHARDS}.gz"
+#CALL_VARIANTS_OUTPUT="${OUTPUT_DIR}/HG002.cvo.tfrecord.gz"
+#OUTPUT_VCF="${OUTPUT_DIR}/HG002.output.vcf.gz"
+#OUTPUT_GVCF="${OUTPUT_DIR}/HG002.output.g.vcf.gz"
+#LOG_DIR="${OUTPUT_DIR}/logs"
 
-OUTPUT_DIR="${BASE}/output"
-EXAMPLES="${OUTPUT_DIR}/HG002.examples.tfrecord@${N_SHARDS}.gz"
-GVCF_TFRECORDS="${OUTPUT_DIR}/HG002.gvcf.tfrecord@${N_SHARDS}.gz"
-CALL_VARIANTS_OUTPUT="${OUTPUT_DIR}/HG002.cvo.tfrecord.gz"
-OUTPUT_VCF="${OUTPUT_DIR}/HG002.output.vcf.gz"
-OUTPUT_GVCF="${OUTPUT_DIR}/HG002.output.g.vcf.gz"
-LOG_DIR="${OUTPUT_DIR}/logs"
-
-CAPTURE_BED="${DATA_DIR}/agilent_sureselect_human_all_exon_v5_b37_targets.bed"
+#CAPTURE_BED="${DATA_DIR}/agilent_sureselect_human_all_exon_v5_b37_targets.bed"
 
 ## Create local directory structure
 mkdir -p "${OUTPUT_DIR}"
@@ -47,17 +43,11 @@ aria2c -c -x10 -s10 -d "${MODELS_DIR}" "${MODEL_HTTP_DIR}"/model.ckpt.data-00000
 aria2c -c -x10 -s10 -d "${MODELS_DIR}" "${MODEL_HTTP_DIR}"/model.ckpt.index
 aria2c -c -x10 -s10 -d "${MODELS_DIR}" "${MODEL_HTTP_DIR}"/model.ckpt.meta
 
-# Copy the data
-aria2c -c -x10 -s10 -d "${DATA_DIR}" https://storage.googleapis.com/deepvariant/exome-case-study-testdata/151002_7001448_0359_AC7F6GANXX_Sample_HG002-EEogPU_v02-KIT-Av5_AGATGTAC_L008.posiSrt.markDup.bai
-aria2c -c -x10 -s10 -d "${DATA_DIR}" https://storage.googleapis.com/deepvariant/exome-case-study-testdata/151002_7001448_0359_AC7F6GANXX_Sample_HG002-EEogPU_v02-KIT-Av5_AGATGTAC_L008.posiSrt.markDup.bam
-aria2c -c -x10 -s10 -d "${DATA_DIR}" https://storage.googleapis.com/deepvariant/exome-case-study-testdata/HG002_GRCh37_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed
-aria2c -c -x10 -s10 -d "${DATA_DIR}" https://storage.googleapis.com/deepvariant/exome-case-study-testdata/HG002_GRCh37_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-22_v.3.3.2_highconf_triophased.vcf.gz
-aria2c -c -x10 -s10 -d "${DATA_DIR}" https://storage.googleapis.com/deepvariant/exome-case-study-testdata/HG002_GRCh37_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-22_v.3.3.2_highconf_triophased.vcf.gz.tbi
-aria2c -c -x10 -s10 -d "${DATA_DIR}" https://storage.googleapis.com/deepvariant/exome-case-study-testdata/agilent_sureselect_human_all_exon_v5_b37_targets.bed
-aria2c -c -x10 -s10 -d "${DATA_DIR}" https://storage.googleapis.com/deepvariant/exome-case-study-testdata/hs37d5.fa.gz
-aria2c -c -x10 -s10 -d "${DATA_DIR}" https://storage.googleapis.com/deepvariant/exome-case-study-testdata/hs37d5.fa.gz.fai
-aria2c -c -x10 -s10 -d "${DATA_DIR}" https://storage.googleapis.com/deepvariant/exome-case-study-testdata/hs37d5.fa.gz.gzi
-aria2c -c -x10 -s10 -d "${DATA_DIR}" https://storage.googleapis.com/deepvariant/exome-case-study-testdata/hs37d5.fa.gzi
+# WDL Testing
+DATA_HTTP_DIR="https://storage.googleapis.com/deepvariant/quickstart-testdata"
+REF="${DATA_DIR}/ucsc.hg19.chr20.unittest.fasta.gz"
+BAM="${DATA_DIR}/NA12878_S1.chr20.10_10p1mb.bam"
+BAI="${DATA_DIR}/NA12878_S1.chr20.10_10p1mb.bai"
 
 wget -P "${DATA_DIR}" "${DATA_HTTP_DIR}"/NA12878_S1.chr20.10_10p1mb.bam
 wget -P "${DATA_DIR}" "${DATA_HTTP_DIR}"/NA12878_S1.chr20.10_10p1mb.bam.bai
@@ -70,13 +60,15 @@ wget -P "${DATA_DIR}" "${DATA_HTTP_DIR}"/ucsc.hg19.chr20.unittest.fasta.gz
 wget -P "${DATA_DIR}" "${DATA_HTTP_DIR}"/ucsc.hg19.chr20.unittest.fasta.gz.fai
 wget -P "${DATA_DIR}" "${DATA_HTTP_DIR}"/ucsc.hg19.chr20.unittest.fasta.gz.gzi
 
-#git clone https://github.com/dnanexus-rnd/DeepVariant-GLnexus-WDL.git
+git clone https://github.com/dnanexus-rnd/DeepVariant-GLnexus-WDL.git
+
+#git clone https://github.com/common-workflow-language/wdl2cwl.git
+#python wdl2cwl/setup.py install
 
 cat > htsget_DeepVariant_inputs.json << EOF
 {
-  "htsget_DeepVariant.htsget_format": "VCF",
   "htsget_DeepVariant.ref_fasta_gz": "${REF}",
-  "htsget_DeepVariant.ranges": ["chr12:111766922-111817529"],
+  "htsget_DeepVariant.ranges": ["chr1:1-100000", "chr12:111766922-111817529"],
   "htsget_DeepVariant.model_tar": "${MODEL}",
   "htsget_DeepVariant.deepvariant_docker": "gcr.io/deepvariant-docker/deepvariant:${BIN_VERSION}",
   "htsget_DeepVariant.accession": "NA12878",
