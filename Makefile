@@ -178,7 +178,7 @@ swarm-join:
 
 toil-docker:
 	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker
-	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker_push
+	$(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
 
 virtualenv:
 	mkdir -p $(DIR)/bin
