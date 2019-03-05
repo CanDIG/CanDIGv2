@@ -44,7 +44,7 @@ sudo systemctl enable docker
 
 sudo systemctl start docker
 
-sudo usermod -aG docker `whoami`
+sudo usermod -aG docker $(whoami)
 ```
 
 ### CentOS 7
@@ -77,8 +77,8 @@ sudo yum install -y yum-utils \
   lvm2
 
 sudo yum-config-manager -y \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
+  --add-repo \
+  https://download.docker.com/linux/centos/docker-ce.repo
 
 sudo yum update
 
@@ -88,14 +88,59 @@ sudo systemctl enable docker
 
 sudo systemctl start docker
 
-sudo usermod -aG docker $(whoami)`
+sudo usermod -aG docker $(whoami)
+```
+
+## Install gVisor (Optional)
+
+```bash
+wget https://storage.googleapis.com/gvisor/releases/nightly/latest/runsc
+wget https://storage.googleapis.com/gvisor/releases/nightly/latest/runsc.sha512
+sha512sum -c runsc.sha512
+chmod a+x runsc
+sudo mv runsc /usr/local/bin
+rm runsc.sha512
+
+sudo mkdir -p /etc/docker
+
+# change storage-driver to overlay2 if OS does not use BTRFS filesystem
+# change network portion (x.x.0.1/16) of bip if subnet is already used in local network
+# change platform for runsc to kvm if kvm on available on host or guest VM is not KVM
+# change network from sandbox to host if you want to use host network stack
+# change runsc overlay to true if you want to persist modifications to running containers
+
+sudo bash -c 'cat > /etc/docker/daemon.json << EOF
+{
+  "storage-driver": "btrfs",
+  "bip": "11.11.0.1/16",
+  "features": {
+    "buildkit": true
+  },
+  "runtimes": {
+    "runsc": {
+      "path": "/usr/local/bin/runsc",
+        "runtimeArgs": [
+          "--platform=ptrace",
+          "--network=sandbox",
+          "--overlay=false"
+        ]
+    }
+  }
+}
+EOF'
+
+sudo systemctl restart docker
 ```
 
 ## Install CanDIG Dependencies
 
-1. Modify `.env` file
+1. Clone/pull latest CanDIGv2 repo from `https://github.com/CanDIG/CanDIGv2.git`
 
-2. Create Cluster
+2. Create/modify `site.env` file
+  * `cp .env site.env`
+  * Edit site.env with your site's local configuration
+
+3. Create Cluster
 ```bash
 # view helpful commands
 make
@@ -106,7 +151,9 @@ make init
 # create images
 make images
 
-# deploy stack
-make stack
+# deploy stack (if using docker-compose environment)
+make compose
 
+# deploy stack (if using docker swarm environment)
+make stack
 ```

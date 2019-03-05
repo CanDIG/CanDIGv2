@@ -1,7 +1,17 @@
 {
   "storage-driver": "btrfs",
   "bip": "11.11.0.1/16",
-  "features": { 
-    "buildkit": true 
+  "features": {
+    "buildkit": true
+  },
+  "runtimes": {
+    "runsc": {
+      "path": "/usr/local/bin/runsc",
+        "runtimeArgs": [
+          "--platform=ptrace",
+          "--network=sandbox",
+          "--overlay=false"
+        ]
+    }
   }
 }

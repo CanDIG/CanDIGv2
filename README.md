@@ -11,13 +11,19 @@ dataflow for genomic data.
 ```bash
 
 ├── .env - docker-compose and Makefile global variables
+├── site.env - docker-compose Makefile global overrides
+├── bin - local binaries directory
+├── doc - documentation for various aspects of CanDIGv2
+├── etc - contains misc files/config/scripts
+├── venv
+│   └── requirements.txt - requirements for CanDIGv2 virtualenv
 ├── lib - contains modules of servies/apps
-│   ├── ga4gh-dos - example service, make compose-ga4gh-dos
-│   │   ├── demo.py
-│   │   ├── docker-compose.yml
-│   │   ├── Dockerfile
-│   │   └── gdc_dos.py
-├── Makefile - actions for repeatable testing/deployment
+│  └── ga4gh-dos - example service, make compose-ga4gh-dos
+│       ├── demo.py
+│       ├── docker-compose.yml
+│       ├── Dockerfile
+│       └── gdc_dos.py
+└── Makefile - actions for repeatable testing/deployment
 
 ```
 
@@ -62,8 +68,14 @@ The `site.env` file is an easy way to keep a set of overrides for the various pa
 # view available options
 make
 
-# initialize docker swarm and create required docker networks
+# initialize docker and create required docker networks
 make init
+
+# join a docker swarm cluster using manager/worker token
+make swarm-join
+
+# (re)build service image for all modules in lib/
+make images
 
 # deploy/test all modules in lib/ using docker-compose
 make compose
@@ -71,23 +83,23 @@ make compose
 # deploy/test all modules in lib/ using docker stack
 make stack
 
-# (re)build service image and deploy/test using docker-compose
-# $module is the name of the sub-folder in lib/
-module=htsget-server
-make build-${module}
+# deploy/test all modules in lib/ using kubernetes
+make kubernetes
 
-# (re)build service image for all modules in lib/
-make images
+# (re)build service image and deploy/test using docker-compose
+# $$module is the name of the sub-folder in lib/
+module=htsget-server
+make build-$$module
 
 # deploy/test individual modules using docker-compose
-# $module is the name of the sub-folder in lib/
+# $$module is the name of the sub-folder in lib/
 module=ga4gh-dos
-make compose-${module}
+make compose-$$module
 
 # deploy/test indivudual modules using docker stack
-# $module is the name of the sub-folder in lib/
+# $$module is the name of the sub-folder in lib/
 module=igv-js
-make stack-${module}
+make stack-$$module
 
 # cleanup environment
 make clean
