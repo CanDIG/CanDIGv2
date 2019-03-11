@@ -5,8 +5,7 @@ networks:
   bridge-net:
     external: true
   agent-net:
-    driver: bridge
-    attachable: true
+    external: true
 
 volumes:
   minio-data:
@@ -18,7 +17,7 @@ volumes:
   toil-jobstore:
     external: true
   portainer-data:
-    driver: local
+    external: true
 
 secrets:
   minio_access_key:

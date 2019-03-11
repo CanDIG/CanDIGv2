@@ -51,6 +51,7 @@ RUN apt-get update && apt-get install --quiet --yes \
   ffmpeg \
   parallel \
   aria2 \
+  samtools \
   gcc && \
   rm -rf /var/lib/apt/lists/*
 

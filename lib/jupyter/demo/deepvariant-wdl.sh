@@ -14,22 +14,22 @@ INPUT_DIR="${BASE}/input"
 MODELS_DIR="${INPUT_DIR}/models"
 MODEL="${MODELS_DIR}/model.ckpt"
 DATA_DIR="${INPUT_DIR}/data"
-#REF="${DATA_DIR}/hs37d5.fa.gz"
-#BAM="${DATA_DIR}/151002_7001448_0359_AC7F6GANXX_Sample_HG002-EEogPU_v02-KIT-Av5_AGATGTAC_L008.posiSrt.markDup.bam"
-#TRUTH_VCF="${DATA_DIR}/HG002_GRCh37_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-22_v.3.3.2_highconf_triophased.vcf.gz"
-#TRUTH_BED="${DATA_DIR}/HG002_GRCh37_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
+REF="${DATA_DIR}/hs37d5.fa.gz"
+BAM="${DATA_DIR}/151002_7001448_0359_AC7F6GANXX_Sample_HG002-EEogPU_v02-KIT-Av5_AGATGTAC_L008.posiSrt.markDup.bam"
+TRUTH_VCF="${DATA_DIR}/HG002_GRCh37_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-22_v.3.3.2_highconf_triophased.vcf.gz"
+TRUTH_BED="${DATA_DIR}/HG002_GRCh37_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
 
-#N_SHARDS="64"
+N_SHARDS="64"
 
-#OUTPUT_DIR="${BASE}/output"
-#EXAMPLES="${OUTPUT_DIR}/HG002.examples.tfrecord@${N_SHARDS}.gz"
-#GVCF_TFRECORDS="${OUTPUT_DIR}/HG002.gvcf.tfrecord@${N_SHARDS}.gz"
-#CALL_VARIANTS_OUTPUT="${OUTPUT_DIR}/HG002.cvo.tfrecord.gz"
-#OUTPUT_VCF="${OUTPUT_DIR}/HG002.output.vcf.gz"
-#OUTPUT_GVCF="${OUTPUT_DIR}/HG002.output.g.vcf.gz"
-#LOG_DIR="${OUTPUT_DIR}/logs"
+OUTPUT_DIR="${BASE}/output"
+EXAMPLES="${OUTPUT_DIR}/HG002.examples.tfrecord@${N_SHARDS}.gz"
+GVCF_TFRECORDS="${OUTPUT_DIR}/HG002.gvcf.tfrecord@${N_SHARDS}.gz"
+CALL_VARIANTS_OUTPUT="${OUTPUT_DIR}/HG002.cvo.tfrecord.gz"
+OUTPUT_VCF="${OUTPUT_DIR}/HG002.output.vcf.gz"
+OUTPUT_GVCF="${OUTPUT_DIR}/HG002.output.g.vcf.gz"
+LOG_DIR="${OUTPUT_DIR}/logs"
 
-#CAPTURE_BED="${DATA_DIR}/agilent_sureselect_human_all_exon_v5_b37_targets.bed"
+CAPTURE_BED="${DATA_DIR}/agilent_sureselect_human_all_exon_v5_b37_targets.bed"
 
 ## Create local directory structure
 mkdir -p "${OUTPUT_DIR}"
@@ -62,6 +62,7 @@ wget -P "${DATA_DIR}" "${DATA_HTTP_DIR}"/ucsc.hg19.chr20.unittest.fasta.gz.gzi
 
 git clone https://github.com/dnanexus-rnd/DeepVariant-GLnexus-WDL.git
 
+wget https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
 #git clone https://github.com/common-workflow-language/wdl2cwl.git
 #python wdl2cwl/setup.py install
 
