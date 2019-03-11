@@ -18,14 +18,51 @@ define help
 # view available options
 make
 
+# create python virtualenv for docker-compose and HPC
+make virtualenv
+
 # initialize docker and create required docker networks
 make init
+
+# initialize docker-compose environment
+make init-compose
+
+# initialize docker-swarm environment (alias for swarm-init)
+make init-swarm
+
+# initialize kubernetes environment using minikube
+make init-kubernetes
+
+# create docker bridge networks
+make docker-net
+
+# push docker images to CanDIG repo
+make docker-push
+
+# create docker secrets for CanDIG services
+make docker-secrets
+
+# create persistant volumes for docker containers
+make docker-volumes
+
+# download kubectl (for kubernetes deployment)
+make kubectl
+
+# create minikube environment for integration testing
+make minikube
+
+# initialize primary docker-swarm master node
+# all other nodes can join in as master/worker
+make swarm-init
 
 # join a docker swarm cluster using manager/worker token
 make swarm-join
 
 # (re)build service image for all modules in lib/
 make images
+
+# create toil images using upstream Toil repo
+make toil-docker
 
 # deploy/test all modules in lib/ using docker-compose
 make compose
@@ -114,6 +151,7 @@ docker-volumes:
 
 images: toil-docker
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
+	$(MAKE) docker-push
 
 init: virtualenv docker-net docker-volumes init-$(DOCKER_MODE)
 
@@ -193,7 +231,7 @@ virtualenv:
 	conda activate $(VENV_NAME)
 	#pip install -r $(DIR)/etc/venv/requirements.txt
 
-.PHONY: all clean compose docker-net docker-secrets docker-volumes \
+.PHONY: all clean compose docker-net docker-push docker-secrets docker-volumes \
 	images init init-compose init-swarm init-kubernetes \
 	kubectl kubernetes minikube stack swarm-init swarm-join \
 	toil-docker virtualenv
