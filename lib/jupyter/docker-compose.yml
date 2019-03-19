@@ -31,13 +31,11 @@ services:
       #- NOTEBOOK_DIR=${JUPYTER_NOTEBOOK_DIR:-/notebooks}
       #- JPY_PORT=${JUPYTER_UI_PORT:-8888}
       #- JPY_USR=${JUPYTER_USER:-jovyan}
-       - JUPYTER_ENABLE_LAB=${JUPYTER_LAB:-yes}
+       - JUPYTER_ENABLE_LAB=${JUPYTER_ENABLE_LAB:-yes}
+       - GRANT_SUDO=${JUPYTER_ENABLE_SUDO:-no}
     command:
       - start-notebook.sh
       - --ip=0.0.0.0
       - --port=${JUPYTER_UI_PORT:-8888}
-      - --notebook-dir="${JUPYTER_NOTEBOOK_DIR:-/notebooks}"
+      - --notebook-dir=${JUPYTER_NOTEBOOK_DIR:-/notebooks}
       - --no-browser
-      - --NotebookApp.iopub_data_rate_limit=10000000000
-      #- --allow-root
-      #- --NotebookApp.token=

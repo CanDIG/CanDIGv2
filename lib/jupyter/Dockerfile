@@ -61,9 +61,9 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     "deb [arch=amd64] https://download.docker.com/linux/ubuntu `lsb_release -cs` stable"
 
 RUN apt-get update && \
-  apt-get install --quiet --yes docker-ce docker-ce-cli containerd.io && \
-  rm -rf /var/lib/apt/lists/* && \
-  usermod -aG docker $NB_USER
+  apt-get install --quiet --yes docker-ce-cli containerd.io && \
+  rm -rf /var/lib/apt/lists/* #&& \
+  #usermod -aG docker $NB_USER
 
 USER $NB_UID
 
@@ -135,6 +135,9 @@ RUN conda install --quiet --yes \
   # https://github.com/jupyter-widgets/ipywidgets/tree/master/packages/jupyterlab-manager
   jupyter labextension install @jupyter-widgets/jupyterlab-manager@^0.38.1 && \
   jupyter labextension install jupyterlab_bokeh@0.6.3 && \
+  jupyter nbextension install --sys-prefix --py ipyparallel && \
+  jupyter nbextension enable --sys-prefix --py ipyparallel && \
+  jupyter serverextension enable --sys-prefix --py ipyparallel && \
   npm cache clean --force && \
   rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
   rm -rf /home/$NB_USER/.cache/yarn && \
@@ -158,12 +161,12 @@ RUN conda install --quiet --yes \
 #fix-permissions /home/$NB_USER
 
 # Install Tensorflow
-#RUN conda install --quiet --yes \
-  #'tensorflow=1.12*' \
-  #'keras=2.2*' && \
-  #conda clean -tipsy && \
-  #fix-permissions $CONDA_DIR && \
-  #fix-permissions /home/$NB_USER
+RUN conda install --quiet --yes \
+  'tensorflow=1.12*' \
+  'keras=2.2*' && \
+  conda clean -tipsy && \
+  fix-permissions $CONDA_DIR && \
+  fix-permissions /home/$NB_USER
 
 # Install BioJupies Packages
 #COPY requirements.R /home/jovyan/
