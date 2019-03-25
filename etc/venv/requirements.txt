@@ -8,3 +8,4 @@ dask-xgboost
 distributed
 htsget
 minio
+wes-service
