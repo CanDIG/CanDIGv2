@@ -61,7 +61,7 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     "deb [arch=amd64] https://download.docker.com/linux/ubuntu `lsb_release -cs` stable"
 
 RUN apt-get update && \
-  apt-get install --quiet --yes docker-ce-cli containerd.io && \
+  apt-get install --quiet --yes docker-ce-cli && \
   rm -rf /var/lib/apt/lists/* #&& \
   #usermod -aG docker $NB_USER
 
@@ -100,6 +100,7 @@ RUN conda install --quiet --yes \
 # use notebook-friendly backends in these images
 RUN conda install --quiet --yes \
   'conda-forge::blas=*=openblas' \
+  'conda-forge::jupyter_nbextensions_configurator' \
   'ipywidgets=7.4*' \
   'pandas=0.23*' \
   'numexpr=2.6*' \
@@ -135,9 +136,6 @@ RUN conda install --quiet --yes \
   # https://github.com/jupyter-widgets/ipywidgets/tree/master/packages/jupyterlab-manager
   jupyter labextension install @jupyter-widgets/jupyterlab-manager@^0.38.1 && \
   jupyter labextension install jupyterlab_bokeh@0.6.3 && \
-  jupyter nbextension install --sys-prefix --py ipyparallel && \
-  jupyter nbextension enable --sys-prefix --py ipyparallel && \
-  jupyter serverextension enable --sys-prefix --py ipyparallel && \
   npm cache clean --force && \
   rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
   rm -rf /home/$NB_USER/.cache/yarn && \

@@ -73,7 +73,7 @@ python -m ipykernel install --user --name candig
 source deactivate
 popd
 
-https://github.com/ipython/ipython-in-depth.git
+git clone https://github.com/ipython/ipython-in-depth.git
 
 pushd ipython-in-depth
 conda env create -n ipython-in-depth -f binder/environment.yml
@@ -82,3 +82,4 @@ python -m ipykernel install --user --name ipython-in-depth
 source deactivate
 popd
 
+git clone git@github.com:CanDIG/ga4gh_readthrough_fusions_example.git
