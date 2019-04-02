@@ -127,8 +127,8 @@ docker-net:
 		docker_gwbridge
 
 docker-push:
-	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
 	$(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
+	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
 
 docker-secrets:
 	echo admin > minio_access_key
@@ -220,6 +220,7 @@ swarm-join:
 
 toil-docker:
 	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker
+	$(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
 
 virtualenv:
 	mkdir -p $(DIR)/bin

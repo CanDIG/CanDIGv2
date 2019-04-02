@@ -1,11 +1,11 @@
 docker-compose
-grip
+cwltool
+htsget
+minio
 toil[all]
+wes-service
 dask
 dask-jobqueue
 dask-ml
 dask-xgboost
 distributed
-htsget
-minio
-wes-service
