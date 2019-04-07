@@ -32,5 +32,5 @@ services:
         target: access_key
       - source: minio_secret_key
         target: secret_key
-    command: ["server", "/data"]
+    command: ["server", "${MINO_DATA_DIR:-/data}"]
 

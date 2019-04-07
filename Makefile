@@ -48,6 +48,15 @@ make docker-volumes
 # download kubectl (for kubernetes deployment)
 make kubectl
 
+# download minio server/client
+make minio
+
+# generate secrets for minio server/client
+make minio-secrets
+
+# download minio server/client and start server start instance
+make minio-server
+
 # create minikube environment for integration testing
 make minikube
 
@@ -98,6 +107,9 @@ export help
 all:
 	@printf "$$help"
 
+bin-dir:
+	mkdir -p $(DIR)/bin
+
 build-%:
 	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build
 
@@ -130,9 +142,7 @@ docker-push:
 	$(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
 
-docker-secrets:
-	echo admin > minio_access_key
-	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio_secret_key
+docker-secrets: minio-secrets
 	echo admin > portainer_user
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > portainer_key
 	docker run --rm httpd:2.4-alpine htpasswd -nbB admin `cat portainer_key` | cut -d ":" -f 2 > $(DIR)/portainer_secret
@@ -161,8 +171,7 @@ init-swarm: swarm-init docker-secrets
 
 init-kubernetes: kubectl minikube docker-secrets
 
-kubectl:
-	mkdir -p $(DIR)/bin
+kubectl: bin-dir
 	curl -LOo $(DIR)/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
 	chmod 755 $(DIR)/bin/kubectl
 
@@ -182,14 +191,30 @@ kube-%:
 		--compose-file $(DIR)/lib/$*/docker-compose.yml \
 		$*
 
-minikube:
-	mkdir -p $(DIR)/bin
+minikube: bin-dir
 	curl -Lo $(DIR)/bin/minikube \
 		https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 	chmod 755 $(DIR)/bin/minikube
 	minikube start --bootstrapper kubeadm --container-runtime $(MINIKUBE_CRI) \
 	        --cpus $(MINIKUBE_CPUS) --memory $(MINIKUBE_MEM) --disk-size $(MINIKUBE_DISK) \
 	        --network-plugin cni --enable-default-cni --vm-driver $(MINIKUBE_DRIVER)
+
+minio:
+	curl -Lo $(DIR)/bin/minio \
+		https://dl.minio.io/server/minio/release/linux-amd64/minio
+	curl -Lo $(DIR)/bin/mc \
+		https://dl.minio.io/client/mc/release/linux-amd64/mc
+	chmod 755 $(DIR)/bin/minio
+	chmod 755 $(DIR)/bin/mc
+
+minio-secrets:
+	echo admin > minio_access_key
+	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio_secret_key
+
+minio-server: #minio minio-secrets
+	MINIO_ACCESS_KEY=`cat $(DIR)/minio_access_key` MINIO_SECRET_KEY=`cat $(DIR)/minio_secret_key` \
+		$(DIR)/bin/minio server --address $(MINIO_DOMAIN):$(MINIO_PORT) $(MINIO_DATA_DIR) \
+		$*
 
 # test print global variables
 print-%:
@@ -222,8 +247,7 @@ toil-docker:
 	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker
 	$(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
 
-virtualenv:
-	mkdir -p $(DIR)/bin
+virtualenv: bin-dir
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 	bash $(DIR)/bin/miniconda_install.sh -f -b
@@ -234,6 +258,6 @@ virtualenv:
 
 .PHONY: all clean compose docker-net docker-push docker-secrets docker-volumes \
 	images init init-compose init-swarm init-kubernetes \
-	kubectl kubernetes minikube stack swarm-init swarm-join \
+	kubernetes minikube minio-server stack swarm-init swarm-join \
 	toil-docker virtualenv
 
