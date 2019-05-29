@@ -6,8 +6,8 @@ services:
       context: $PWD/lib/toil
       args:
         toil_version: ${TOIL_VERSION:-latest}
-        wes_version: ${WES_VERSION:-3.2}
-    image: candig/wes-service:${WES_VERSION:-3.2}
+        #wes_version: ${WES_VERSION:-3.3}
+    image: candig/wes-service:${WES_VERSION:-3.3}
     volumes:
       - toil-jobstore:/jobStoreParentDir
     networks:

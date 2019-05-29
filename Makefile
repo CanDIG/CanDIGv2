@@ -11,7 +11,6 @@ include $(overrides)
 export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
-#MODULES = $(shell ls $(DIR)/lib/)
 MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js jupyter
 
 define help
@@ -146,6 +145,8 @@ docker-secrets: minio-secrets
 	echo admin > portainer_user
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > portainer_key
 	docker run --rm httpd:2.4-alpine htpasswd -nbB admin `cat portainer_key` | cut -d ":" -f 2 > $(DIR)/portainer_secret
+
+docker-swarm-secrets: docker-secrets
 	docker secret create minio_access_key $(DIR)/minio_access_key
 	docker secret create minio_secret_key $(DIR)/minio_secret_key
 	docker secret create portainer_user   $(DIR)/portainer_user
@@ -167,9 +168,9 @@ init: virtualenv docker-net docker-volumes init-$(DOCKER_MODE)
 
 init-compose: docker-secrets
 
-init-swarm: swarm-init docker-secrets
+init-swarm: swarm-init docker-swarm-secrets
 
-init-kubernetes: kubectl minikube docker-secrets
+init-kubernetes: kubectl minikube docker-swarm-secrets
 
 kubectl: bin-dir
 	curl -LOo $(DIR)/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
@@ -199,7 +200,7 @@ minikube: bin-dir
 	        --cpus $(MINIKUBE_CPUS) --memory $(MINIKUBE_MEM) --disk-size $(MINIKUBE_DISK) \
 	        --network-plugin cni --enable-default-cni --vm-driver $(MINIKUBE_DRIVER)
 
-minio:
+minio: bin-dir
 	curl -Lo $(DIR)/bin/minio \
 		https://dl.minio.io/server/minio/release/linux-amd64/minio
 	curl -Lo $(DIR)/bin/mc \
@@ -256,8 +257,7 @@ virtualenv: bin-dir
 	conda activate $(VENV_NAME)
 	#pip install -r $(DIR)/etc/venv/requirements.txt
 
-.PHONY: all clean compose docker-net docker-push docker-secrets docker-volumes \
-	images init init-compose init-swarm init-kubernetes \
-	kubernetes minikube minio-server stack swarm-init swarm-join \
-	toil-docker virtualenv
+.PHONY: all clean compose docker-net docker-push docker-swarm-secrets docker-volumes \
+	images init init-compose init-swarm init-kubernetes kubernetes minikube minio-server \
+	stack swarm-init swarm-join toil-docker virtualenv
 

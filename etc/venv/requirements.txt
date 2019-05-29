@@ -9,3 +9,4 @@ dask-jobqueue
 dask-ml
 dask-xgboost
 distributed
+ga4gh-dos-schemas
