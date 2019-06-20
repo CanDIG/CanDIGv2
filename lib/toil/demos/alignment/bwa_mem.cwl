@@ -4,9 +4,14 @@ cwlVersion: v1.0
 
 baseCommand: [ "bwa", "mem" ]
 
-requirements:
+hints:
   - class: DockerRequirement
     dockerPull: biocontainers/bwa:0.7.15
+
+  - class: SoftwareRequirement
+    packages:
+      package: "bwa"
+      version: "0.7.15"
 
 inputs:
   reference_index:

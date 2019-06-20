@@ -10,9 +10,15 @@ inputs:
     inputBinding:
       position: 1
 
-requirements:
+hints:
   - class: DockerRequirement
     dockerPull: biocontainers/bwa:0.7.15
+
+  - class: SoftwareRequirement
+    packages:
+      package: "bwa"
+      version: "0.7.15"
+
   - class: InitialWorkDirRequirement
     listing:
       - $(inputs.reference_file)

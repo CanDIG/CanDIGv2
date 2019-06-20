@@ -6,18 +6,22 @@ baseCommand: [ "gunzip" ]
 
 arguments: [ "-c" ]
 
-requirements:
+hints:
   - class: DockerRequirement
     dockerPull: ubuntu:xenial
 
+  - class: SoftwareRequirement
+    packages:
+      package: "gunzip"
+
 inputs:
-    reference_file:
-        type: File
-        inputBinding:
-            position: 1
+  reference_file:
+    type: File
+      inputBinding:
+        position: 1
 
 outputs:
-    unzipped_fasta:
-        type: stdout
+  unzipped_fasta:
+    type: stdout
 
 stdout: reference.fa

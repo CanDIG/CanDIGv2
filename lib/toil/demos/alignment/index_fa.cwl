@@ -4,9 +4,15 @@ cwlVersion: v1.0
 
 baseCommand: [ "faidx" ]
 
-requirements:
+hints:
   - class: DockerRequirement
     dockerPull: mgibio/samtools:1.9
+
+  - class: SoftwareRequirement
+    packages:
+      package: "samtools"
+      version: "1.9"
+
   - class: InitialWorkDirRequirement
     listing:
       - $(inputs.reference_file)
