@@ -10,8 +10,8 @@ hints:
 
   - class: SoftwareRequirement
     packages:
-      package: "samtools"
-      version: "1.9"
+      samtools:
+        version: [ "1.9" ]
 
   - class: InitialWorkDirRequirement
     listing:

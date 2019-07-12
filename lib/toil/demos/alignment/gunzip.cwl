@@ -12,13 +12,14 @@ hints:
 
   - class: SoftwareRequirement
     packages:
-      package: "gunzip"
+      gunzip:
+        version: [ "1.6" ]
 
 inputs:
   reference_file:
     type: File
-      inputBinding:
-        position: 1
+    inputBinding:
+      position: 1
 
 outputs:
   unzipped_fasta:

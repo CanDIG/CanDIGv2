@@ -16,8 +16,8 @@ hints:
 
   - class: SoftwareRequirement
     packages:
-      package: "bwa"
-      version: "0.7.15"
+      bwa:
+        version: [ "0.7.15" ]
 
   - class: InitialWorkDirRequirement
     listing:

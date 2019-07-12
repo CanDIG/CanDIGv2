@@ -18,8 +18,8 @@ hints:
 
   - class: SoftwareRequirement
     packages:
-      package: "picard"
-      version: "2.18.2"
+      picard:
+        version: [ "2.18.2" ]
 
 inputs:
   bam_file:

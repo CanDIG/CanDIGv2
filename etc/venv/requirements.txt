@@ -1,5 +1,6 @@
 docker-compose
 cwltool
+cwltool[deps]
 htsget
 minio
 toil[all]
