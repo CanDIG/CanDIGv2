@@ -8,8 +8,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      #- "${TRAEFIK_HTTP_PORT:-80}:80"
-      - "${TRAEFIK_UI_PORT:-80}:8080"
+      - "${TRAEFIK_HTTP_PORT:-80}:80"
+      - "${TRAEFIK_HTTPS_PORT:-443}:443"
+      - "${TRAEFIK_UI_PORT:-8000}:8080"
     deploy:
       placement:
         constraints:
@@ -24,14 +25,22 @@ services:
         - traefik.port=${TRAEFIK_UI_PORT:-8080}
         - traefik.docker.network=${DOCKER_NET:-bridge-net}
         - traefik.frontend.rule=Host:traefik.${MINIO_DOMAIN:-localhost}
-    command:
+      secrets:
+        - source: traefik_ssl_key
+          target: site.key
+        - source: traefik_ssl_crt
+          target: site.crt
+      command:
       - traefik
       - --api
-      - --docker
-      - --docker.swarmmode=${TRAEFIK_SWARM:-false}
-      - --docker.network=${TRAEFIK_NET:-bridge-net}
-      - --docker.domain=${MINIO_DOMAIN:-localhost}
-      - --docker.watch
       - --consul
-      - --consul.endpoint=${CONSUL_PROTOCOL:-http}://consul:${CONSUL_HTTP_PORT:-8500}
-
+      - --consul.endpoint=consul:${CONSUL_HTTP_PORT:-8500}
+      - --docker
+      - --docker.domain=${MINIO_DOMAIN:-localhost}
+      - --docker.network=${TRAEFIK_NET:-bridge-net}
+      - --docker.swarmmode=${TRAEFIK_SWARM:-false}
+      - --docker.watch
+      - --defaultEntrypoints='http, https'
+      - --entryPoints="Name:http Address::${TRAEFIK_HTTP_PORT:-80} Redirect.EntryPoint:https"
+      - --entryPoints="Name:https Address::${TRAEFIK_HTTPS_PORT:-443} TLS:/run/secrets/site.crt,/run/secrets/site.key"
+      - --kubernetes

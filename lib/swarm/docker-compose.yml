@@ -28,6 +28,10 @@ secrets:
     external: true
   portainer_secret:
     external: true
+  traefik_ssl_key:
+    external: true
+  traefik_ssl_crt:
+    external: true
 
 x-deploy:
   &default-restart

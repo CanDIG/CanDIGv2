@@ -9,3 +9,4 @@ swarm_worker_token
 .venv
 site.env
 /bin
+/etc/ssl/selfsigned-*

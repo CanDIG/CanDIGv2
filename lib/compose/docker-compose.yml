@@ -28,3 +28,7 @@ secrets:
     file: $PWD/portainer_user
   portainer_secret:
     file: $PWD/portainer_secret
+  traefik_ssl_key:
+    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.key
+  traefik_ssl_crt:
+    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.crt

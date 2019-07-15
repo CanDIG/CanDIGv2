@@ -129,6 +129,10 @@ compose:
 compose-%:
 	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml up
 
+docker-k8snet:
+	docker network create --driver overlay --opt encrypted=true traefik-net
+	docker network create --driver overlay --opt encrypted=true agent-net
+
 docker-net:
 	docker network create --driver bridge --subnet=$(DOCKER_BRIDGE_IP) --attachable bridge-net
 	docker network create --driver bridge --subnet=$(DOCKER_GWBRIDGE_IP) --attachable \
@@ -149,8 +153,10 @@ docker-secrets: minio-secrets
 docker-swarm-secrets: docker-secrets
 	docker secret create minio_access_key $(DIR)/minio_access_key
 	docker secret create minio_secret_key $(DIR)/minio_secret_key
-	docker secret create portainer_user   $(DIR)/portainer_user
+	docker secret create portainer_user $(DIR)/portainer_user
 	docker secret create portainer_secret $(DIR)/portainer_secret
+	docker secret create traefik_ssl_key $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).key
+	docker secret create traefik_ssl_crt $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).crt
 
 docker-volumes:
 	docker volume create minio-config
@@ -222,6 +228,25 @@ minio-server: #minio minio-secrets
 print-%:
 	@echo '$*=$($*)'
 
+ssl-cert:
+	openssl genrsa -out $(DIR)/etc/ssl/selfsigned-root-ca.key 4096
+	openssl req -new -key $(DIR)/etc/ssl/selfsigned-root-ca.key \
+		-out $(DIR)/etc/ssl/selfsigned-root-ca.csr -sha256 \
+		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed CA'
+	openssl x509 -req -days 3650 -in $(DIR)/etc/ssl/selfsigned-root-ca.csr \
+		-signkey $(DIR)/etc/ssl/selfsigned-root-ca.key -sha256 \
+		-out $(DIR)/etc/ssl/selfsigned-root-ca.crt \
+    -extfile $(DIR)/etc/ssl/root-ca.cnf -extensions root_ca
+	openssl genrsa -out $(DIR)/etc/ssl/selfsigned-site.key 4096
+	openssl req -new -key $(DIR)/etc/ssl/selfsigned-site.key \
+		-out $(DIR)/etc/ssl/selfsigned-site.csr -sha256 \
+    -subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed Cert'
+	openssl x509 -req -days 750 -in $(DIR)/etc/ssl/selfsigned-site.csr -sha256 \
+    -CA $(DIR)/etc/ssl/selfsigned-root-ca.crt \
+		-CAkey $(DIR)/etc/ssl/selfsigned-root-ca.key \
+		-CAcreateserial -out $(DIR)/etc/ssl/selfsigned-site.crt \
+		-extfile $(DIR)/etc/ssl/site.cnf -extensions server
+
 stack:
 	docker stack deploy \
 		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
@@ -257,7 +282,7 @@ virtualenv: mkdir
 	conda activate $(VENV_NAME)
 	pip install -r $(DIR)/etc/venv/requirements.txt
 
-.PHONY: all clean compose docker-net docker-push docker-swarm-secrets docker-volumes \
+.PHONY: all clean compose docker-k8snet docker-net docker-push docker-swarm-secrets docker-volumes \
 	images init init-compose init-swarm init-kubernetes kubernetes minikube minio-server \
 	stack swarm-init swarm-join toil-docker virtualenv
 
