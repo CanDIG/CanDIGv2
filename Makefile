@@ -7,8 +7,8 @@ overrides ?= site.env
 include $(env)
 export $(shell sed 's/=.*//' $(env))
 
-include $(overrides)
-export $(shell sed 's/=.*//' $(overrides))
+#include $(overrides)
+#export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
 MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js jupyter
@@ -29,7 +29,7 @@ make init-compose
 # initialize docker-swarm environment (alias for swarm-init)
 make init-swarm
 
-# initialize kubernetes environment using minikube
+# initialize kubernetes environment
 make init-kubernetes
 
 # create docker bridge networks
@@ -106,7 +106,7 @@ export help
 all:
 	@printf "$$help"
 
-bin-dir:
+mkdir:
 	mkdir -p $(DIR)/bin
 
 build-%:
@@ -168,12 +168,13 @@ init: virtualenv docker-net docker-volumes init-$(DOCKER_MODE)
 
 init-compose: docker-secrets
 
+init-kubernetes: kubectl docker-k8snet docker-swarm-secrets
+
 init-swarm: swarm-init docker-swarm-secrets
 
-init-kubernetes: kubectl minikube docker-swarm-secrets
-
-kubectl: bin-dir
-	curl -LOo $(DIR)/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+kubectl: mkdir
+	$(eval KUBECTL_VERSION = $(shell curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt))
+	curl -Lo $(DIR)/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/linux/amd64/kubectl
 	chmod 755 $(DIR)/bin/kubectl
 
 kubernetes:
@@ -192,7 +193,7 @@ kube-%:
 		--compose-file $(DIR)/lib/$*/docker-compose.yml \
 		$*
 
-minikube: bin-dir
+minikube: mkdir
 	curl -Lo $(DIR)/bin/minikube \
 		https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 	chmod 755 $(DIR)/bin/minikube
@@ -200,7 +201,7 @@ minikube: bin-dir
 	        --cpus $(MINIKUBE_CPUS) --memory $(MINIKUBE_MEM) --disk-size $(MINIKUBE_DISK) \
 	        --network-plugin cni --enable-default-cni --vm-driver $(MINIKUBE_DRIVER)
 
-minio: bin-dir
+minio: mkdir
 	curl -Lo $(DIR)/bin/minio \
 		https://dl.minio.io/server/minio/release/linux-amd64/minio
 	curl -Lo $(DIR)/bin/mc \
@@ -248,14 +249,13 @@ toil-docker:
 	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker
 	$(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
 
-virtualenv: bin-dir
+virtualenv: mkdir
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 	bash $(DIR)/bin/miniconda_install.sh -f -b
-	source $(HOME)/miniconda3/etc/profile.d/conda.sh
-	conda env create -n $(VENV_NAME) -f $(DIR)/etc/conda/environment.yml python=$(VENV_PYTHON)
+	conda create -n $(VENV_NAME) python=$(VENV_PYTHON)
 	conda activate $(VENV_NAME)
-	#pip install -r $(DIR)/etc/venv/requirements.txt
+	pip install -r $(DIR)/etc/venv/requirements.txt
 
 .PHONY: all clean compose docker-net docker-push docker-swarm-secrets docker-volumes \
 	images init init-compose init-swarm init-kubernetes kubernetes minikube minio-server \

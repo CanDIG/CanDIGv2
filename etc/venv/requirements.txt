@@ -1,13 +1,13 @@
-docker-compose
+toil[all]
 cwltool
 cwltool[deps]
+ga4gh-dos-schemas
 htsget
 minio
-toil[all]
 wes-service
 dask
 dask-jobqueue
 dask-ml
 dask-xgboost
 distributed
-ga4gh-dos-schemas
+docker-compose
