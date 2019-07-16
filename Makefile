@@ -129,10 +129,6 @@ compose:
 compose-%:
 	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml up
 
-docker-k8snet:
-	docker network create --driver overlay --opt encrypted=true traefik-net
-	docker network create --driver overlay --opt encrypted=true agent-net
-
 docker-net:
 	docker network create --driver bridge --subnet=$(DOCKER_BRIDGE_IP) --attachable bridge-net
 	docker network create --driver bridge --subnet=$(DOCKER_GWBRIDGE_IP) --attachable \
@@ -142,7 +138,6 @@ docker-net:
 		docker_gwbridge
 
 docker-push:
-	$(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
 
 docker-secrets: minio-secrets
@@ -166,15 +161,16 @@ docker-volumes:
 	docker volume create portainer-data
 	docker volume create jupyter-data
 
-images: toil-docker
+images:
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 	$(MAKE) docker-push
 
-init: virtualenv docker-net docker-volumes init-$(DOCKER_MODE)
+init: virtualenv docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
+	git submodule update --init --recursive
 
 init-compose: docker-secrets
 
-init-kubernetes: kubectl docker-k8snet docker-swarm-secrets
+init-kubernetes: kubectl
 
 init-swarm: swarm-init docker-swarm-secrets
 
@@ -271,8 +267,8 @@ swarm-join:
 		--token `cat $(DIR)/swarm_$(SWARM_MODE)_token` $(SWARM_MANAGER_IP)
 
 toil-docker:
-	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker
-	$(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
+	VIRTUAL_ENV=1 $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
+	VIRTUAL_ENV=1 BUILD_NUMBER=$(TOIL_VERSION) $(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
 
 virtualenv: mkdir
 	curl -Lo $(DIR)/bin/miniconda_install.sh \

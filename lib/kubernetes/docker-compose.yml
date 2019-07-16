@@ -21,17 +21,17 @@ volumes:
 
 secrets:
   minio_access_key:
-    external: true
+    file: $PWD/minio_access_key
   minio_secret_key:
-    external: true
+    file: $PWD/minio_secret_key
   portainer_user:
-    external: true
+    file: $PWD/portainer_user
   portainer_secret:
-    external: true
+    file: $PWD/portainer_secret
   traefik_ssl_key:
-    external: true
+    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.key
   traefik_ssl_crt:
-    external: true
+    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.crt
 
 x-deploy:
   &default-restart
