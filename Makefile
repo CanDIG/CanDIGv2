@@ -7,8 +7,8 @@ overrides ?= site.env
 include $(env)
 export $(shell sed 's/=.*//' $(env))
 
-#include $(overrides)
-#export $(shell sed 's/=.*//' $(overrides))
+include $(overrides)
+export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
 MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js jupyter
@@ -120,8 +120,11 @@ clean:
 	docker network rm bridge-net traefik-net agent-net docker_gwbridge
 	docker rm -v `docker ps -aq`
 	docker volume rm `docker volume ls -q`
-	docker rmi `docker images -q`
-	rm -f minio_access_key minio_secret_key portainer_user portainer_secret swarm_manager_token swarm_worker_token
+	#docker rmi `docker images -q`
+	rm -f minio_access_key minio_secret_key \
+		portainer_user portainer_secret \
+		swarm_manager_token swarm_worker_token \
+		$(DIR)/etc/ssl/selfsigned-* $(DIR)/bin/*
 
 compose:
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml up -d;)

@@ -11,6 +11,7 @@ dataflow for genomic data.
 ```bash
 
 ├── .env - docker-compose and Makefile global variables
+├── site.env - docker-compose Makefile global overrides
 ├── bin - local binaries directory
 ├── doc - documentation for various aspects of CanDIGv2
 ├── etc - contains misc files/config/scripts
@@ -55,6 +56,9 @@ services:
 ...
 
 ```
+
+### `site.env` Site Overrides
+The site.env file is an easy way to keep a set of overrides for the various parameters contained in `.env`. This file is read by `Makefile` and any corresponding values will override the global default for CanDIGv2. Site operators are encouraged to keep changes in `site.env` rather than in `.env` directly, as `.env` may be modified from time-to-time by the CanDIG development team. The `site.env` will always override the same global export value for `.env`. Please note that `site.env` will not be saved with repo by default (blocked in `.gitignore`). This is by design to allow developers to test different configurations of CanDIGv2.
 
 ## `make` Deployment
 
