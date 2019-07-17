@@ -12,6 +12,7 @@ export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
 MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js jupyter
+TOIL_MODULES = toil toil-grafana toil-mtail toil-prometheus
 
 define help
 # view available options
@@ -164,6 +165,7 @@ docker-net:
 
 docker-push:
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
+	$(foreach MODULE, $(TOIL_MODULES), docker push $(TOIL_DOCKER_REGISTRY)/$(MODULE):latest;)
 
 docker-secrets: minio-secrets
 	echo admin > portainer_user
@@ -177,6 +179,7 @@ docker-swarm-secrets: docker-secrets
 	docker secret create portainer_secret $(DIR)/portainer_secret
 	docker secret create traefik_ssl_key $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).key
 	docker secret create traefik_ssl_crt $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).crt
+	docker secret create wes_dependency_resolver $(DIR)/etc/yml/$(WES_DEPENDENCY_RESOLVER)
 
 docker-volumes:
 	docker volume create minio-config
@@ -186,9 +189,8 @@ docker-volumes:
 	docker volume create portainer-data
 	docker volume create jupyter-data
 
-images:
+images: toil-docker
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
-	$(MAKE) docker-push
 
 init: virtualenv docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
 	git submodule update --init --recursive
@@ -273,7 +275,12 @@ swarm-join:
 
 toil-docker:
 	VIRTUAL_ENV=1 $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
-	VIRTUAL_ENV=1 BUILD_NUMBER=$(TOIL_VERSION) $(MAKE) -C $(DIR)/lib/toil/toil-docker push_docker
+	$(foreach MODULE,$(TOIL_MODULES), \
+		docker tag $(TOIL_DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION)-$(TOIL_BUILD_HASH) \
+		$(TOIL_DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION);)
+	$(foreach MODULE,$(TOIL_MODULES), \
+		docker tag $(TOIL_DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION) \
+		$(TOIL_DOCKER_REGISTRY)/$(MODULE):latest;)
 
 virtualenv: mkdir
 	curl -Lo $(DIR)/bin/miniconda_install.sh \

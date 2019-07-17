@@ -4,6 +4,8 @@ version: '3.7'
 networks:
   bridge-net:
     external: true
+  traefik-net:
+    external: true
   agent-net:
     external: true
 
@@ -32,3 +34,5 @@ secrets:
     file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.key
   traefik_ssl_crt:
     file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.crt
+  wes_dependency_resolver:
+    file: $PWD/etc/yml/$WES_DEPENDENCY_RESOLVER

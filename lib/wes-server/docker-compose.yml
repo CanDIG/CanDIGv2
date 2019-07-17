@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  wes-server:
+    build:
+      context: $PWD/lib/wes-server
+      args:
+        toil_version: ${TOIL_VERSION:-latest}
+        wes_version: ${WES_VERSION:-3.3}
+    image: candig/wes-server:${WES_VERSION:-3.3}
+    networks:
+      - ${DOCKER_NET:-bridge-net}
+    ports:
+      - "${WES_PORT:-5000}:5000"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${WES_PORT:-5000}
+        - traefik.docker.network=${DOCKER_NET:-bridge-net}
+        - traefik.frontend.rule=Host:wes-server.${MINIO_DOMAIN:-localhost}
+    secrets:
+      - source: wes_dependency_resolver
+        target: dependency_resolver.yml
+    entrypoint: ["wes-server"]
+    command:
+      - --backend=${WES_BACKEND:-wes_service.toil_wes}
+      - --port=5000
+      - ${WES_OPT}

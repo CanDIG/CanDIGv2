@@ -10,11 +10,16 @@ services:
     image: candig/toil:${TOIL_VERSION:-latest}
     volumes:
       - toil-jobstore:/jobStoreParentDir
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:
       - "${TOIL_PORT:-5050}:5050"
-      - "${WES_PORT:-5000}:5000"
+      - "${TOIL_UI_PORT:-3000}:3000"
+    # keep the following ports free
+    # 3903 - mtail service
+    # 9100 - node exporter
+    # 9090 - prometheus service
     deploy:
       placement:
         constraints:

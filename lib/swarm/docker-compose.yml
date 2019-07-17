@@ -2,6 +2,8 @@
 version: '3.7'
 
 networks:
+  bridge-net:
+    external: true
   traefik-net:
     external: true
   agent-net:
@@ -31,6 +33,8 @@ secrets:
   traefik_ssl_key:
     external: true
   traefik_ssl_crt:
+    external: true
+  wes_dependency_resolver:
     external: true
 
 x-deploy:
