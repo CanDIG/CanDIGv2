@@ -109,6 +109,28 @@ all:
 mkdir:
 	mkdir -p $(DIR)/bin
 
+# test print global variables
+print-%:
+	@echo '$*=$($*)'
+
+bin-kubectl: mkdir
+	$(eval KUBECTL_VERSION = $(shell curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt))
+	curl -Lo $(DIR)/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/linux/amd64/kubectl
+	chmod 755 $(DIR)/bin/kubectl
+
+bin-minikube: mkdir
+	curl -Lo $(DIR)/bin/minikube \
+		https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+	chmod 755 $(DIR)/bin/minikube
+
+bin-minio: mkdir
+	curl -Lo $(DIR)/bin/minio \
+		https://dl.minio.io/server/minio/release/linux-amd64/minio
+	curl -Lo $(DIR)/bin/mc \
+		https://dl.minio.io/client/mc/release/linux-amd64/mc
+	chmod 755 $(DIR)/bin/minio
+	chmod 755 $(DIR)/bin/mc
+
 build-%:
 	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build
 
@@ -177,11 +199,6 @@ init-kubernetes: kubectl
 
 init-swarm: swarm-init docker-swarm-secrets
 
-kubectl: mkdir
-	$(eval KUBECTL_VERSION = $(shell curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt))
-	curl -Lo $(DIR)/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/linux/amd64/kubectl
-	chmod 755 $(DIR)/bin/kubectl
-
 kubernetes:
 	docker stack deploy \
 		--orchestrator $(DOCKER_MODE) \
@@ -198,21 +215,10 @@ kube-%:
 		--compose-file $(DIR)/lib/$*/docker-compose.yml \
 		$*
 
-minikube: mkdir
-	curl -Lo $(DIR)/bin/minikube \
-		https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-	chmod 755 $(DIR)/bin/minikube
+minikube:
 	minikube start --bootstrapper kubeadm --container-runtime $(MINIKUBE_CRI) \
-	        --cpus $(MINIKUBE_CPUS) --memory $(MINIKUBE_MEM) --disk-size $(MINIKUBE_DISK) \
-	        --network-plugin cni --enable-default-cni --vm-driver $(MINIKUBE_DRIVER)
-
-minio: mkdir
-	curl -Lo $(DIR)/bin/minio \
-		https://dl.minio.io/server/minio/release/linux-amd64/minio
-	curl -Lo $(DIR)/bin/mc \
-		https://dl.minio.io/client/mc/release/linux-amd64/mc
-	chmod 755 $(DIR)/bin/minio
-	chmod 755 $(DIR)/bin/mc
+		--cpus $(MINIKUBE_CPUS) --memory $(MINIKUBE_MEM) --disk-size $(MINIKUBE_DISK) \
+		--network-plugin cni --enable-default-cni --vm-driver $(MINIKUBE_DRIVER)
 
 minio-secrets:
 	echo admin > minio_access_key
@@ -222,10 +228,6 @@ minio-server: #minio minio-secrets
 	MINIO_ACCESS_KEY=`cat $(DIR)/minio_access_key` MINIO_SECRET_KEY=`cat $(DIR)/minio_secret_key` \
 		$(DIR)/bin/minio server --address $(MINIO_DOMAIN):$(MINIO_PORT) $(MINIO_DATA_DIR) \
 		$*
-
-# test print global variables
-print-%:
-	@echo '$*=$($*)'
 
 ssl-cert:
 	openssl genrsa -out $(DIR)/etc/ssl/selfsigned-root-ca.key 4096
@@ -281,7 +283,7 @@ virtualenv: mkdir
 	conda activate $(VENV_NAME)
 	pip install -r $(DIR)/etc/venv/requirements.txt
 
-.PHONY: all clean compose docker-k8snet docker-net docker-push docker-swarm-secrets docker-volumes \
+.PHONY: all clean compose docker-net docker-push docker-swarm-secrets docker-volumes \
 	images init init-compose init-swarm init-kubernetes kubernetes minikube minio-server \
 	stack swarm-init swarm-join toil-docker virtualenv
 
