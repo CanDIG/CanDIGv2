@@ -10,20 +10,25 @@ dataflow for genomic data.
 
 ```bash
 
-├── .env - docker-compose and Makefile global variables
-├── site.env - docker-compose Makefile global overrides
-├── bin - local binaries directory
-├── doc - documentation for various aspects of CanDIGv2
-├── etc - contains misc files/config/scripts
-├── venv
-│   └── requirements.txt - requirements for CanDIGv2 virtualenv
-├── lib - contains modules of servies/apps
-│  └── ga4gh-dos - example service, make compose-ga4gh-dos
-│       ├── demo.py
-│       ├── docker-compose.yml
-│       ├── Dockerfile
-│       └── gdc_dos.py
-└── Makefile - actions for repeatable testing/deployment
+CanDIGv2/
+  ├── .env                        ├ global variables
+  ├── site.env                    ├ global overrides
+  ├── Makefile                    ├ actions for repeatable testing/deployment
+  ├── bin/                        ├ local binaries directory
+  ├── doc/                        ├ documentation for various aspects of CanDIGv2
+  ├── etc/                        ├ contains misc files/config/scripts
+  │   ├── docker/                 ├ docker configurations
+  │   ├── env/                    ├ sample env files for site.env
+  │   ├── ssl/                    ├ ssl rootCA/site configs and certs
+  │   ├── venv/                   ├ dependency files for virtualenvs (conda, pip, etc.)
+  │   └── yml/                    ├ various yaml based configs (toil, traefik, etc.)
+  └── lib/                        ├ contains modules of servies/apps
+     ├── compose/                 ├ set of base docker variables for Compose
+     ├── kubernetes/              ├ set of base docker variables for Kubernetes
+     ├── swarm/                   ├ set of base docker variables for Swarm
+     └── ga4gh-dos/               ├ example service, make compose-ga4gh-dos
+          ├── docker-compose.yml  ├ minimum requirement of module, contains deployment context
+          └── Dockerfile          ├ contains build context for module (if not using prebuilt image)
 
 ```
 
@@ -58,7 +63,7 @@ services:
 ```
 
 ### `site.env` Site Overrides
-The site.env file is an easy way to keep a set of overrides for the various parameters contained in `.env`. This file is read by `Makefile` and any corresponding values will override the global default for CanDIGv2. Site operators are encouraged to keep changes in `site.env` rather than in `.env` directly, as `.env` may be modified from time-to-time by the CanDIG development team. The `site.env` will always override the same global export value for `.env`. Please note that `site.env` will not be saved with repo by default (blocked in `.gitignore`). This is by design to allow developers to test different configurations of CanDIGv2.
+The `site.env` file is an easy way to keep a set of overrides for the various parameters contained in `.env`. This file is read by `Makefile` and any corresponding values will override the global default for CanDIGv2. Site operators are encouraged to keep changes in `site.env` rather than in `.env` directly, as `.env` may be modified from time-to-time by the CanDIG development team. The `site.env` will always override the same global export value for `.env`. Please note that `site.env` will not be saved with repo by default (blocked in `.gitignore`). This is by design to allow developers to test different configurations of CanDIGv2.
 
 ## `make` Deployment
 
@@ -67,14 +72,69 @@ The site.env file is an easy way to keep a set of overrides for the various para
 # view available options
 make
 
+# create python virtualenv for docker-compose and HPC
+make virtualenv
+
 # initialize docker and create required docker networks
 make init
+
+# initialize docker-compose environment
+make init-compose
+
+# initialize docker-swarm environment (alias for swarm-init)
+make init-swarm
+
+# initialize kubernetes environment
+make init-kubernetes
+
+# create docker bridge networks
+make docker-net
+
+# push docker images to CanDIG repo
+make docker-push
+
+# create docker secrets for CanDIG services
+make docker-secrets
+
+# create persistant volumes for docker containers
+make docker-volumes
+
+# download kubectl (for kubernetes deployment)
+make bin-kubectl
+
+# download latest minikube binary from Google repo
+make bin-minikube
+
+# download minio server/client
+make bin-minio
+
+# generate secrets for minio server/client
+make minio-secrets
+
+# start minio server instance
+make minio-server
+
+# create minikube environment for (kubernetes) integration testing
+make minikube
+
+# generate root-ca and site ssl certs using openssl
+make ssl-cert
+
+# initialize primary docker-swarm master node
+# all other nodes can join in as master/worker
+make swarm-init
 
 # join a docker swarm cluster using manager/worker token
 make swarm-join
 
-# (re)build service image for all modules in lib/
+# create docker swarm compatbile secrets
+make swarm-secrets
+
+# (re)build service image for all modules
 make images
+
+# create toil images using upstream Toil repo
+make toil-docker
 
 # deploy/test all modules in lib/ using docker-compose
 make compose
@@ -86,19 +146,19 @@ make stack
 make kubernetes
 
 # (re)build service image and deploy/test using docker-compose
-# $$module is the name of the sub-folder in lib/
+# $module is the name of the sub-folder in lib/
 module=htsget-server
-make build-$$module
+make build-$module
 
 # deploy/test individual modules using docker-compose
-# $$module is the name of the sub-folder in lib/
+# $module is the name of the sub-folder in lib/
 module=ga4gh-dos
-make compose-$$module
+make compose-$module
 
 # deploy/test indivudual modules using docker stack
-# $$module is the name of the sub-folder in lib/
+# $module is the name of the sub-folder in lib/
 module=igv-js
-make stack-$$module
+make stack-$module
 
 # cleanup environment
 make clean

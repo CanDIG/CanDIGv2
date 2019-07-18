@@ -11,7 +11,7 @@ include $(overrides)
 export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
-MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js jupyter
+MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js jupyter wes-server
 TOIL_MODULES = toil toil-grafana toil-mtail toil-prometheus
 
 define help
@@ -46,19 +46,25 @@ make docker-secrets
 make docker-volumes
 
 # download kubectl (for kubernetes deployment)
-make kubectl
+make bin-kubectl
+
+# download latest minikube binary from Google repo
+make bin-minikube
 
 # download minio server/client
-make minio
+make bin-minio
 
 # generate secrets for minio server/client
 make minio-secrets
 
-# download minio server/client and start server start instance
+# start minio server instance
 make minio-server
 
-# create minikube environment for integration testing
+# create minikube environment for (kubernetes) integration testing
 make minikube
+
+# generate root-ca and site ssl certs using openssl
+make ssl-cert
 
 # initialize primary docker-swarm master node
 # all other nodes can join in as master/worker
@@ -67,7 +73,10 @@ make swarm-init
 # join a docker swarm cluster using manager/worker token
 make swarm-join
 
-# (re)build service image for all modules in lib/
+# create docker swarm compatbile secrets
+make swarm-secrets
+
+# (re)build service image for all modules
 make images
 
 # create toil images using upstream Toil repo
@@ -172,15 +181,6 @@ docker-secrets: minio-secrets
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > portainer_key
 	docker run --rm httpd:2.4-alpine htpasswd -nbB admin `cat portainer_key` | cut -d ":" -f 2 > $(DIR)/portainer_secret
 
-docker-swarm-secrets: docker-secrets
-	docker secret create minio_access_key $(DIR)/minio_access_key
-	docker secret create minio_secret_key $(DIR)/minio_secret_key
-	docker secret create portainer_user $(DIR)/portainer_user
-	docker secret create portainer_secret $(DIR)/portainer_secret
-	docker secret create traefik_ssl_key $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).key
-	docker secret create traefik_ssl_crt $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).crt
-	docker secret create wes_dependency_resolver $(DIR)/etc/yml/$(WES_DEPENDENCY_RESOLVER)
-
 docker-volumes:
 	docker volume create minio-config
 	docker volume create minio-data #--opt o=size=$(MINIO_VOLUME_SIZE)
@@ -199,7 +199,7 @@ init-compose: docker-secrets
 
 init-kubernetes: kubectl
 
-init-swarm: swarm-init docker-swarm-secrets
+init-swarm: swarm-init swarm-secrets
 
 kubernetes:
 	docker stack deploy \
@@ -273,6 +273,15 @@ swarm-join:
 	docker swarm join --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP) \
 		--token `cat $(DIR)/swarm_$(SWARM_MODE)_token` $(SWARM_MANAGER_IP)
 
+swarm-secrets: docker-secrets
+	docker secret create minio_access_key $(DIR)/minio_access_key
+	docker secret create minio_secret_key $(DIR)/minio_secret_key
+	docker secret create portainer_user $(DIR)/portainer_user
+	docker secret create portainer_secret $(DIR)/portainer_secret
+	docker secret create traefik_ssl_key $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).key
+	docker secret create traefik_ssl_crt $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).crt
+	docker secret create wes_dependency_resolver $(DIR)/etc/yml/$(WES_DEPENDENCY_RESOLVER)
+
 toil-docker:
 	VIRTUAL_ENV=1 $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
 	$(foreach MODULE,$(TOIL_MODULES), \
@@ -290,7 +299,8 @@ virtualenv: mkdir
 	conda activate $(VENV_NAME)
 	pip install -r $(DIR)/etc/venv/requirements.txt
 
-.PHONY: all clean compose docker-net docker-push docker-swarm-secrets docker-volumes \
-	images init init-compose init-swarm init-kubernetes kubernetes minikube minio-server \
-	stack swarm-init swarm-join toil-docker virtualenv
+.PHONY: all clean compose docker-net docker-push docker-volumes \
+	images init init-compose init-swarm init-kubernetes kubernetes \
+	minikube minio-server stack swarm-init swarm-join swarm-secrets \
+	toil-docker virtualenv
 
