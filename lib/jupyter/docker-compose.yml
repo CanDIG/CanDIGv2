@@ -13,6 +13,7 @@ services:
       - ${DOCKER_NET:-bridge-net}
     ports:
       - "${JUPYTER_UI_PORT:-8888}:8888"
+      - "${JUPYTER_R_PORT:-8787}:8787"
     deploy:
       placement:
         constraints:
