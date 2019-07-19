@@ -106,8 +106,35 @@ make compose-$$module
 module=igv-js
 make stack-$$module
 
-# cleanup environment
-make clean
+# run all cleanup functions
+make clean-all
+
+# cleanup docker stack(s)
+clean-stack
+
+# stop all running containers and remove all run containers
+clean-containers
+
+# clear swarm secrets
+clean-secrets
+
+# remove all peristant volumes
+clean-volumes
+
+# (foricibily) leave docker-swarm
+clean-swarm
+
+# clear bridge-net/traefik-net/agent-net
+clean-networks
+
+# clear all images (including base images)
+clean-images
+
+# cleanup for compose, preserves everything except services/containers
+clean-compose
+
+# cleanup for stack/kubernetes, preserves everything except stack/services/containers
+clean-stack
 
 endef
 
@@ -124,8 +151,10 @@ print-%:
 	@echo '$*=$($*)'
 
 bin-kubectl: mkdir
-	$(eval KUBECTL_VERSION = $(shell curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt))
-	curl -Lo $(DIR)/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/linux/amd64/kubectl
+	$(eval KUBECTL_VERSION = \
+		$(shell curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt))
+	curl -Lo $(DIR)/bin/kubectl \
+		https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/linux/amd64/kubectl
 	chmod 755 $(DIR)/bin/kubectl
 
 bin-minikube: mkdir
@@ -142,27 +171,46 @@ bin-minio: mkdir
 	chmod 755 $(DIR)/bin/mc
 
 build-%:
-	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build
+	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+		-f $(DIR)/lib/$*/docker-compose.yml build
 
-clean:
-	docker stack rm `docker stack ls | awk '{print $1}'`
+clean-all: clean-stack clean-containers clean-secrets clean-volumes clean-swarm clean-networks clean-images
+clean-compose: clean-containers
+
+clean-containers:
 	docker stop `docker ps -q`
-	docker secret rm `docker secret ls -q`
-	docker swarm leave --force
-	docker network rm bridge-net traefik-net agent-net docker_gwbridge
 	docker rm -v `docker ps -aq`
-	docker volume rm `docker volume ls -q`
-	#docker rmi `docker images -q`
-	rm -f minio_access_key minio_secret_key \
-		portainer_user portainer_secret \
+
+clean-images:
+	docker rmi `docker images -q`
+
+clean-network:
+	docker network rm bridge-net traefik-net agent-net docker_gwbridge
+
+clean-secrets:
+	docker secret rm `docker secret ls -q`
+	rm -f minio-access-key minio-secret-key \
+		portainer-user portainer-key portainer-secret \
 		swarm_manager_token swarm_worker_token \
 		$(DIR)/etc/ssl/selfsigned-* $(DIR)/bin/*
 
+clean-stack:
+	docker stack rm `docker stack ls | awk '{print $1}'`
+	$(MAKE) clean-containers
+
+clean-swarm:
+	docker swarm leave --force
+
+clean-volumes:
+	docker volume rm `docker volume ls -q`
+
 compose:
-	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml up -d;)
+	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
+		-f $(DIR)/lib/$(MODULE)/docker-compose.yml up -d;)
 
 compose-%:
-	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml up
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
+		-f $(DIR)/lib/$*/docker-compose.yml up
 
 docker-net:
 	docker network create --driver bridge --subnet=$(DOCKER_BRIDGE_IP) --attachable bridge-net
@@ -173,13 +221,15 @@ docker-net:
 		docker_gwbridge
 
 docker-push:
-	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
+	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+		-f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
 	$(foreach MODULE, $(TOIL_MODULES), docker push $(TOIL_DOCKER_REGISTRY)/$(MODULE):latest;)
 
 docker-secrets: minio-secrets
-	echo admin > portainer_user
+	echo admin > portainer-user
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > portainer_key
-	docker run --rm httpd:2.4-alpine htpasswd -nbB admin `cat portainer_key` | cut -d ":" -f 2 > $(DIR)/portainer_secret
+	docker run --rm httpd:2.4-alpine htpasswd -nbB admin `cat portainer_key` \
+		| cut -d ":" -f 2 > $(DIR)/portainer-secret
 
 docker-volumes:
 	docker volume create minio-config
@@ -190,15 +240,14 @@ docker-volumes:
 	docker volume create jupyter-data
 
 images: toil-docker
-	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
+	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+		-f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 
 init: virtualenv docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
 	git submodule update --init --recursive
 
 init-compose: docker-secrets
-
-init-kubernetes: kubectl
-
+init-kubernetes: bin-kubectl init-swarm
 init-swarm: swarm-init swarm-secrets
 
 kubernetes:
@@ -217,17 +266,19 @@ kube-%:
 		--compose-file $(DIR)/lib/$*/docker-compose.yml \
 		$*
 
-minikube:
+minikube: bin-minikube
 	minikube start --bootstrapper kubeadm --container-runtime $(MINIKUBE_CRI) \
 		--cpus $(MINIKUBE_CPUS) --memory $(MINIKUBE_MEM) --disk-size $(MINIKUBE_DISK) \
 		--network-plugin cni --enable-default-cni --vm-driver $(MINIKUBE_DRIVER)
 
 minio-secrets:
-	echo admin > minio_access_key
-	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio_secret_key
+	echo admin > minio-access-key
+	dd if=/dev/urandom bs=1 count=16 2>/dev/null \
+		| base64 | rev | cut -b 2- | rev > minio-secret-key
 
-minio-server: #minio minio-secrets
-	MINIO_ACCESS_KEY=`cat $(DIR)/minio_access_key` MINIO_SECRET_KEY=`cat $(DIR)/minio_secret_key` \
+minio-server: bin-minio
+	MINIO_ACCESS_KEY=`cat $(DIR)/minio-access-key` \
+		MINIO_SECRET_KEY=`cat $(DIR)/minio-secret-key` \
 		$(DIR)/bin/minio server --address $(MINIO_DOMAIN):$(MINIO_PORT) $(MINIO_DATA_DIR) \
 		$*
 
@@ -273,14 +324,14 @@ swarm-join:
 	docker swarm join --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP) \
 		--token `cat $(DIR)/swarm_$(SWARM_MODE)_token` $(SWARM_MANAGER_IP)
 
-swarm-secrets: docker-secrets
-	docker secret create minio_access_key $(DIR)/minio_access_key
-	docker secret create minio_secret_key $(DIR)/minio_secret_key
-	docker secret create portainer_user $(DIR)/portainer_user
-	docker secret create portainer_secret $(DIR)/portainer_secret
-	docker secret create traefik_ssl_key $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).key
-	docker secret create traefik_ssl_crt $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).crt
-	docker secret create wes_dependency_resolver $(DIR)/etc/yml/$(WES_DEPENDENCY_RESOLVER)
+swarm-secrets: docker-secrets ssl-cert
+	docker secret create minio-access-key $(DIR)/minio-access-key
+	docker secret create minio-secret-key $(DIR)/minio-secret-key
+	docker secret create portainer-user $(DIR)/portainer-user
+	docker secret create portainer-secret $(DIR)/portainer-secret
+	docker secret create traefik-ssl-key $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).key
+	docker secret create traefik-ssl-crt $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).crt
+	docker secret create wes-dependency-resolver $(DIR)/etc/yml/$(WES_DEPENDENCY_RESOLVER)
 
 toil-docker:
 	VIRTUAL_ENV=1 $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
@@ -299,8 +350,9 @@ virtualenv: mkdir
 	conda activate $(VENV_NAME)
 	pip install -r $(DIR)/etc/venv/requirements.txt
 
-.PHONY: all clean compose docker-net docker-push docker-volumes \
-	images init init-compose init-swarm init-kubernetes kubernetes \
-	minikube minio-server stack swarm-init swarm-join swarm-secrets \
-	toil-docker virtualenv
+.PHONY: all clean-all clean-containers clean-images clean-networks \
+	clean-secrets clean-stack clean-swarm clean-volumes compose \
+	docker-net docker-push docker-volumes images init init-compose \
+	init-swarm init-kubernetes kubernetes minikube minio-server stack \
+	swarm-init swarm-join swarm-secrets toil-docker virtualenv
 

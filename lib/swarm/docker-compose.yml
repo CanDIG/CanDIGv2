@@ -22,19 +22,19 @@ volumes:
     external: true
 
 secrets:
-  minio_access_key:
+  minio-access-key:
     external: true
-  minio_secret_key:
+  minio-secret-key:
     external: true
-  portainer_user:
+  portainer-user:
     external: true
-  portainer_secret:
+  portainer-secret:
     external: true
-  traefik_ssl_key:
+  traefik-ssl-key:
     external: true
-  traefik_ssl_crt:
+  traefik-ssl-crt:
     external: true
-  wes_dependency_resolver:
+  wes-dependency-resolver:
     external: true
 
 x-deploy:

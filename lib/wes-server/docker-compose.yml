@@ -27,7 +27,7 @@ services:
         - traefik.docker.network=${DOCKER_NET:-bridge-net}
         - traefik.frontend.rule=Host:wes-server.${MINIO_DOMAIN:-localhost}
     secrets:
-      - source: wes_dependency_resolver
+      - source: wes-dependency-resolver
         target: dependency_resolver.yml
     entrypoint: ["wes-server"]
     command:

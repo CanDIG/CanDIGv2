@@ -1,10 +1,10 @@
-minio_access_key
-minio_secret_key
-portainer_user
-portainer_key
-portainer_secret
-swarm_manager_token
-swarm_worker_token
+minio-access-key
+minio-secret-key
+portainer-user
+portainer-key
+portainer-secret
+swarm-manager-token
+swarm-worker-token
 *.bam
 .venv
 site.env

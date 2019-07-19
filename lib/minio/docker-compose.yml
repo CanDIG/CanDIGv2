@@ -28,9 +28,9 @@ services:
       - MINIO_REGION="${MINIO_REGION:-us-east-1}"
       - MINIO_DOMAIN="${MINIO_DOMAIN:-localhost}"
     secrets:
-      - source: minio_access_key
+      - source: minio-access-key
         target: access_key
-      - source: minio_secret_key
+      - source: minio-secret-key
         target: secret_key
     command: ["server", "${MINO_DATA_DIR:-/data}"]
 

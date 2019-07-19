@@ -21,21 +21,37 @@ volumes:
   portainer-data:
     external: true
 
+#secrets:
+  #minio-access-key:
+    #file: $PWD/minio-access-key
+  #minio-secret-key:
+    #file: $PWD/minio-secret-key
+  #portainer-user:
+    #file: $PWD/portainer-user
+  #portainer-secret:
+    #file: $PWD/portainer-secret
+  #traefik-ssl-key:
+    #file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.key
+  #traefik-ssl-crt:
+    #file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.crt
+  #wes-dependency-resolver:
+    #file: $PWD/etc/yml/$WES_DEPENDENCY_RESOLVER
+
 secrets:
-  minio_access_key:
-    file: $PWD/minio_access_key
-  minio_secret_key:
-    file: $PWD/minio_secret_key
-  portainer_user:
-    file: $PWD/portainer_user
-  portainer_secret:
-    file: $PWD/portainer_secret
-  traefik_ssl_key:
-    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.key
-  traefik_ssl_crt:
-    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.crt
-  wes_dependency_resolver:
-    file: $PWD/etc/yml/$WES_DEPENDENCY_RESOLVER
+  minio-access-key:
+    external: true
+  minio-secret-key:
+    external: true
+  portainer-user:
+    external: true
+  portainer-secret:
+    external: true
+  traefik-ssl-key:
+    external: true
+  traefik-ssl-crt:
+    external: true
+  wes-dependency-resolver:
+    eternal: true
 
 x-deploy:
   &default-restart

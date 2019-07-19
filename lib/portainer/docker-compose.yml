@@ -49,8 +49,8 @@ services:
         - traefik.docker.network=${DOCKER_NET:-bridge-net}
         - traefik.frontend.rule=Host:portainer.${MINIO_DOMAIN:-localhost}
     secrets:
-      - source: portainer_user
+      - source: portainer-user
         target: user_name
-      - source: portainer_secret
+      - source: portainer-secret
         target: secret_key
 

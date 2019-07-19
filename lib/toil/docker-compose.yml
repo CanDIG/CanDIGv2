@@ -37,9 +37,9 @@ services:
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
     secrets:
-      - source: minio_access_key
+      - source: minio-access-key
         target: access_key
-      - source: minio_secret_key
+      - source: minio-secret-key
         target: secret_key
     entrypoint: ["mesos-master"]
     command:
@@ -72,9 +72,9 @@ services:
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
     secrets:
-      - source: minio_access_key
+      - source: minio-access-key
         target: access_key
-      - source: minio_secret_key
+      - source: minio-secret-key
         target: secret_key
     entrypoint: ["mesos-slave"]
     command:
