@@ -160,8 +160,35 @@ make compose-$module
 module=igv-js
 make stack-$module
 
-# cleanup environment
-make clean
+# run all cleanup functions
+make clean-all
+
+# cleanup docker stack(s)
+clean-stack
+
+# stop all running containers and remove all run containers
+clean-containers
+
+# clear swarm secrets
+clean-secrets
+
+# remove all peristant volumes
+clean-volumes
+
+# (foricibily) leave docker-swarm
+clean-swarm
+
+# clear bridge-net/traefik-net/agent-net
+clean-networks
+
+# clear all images (including base images)
+clean-images
+
+# cleanup for compose, preserves everything except services/containers
+clean-compose
+
+# cleanup for stack/kubernetes, preserves everything except stack/services/containers
+clean-stack
 
 ```
 
