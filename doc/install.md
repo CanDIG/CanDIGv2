@@ -156,4 +156,7 @@ make compose
 
 # deploy stack (if using docker swarm environment)
 make stack
+
+# deploy kubernetes (if using kubernetes environment with compose-api)
+make kubernetes
 ```
