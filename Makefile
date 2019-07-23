@@ -263,6 +263,8 @@ init-hpc: docker-secrets bin-all
 init-kubernetes: bin-kubectl init-swarm
 init-swarm: swarm-init swarm-secrets
 
+hpc:
+
 kubernetes:
 	docker stack deploy \
 		--orchestrator $(DOCKER_MODE) \
@@ -365,6 +367,6 @@ virtualenv: mkdir
 
 .PHONY: all clean-all clean-containers clean-images clean-networks clean-secrets clean-stack \
 	clean-swarm clean-volumes compose docker-net docker-push docker-volumes images init init-compose \
-	init-swarm init-hpc init-kubernetes kubernetes minikube minio-server stack swarm-init swarm-join \
-	swarm-secrets toil-docker virtualenv
+	init-swarm init-hpc init-kubernetes hpc kubernetes minikube minio-server stack swarm-init \
+	swarm-join swarm-secrets toil-docker virtualenv
 
