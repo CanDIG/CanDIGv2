@@ -1,0 +1,17 @@
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+    [entryPoints.https.tls]
+      [[entryPoints.https.tls.certificates]]
+      certFile = "/var/run/secrets/site.crt"
+      keyFile = "/var/run/secrets/site.key"
+
+[providers.docker]
+  endpoint = "unix:///var/run/docker.sock"
+  #endpoint = "tcp://127.0.0.1:2377"
+  swarmMode = $traefik_swarm
+  network = $traefik_net

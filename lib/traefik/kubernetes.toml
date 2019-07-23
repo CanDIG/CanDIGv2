@@ -1,0 +1,8 @@
+[entryPoints]
+  [entryPoints.web]
+    address = ":$TRAEFIK_HTTPS_PORT"
+
+[providers]
+  [providers.kubernetesIngress]
+    namespaces = ["$DOCKER_NAMESPACE"]
+    hostname = "$MINIO_DOMAIN"

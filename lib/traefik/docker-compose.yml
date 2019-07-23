@@ -25,11 +25,16 @@ services:
         - traefik.port=${TRAEFIK_UI_PORT:-8080}
         - traefik.docker.network=${DOCKER_NET:-bridge-net}
         - traefik.frontend.rule=Host:traefik.${MINIO_DOMAIN:-localhost}
+        - traefik.http.routers.my-container.rule=Path(/traefik)
     secrets:
       - source: traefik-ssl-key
         target: site.key
       - source: traefik-ssl-crt
         target: site.crt
+    environment:
+      traefik_net=${TRAEFIK_NET:-bridge-net}
+      traefik_domain=${MINIO_DOMAIN:-localhost}
+      traefik_swarm=${TRAEFIK_SWARM:-false}
     command:
       - traefik
       - --api

@@ -26,9 +26,9 @@ CanDIGv2/
      ├── compose/                 ├ set of base docker variables for Compose
      ├── kubernetes/              ├ set of base docker variables for Kubernetes
      ├── swarm/                   ├ set of base docker variables for Swarm
-     └── ga4gh-dos/               ├ example service, make compose-ga4gh-dos
+     └── ga4gh-dos/               ├ example module, folder name = module name (i.e. make compose-ga4gh-dos)
           ├── docker-compose.yml  ├ minimum requirement of module, contains deployment context
-          └── Dockerfile          ├ contains build context for module (if not using prebuilt image)
+          └── Dockerfile          ├ contains build context for module
 
 ```
 
@@ -81,11 +81,14 @@ make init
 # initialize docker-compose environment
 make init-compose
 
-# initialize docker-swarm environment (alias for swarm-init)
-make init-swarm
+# initialize hpc environment
+make init-hpc
 
 # initialize kubernetes environment
 make init-kubernetes
+
+# initialize docker-swarm environment (alias for swarm-init)
+make init-swarm
 
 # create docker bridge networks
 make docker-net
@@ -98,6 +101,9 @@ make docker-secrets
 
 # create persistant volumes for docker containers
 make docker-volumes
+
+# get all package binaries
+make bin-all
 
 # download kubectl (for kubernetes deployment)
 make bin-kubectl
@@ -121,7 +127,6 @@ make minikube
 make ssl-cert
 
 # initialize primary docker-swarm master node
-# all other nodes can join in as master/worker
 make swarm-init
 
 # join a docker swarm cluster using manager/worker token

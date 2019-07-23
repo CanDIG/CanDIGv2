@@ -27,11 +27,14 @@ make init
 # initialize docker-compose environment
 make init-compose
 
-# initialize docker-swarm environment (alias for swarm-init)
-make init-swarm
+# initialize hpc environment
+make init-hpc
 
 # initialize kubernetes environment
 make init-kubernetes
+
+# initialize docker-swarm environment (alias for swarm-init)
+make init-swarm
 
 # create docker bridge networks
 make docker-net
@@ -44,6 +47,9 @@ make docker-secrets
 
 # create persistant volumes for docker containers
 make docker-volumes
+
+# get all package binaries
+make bin-all
 
 # download kubectl (for kubernetes deployment)
 make bin-kubectl
@@ -67,7 +73,6 @@ make minikube
 make ssl-cert
 
 # initialize primary docker-swarm master node
-# all other nodes can join in as master/worker
 make swarm-init
 
 # join a docker swarm cluster using manager/worker token
@@ -150,6 +155,8 @@ mkdir:
 print-%:
 	@echo '$*=$($*)'
 
+bin-all: bin-kubectl bin-minikube bin-minio
+
 bin-kubectl: mkdir
 	$(eval KUBECTL_VERSION = \
 		$(shell curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt))
@@ -169,6 +176,11 @@ bin-minio: mkdir
 		https://dl.minio.io/client/mc/release/linux-amd64/mc
 	chmod 755 $(DIR)/bin/minio
 	chmod 755 $(DIR)/bin/mc
+
+bin-traefik: mkdir
+	curl -Lo $(DIR)/bin/traefik \
+		https://github.com/containous/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik
+	chmod 755 $(DIR)/bin/traefik
 
 build-%:
 	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
@@ -247,6 +259,7 @@ init: virtualenv docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
 	git submodule update --init --recursive
 
 init-compose: docker-secrets
+init-hpc: docker-secrets bin-all
 init-kubernetes: bin-kubectl init-swarm
 init-swarm: swarm-init swarm-secrets
 
@@ -350,9 +363,8 @@ virtualenv: mkdir
 	conda activate $(VENV_NAME)
 	pip install -r $(DIR)/etc/venv/requirements.txt
 
-.PHONY: all clean-all clean-containers clean-images clean-networks \
-	clean-secrets clean-stack clean-swarm clean-volumes compose \
-	docker-net docker-push docker-volumes images init init-compose \
-	init-swarm init-kubernetes kubernetes minikube minio-server stack \
-	swarm-init swarm-join swarm-secrets toil-docker virtualenv
+.PHONY: all clean-all clean-containers clean-images clean-networks clean-secrets clean-stack \
+	clean-swarm clean-volumes compose docker-net docker-push docker-volumes images init init-compose \
+	init-swarm init-hpc init-kubernetes kubernetes minikube minio-server stack swarm-init swarm-join \
+	swarm-secrets toil-docker virtualenv
 
