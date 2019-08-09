@@ -8,8 +8,7 @@ dataflow for genomic data.
 
 ## Project Structure
 
-```bash
-
+```plaintext
 CanDIGv2/
   ├── .env                        ├ global variables
   ├── site.env                    ├ global overrides
@@ -29,7 +28,6 @@ CanDIGv2/
      └── ga4gh-dos/               ├ example module, folder name = module name (i.e. make compose-ga4gh-dos)
           ├── docker-compose.yml  ├ minimum requirement of module, contains deployment context
           └── Dockerfile          ├ contains build context for module
-
 ```
 
 ## `.env` Environment File
@@ -52,23 +50,21 @@ These evironment variables can be read in `docker-compose` scripts through the v
 `${VAR:-default}`.
 
 ```yaml
-
 # example compose YAML using variable substitution with default option
 services:
   consul:
     image: progrium/consul
     network_mode: ${DOCKER_MODE:-bridge}
 ...
-
 ```
 
 ### `site.env` Site Overrides
+
 The `site.env` file is an easy way to keep a set of overrides for the various parameters contained in `.env`. This file is read by `Makefile` and any corresponding values will override the global default for CanDIGv2. Site operators are encouraged to keep changes in `site.env` rather than in `.env` directly, as `.env` may be modified from time-to-time by the CanDIG development team. The `site.env` will always override the same global export value for `.env`. Please note that `site.env` will not be saved with repo by default (blocked in `.gitignore`). This is by design to allow developers to test different configurations of CanDIGv2.
 
 ## `make` Deployment
 
 ```bash
-
 # view available options
 make
 
@@ -194,6 +190,5 @@ clean-compose
 
 # cleanup for stack/kubernetes, preserves everything except stack/services/containers
 clean-stack
-
 ```
 

@@ -190,8 +190,8 @@ clean-all: clean-stack clean-containers clean-secrets clean-volumes clean-swarm 
 clean-compose: clean-containers
 
 clean-containers:
-	docker stop `docker ps -q`
-	docker rm -v `docker ps -aq`
+	docker stop `docker ps -q` || return 0
+	docker rm -v `docker ps -aq` || return 0
 
 clean-images:
 	docker rmi `docker images -q`
@@ -203,11 +203,11 @@ clean-secrets:
 	docker secret rm `docker secret ls -q`
 	rm -f minio-access-key minio-secret-key \
 		portainer-user portainer-key portainer-secret \
-		swarm_manager_token swarm_worker_token \
+		swarm-manager-token swarm-worker-token \
 		$(DIR)/etc/ssl/selfsigned-* $(DIR)/bin/*
 
 clean-stack:
-	docker stack rm `docker stack ls | awk '{print $1}'`
+	docker stack rm `docker stack ls | awk '{print $$1}'`
 	$(MAKE) clean-containers
 
 clean-swarm:
@@ -239,8 +239,8 @@ docker-push:
 
 docker-secrets: minio-secrets
 	echo admin > portainer-user
-	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > portainer_key
-	docker run --rm httpd:2.4-alpine htpasswd -nbB admin `cat portainer_key` \
+	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > portainer-key
+	docker run --rm httpd:2.4-alpine htpasswd -nbB admin `cat portainer-key` \
 		| cut -d ":" -f 2 > $(DIR)/portainer-secret
 
 docker-volumes:
@@ -330,8 +330,8 @@ stack-%:
 
 swarm-init:
 	docker swarm init --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP)
-	docker swarm join-token manager -q > swarm_manager_token
-	docker swarm join-token worker -q > swarm_worker_token
+	docker swarm join-token manager -q > swarm-manager-token
+	docker swarm join-token worker -q > swarm-worker-token
 	docker network create --driver overlay --opt encrypted=true traefik-net
 	docker network create --driver overlay --opt encrypted=true agent-net
 
@@ -339,7 +339,7 @@ swarm-join:
 	docker swarm join --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP) \
 		--token `cat $(DIR)/swarm_$(SWARM_MODE)_token` $(SWARM_MANAGER_IP)
 
-swarm-secrets: docker-secrets ssl-cert
+swarm-secrets: docker-secrets
 	docker secret create minio-access-key $(DIR)/minio-access-key
 	docker secret create minio-secret-key $(DIR)/minio-secret-key
 	docker secret create portainer-user $(DIR)/portainer-user
