@@ -137,7 +137,7 @@ sudo systemctl restart docker
 1. Clone/pull latest CanDIGv2 repo from `https://github.com/CanDIG/CanDIGv2.git`
 
 2. Create/modify `site.env` file
-  * `cp .env site.env`
+  * `cp -i etc/env/swarm.env site.env`
   * Edit site.env with your site's local configuration
 
 3. Create Cluster
