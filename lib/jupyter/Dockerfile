@@ -1,7 +1,7 @@
 ARG BASE_CONTAINER=jupyter/base-notebook
 FROM $BASE_CONTAINER
 
-LABEL maintainer="CanDIG <info@distributedgenomics.ca"
+LABEL maintainer="CanDIG <info@distributedgenomics.ca>"
 ARG NB_USER="jovyan"
 ARG NB_UID="1000"
 ARG NB_GID="100"
@@ -105,8 +105,7 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
 
 RUN apt-get update && \
   apt-get install --quiet --yes docker-ce-cli && \
-  rm -rf /var/lib/apt/lists/* #&& \
-  #usermod -aG docker $NB_USER
+  rm -rf /var/lib/apt/lists/*
 
 # Julia dependencies
 # install Julia packages in /opt/julia instead of $HOME
@@ -261,11 +260,10 @@ USER root
 RUN mkdir /notebooks /library /download
 COPY demo /notebooks/demo
 
-RUN chown -R $NB_UID:$NB_GID /notebooks /library /download
+RUN chown -R $NB_UID:$NB_GID /notebooks /library /download && \
+  echo "$NB_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/notebook && \
+  usermod -aG docker $NB_USER
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER $NB_UID
 
-#RUN jupyterhub token jovyan
-
-#RUN bash /notebooks/demo/install-demos.sh
