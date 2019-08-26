@@ -48,7 +48,7 @@ make docker-secrets
 # create persistant volumes for docker containers
 make docker-volumes
 
-# get all package binaries
+# download all package binaries
 make bin-all
 
 # download kubectl (for kubernetes deployment)
@@ -145,9 +145,11 @@ endef
 
 export help
 
+.PHONY: all
 all:
 	@printf "$$help"
 
+.PHONY: mkdir
 mkdir:
 	mkdir -p $(DIR)/bin
 
@@ -186,19 +188,26 @@ build-%:
 	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$*/docker-compose.yml build
 
+.PHONY: clean-all
 clean-all: clean-stack clean-containers clean-secrets clean-volumes clean-swarm clean-networks clean-images
+
+.PHONY: clean-compose
 clean-compose: clean-containers
 
+.PHONY: clean-containers
 clean-containers:
 	docker stop `docker ps -q` || return 0
 	docker rm -v `docker ps -aq` || return 0
 
+.PHONY: clean-images
 clean-images:
 	docker rmi `docker images -q`
 
+.PHONY: clean-network
 clean-network:
 	docker network rm bridge-net traefik-net agent-net docker_gwbridge
 
+.PHONY: clean-secrets
 clean-secrets:
 	docker secret rm `docker secret ls -q`
 	rm -f minio-access-key minio-secret-key \
@@ -206,16 +215,20 @@ clean-secrets:
 		swarm-manager-token swarm-worker-token \
 		$(DIR)/etc/ssl/selfsigned-* $(DIR)/bin/*
 
+.PHONY: clean-stack
 clean-stack:
 	docker stack rm `docker stack ls | awk '{print $$1}'`
 	$(MAKE) clean-containers
 
+.PHONY: clean-swarm
 clean-swarm:
 	docker swarm leave --force
 
+.PHONY: clean-volumes
 clean-volumes:
 	docker volume rm `docker volume ls -q`
 
+.PHONY: compose
 compose:
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
 		-f $(DIR)/lib/$(MODULE)/docker-compose.yml up -d;)
@@ -224,6 +237,7 @@ compose-%:
 	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
 		-f $(DIR)/lib/$*/docker-compose.yml up
 
+.PHONY: docker-net
 docker-net:
 	docker network create --driver bridge --subnet=$(DOCKER_BRIDGE_IP) --attachable bridge-net
 	docker network create --driver bridge --subnet=$(DOCKER_GWBRIDGE_IP) --attachable \
@@ -232,17 +246,20 @@ docker-net:
 		-o com.docker.network.bridge.enable_ip_masquerade=true \
 		docker_gwbridge
 
+.PHONY: docker-push
 docker-push:
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
 	$(foreach MODULE, $(TOIL_MODULES), docker push $(TOIL_DOCKER_REGISTRY)/$(MODULE):latest;)
 
+.PHONY: docker-secrets
 docker-secrets: minio-secrets
 	echo admin > portainer-user
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > portainer-key
 	docker run --rm httpd:2.4-alpine htpasswd -nbB admin `cat portainer-key` \
 		| cut -d ":" -f 2 > $(DIR)/portainer-secret
 
+.PHONY: docker-volumes
 docker-volumes:
 	docker volume create minio-config
 	docker volume create minio-data #--opt o=size=$(MINIO_VOLUME_SIZE)
@@ -251,20 +268,32 @@ docker-volumes:
 	docker volume create portainer-data
 	docker volume create jupyter-data
 
+.PHONY: images
 images: toil-docker
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 
-init: virtualenv docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
+.PHONY: init
+init: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
 	git submodule update --init --recursive
 
+.PHONY: init-compose
 init-compose: docker-secrets
+
+.PHONY: init-hpc
 init-hpc: docker-secrets bin-all
+
+.PHONY: init-kubernetes
 init-kubernetes: bin-kubectl init-swarm
+
+.PHONY: init-swarm
 init-swarm: swarm-init swarm-secrets
 
+.PHONY: hpc
 hpc:
+	# TODO: complete hpc integration
 
+.PHONY: kubernetes
 kubernetes:
 	docker stack deploy \
 		--orchestrator $(DOCKER_MODE) \
@@ -281,6 +310,7 @@ kube-%:
 		--compose-file $(DIR)/lib/$*/docker-compose.yml \
 		$*
 
+.PHONY: minikube
 minikube: bin-minikube
 	minikube start --bootstrapper kubeadm --container-runtime $(MINIKUBE_CRI) \
 		--cpus $(MINIKUBE_CPUS) --memory $(MINIKUBE_MEM) --disk-size $(MINIKUBE_DISK) \
@@ -291,6 +321,7 @@ minio-secrets:
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null \
 		| base64 | rev | cut -b 2- | rev > minio-secret-key
 
+.PHONY: minio-server
 minio-server: bin-minio
 	MINIO_ACCESS_KEY=`cat $(DIR)/minio-access-key` \
 		MINIO_SECRET_KEY=`cat $(DIR)/minio-secret-key` \
@@ -316,6 +347,7 @@ ssl-cert:
 		-CAcreateserial -out $(DIR)/etc/ssl/selfsigned-site.crt \
 		-extfile $(DIR)/etc/ssl/site.cnf -extensions server
 
+.PHONY: stack
 stack:
 	docker stack deploy \
 		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
@@ -328,6 +360,7 @@ stack-%:
 		--compose-file $(DIR)/lib/$*/docker-compose.yml \
 		$*
 
+.PHONY: swarm-init
 swarm-init:
 	docker swarm init --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP)
 	docker swarm join-token manager -q > swarm-manager-token
@@ -335,10 +368,12 @@ swarm-init:
 	docker network create --driver overlay --opt encrypted=true traefik-net
 	docker network create --driver overlay --opt encrypted=true agent-net
 
+.PHONY: swarm-join
 swarm-join:
 	docker swarm join --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP) \
 		--token `cat $(DIR)/swarm_$(SWARM_MODE)_token` $(SWARM_MANAGER_IP)
 
+.PHONY: swarm-secrets
 swarm-secrets: docker-secrets
 	docker secret create minio-access-key $(DIR)/minio-access-key
 	docker secret create minio-secret-key $(DIR)/minio-secret-key
@@ -348,6 +383,7 @@ swarm-secrets: docker-secrets
 	docker secret create traefik-ssl-crt $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).crt
 	docker secret create wes-dependency-resolver $(DIR)/etc/yml/$(WES_DEPENDENCY_RESOLVER)
 
+.PHONY: toil-docker
 toil-docker:
 	VIRTUAL_ENV=1 $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
 	$(foreach MODULE,$(TOIL_MODULES), \
@@ -357,6 +393,7 @@ toil-docker:
 		docker tag $(TOIL_DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION) \
 		$(TOIL_DOCKER_REGISTRY)/$(MODULE):latest;)
 
+.PHONY: virtualenv
 virtualenv: mkdir
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -364,9 +401,4 @@ virtualenv: mkdir
 	conda create -n $(VENV_NAME) python=$(VENV_PYTHON)
 	conda activate $(VENV_NAME)
 	pip install -r $(DIR)/etc/venv/requirements.txt
-
-.PHONY: all clean-all clean-containers clean-images clean-networks clean-secrets clean-stack \
-	clean-swarm clean-volumes compose docker-net docker-push docker-volumes images init init-compose \
-	init-swarm init-hpc init-kubernetes hpc kubernetes minikube minio-server stack swarm-init \
-	swarm-join swarm-secrets toil-docker virtualenv
 
