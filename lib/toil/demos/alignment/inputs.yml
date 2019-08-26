@@ -1,6 +1,6 @@
 bam:
   class: File
-  path: ./gerald_C1TD1ACXX_7_ATCACG.bam
+  path: gerald_C1TD1ACXX_7_ATCACG.bam
 reference:
   class: File
-  path: ./Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz
+  path: Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz

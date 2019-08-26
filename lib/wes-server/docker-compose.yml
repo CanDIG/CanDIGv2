@@ -5,9 +5,10 @@ services:
     build:
       context: $PWD/lib/wes-server
       args:
-        toil_version: ${TOIL_VERSION:-latest}
-        wes_version: ${WES_VERSION:-3.3}
+        - wes_version=${WES_VERSION:-3.3}
     image: candig/wes-server:${WES_VERSION:-3.3}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:
@@ -31,6 +32,9 @@ services:
         target: dependency_resolver.yml
     entrypoint: ["wes-server"]
     command:
-      - --backend=${WES_BACKEND:-wes_service.toil_wes}
+      - --backend=${WES_BACKEND:-wes_service.cwl_runner}
       - --port=5000
-      - ${WES_OPT}
+      - --opt=runner=${WES_CWL_RUNNER:-cwltool}
+      #- --opt=extra=--batchSystem=Mesos
+      #- --opt=extra=--mesosMaster=toil-master:5050
+      - --opt=extra=--beta-dependency-resolvers-configuration=/run/secrets/dependency_resolver.yml

@@ -30,6 +30,5 @@ services:
       - "8301/udp"
       - "8302"
       - "8302/udp"
-    # TODO: FIX CMD Error starting agent: Failed to get advertise address: No private IP address found
     command: -server -bootstrap -log-level debug -ui-dir /ui
 

@@ -27,15 +27,20 @@ services:
 
   weave-probe:
     image: weaveworks/scope-swarm-launcher
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - ${DOCKER_NET:-bridge-net}
+      - agent-net
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     command:
       - /bin/sh
       - -c
       - |
         scope launch --mode=probe --probe-only --probe.docker.bridge=docker0 --probe.docker=true 0.0.0.0:4040
         docker logs --follow weavescope
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    deploy:
-      mode: global

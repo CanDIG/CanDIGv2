@@ -37,12 +37,3 @@ secrets:
   wes-dependency-resolver:
     external: true
 
-x-deploy:
-  &default-restart
-  restart_policy:
-    delay: 10s
-    max_attempts: 10
-    window: 60s
-  labels:
-    - traefik.enable=true
-    - traefik.docker.network=${TRAEFIK_NET:-traefik-net}

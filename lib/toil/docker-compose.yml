@@ -6,7 +6,7 @@ services:
       context: $PWD/lib/toil
       args:
         toil_version: ${TOIL_VERSION:-latest}
-        #wes_version: ${WES_VERSION:-3.3}
+        wes_version: ${WES_VERSION:-3.3}
     image: candig/toil:${TOIL_VERSION:-latest}
     volumes:
       - toil-jobstore:/jobStoreParentDir
@@ -82,5 +82,9 @@ services:
       - --master=toil-master:5050
       - --ip=${TOIL_IP:-127.0.0.1}
       - --attributes=preeemtable:false
+      #- --launcher=linux
+      - --containerizers=docker,mesos
+      #- --image_providers=appc,docker
+      #- --isolation=filesystem/linux,docker/runtime
       #- --resources=cpus:4
 
