@@ -5,7 +5,8 @@ services:
     build:
       context: $PWD/lib/wes-server
       args:
-        - wes_version=${WES_VERSION:-3.3}
+        toil_version: ${TOIL_VERSION:-latest}
+        wes_version: ${WES_VERSION:-3.3}
     image: candig/wes-server:${WES_VERSION:-3.3}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
