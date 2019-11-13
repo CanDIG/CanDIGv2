@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   traefik:
-    image: traefik
+    image: traefik:${TRAEFIK_VERSION:-latest}
     networks:
       - ${DOCKER_NET:-bridge-net}
     volumes:

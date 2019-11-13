@@ -130,7 +130,7 @@ clean-volumes
 clean-swarm
 
 # clear bridge-net/traefik-net/agent-net
-clean-networks
+clean-network
 
 # clear all images (including base images)
 clean-images
