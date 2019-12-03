@@ -2,14 +2,14 @@
 version: '3.7'
 
 services:
-  htsnexus-server:
+  htsget-app:
     build:
-      context: $PWD/lib/htsnexus-server
-    image: candig/htsnexus-server:${HTSNEXUS_VERSION:-latest}
+      context: $PWD/lib/htsget-app/htsget_app
+    image: candig/htsget-app:${HTSGETAPP_VERSION:-latest}
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:
-      - "${HTSNEXUS_PORT:-48444}:48444"
+      - "${HTSGETAPP_PORT:-3000}:3000"
     deploy:
       placement:
         constraints:
@@ -21,8 +21,6 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${HTSNEXUS_PORT:-48444}
+        - traefik.port=${HTSGETAPP_PORT:-48444}
         - traefik.docker.network=${DOCKER_NET:-bridge-net}
         - traefik.frontend.rule=Host:htsget.${MINIO_DOMAIN:-localhost}
-    command: ["--bind", "0.0.0.0", "--port", "${HTSNEXUS_PORT:-48444}", "htsnexus-server.db"]
-
