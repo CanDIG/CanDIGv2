@@ -21,6 +21,6 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${HTSGETAPP_PORT:-48444}
+        - traefik.port=${HTSGETAPP_PORT:-3000}
         - traefik.docker.network=${DOCKER_NET:-bridge-net}
         - traefik.frontend.rule=Host:htsget.${MINIO_DOMAIN:-localhost}
