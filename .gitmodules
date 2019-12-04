@@ -1,6 +1,6 @@
 [submodule "lib/toil/toil-docker"]
 	path = lib/toil/toil-docker
 	url = https://github.com/DataBiosphere/toil.git
-[submodule "lib/htsget-app/htsget_app"]
+[submodule "lib/htsget/htsget_app"]
 	path = lib/htsget-app
 	url = https://github.com/candig/htsget_app
