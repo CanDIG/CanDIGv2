@@ -4,7 +4,7 @@ version: '3.7'
 services:
   htsget-app:
     build:
-      context: $PWD/lib/htsget-app/htsget_app
+      context: $PWD/lib/htsget/htsget_app
     image: candig/htsget-app:${HTSGETAPP_VERSION:-latest}
     networks:
       - ${DOCKER_NET:-bridge-net}
