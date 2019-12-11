@@ -4,3 +4,6 @@
 [submodule "lib/htsget-app/htsget_app"]
 	path = lib/htsget-app/htsget_app
 	url = https://github.com/candig/htsget_app
+[submodule "lib/jade-data-repo/jade-data-repo"]
+	path = lib/jade-data-repo/jade-data-repo
+	url = https://github.com/DataBiosphere/jade-data-repo

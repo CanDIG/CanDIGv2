@@ -11,7 +11,7 @@ include $(overrides)
 export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
-MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsget-app toil igv-js jupyter wes-server
+MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsget-app toil igv-js jupyter wes-server jade-data-repo
 TOIL_MODULES = toil toil-grafana toil-mtail toil-prometheus
 
 define help
@@ -188,6 +188,12 @@ build-%:
 	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$*/docker-compose.yml build
 
+build-jade-data-repo: jade-data-repo-jib-build
+
+.PHONY: jade-data-repo-jib-build
+jade-data-repo-jib-build:
+	GRADLE_USER_HOME=$(DIR)/lib/jade-data-repo $(DIR)/lib/jade-data-repo/jade-data-repo/gradlew jibDockerBuild
+
 .PHONY: clean-all
 clean-all: clean-stack clean-containers clean-secrets clean-volumes clean-swarm clean-networks clean-images
 
@@ -269,7 +275,7 @@ docker-volumes:
 	docker volume create jupyter-data
 
 .PHONY: images
-images: toil-docker
+images: toil-docker jade-data-repo-jib-build
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 
