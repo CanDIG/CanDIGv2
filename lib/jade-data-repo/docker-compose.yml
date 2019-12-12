@@ -4,10 +4,10 @@ services:
   jade-data-repo:
     image: gcr.io/broad-jade-dev/jade-data-repo
     ports:
-      - "${DRS_PORT:-8080}:8080"
+      - "${DRS_PORT:-8085}:8080"
     networks:
       - ${DOCKER_NET:-bridge-net}
-      - ${DRS_NET:-bridge-net}
+      - ${DRS_NET:-drs-net}
     deploy:
       placement:
         constraints:
@@ -24,12 +24,14 @@ services:
         - traefik.frontend.rule=Host:drs.${MINIO_DOMAIN:-localhost}
 
   jade-drs-postgresql:
-    image: postgres:11
-    env:
-      POSTGRES_PASSWORD: drpasswd
-      POSTGRES_USER: drmanager
+    image: candig/postgres-drs
+    build:
+      context: $PWD/lib/jade-data-repo
+      dockerfile: Dockerfile.database
     networks:
-      - ${DRS_NET:-bridge-net}
+      - ${DRS_NET:-drs-net}
+    volumes:
+      - drs-data:/var/lib/postgres/data
     deploy:
       placement:
         constraints:
@@ -39,11 +41,3 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-
-  jade-drs-job:
-    build:
-      context: $PWD/lib/jade-data-repo
-    image: candig/jade-drs-job
-    networks:
-      - ${DRS_NET:-bridge-net}
-    command: /app/gradlew update

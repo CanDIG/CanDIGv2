@@ -8,6 +8,8 @@ networks:
     external: true
   agent-net:
     external: true
+  drs-net:
+    external: true
 
 volumes:
   minio-data:
@@ -19,6 +21,8 @@ volumes:
   toil-jobstore:
     external: true
   portainer-data:
+    external: true
+  drs-data:
     external: true
 
 secrets:
@@ -36,4 +40,3 @@ secrets:
     external: true
   wes-dependency-resolver:
     external: true
-

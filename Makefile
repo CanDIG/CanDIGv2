@@ -192,7 +192,7 @@ build-jade-data-repo: jade-data-repo-jib-build
 
 .PHONY: jade-data-repo-jib-build
 jade-data-repo-jib-build:
-	GRADLE_USER_HOME=$(DIR)/lib/jade-data-repo $(DIR)/lib/jade-data-repo/jade-data-repo/gradlew jibDockerBuild
+	cd $(DIR)/lib/jade-data-repo/jade-data-repo && GRADLE_USER_HOME=.. ./gradlew jibDockerBuild
 
 .PHONY: clean-all
 clean-all: clean-stack clean-containers clean-secrets clean-volumes clean-swarm clean-networks clean-images
@@ -211,7 +211,7 @@ clean-images:
 
 .PHONY: clean-network
 clean-network:
-	docker network rm bridge-net traefik-net agent-net docker_gwbridge
+	docker network rm bridge-net traefik-net agent-net docker_gwbridge drs-net
 
 .PHONY: clean-secrets
 clean-secrets:
@@ -251,6 +251,7 @@ docker-net:
 		-o com.docker.network.bridge.name=docker_gwbridge \
 		-o com.docker.network.bridge.enable_ip_masquerade=true \
 		docker_gwbridge
+	docker network create drs-net
 
 .PHONY: docker-push
 docker-push:
@@ -273,6 +274,7 @@ docker-volumes:
 	docker volume create toil-jobstore
 	docker volume create portainer-data
 	docker volume create jupyter-data
+	docker volume create drs-data
 
 .PHONY: images
 images: toil-docker jade-data-repo-jib-build

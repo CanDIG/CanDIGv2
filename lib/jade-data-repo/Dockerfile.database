@@ -1,0 +1,2 @@
+FROM postgres:11-alpine
+ADD jade-data-repo/db/create-data-repo-db /docker-entrypoint-initdb.d/create-data-repo-db.sql
