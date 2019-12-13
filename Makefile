@@ -11,7 +11,7 @@ export $(shell sed 's/=.*//' $(env))
 #export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
-MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js jupyter wes-server
+MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsget-server htsnexus-server toil igv-js jupyter wes-server
 TOIL_MODULES = toil toil-grafana toil-mtail toil-prometheus
 
 define help
