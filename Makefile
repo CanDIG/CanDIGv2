@@ -371,7 +371,7 @@ swarm-init:
 .PHONY: swarm-join
 swarm-join:
 	docker swarm join --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP) \
-		--token `cat $(DIR)/swarm_$(SWARM_MODE)_token` $(SWARM_MANAGER_IP)
+		--token `cat $(DIR)/swarm-$(SWARM_MODE)-token` $(SWARM_MANAGER_IP)
 
 .PHONY: swarm-secrets
 swarm-secrets: docker-secrets
