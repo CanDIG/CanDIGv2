@@ -7,6 +7,6 @@ swarm-manager-token
 swarm-worker-token
 *.bam
 .venv
-site.env
+.env
 /bin
 /etc/ssl/selfsigned-*

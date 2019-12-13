@@ -2,13 +2,13 @@
 
 # import global variables
 env ?= .env
-overrides ?= site.env
+#overrides ?= site.env
 
 include $(env)
 export $(shell sed 's/=.*//' $(env))
 
-include $(overrides)
-export $(shell sed 's/=.*//' $(overrides))
+#include $(overrides)
+#export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
 MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsnexus-server toil igv-js jupyter wes-server

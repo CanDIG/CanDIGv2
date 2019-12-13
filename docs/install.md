@@ -111,7 +111,7 @@ sudo mkdir -p /etc/docker
 
 sudo bash -c 'cat > /etc/docker/daemon.json << EOF
 {
-  "storage-driver": "btrfs",
+  "storage-driver": "overlay2",
   "bip": "11.11.0.1/16",
   "features": {
     "buildkit": true
@@ -136,9 +136,9 @@ sudo systemctl restart docker
 
 1. Clone/pull latest CanDIGv2 repo from `https://github.com/CanDIG/CanDIGv2.git`
 
-2. Create/modify `site.env` file
-  * `cp -i etc/env/swarm.env site.env`
-  * Edit site.env with your site's local configuration
+2. Create/modify `.env` file
+  * `cp -i etc/env/swarm.env .env`
+  * Edit `.env` with your site's local configuration
 
 3. Create Cluster
 ```bash
@@ -156,7 +156,4 @@ make compose
 
 # deploy stack (if using docker swarm environment)
 make stack
-
-# deploy kubernetes (if using kubernetes environment with compose-api)
-make kubernetes
 ```

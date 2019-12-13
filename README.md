@@ -10,24 +10,23 @@ dataflow for genomic data.
 
 ```plaintext
 CanDIGv2/
-  ├── .env                        ├ global variables
-  ├── site.env                    ├ global overrides
-  ├── Makefile                    ├ actions for repeatable testing/deployment
-  ├── bin/                        ├ local binaries directory
-  ├── doc/                        ├ documentation for various aspects of CanDIGv2
-  ├── etc/                        ├ contains misc files/config/scripts
-  │   ├── docker/                 ├ docker configurations
-  │   ├── env/                    ├ sample env files for site.env
-  │   ├── ssl/                    ├ ssl rootCA/site configs and certs
-  │   ├── venv/                   ├ dependency files for virtualenvs (conda, pip, etc.)
-  │   └── yml/                    ├ various yaml based configs (toil, traefik, etc.)
-  └── lib/                        ├ contains modules of servies/apps
-     ├── compose/                 ├ set of base docker variables for Compose
-     ├── kubernetes/              ├ set of base docker variables for Kubernetes
-     ├── swarm/                   ├ set of base docker variables for Swarm
-     └── ga4gh-dos/               ├ example module, folder name = module name (i.e. make compose-ga4gh-dos)
-          ├── docker-compose.yml  ├ minimum requirement of module, contains deployment context
-          └── Dockerfile          ├ contains build context for module
+  ├── .env                        - global variables
+  ├── Makefile                    - actions for repeatable testing/deployment
+  ├── bin/                        - local binaries directory
+  ├── doc/                        - documentation for various aspects of CanDIGv2
+  ├── etc/                        - contains misc files/config/scripts
+  │   ├── docker/                 - docker configurations
+  │   ├── env/                    - sample env files for site.env
+  │   ├── ssl/                    - ssl rootCA/site configs and certs
+  │   ├── venv/                   - dependency files for virtualenvs (conda, pip, etc.)
+  │   └── yml/                    - various yaml based configs (toil, traefik, etc.)
+  └── lib/                        - contains modules of servies/apps
+     ├── compose/                 - set of base docker variables for Compose
+     ├── kubernetes/              - set of base docker variables for Kubernetes
+     ├── swarm/                   - set of base docker variables for Swarm
+     └── ga4gh-dos/               - example module, folder name = module name (i.e. make compose-ga4gh-dos)
+          ├── docker-compose.yml  - minimum requirement of module, contains deployment context
+          └── Dockerfile          - contains build context for module
 ```
 
 ## `.env` Environment File
@@ -58,9 +57,9 @@ services:
 ...
 ```
 
-### `site.env` Site Overrides
+### `site.env` Site Overrides (Deprecated)
 
-The `site.env` file is an easy way to keep a set of overrides for the various parameters contained in `.env`. This file is read by `Makefile` and any corresponding values will override the global default for CanDIGv2. Site operators are encouraged to keep changes in `site.env` rather than in `.env` directly, as `.env` may be modified from time-to-time by the CanDIG development team. The `site.env` will always override the same global export value for `.env`. Please note that `site.env` will not be saved with repo by default (blocked in `.gitignore`). This is by design to allow developers to test different configurations of CanDIGv2.
+~~The `site.env` file is an easy way to keep a set of overrides for the various parameters contained in `.env`. This file is read by `Makefile` and any corresponding values will override the global default for CanDIGv2. Site operators are encouraged to keep changes in `site.env` rather than in `.env` directly, as `.env` may be modified from time-to-time by the CanDIG development team. The `site.env` will always override the same global export value for `.env`. Please note that `site.env` will not be saved with repo by default (blocked in `.gitignore`). This is by design to allow developers to test different configurations of CanDIGv2.~~
 
 ## `make` Deployment
 
@@ -98,7 +97,7 @@ make docker-secrets
 # create persistant volumes for docker containers
 make docker-volumes
 
-# get all package binaries
+# download all package binaries
 make bin-all
 
 # download kubectl (for kubernetes deployment)
@@ -180,7 +179,7 @@ clean-volumes
 clean-swarm
 
 # clear bridge-net/traefik-net/agent-net
-clean-networks
+clean-network
 
 # clear all images (including base images)
 clean-images
