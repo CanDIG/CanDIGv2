@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  htsget-app:
+    build:
+      context: $PWD/lib/htsget-server/htsget_app
+    image: candig/htsget-app:${HTSGET_APP_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET:-bridge-net}
+    ports:
+      - "${HTSGET_APP_PORT:-3333}:3333"
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${HTSGET_APP_PORT:-3333}
+        - traefik.docker.network=${DOCKER_NET:-bridge-net}
+        - traefik.frontend.rule=Host:htsget.${MINIO_DOMAIN:-localhost}
+    command: ["--host", "0.0.0.0", "--port", "${HTSGET_APP_PORT:-3333}"]
