@@ -10,7 +10,7 @@ services:
     image: candig/toil:${TOIL_VERSION:-latest}
     volumes:
       - toil-jobstore:/jobStoreParentDir
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:rw
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:
@@ -52,7 +52,7 @@ services:
     image: candig/toil:${TOIL_VERSION:-latest}
     volumes:
       - toil-jobstore:/jobStoreParentDir
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:rw
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:
