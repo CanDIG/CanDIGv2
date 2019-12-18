@@ -18,13 +18,13 @@ services:
     environment:
       # REQUIRED: Should be equal to the service name prefixed by "tasks." when
       # deployed inside an overlay network
-      - AGENT_CLUSTER_ADDR=tasks.agent
+      - AGENT_CLUSTER_ADDR=tasks.portainer-agent
       # AGENT_PORT: 9001
       # LOG_LEVEL: debug
 
   portainer:
     image: portainer/portainer
-    command: -H tcp://tasks.agent:9001 --tlsskipverify #--admin-password-file /run/secrets/secret_key
+    command: -H tcp://tasks.portainer-agent:9001 --tlsskipverify --admin-password-file /run/secrets/secret_key
     ports:
       - "${PORTAINER_UI_PORT:-9000}:9000"
     volumes:
