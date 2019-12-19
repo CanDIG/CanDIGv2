@@ -254,10 +254,10 @@ docker-push:
 
 .PHONY: docker-secrets
 docker-secrets: minio-secrets
-	echo admin > portainer-user
-	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > portainer-key
+	echo admin | tr -d '\n' > portainer-user
+	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev | tr -d '\n' > portainer-key
 	docker run --rm httpd:2.4-alpine htpasswd -nbB admin `cat portainer-key` \
-		| cut -d ":" -f 2 > $(DIR)/portainer-secret
+		| cut -d ":" -f 2 | tr -d '\n' > $(DIR)/portainer-secret
 
 .PHONY: docker-volumes
 docker-volumes:
@@ -317,9 +317,9 @@ minikube: bin-minikube
 		--network-plugin cni --enable-default-cni --vm-driver $(MINIKUBE_DRIVER)
 
 minio-secrets:
-	echo admin > minio-access-key
+	echo admin tr -d '\n' > minio-access-key
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | rev | cut -b 2- | rev > minio-secret-key
+		| base64 | rev | cut -b 2- | rev | tr -d '\n' > minio-secret-key
 
 .PHONY: minio-server
 minio-server: bin-minio
