@@ -385,7 +385,7 @@ swarm-secrets: docker-secrets
 	docker secret create minio-access-key $(DIR)/minio-access-key
 	docker secret create minio-secret-key $(DIR)/minio-secret-key
 	docker secret create portainer-user $(DIR)/portainer-user
-	docker secret create portainer-secret $(DIR)/portainer-secret
+	docker secret create portainer-key $(DIR)/portainer-key
 	docker secret create traefik-ssl-key $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).key
 	docker secret create traefik-ssl-crt $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).crt
 	docker secret create wes-dependency-resolver $(DIR)/etc/yml/$(WES_DEPENDENCY_RESOLVER)

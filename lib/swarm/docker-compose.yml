@@ -28,7 +28,7 @@ secrets:
     external: true
   portainer-user:
     external: true
-  portainer-secret:
+  portainer-key:
     external: true
   traefik-ssl-key:
     external: true

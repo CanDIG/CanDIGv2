@@ -28,8 +28,8 @@ secrets:
     file: $PWD/minio-secret-key
   portainer-user:
     file: $PWD/portainer-user
-  portainer-secret:
-    file: $PWD/portainer-secret
+  portainer-key:
+    file: $PWD/portainer-key
   traefik-ssl-key:
     file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.key
   traefik-ssl-crt:
