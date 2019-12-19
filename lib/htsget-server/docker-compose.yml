@@ -22,5 +22,5 @@ services:
         - traefik.enable=true
         - traefik.port=${HTSGET_APP_PORT:-3333}
         - traefik.docker.network=${DOCKER_NET:-bridge-net}
-        - traefik.frontend.rule=Host:htsget.${MINIO_DOMAIN:-localhost}
+        - traefik.frontend.rule=Host:htsget-app.${MINIO_DOMAIN:-localhost}
     command: ["--host", "0.0.0.0", "--port", "${HTSGET_APP_PORT:-3333}"]
