@@ -210,10 +210,8 @@ clean-network:
 .PHONY: clean-secrets
 clean-secrets:
 	docker secret rm `docker secret ls -q`
-	rm -f minio-access-key minio-secret-key \
-		portainer-user portainer-key portainer-secret \
-		swarm-manager-token swarm-worker-token \
-		$(DIR)/etc/ssl/selfsigned-* $(DIR)/bin/*
+	rm -f minio-access-key minio-secret-key portainer-user portainer-key \
+		swarm-manager-token swarm-worker-token
 
 .PHONY: clean-stack
 clean-stack:
@@ -254,10 +252,8 @@ docker-push:
 
 .PHONY: docker-secrets
 docker-secrets: minio-secrets
-	echo admin | tr -d '\n' > portainer-user
-	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev | tr -d '\n' > portainer-key
-	docker run --rm httpd:2.4-alpine htpasswd -nbB admin `cat portainer-key` \
-		| cut -d ":" -f 2 | tr -d '\n' > $(DIR)/portainer-secret
+	echo admin > portainer-user
+	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > portainer-key
 
 .PHONY: docker-volumes
 docker-volumes:
@@ -317,9 +313,8 @@ minikube: bin-minikube
 		--network-plugin cni --enable-default-cni --vm-driver $(MINIKUBE_DRIVER)
 
 minio-secrets:
-	echo admin tr -d '\n' > minio-access-key
-	dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | rev | cut -b 2- | rev | tr -d '\n' > minio-secret-key
+	echo admin > minio-access-key
+	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio-secret-key
 
 .PHONY: minio-server
 minio-server: bin-minio
