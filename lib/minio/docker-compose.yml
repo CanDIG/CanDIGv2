@@ -25,7 +25,7 @@ services:
         - traefik.docker.network=${DOCKER_NET:-bridge-net}
         - traefik.frontend.rule=Host:minio.${MINIO_DOMAIN:-localhost}
     environment:
-      - MINIO_REGION="${MINIO_REGION:-us-east-1}"
+      - MINIO_REGION=${MINIO_REGION:-us-east-1}
       - MINIO_DOMAIN="${MINIO_DOMAIN:-localhost}"
     secrets:
       - source: minio-access-key
