@@ -114,8 +114,11 @@ make stack-$$module
 # run all cleanup functions
 make clean-all
 
-# cleanup docker stack(s)
-clean-stack
+# clear downloaded binaries
+make clean-bin
+
+# clear selfsigned-certs
+make clean-certs
 
 # stop all running containers and remove all run containers
 clean-containers
@@ -189,7 +192,16 @@ build-%:
 		-f $(DIR)/lib/$*/docker-compose.yml build
 
 .PHONY: clean-all
-clean-all: clean-stack clean-containers clean-secrets clean-volumes clean-swarm clean-networks clean-images
+clean-all: clean-stack clean-containers clean-secrets clean-volumes \
+	clean-swarm clean-networks clean-images clean-certs clean-bin
+
+.PHONY: clean-bin
+clean-bin:
+	rm -f $(DIR)/bin/*
+
+.PHONY: clean-certs
+clean-certs:
+	rm -f $(DIR)/etc/ssl/selfsigned-*
 
 .PHONY: clean-compose
 clean-compose: clean-containers
