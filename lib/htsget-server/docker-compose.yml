@@ -8,7 +8,7 @@ services:
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:
-      - "${HTSGET_APP_PORT:-3333}:3333"
+      - "${HTSGET_APP_PORT:-3333}:3000"
     deploy:
       placement:
         constraints:
