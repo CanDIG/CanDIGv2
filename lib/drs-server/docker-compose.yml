@@ -1,14 +1,14 @@
 version: '3.7'
 
 services:
-  htsget-app:
+  chord-drs:
     build:
-      context: $PWD/lib/htsget-server/htsget_app
-    image: candig/htsget-app:${HTSGET_APP_VERSION}
+      context: $PWD/lib/drs-server
+    image: candig/chord-drs:${CHORD_DRS_VERSION}
     networks:
       - ${DOCKER_NET}
     ports:
-      - "${HTSGET_APP_PORT}:3000"
+      - "${CHORD_DRS_PORT}:5000"
     deploy:
       placement:
         constraints:
@@ -20,7 +20,7 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${HTSGET_APP_PORT}
+        - traefik.port=${CHORD_DRS_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:htsget-app.${MINIO_DOMAIN}
-    command: ["--host", "0.0.0.0", "--port", "${HTSGET_APP_PORT}"]
+        - traefik.frontend.rule=Host:chord-drs.${MINIO_DOMAIN}
+    command: ["--host", "0.0.0.0", "--port", "5000"]
