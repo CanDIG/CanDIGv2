@@ -11,29 +11,27 @@ export $(shell sed 's/=.*//' $(env))
 #export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
-MODULES = weavescope portainer consul traefik minio mc ga4gh-dos htsget-server htsnexus-server toil igv-js jupyter wes-server
+MODULES = weavescope portainer consul traefik minio mc drs-server htsget-server toil igv-js jupyter wes-server
 TOIL_MODULES = toil toil-grafana toil-mtail toil-prometheus
+CONDA = $(DIR)/bin/miniconda3/condabin/conda
 
 define help
 # view available options
 make
 
-# create python virtualenv for docker-compose and HPC
-make virtualenv
-
 # initialize docker and create required docker networks
-make init
+make init-docker
 
 # initialize docker-compose environment
 make init-compose
 
-# initialize hpc environment
-make init-hpc
+# initialize conda environment
+make init-conda
 
 # initialize kubernetes environment
 make init-kubernetes
 
-# initialize docker-swarm environment (alias for swarm-init)
+# initialize docker-swarm environment
 make init-swarm
 
 # create docker bridge networks
@@ -50,6 +48,9 @@ make docker-volumes
 
 # download all package binaries
 make bin-all
+
+# download miniconda package
+make bin-conda
 
 # download kubectl (for kubernetes deployment)
 make bin-kubectl
@@ -87,28 +88,32 @@ make images
 # create toil images using upstream Toil repo
 make toil-docker
 
-# deploy/test all modules in lib/ using docker-compose
+# deploy/test all modules in $$MODULES using docker-compose
 make compose
 
-# deploy/test all modules in lib/ using docker stack
+# deploy/test all modules in $$MODULES using docker stack
 make stack
 
-# deploy/test all modules in lib/ using kubernetes
+# deploy/test all modules in $$MODULES using kubernetes
 make kubernetes
+
+# deploy/test all modules in $$MODULES using conda
+make conda
+
+# deploy/test individual modules using conda
+# $$module is the name of the sub-folder in lib/
+make conda-$$module
 
 # (re)build service image and deploy/test using docker-compose
 # $$module is the name of the sub-folder in lib/
-module=htsget-server
 make build-$$module
 
 # deploy/test individual modules using docker-compose
 # $$module is the name of the sub-folder in lib/
-module=ga4gh-dos
 make compose-$$module
 
 # deploy/test indivudual modules using docker stack
 # $$module is the name of the sub-folder in lib/
-module=igv-js
 make stack-$$module
 
 # run all cleanup functions
@@ -160,7 +165,12 @@ mkdir:
 print-%:
 	@echo '$*=$($*)'
 
-bin-all: bin-kubectl bin-minikube bin-minio
+bin-all: bin-conda bin-kubectl bin-minikube bin-minio
+
+bin-conda: mkdir
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
 
 bin-kubectl: mkdir
 	$(eval KUBECTL_VERSION = \
@@ -247,6 +257,13 @@ compose-%:
 	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
 		-f $(DIR)/lib/$*/docker-compose.yml up
 
+.PHONY: conda
+conda:
+	$(foreach MODULE, $(MODULES), screen -dmS $(MODULE) $(DIR)/lib/$(MODULE)/run.sh)
+
+conda-%:
+
+
 .PHONY: docker-net
 docker-net:
 	docker network create --driver bridge --subnet=$(DOCKER_BRIDGE_IP) --attachable bridge-net
@@ -281,25 +298,23 @@ images: toil-docker
 	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 
-.PHONY: init
-init: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
+.PHONY: init-docker
+init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
 	git submodule update --init --recursive
 
 .PHONY: init-compose
 init-compose: docker-secrets
 
-.PHONY: init-hpc
-init-hpc: docker-secrets bin-all
+.PHONY: init-conda
+init-conda: bin-all minio-secrets
+	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON)
+	#pip install -r $(DIR)/etc/venv/requirements.txt
 
 .PHONY: init-kubernetes
 init-kubernetes: bin-kubectl init-swarm
 
 .PHONY: init-swarm
 init-swarm: swarm-init swarm-secrets
-
-.PHONY: hpc
-hpc:
-	# TODO: complete hpc integration
 
 .PHONY: kubernetes
 kubernetes:
@@ -343,13 +358,13 @@ ssl-cert:
 	openssl x509 -req -days 3650 -in $(DIR)/etc/ssl/selfsigned-root-ca.csr \
 		-signkey $(DIR)/etc/ssl/selfsigned-root-ca.key -sha256 \
 		-out $(DIR)/etc/ssl/selfsigned-root-ca.crt \
-    -extfile $(DIR)/etc/ssl/root-ca.cnf -extensions root_ca
+		-extfile $(DIR)/etc/ssl/root-ca.cnf -extensions root_ca
 	openssl genrsa -out $(DIR)/etc/ssl/selfsigned-site.key 4096
 	openssl req -new -key $(DIR)/etc/ssl/selfsigned-site.key \
 		-out $(DIR)/etc/ssl/selfsigned-site.csr -sha256 \
-    -subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed Cert'
+		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed Cert'
 	openssl x509 -req -days 750 -in $(DIR)/etc/ssl/selfsigned-site.csr -sha256 \
-    -CA $(DIR)/etc/ssl/selfsigned-root-ca.crt \
+		-CA $(DIR)/etc/ssl/selfsigned-root-ca.crt \
 		-CAkey $(DIR)/etc/ssl/selfsigned-root-ca.key \
 		-CAcreateserial -out $(DIR)/etc/ssl/selfsigned-site.crt \
 		-extfile $(DIR)/etc/ssl/site.cnf -extensions server
@@ -399,13 +414,4 @@ toil-docker:
 	$(foreach MODULE,$(TOIL_MODULES), \
 		docker tag $(TOIL_DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION) \
 		$(TOIL_DOCKER_REGISTRY)/$(MODULE):latest;)
-
-.PHONY: virtualenv
-virtualenv: mkdir
-	curl -Lo $(DIR)/bin/miniconda_install.sh \
-		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-	bash $(DIR)/bin/miniconda_install.sh -f -b
-	conda create -n $(VENV_NAME) python=$(VENV_PYTHON)
-	conda activate $(VENV_NAME)
-	pip install -r $(DIR)/etc/venv/requirements.txt
 
