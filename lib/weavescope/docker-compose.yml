@@ -2,9 +2,9 @@ version: '3.7'
 
 services:
   weave-app:
-    image: weaveworks/scope:${WEAVE_VERSION:-latest}
+    image: weaveworks/scope:${WEAVE_VERSION}
     networks:
-      - ${DOCKER_NET:-bridge-net}
+      - ${DOCKER_NET}
     ports:
       - "${WEAVE_UI_PORT:-4040}:4040"
     deploy:
@@ -18,9 +18,9 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${WEAVE_UI_PORT:-4040}
-        - traefik.docker.network=${DOCKER_NET:-bridge-net}
-        - traefik.frontend.rule=Host:weave-app.${MINIO_DOMAIN:-localhost}
+        - traefik.port=${WEAVE_UI_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:weave-app.${MINIO_DOMAIN}
     command:
       - /home/weave/scope
       - --mode=app

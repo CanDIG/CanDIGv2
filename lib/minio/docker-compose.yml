@@ -2,14 +2,14 @@ version: '3.7'
 
 services:
   minio:
-    image: minio/minio:${MINIO_VERSION:-latest}
+    image: minio/minio:${MINIO_VERSION}
     volumes:
       - minio-data:/data
       - minio-config:/root/.minio
     networks:
       - ${DOCKER_NET:-bridge-net}
     ports:
-      - "${MINIO_UI_PORT:-9000}:9000"
+      - "${MINIO_UI_PORT}:9000"
     deploy:
       placement:
         constraints:
@@ -21,18 +21,18 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${MINIO_UI_PORT:-9000}
-        - traefik.docker.network=${DOCKER_NET:-bridge-net}
-        - traefik.frontend.rule=Host:minio.${MINIO_DOMAIN:-localhost}
+        - traefik.port=${MINIO_UI_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:minio.${MINIO_DOMAIN}
     environment:
-      - MINIO_REGION=${MINIO_REGION:-us-east-1}
-      - MINIO_DOMAIN="${MINIO_DOMAIN:-localhost}"
+      - MINIO_REGION=${MINIO_REGION}
+      - MINIO_DOMAIN="${MINIO_DOMAIN}"
     secrets:
       - source: minio-access-key
         target: access_key
       - source: minio-secret-key
         target: secret_key
-    command: ["server", "${MINO_DATA_DIR:-/data}"]
+    command: ["server", "${MINO_DATA_DIR}"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s

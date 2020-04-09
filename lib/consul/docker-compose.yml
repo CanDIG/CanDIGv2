@@ -4,11 +4,11 @@ services:
   consul:
     image: progrium/consul
     networks:
-      - ${DOCKER_NET:-bridge-net}
+      - ${DOCKER_NET}
     ports:
-      - "${CONSUL_RPC_PORT:-8400}:8400"
-      - "${CONSUL_HTTP_PORT:-8500}:8500"
-      - "${CONSUL_DNS_PORT:-8600}:53/udp"
+      - "${CONSUL_RPC_PORT}:8400"
+      - "${CONSUL_HTTP_PORT}:8500"
+      - "${CONSUL_DNS_PORT}:53/udp"
       - "8300-8310:8300-8310"
     deploy:
       placement:
@@ -21,9 +21,9 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${CONSUL_HTTP_PORT:-8500}
-        - traefik.docker.network=${DOCKER_NET:-bridge-net}
-        - traefik.frontend.rule=Host:consul.${MINIO_DOMAIN:-localhost}
+        - traefik.port=${CONSUL_HTTP_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:consul.${MINIO_DOMAIN}
     expose:
       - "8300"
       - "8301"

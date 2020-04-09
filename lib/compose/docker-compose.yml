@@ -31,8 +31,8 @@ secrets:
   portainer-key:
     file: $PWD/portainer-key
   traefik-ssl-key:
-    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.key
+    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.key
   traefik-ssl-crt:
-    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.crt
+    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.crt
   wes-dependency-resolver:
     file: $PWD/etc/yml/$WES_DEPENDENCY_RESOLVER

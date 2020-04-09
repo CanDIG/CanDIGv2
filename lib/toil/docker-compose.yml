@@ -5,17 +5,17 @@ services:
     build:
       context: $PWD/lib/toil
       args:
-        toil_version: ${TOIL_VERSION:-latest}
-        wes_version: ${WES_VERSION:-3.3}
-    image: candig/toil:${TOIL_VERSION:-latest}
+        toil_version: ${TOIL_VERSION}
+        wes_version: ${WES_VERSION}
+    image: candig/toil:${TOIL_VERSION}
     volumes:
       - toil-jobstore:/jobStoreParentDir
       - /var/run/docker.sock:/var/run/docker.sock:rw
     networks:
-      - ${DOCKER_NET:-bridge-net}
+      - ${DOCKER_NET}
     ports:
-      - "${TOIL_PORT:-5050}:5050"
-      - "${TOIL_UI_PORT:-3000}:3000"
+      - "${TOIL_PORT}:5050"
+      - "${TOIL_UI_PORT}:3000"
     # keep the following ports free
     # 3903 - mtail service
     # 9100 - node exporter
@@ -31,9 +31,9 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${TOIL_PORT:-5050}
-        - traefik.docker.network=${DOCKER_NET:-bridge-net}
-        - traefik.frontend.rule=Host:toil-master.${MINIO_DOMAIN:-localhost}
+        - traefik.port=${TOIL_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:toil-master.${MINIO_DOMAIN}
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
     secrets:
@@ -44,19 +44,19 @@ services:
     entrypoint: ["mesos-master"]
     command:
       - --registry=in_memory
-      - --ip=${TOIL_IP:-127.0.0.1}
-      - --port=${TOIL_PORT:-5050}
+      - --ip=${TOIL_IP}
+      - --port=${TOIL_PORT}
       - --allocation_interval=500ms
 
   toil-worker:
-    image: candig/toil:${TOIL_VERSION:-latest}
+    image: candig/toil:${TOIL_VERSION}
     volumes:
       - toil-jobstore:/jobStoreParentDir
       - /var/run/docker.sock:/var/run/docker.sock:rw
     networks:
-      - ${DOCKER_NET:-bridge-net}
+      - ${DOCKER_NET}
     ports:
-      - "${TOIL_WORKER_PORT:-5051}:5051"
+      - "${TOIL_WORKER_PORT}:5051"
     deploy:
       mode: global
       restart_policy:
@@ -66,9 +66,9 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${TOIL_WORKER_PORT:-5051}
-        - traefik.docker.network=${DOCKER_NET:-bridge-net}
-        - traefik.frontend.rule=Host:toil-worker.${MINIO_DOMAIN:-localhost}
+        - traefik.port=${TOIL_WORKER_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:toil-worker.${MINIO_DOMAIN}
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
     secrets:
@@ -80,7 +80,7 @@ services:
     command:
       - --work_dir=/var/lib/mesos
       - --master=toil-master:5050
-      - --ip=${TOIL_IP:-127.0.0.1}
+      - --ip=${TOIL_IP}
       - --attributes=preeemtable:false
       #- --launcher=linux
       - --containerizers=docker,mesos

@@ -31,9 +31,9 @@ volumes:
   #portainer-secret:
     #file: $PWD/portainer-secret
   #traefik-ssl-key:
-    #file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.key
+    #file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.key
   #traefik-ssl-crt:
-    #file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT:-selfsigned-site}.crt
+    #file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.crt
   #wes-dependency-resolver:
     #file: $PWD/etc/yml/$WES_DEPENDENCY_RESOLVER
 
@@ -52,13 +52,3 @@ secrets:
     external: true
   wes-dependency-resolver:
     eternal: true
-
-x-deploy:
-  &default-restart
-  restart_policy:
-    delay: 10s
-    max_attempts: 10
-    window: 60s
-  labels:
-    - traefik.enable=true
-    - traefik.docker.network=${TRAEFIK_NET:-traefik-net}

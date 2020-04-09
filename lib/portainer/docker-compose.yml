@@ -26,12 +26,12 @@ services:
     image: portainer/portainer
     command: -H tcp://tasks.portainer-agent:9001 --tlsskipverify --admin-password-file /run/secrets/secret_key
     ports:
-      - "${PORTAINER_UI_PORT:-9000}:9000"
+      - "${PORTAINER_UI_PORT}:9000"
     volumes:
       - portainer-data:/data
     networks:
       - agent-net
-      - ${DOCKER_NET:-bridge-net}
+      - ${DOCKER_NET}
     deploy:
       mode: replicated
       replicas: 1
@@ -45,9 +45,9 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${PORTAINER_UI_PORT:-9000}
-        - traefik.docker.network=${DOCKER_NET:-bridge-net}
-        - traefik.frontend.rule=Host:portainer.${MINIO_DOMAIN:-localhost}
+        - traefik.port=${PORTAINER_UI_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:portainer.${MINIO_DOMAIN}
     secrets:
       - source: portainer-user
         target: user_name
