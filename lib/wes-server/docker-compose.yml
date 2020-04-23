@@ -5,15 +5,15 @@ services:
     build:
       context: $PWD/lib/wes-server
       args:
-        toil_version: ${TOIL_VERSION:-latest}
-        wes_version: ${WES_VERSION:-3.3}
-    image: candig/wes-server:${WES_VERSION:-3.3}
+        toil_version: ${TOIL_VERSION}
+        wes_version: ${WES_VERSION}
+    image: candig/wes-server:${WES_VERSION}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
     networks:
-      - ${DOCKER_NET:-bridge-net}
+      - ${DOCKER_NET}
     ports:
-      - "${WES_PORT:-5000}:5000"
+      - "${WES_PORT}:5000"
     deploy:
       placement:
         constraints:
@@ -25,17 +25,17 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${WES_PORT:-5000}
-        - traefik.docker.network=${DOCKER_NET:-bridge-net}
-        - traefik.frontend.rule=Host:wes-server.${MINIO_DOMAIN:-localhost}
+        - traefik.port=${WES_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:wes-server.${CANDIG_DOMAIN}
     secrets:
       - source: wes-dependency-resolver
         target: dependency_resolver.yml
     entrypoint: ["wes-server"]
     command:
-      - --backend=${WES_BACKEND:-wes_service.cwl_runner}
+      - --backend=${WES_BACKEND}
       - --port=5000
-      - --opt=runner=${WES_CWL_RUNNER:-cwltool}
+      - --opt=runner=${WES_CWL_RUNNER}
       #- --opt=extra=--batchSystem=Mesos
       #- --opt=extra=--mesosMaster=toil-master:5050
       - --opt=extra=--beta-dependency-resolvers-configuration=/run/secrets/dependency_resolver.yml

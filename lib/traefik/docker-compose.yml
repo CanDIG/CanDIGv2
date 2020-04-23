@@ -2,9 +2,9 @@ version: '3.7'
 
 services:
   traefik:
-    image: traefik:${TRAEFIK_VERSION:-latest}
+    image: traefik:${TRAEFIK_VERSION}
     networks:
-      - ${DOCKER_NET:-bridge-net}
+      - ${DOCKER_NET}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
@@ -22,9 +22,9 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${TRAEFIK_UI_PORT:-8080}
-        - traefik.docker.network=${DOCKER_NET:-bridge-net}
-        - traefik.frontend.rule=Host:traefik.${MINIO_DOMAIN:-localhost}
+        - traefik.port=${TRAEFIK_UI_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:traefik.${CANDIG_DOMAIN}
         - traefik.http.routers.traefik.rule=Path(/traefik)
     secrets:
       - source: traefik-ssl-key
@@ -32,20 +32,20 @@ services:
       - source: traefik-ssl-crt
         target: site.crt
     environment:
-      - traefik_net=${TRAEFIK_NET:-bridge-net}
-      - traefik_domain=${MINIO_DOMAIN:-localhost}
-      - traefik_swarm=${TRAEFIK_SWARM:-false}
+      - traefik_net=${TRAEFIK_NET}
+      - traefik_domain=${CANDIG_DOMAIN}
+      - traefik_swarm=${TRAEFIK_SWARM}
     command:
       - traefik
       - --api
       - --consul
-      - --consul.endpoint=consul:${CONSUL_HTTP_PORT:-8500}
+      - --consul.endpoint=consul:${CONSUL_HTTP_PORT}
       - --docker
-      - --docker.domain=${MINIO_DOMAIN:-localhost}
-      - --docker.network=${TRAEFIK_NET:-bridge-net}
-      - --docker.swarmmode=${TRAEFIK_SWARM:-false}
+      - --docker.domain=${CANDIG_DOMAIN}
+      - --docker.network=${TRAEFIK_NET}
+      - --docker.swarmmode=${TRAEFIK_SWARM}
       - --docker.watch
       - --defaultEntrypoints='http, https'
-      - --entryPoints="Name:http Address::${TRAEFIK_HTTP_PORT:-80} Redirect.EntryPoint:https"
-      - --entryPoints="Name:https Address::${TRAEFIK_HTTPS_PORT:-443} TLS:/run/secrets/site.crt,/run/secrets/site.key"
+      - --entryPoints="Name:http Address::${TRAEFIK_HTTP_PORT} Redirect.EntryPoint:https"
+      - --entryPoints="Name:https Address::${TRAEFIK_HTTPS_PORT} TLS:/run/secrets/site.crt,/run/secrets/site.key"
       - --kubernetes

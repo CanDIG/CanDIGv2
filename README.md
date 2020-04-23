@@ -63,26 +63,23 @@ services:
 
 ## `make` Deployment
 
-```bash
+```sh
 # view available options
 make
 
-# create python virtualenv for docker-compose and HPC
-make virtualenv
-
 # initialize docker and create required docker networks
-make init
+make init-docker
 
 # initialize docker-compose environment
 make init-compose
 
-# initialize hpc environment
-make init-hpc
+# initialize conda environment
+make init-conda
 
 # initialize kubernetes environment
 make init-kubernetes
 
-# initialize docker-swarm environment (alias for swarm-init)
+# initialize docker-swarm environment
 make init-swarm
 
 # create docker bridge networks
@@ -99,6 +96,9 @@ make docker-volumes
 
 # download all package binaries
 make bin-all
+
+# download miniconda package
+make bin-conda
 
 # download kubectl (for kubernetes deployment)
 make bin-kubectl
@@ -136,35 +136,42 @@ make images
 # create toil images using upstream Toil repo
 make toil-docker
 
-# deploy/test all modules in lib/ using docker-compose
+# deploy/test all modules in $MODULES using docker-compose
 make compose
 
-# deploy/test all modules in lib/ using docker stack
+# deploy/test all modules in $MODULES using docker stack
 make stack
 
-# deploy/test all modules in lib/ using kubernetes
+# deploy/test all modules in $MODULES using kubernetes
 make kubernetes
+
+# deploy/test all modules in $MODULES using conda
+make conda
+
+# deploy/test individual modules using conda
+# $module is the name of the sub-folder in lib/
+make conda-$module
 
 # (re)build service image and deploy/test using docker-compose
 # $module is the name of the sub-folder in lib/
-module=htsget-server
 make build-$module
 
 # deploy/test individual modules using docker-compose
 # $module is the name of the sub-folder in lib/
-module=ga4gh-dos
 make compose-$module
 
 # deploy/test indivudual modules using docker stack
 # $module is the name of the sub-folder in lib/
-module=igv-js
 make stack-$module
 
 # run all cleanup functions
 make clean-all
 
-# cleanup docker stack(s)
-clean-stack
+# clear downloaded binaries
+make clean-bin
+
+# clear selfsigned-certs
+make clean-certs
 
 # stop all running containers and remove all run containers
 clean-containers

@@ -3,7 +3,7 @@ version: '3.7'
 
 services:
   mc:
-    image: minio/mc:${MINIO_VERSION:-latest}
+    image: minio/mc:${MINIO_VERSION}
     volumes:
       - mc-config:/root/.mc
     networks:
@@ -18,8 +18,8 @@ services:
         max_attempts: 3
         window: 120s
     environment:
-      - MINIO_REGION="${MINIO_REGION:-us-east-1}"
-      - MINIO_DOMAIN="${MINIO_DOMAIN:-localhost}"
+      - MINIO_REGION="${MINIO_REGION}"
+      - CANDIG_DOMAIN="${CANDIG_DOMAIN}"
     secrets:
       - source: minio-access-key
         target: access_key

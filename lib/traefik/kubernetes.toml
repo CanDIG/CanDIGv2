@@ -5,4 +5,4 @@
 [providers]
   [providers.kubernetesIngress]
     namespaces = ["$DOCKER_NAMESPACE"]
-    hostname = "$MINIO_DOMAIN"
+    hostname = "$CANDIG_DOMAIN"
