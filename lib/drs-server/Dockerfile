@@ -30,7 +30,7 @@ RUN apk add \
 RUN mkdir /app
 WORKDIR /app
 
-RUN git clone --branch minio-backend https://github.com/c3g/chord_drs.git
+RUN git clone https://github.com/c3g/chord_drs.git
 
 WORKDIR /app/chord_drs
 RUN pip install -r requirements.txt && flask db upgrade
