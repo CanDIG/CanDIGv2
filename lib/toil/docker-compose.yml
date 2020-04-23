@@ -33,7 +33,7 @@ services:
         - traefik.enable=true
         - traefik.port=${TOIL_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:toil-master.${MINIO_DOMAIN}
+        - traefik.frontend.rule=Host:toil-master.${CANDIG_DOMAIN}
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
     secrets:
@@ -68,7 +68,7 @@ services:
         - traefik.enable=true
         - traefik.port=${TOIL_WORKER_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:toil-worker.${MINIO_DOMAIN}
+        - traefik.frontend.rule=Host:toil-worker.${CANDIG_DOMAIN}
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
     secrets:

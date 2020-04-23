@@ -23,7 +23,7 @@ services:
         - traefik.enable=true
         - traefik.port=${CONSUL_HTTP_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:consul.${MINIO_DOMAIN}
+        - traefik.frontend.rule=Host:consul.${CANDIG_DOMAIN}
     expose:
       - "8300"
       - "8301"

@@ -24,7 +24,7 @@ services:
         - traefik.enable=true
         - traefik.port=${TRAEFIK_UI_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:traefik.${MINIO_DOMAIN}
+        - traefik.frontend.rule=Host:traefik.${CANDIG_DOMAIN}
         - traefik.http.routers.traefik.rule=Path(/traefik)
     secrets:
       - source: traefik-ssl-key
@@ -33,7 +33,7 @@ services:
         target: site.crt
     environment:
       - traefik_net=${TRAEFIK_NET}
-      - traefik_domain=${MINIO_DOMAIN}
+      - traefik_domain=${CANDIG_DOMAIN}
       - traefik_swarm=${TRAEFIK_SWARM}
     command:
       - traefik
@@ -41,7 +41,7 @@ services:
       - --consul
       - --consul.endpoint=consul:${CONSUL_HTTP_PORT}
       - --docker
-      - --docker.domain=${MINIO_DOMAIN}
+      - --docker.domain=${CANDIG_DOMAIN}
       - --docker.network=${TRAEFIK_NET}
       - --docker.swarmmode=${TRAEFIK_SWARM}
       - --docker.watch

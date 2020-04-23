@@ -22,5 +22,5 @@ services:
         - traefik.enable=true
         - traefik.port=${CHORD_DRS_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:chord-drs.${MINIO_DOMAIN}
+        - traefik.frontend.rule=Host:chord-drs.${CANDIG_DOMAIN}
     command: ["--host", "0.0.0.0", "--port", "5000"]

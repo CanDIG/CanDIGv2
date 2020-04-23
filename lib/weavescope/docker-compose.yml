@@ -20,7 +20,7 @@ services:
         - traefik.enable=true
         - traefik.port=${WEAVE_UI_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:weave-app.${MINIO_DOMAIN}
+        - traefik.frontend.rule=Host:weave-app.${CANDIG_DOMAIN}
     command:
       - /home/weave/scope
       - --mode=app

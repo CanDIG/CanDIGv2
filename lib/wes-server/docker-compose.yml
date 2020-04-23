@@ -27,7 +27,7 @@ services:
         - traefik.enable=true
         - traefik.port=${WES_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:wes-server.${MINIO_DOMAIN}
+        - traefik.frontend.rule=Host:wes-server.${CANDIG_DOMAIN}
     secrets:
       - source: wes-dependency-resolver
         target: dependency_resolver.yml

@@ -19,7 +19,7 @@ services:
         window: 120s
     environment:
       - MINIO_REGION="${MINIO_REGION}"
-      - MINIO_DOMAIN="${MINIO_DOMAIN}"
+      - CANDIG_DOMAIN="${CANDIG_DOMAIN}"
     secrets:
       - source: minio-access-key
         target: access_key

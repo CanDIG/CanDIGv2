@@ -47,7 +47,7 @@ services:
         - traefik.enable=true
         - traefik.port=${PORTAINER_UI_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:portainer.${MINIO_DOMAIN}
+        - traefik.frontend.rule=Host:portainer.${CANDIG_DOMAIN}
     secrets:
       - source: portainer-user
         target: user_name

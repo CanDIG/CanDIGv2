@@ -346,7 +346,7 @@ minio-secrets:
 minio-server: bin-minio
 	MINIO_ACCESS_KEY=`cat $(DIR)/minio-access-key` \
 		MINIO_SECRET_KEY=`cat $(DIR)/minio-secret-key` \
-		$(DIR)/bin/minio server --address $(MINIO_DOMAIN):$(MINIO_PORT) $(MINIO_DATA_DIR) \
+		$(DIR)/bin/minio server --address $(CANDIG_DOMAIN):$(MINIO_PORT) $(MINIO_DATA_DIR) \
 		$*
 
 ssl-cert:

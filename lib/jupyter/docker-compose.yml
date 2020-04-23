@@ -27,7 +27,7 @@ services:
         - traefik.enable=true
         - traefik.port=${JUPYTER_UI_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:jupyter.${MINIO_DOMAIN}
+        - traefik.frontend.rule=Host:jupyter.${CANDIG_DOMAIN}
     environment:
       #- NOTEBOOK_DIR=${JUPYTER_NOTEBOOK_DIR}
       #- JPY_PORT=${JUPYTER_UI_PORT}
