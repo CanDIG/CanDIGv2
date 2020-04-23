@@ -11,9 +11,7 @@ export $(shell sed 's/=.*//' $(env))
 #export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
-MODULES = weavescope portainer consul traefik minio mc drs-server htsget-server toil igv-js jupyter wes-server
-TOIL_MODULES = toil toil-grafana toil-mtail toil-prometheus
-CONDA = $(DIR)/bin/miniconda3/condabin/conda
+CONDA = $(DIR)/miniconda3/condabin/conda
 
 define help
 # view available options
@@ -88,16 +86,16 @@ make images
 # create toil images using upstream Toil repo
 make toil-docker
 
-# deploy/test all modules in $$MODULES using docker-compose
+# deploy/test all modules in $$CANDIG_MODULES using docker-compose
 make compose
 
-# deploy/test all modules in $$MODULES using docker stack
+# deploy/test all modules in $$CANDIG_MODULES using docker stack
 make stack
 
-# deploy/test all modules in $$MODULES using kubernetes
+# deploy/test all modules in $$CANDIG_MODULES using kubernetes
 make kubernetes
 
-# deploy/test all modules in $$MODULES using conda
+# deploy/test all modules in $$CANDIG_MODULES using conda
 make conda
 
 # deploy/test individual modules using conda
@@ -170,7 +168,7 @@ bin-all: bin-conda bin-kubectl bin-minikube bin-minio
 bin-conda: mkdir
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
+	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/miniconda3
 
 bin-kubectl: mkdir
 	$(eval KUBECTL_VERSION = \
@@ -250,7 +248,7 @@ clean-volumes:
 
 .PHONY: compose
 compose:
-	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
+	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
 		-f $(DIR)/lib/$(MODULE)/docker-compose.yml up -d;)
 
 compose-%:
@@ -259,9 +257,10 @@ compose-%:
 
 .PHONY: conda
 conda:
-	$(foreach MODULE, $(MODULES), screen -dmS $(MODULE) $(DIR)/lib/$(MODULE)/run.sh)
+	$(foreach MODULE, $(CONDA_MODULES), screen -dmS $(MODULE) $(DIR)/lib/$(MODULE)/run.sh;)
 
 conda-%:
+	screen -dmS $* $(DIR)/lib/$*/run.sh
 
 
 .PHONY: docker-net
@@ -275,7 +274,7 @@ docker-net:
 
 .PHONY: docker-push
 docker-push:
-	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
 	$(foreach MODULE, $(TOIL_MODULES), docker push $(TOIL_DOCKER_REGISTRY)/$(MODULE):latest;)
 
@@ -295,12 +294,8 @@ docker-volumes:
 
 .PHONY: images
 images: toil-docker
-	$(foreach MODULE, $(MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
-
-.PHONY: init-docker
-init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
-	git submodule update --init --recursive
 
 .PHONY: init-compose
 init-compose: docker-secrets
@@ -309,6 +304,10 @@ init-compose: docker-secrets
 init-conda: bin-all minio-secrets
 	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON)
 	#pip install -r $(DIR)/etc/venv/requirements.txt
+
+.PHONY: init-docker
+	init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
+	git submodule update --init --recursive
 
 .PHONY: init-kubernetes
 init-kubernetes: bin-kubectl init-swarm
@@ -322,7 +321,7 @@ kubernetes:
 		--orchestrator $(DOCKER_MODE) \
 		--namespace $(DOCKER_NAMESPACE) \
 		--compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
-		$(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+		$(foreach MODULE, $(CANDIG_MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
 		CanDIGv2
 
 kube-%:
@@ -373,7 +372,7 @@ ssl-cert:
 stack:
 	docker stack deploy \
 		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
-		$(foreach MODULE, $(MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+		$(foreach MODULE, $(CANDIG_MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
 		CanDIGv2
 
 stack-%:
