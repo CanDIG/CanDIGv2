@@ -7,3 +7,6 @@
 [submodule "lib/drs-server/chord_drs"]
 	path = lib/drs-server/chord_drs
 	url = https://github.com/c3g/chord_drs.git
+[submodule "lib/federation-service/federation_service"]
+	path = lib/federation-service/federation_service
+	url = https://github.com/CanDIG/federation_service
