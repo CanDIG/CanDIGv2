@@ -8,5 +8,5 @@ source .env
 
 pushd $(pwd)/lib/federation-service/federation_service
     pip install -r requirements.txt
-    python -m candig_federation --port 4232
+    python -m candig_federation --host ${FEDERATION_SERVICE_IP} --port ${FEDERATION_SERVICE_PORT}
 popd
