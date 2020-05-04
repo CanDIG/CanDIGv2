@@ -16,5 +16,5 @@ make minio-secrets
 # start minio server instance
 # start drs server instance
 # start htsget server instance
-#make minio-server & 
-make conda-drs-server & make conda-htsget-server & make conda-federation-service
+# start federation service
+make minio-server & make conda-drs-server & make conda-htsget-server & make conda-federation-service
