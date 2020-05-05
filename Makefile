@@ -62,9 +62,6 @@ make bin-minio
 # generate secrets for minio server/client
 make minio-secrets
 
-# start minio server instance
-make minio-server
-
 # create minikube environment for (kubernetes) integration testing
 make minikube
 
@@ -132,10 +129,10 @@ clean-secrets
 # remove all peristant volumes
 clean-volumes
 
-# (foricibily) leave docker-swarm
+# leave docker-swarm
 clean-swarm
 
-# clear bridge-net/traefik-net/agent-net
+# clear container networks
 clean-network
 
 # clear all images (including base images)
@@ -167,8 +164,8 @@ bin-all: bin-conda bin-kubectl bin-minikube bin-minio
 
 bin-conda: mkdir
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
-		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/miniconda3
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-$(VENV_OS)-x86_64.sh
+	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
 
 bin-kubectl: mkdir
 	$(eval KUBECTL_VERSION = \
@@ -205,7 +202,7 @@ clean-all: clean-stack clean-containers clean-secrets clean-volumes \
 
 .PHONY: clean-bin
 clean-bin:
-	rm -f $(DIR)/bin/*
+	rm -rf $(DIR)/bin
 
 .PHONY: clean-certs
 clean-certs:
@@ -306,7 +303,7 @@ init-conda: bin-all minio-secrets
 	#pip install -r $(DIR)/etc/venv/requirements.txt
 
 .PHONY: init-docker
-	init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
+init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
 	git submodule update --init --recursive
 
 .PHONY: init-kubernetes
@@ -341,13 +338,6 @@ minikube: bin-minikube
 minio-secrets:
 	echo admin > minio-access-key
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio-secret-key
-
-.PHONY: minio-server
-minio-server: bin-minio
-	MINIO_ACCESS_KEY=`cat $(DIR)/minio-access-key` \
-		MINIO_SECRET_KEY=`cat $(DIR)/minio-secret-key` \
-		$(DIR)/bin/minio server --address $(CANDIG_DOMAIN):$(MINIO_PORT) $(MINIO_DATA_DIR) \
-		$*
 
 ssl-cert:
 	openssl genrsa -out $(DIR)/etc/ssl/selfsigned-root-ca.key 4096
