@@ -10,6 +10,7 @@ swarm-worker-token
 #data files/directories
 *.bam
 /data
+/tmp
 
 #project files
 .venv
