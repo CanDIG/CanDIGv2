@@ -46,14 +46,14 @@ using `make`, `.env` is imported by `make` and all uncommented variables are add
 `export`.
 
 These evironment variables can be read in `docker-compose` scripts through the variable substitution operator
-`${VAR:-default}`.
+`${VAR}`.
 
 ```yaml
 # example compose YAML using variable substitution with default option
 services:
   consul:
     image: progrium/consul
-    network_mode: ${DOCKER_MODE:-bridge}
+    network_mode: ${DOCKER_MODE}
 ...
 ```
 

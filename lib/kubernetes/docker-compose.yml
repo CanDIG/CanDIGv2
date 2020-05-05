@@ -2,6 +2,8 @@
 version: '3.7'
 
 networks:
+  bridge:
+    external: true
   bridge-net:
     external: true
   traefik-net:

@@ -7,7 +7,7 @@ services:
       - minio-data:/data
       - minio-config:/root/.minio
     networks:
-      - ${DOCKER_NET:-bridge-net}
+      - ${DOCKER_NET}
     ports:
       - "${MINIO_UI_PORT}:9000"
     deploy:

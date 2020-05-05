@@ -137,7 +137,7 @@ sudo systemctl restart docker
 1. Clone/pull latest CanDIGv2 repo from `https://github.com/CanDIG/CanDIGv2.git`
 
 2. Create/modify `.env` file
-  * `cp -i etc/env/compose.env .env`
+  * `cp -i etc/env/example.env .env`
   * Edit `.env` with your site's local configuration
 
 3. Create Cluster
@@ -148,12 +148,37 @@ make
 # initialize
 make init-docker
 
+# activate conda
+source ./bin/miniconda3/etc/profile.d/conda.sh
+
 # create images
 make images
 
 # deploy stack (if using docker-compose environment)
 make compose
 
-# deploy stack (if using docker swarm environment)
+# deploy stack (if using docker-swarm environment)
 make stack
+```
+
+## Cleanup CanDIG Compose Environment
+
+Use the following steps to clean up running CanDIGv2 services in a docker-compose configuration. *Note* that these steps are destructive and will remove *ALL* containers, secrets, volumes, networks, and images. If you are using docker in a shared environment (i.e. with other non-CanDIGv2 containers running) please consider running the cleanup manually for now.
+
+```bash
+# 1. stop and remove running containers
+make clean-containers
+
+# 2. remove all secrets from ./tmp/secrets/
+make clean secrets
+
+# 3. remove all docker volumes
+make clean-volumes
+
+# 4. delete all unused networks
+make clean-networks
+
+make clean-images
+
+make clean-certs
 ```

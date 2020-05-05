@@ -7,7 +7,7 @@ services:
     volumes:
       - mc-config:/root/.mc
     networks:
-      - ${DOCKER_NET:-bridge-net}
+      - ${DOCKER_NET}
     deploy:
       placement:
         constraints:

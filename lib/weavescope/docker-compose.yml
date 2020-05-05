@@ -6,7 +6,7 @@ services:
     networks:
       - ${DOCKER_NET}
     ports:
-      - "${WEAVE_UI_PORT:-4040}:4040"
+      - "${WEAVE_UI_PORT}:4040"
     deploy:
       placement:
         constraints:
