@@ -11,7 +11,7 @@ export $(shell sed 's/=.*//' $(env))
 #export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
-CONDA = $(DIR)/miniconda3/condabin/conda
+CONDA = $(DIR)/bin/miniconda3/condabin/conda
 
 define help
 # view available options
