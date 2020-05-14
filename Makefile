@@ -95,6 +95,9 @@ make kubernetes
 # deploy/test all modules in $$CANDIG_MODULES using conda
 make conda
 
+# deploys all modules using Tox
+make tox
+
 # deploy/test individual modules using conda
 # $$module is the name of the sub-folder in lib/
 make conda-$$module
@@ -259,6 +262,12 @@ conda:
 conda-%:
 	screen -dmS $* $(DIR)/lib/$*/run.sh
 
+.PHONY: tox
+tox:
+	dotenv -f .env run tox
+
+tox-%:
+	dotenv -f .env run tox -e $*
 
 .PHONY: docker-net
 docker-net:
