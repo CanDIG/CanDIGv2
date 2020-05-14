@@ -11,3 +11,5 @@ dask-ml
 dask-xgboost
 distributed
 docker-compose
+python-dotenv
+tox
