@@ -8,5 +8,5 @@ source .env
 
 pushd $(pwd)/lib/metadata_service/metadata_service_v2
 	pip install -r requirements.txt
-    ./manage.py runserver
+    ./manage.py runserver $METADATA_SERVICE_IP:$METADATA_SERVICE_PORT
 popd
