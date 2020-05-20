@@ -10,9 +10,6 @@
 [submodule "lib/federation-service/federation_service"]
 	path = lib/federation-service/federation_service
 	url = https://github.com/CanDIG/federation_service
-[submodule "lib/metadata_service"]
-	path = lib/metadata_service
-	url = https://github.com/CanDIG/metadata_service_v2
 [submodule "lib/metadata_service/metadata_service_v2"]
 	path = lib/metadata_service/metadata_service_v2
 	url = https://github.com/CanDIG/metadata_service_v2
