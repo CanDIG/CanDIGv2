@@ -98,6 +98,10 @@ make conda
 # deploys all modules using Tox
 make tox
 
+# deploys individual module using tox
+# $$module is the name of the sub-folder in lib
+make tox-$$module
+
 # deploy/test individual modules using conda
 # $$module is the name of the sub-folder in lib/
 make conda-$$module
