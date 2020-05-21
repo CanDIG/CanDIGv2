@@ -11,7 +11,7 @@ export $(shell sed 's/=.*//' $(env))
 #export $(shell sed 's/=.*//' $(overrides))
 
 DIR = $(PWD)
-CONDA = $(DIR)/miniconda3/condabin/conda
+CONDA = $(DIR)/bin/miniconda3/condabin/conda
 
 define help
 # view available options
@@ -94,6 +94,13 @@ make kubernetes
 
 # deploy/test all modules in $$CANDIG_MODULES using conda
 make conda
+
+# deploys all modules using Tox
+make tox
+
+# deploys individual module using tox
+# $$module is the name of the sub-folder in lib
+make tox-$$module
 
 # deploy/test individual modules using conda
 # $$module is the name of the sub-folder in lib/
@@ -259,6 +266,12 @@ conda:
 conda-%:
 	screen -dmS $* $(DIR)/lib/$*/run.sh
 
+.PHONY: tox
+tox:
+	dotenv -f .env run tox
+
+tox-%:
+	dotenv -f .env run tox -e $*
 
 .PHONY: docker-net
 docker-net:

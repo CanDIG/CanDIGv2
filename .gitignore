@@ -11,6 +11,7 @@ swarm-worker-token
 *.bam
 /data
 /tmp
+.tox
 
 #project files
 .venv
