@@ -19,3 +19,6 @@
 [submodule "lib/rnaget/rnaget_service"]
 	path = lib/rnaget/rnaget_service
 	url = https://github.com/CanDIG/rnaget_service
+[submodule "lib/datasets/datasets_service"]
+	path = lib/datasets/datasets_service
+	url = https://github.com/CanDIG/datasets_service
