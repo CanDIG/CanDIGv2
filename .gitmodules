@@ -22,3 +22,6 @@
 [submodule "lib/datasets/datasets_service"]
 	path = lib/datasets/datasets_service
 	url = https://github.com/CanDIG/datasets_service
+[submodule "lib/authorization/candig_authz_service"]
+	path = lib/authorization/candig_authz_service
+	url = https://github.com/CanDIG/candig_authz_service
