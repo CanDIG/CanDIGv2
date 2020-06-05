@@ -271,6 +271,7 @@ tox:
 	dotenv -f .env run tox
 
 tox-%:
+	git submodule update --init --recursive
 	dotenv -f .env run tox -e $*
 
 .PHONY: docker-net
