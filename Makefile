@@ -167,7 +167,7 @@ mkdir:
 print-%:
 	@echo '$*=$($*)'
 
-bin-all: bin-conda bin-kubectl bin-minikube bin-minio
+bin-all: bin-conda bin-kubectl bin-minikube bin-minio bin-prometheus
 
 bin-conda: mkdir
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
@@ -193,6 +193,13 @@ bin-minio: mkdir
 		https://dl.minio.io/client/mc/release/linux-amd64/mc
 	chmod 755 $(DIR)/bin/minio
 	chmod 755 $(DIR)/bin/mc
+
+bin-prometheus: 
+	mkdir -p $(DIR)/bin/prometheus
+	curl -Lo $(DIR)/bin/prometheus/temp.tar.gz https://github.com/prometheus/prometheus/releases/download/v2.18.1/prometheus-2.18.1.linux-amd64.tar.gz
+	tar --strip-components=1 -zxvf $(DIR)/bin/prometheus/temp.tar.gz -C $(DIR)/bin/prometheus
+	rm $(DIR)/bin/prometheus/temp.tar.gz
+	chmod 755 $(DIR)/bin/prometheus/prometheus
 
 bin-traefik: mkdir
 	curl -Lo $(DIR)/bin/traefik \
@@ -264,7 +271,7 @@ conda:
 	$(foreach MODULE, $(CONDA_MODULES), screen -dmS $(MODULE) $(DIR)/lib/$(MODULE)/run.sh;)
 
 conda-%:
-	screen -dmS $* $(DIR)/lib/$*/run.sh
+	screen -dmLS $* $(DIR)/lib/$*/run.sh
 
 .PHONY: tox
 tox:
