@@ -271,7 +271,7 @@ conda:
 	$(foreach MODULE, $(CONDA_MODULES), screen -dmS $(MODULE) $(DIR)/lib/$(MODULE)/run.sh;)
 
 conda-%:
-	screen -dmLS $* $(DIR)/lib/$*/run.sh
+	screen -dmS $* $(DIR)/lib/$*/run.sh
 
 .PHONY: tox
 tox:
