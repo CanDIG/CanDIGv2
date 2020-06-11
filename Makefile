@@ -5,11 +5,12 @@ env ?= .env
 #overrides ?= site.env
 
 include $(env)
-export $(shell sed 's/=.*//' $(env))
+#export $(shell sed 's/=.*//' $(env))
 
 #include $(overrides)
 #export $(shell sed 's/=.*//' $(overrides))
 
+SHELL = bash
 DIR = $(PWD)
 CONDA = $(DIR)/bin/miniconda3/condabin/conda
 
@@ -127,6 +128,9 @@ make clean-bin
 # clear selfsigned-certs
 make clean-certs
 
+# clear conda environment and secrets
+make clean-conda
+
 # stop all running containers and remove all run containers
 clean-containers
 
@@ -170,33 +174,39 @@ print-%:
 bin-all: bin-conda bin-kubectl bin-minikube bin-minio bin-prometheus
 
 bin-conda: mkdir
+	ifeq ($(VENV_OS), linux)
+		OS = Linux
+	endif
+	ifeq ($(VENV_OS), darwin)
+		OS = MacOSX
+	endif
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
-		https://repo.anaconda.com/miniconda/Miniconda3-latest-$(VENV_OS)-x86_64.sh
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-$(OS)-x86_64.sh
 	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
 
 bin-kubectl: mkdir
 	$(eval KUBECTL_VERSION = \
 		$(shell curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt))
 	curl -Lo $(DIR)/bin/kubectl \
-		https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/linux/amd64/kubectl
+		https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/$(VENV_OS)/amd64/kubectl
 	chmod 755 $(DIR)/bin/kubectl
 
 bin-minikube: mkdir
 	curl -Lo $(DIR)/bin/minikube \
-		https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+		https://storage.googleapis.com/minikube/releases/latest/minikube-$(VENV_OS)-amd64
 	chmod 755 $(DIR)/bin/minikube
 
 bin-minio: mkdir
 	curl -Lo $(DIR)/bin/minio \
-		https://dl.minio.io/server/minio/release/linux-amd64/minio
+		https://dl.minio.io/server/minio/release/$(VENV_OS)-amd64/minio
 	curl -Lo $(DIR)/bin/mc \
-		https://dl.minio.io/client/mc/release/linux-amd64/mc
+		https://dl.minio.io/client/mc/release/$(VENV_OS)-amd64/mc
 	chmod 755 $(DIR)/bin/minio
 	chmod 755 $(DIR)/bin/mc
 
-bin-prometheus: 
+bin-prometheus:
 	mkdir -p $(DIR)/bin/prometheus
-	curl -Lo $(DIR)/bin/prometheus/temp.tar.gz https://github.com/prometheus/prometheus/releases/download/v2.18.1/prometheus-2.18.1.linux-amd64.tar.gz
+	curl -Lo $(DIR)/bin/prometheus/temp.tar.gz https://github.com/prometheus/prometheus/releases/download/v2.18.1/prometheus-2.18.1.$(VENV_OS)-amd64.tar.gz
 	tar --strip-components=1 -zxvf $(DIR)/bin/prometheus/temp.tar.gz -C $(DIR)/bin/prometheus
 	rm $(DIR)/bin/prometheus/temp.tar.gz
 	chmod 755 $(DIR)/bin/prometheus/prometheus
@@ -212,7 +222,7 @@ build-%:
 
 .PHONY: clean-all
 clean-all: clean-stack clean-containers clean-secrets clean-volumes \
-	clean-swarm clean-networks clean-images clean-certs clean-bin
+	clean-swarm clean-networks clean-images clean-certs clean-conda clean-bin
 
 .PHONY: clean-bin
 clean-bin:
@@ -225,22 +235,28 @@ clean-certs:
 .PHONY: clean-compose
 clean-compose: clean-containers
 
+.PHONY: clean-conda
+clean-conda:
+	$(CONDA) deactivate
+	$(CONDA) env remove -n $(VENV_NAME)
+	rm -f minio-access-key minio-secret-key
+
 .PHONY: clean-containers
 clean-containers:
 	docker stop `docker ps -q` || return 0
-	docker rm -v `docker ps -aq` || return 0
+	docker container prune
 
 .PHONY: clean-images
 clean-images:
-	docker rmi `docker images -q`
+	docker image prune -a
 
 .PHONY: clean-network
 clean-network:
-	docker network rm bridge-net traefik-net agent-net docker_gwbridge
+	docker network prune
 
 .PHONY: clean-secrets
 clean-secrets:
-	docker secret rm `docker secret ls -q`
+	docker secret rm `docker secret ls -q` || return 0
 	rm -f minio-access-key minio-secret-key portainer-user portainer-key \
 		swarm-manager-token swarm-worker-token
 
@@ -322,9 +338,11 @@ init-compose: docker-secrets
 init-conda: bin-all minio-secrets
 	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON)
 	#pip install -r $(DIR)/etc/venv/requirements.txt
+	@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
+	@echo "Activate conda env: conda activate $(VENV_NAME)"
 
 .PHONY: init-docker
-init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
+init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE) init-conda
 	git submodule update --init --recursive
 
 .PHONY: init-kubernetes
