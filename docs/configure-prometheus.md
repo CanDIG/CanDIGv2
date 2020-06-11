@@ -19,7 +19,7 @@ The above example will configure Prometheus to monitor the service running on ht
 
 You can read more about how to configure Prometheus at Prometheus' [webpage](https://prometheus.io/docs/prometheus/latest/getting_started/).
 
-To set the `/metrics` endpoint each framework has its own way on configuring it. Bellow we describe how configure it using Flask and DJango frameworks.
+To set the `/metrics` endpoint each framework has its own way on configuring it. Below we describe how configure it using Flask and DJango frameworks.
 
 ## For Flask Applications
 
