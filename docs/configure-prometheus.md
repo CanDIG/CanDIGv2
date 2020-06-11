@@ -1,5 +1,26 @@
 # Configuring Prometheus
 
+Before configuring the APIs we first need to tell Prometheus which services to monitor. Prometheus collects metrics from monitored targets by scraping metrics HTTP endpoints on these targets. 
+
+In order to do that, each service must be added to the `scrape_configs` section on `prometheus.yml` file under `bin\prometheus` (make sure you have downloaded Prometheus by running the command `make bin-prometheus` first). Here is an example:
+```yml
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'cnv_service'
+
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+
+    static_configs:
+      - targets: ['127.0.0.0:3000']
+```
+
+The above example will configure Prometheus to monitor the service running on http//127.0.0.0:3000 by reading its `/metrics` endpoint.
+
+You can read more about how to configure Prometheus at Prometheus' [webpage](https://prometheus.io/docs/prometheus/latest/getting_started/).
+
+To set the `/metrics` endpoint each framework has its own way on configuring it. Above we describe how configure it using Flask and DJango frameworks.
+
 ## For Flask Applications
 
 In order to expose the `/metrics` endpoint of Flask Application, the below steps must be followed:
