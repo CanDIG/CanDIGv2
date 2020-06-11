@@ -72,3 +72,10 @@ urlpatterns = [
 By adding middlewares and an url you’ll get request duration metrics and request counters exposed on the /metrics endpoint of the DJango application.
 
 These are the basics configuration, for more information please visit django-prometheus Github's [webpage](https://github.com/korfuri/django-prometheus)
+
+## Starting Prometheus service
+
+Once all the configuration is done you may start Prometheus by running one of the following commands.
+
+- `make tox-prometheus`
+- `make conda-prometheus`
