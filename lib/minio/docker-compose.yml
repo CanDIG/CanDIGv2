@@ -32,7 +32,7 @@ services:
         target: access_key
       - source: minio-secret-key
         target: secret_key
-    command: ["server", "${MINO_DATA_DIR}"]
+    command: ["server", "/data"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s

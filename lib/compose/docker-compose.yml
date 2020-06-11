@@ -37,4 +37,4 @@ secrets:
   traefik-ssl-crt:
     file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.crt
   wes-dependency-resolver:
-    file: $PWD/etc/yml/$WES_DEPENDENCY_RESOLVER
+    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}
