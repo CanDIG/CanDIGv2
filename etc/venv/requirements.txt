@@ -1,4 +1,4 @@
-toil[all]
+toil[all]==4.0.0
 cwltool
 cwltool[deps]
 ga4gh-dos-schemas
@@ -10,6 +10,7 @@ dask-jobqueue
 dask-ml
 dask-xgboost
 distributed
-docker-compose
+docker-compose>=1.26.0
+docker>=4.2.1
 python-dotenv
 tox

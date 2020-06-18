@@ -135,25 +135,25 @@ make clean-conda
 clean-containers
 
 # clear swarm secrets
-clean-secrets
+make clean-secrets
 
 # remove all peristant volumes
-clean-volumes
+make clean-volumes
 
 # leave docker-swarm
-clean-swarm
+make clean-swarm
 
 # clear container networks
-clean-network
+make clean-networks
 
 # clear all images (including base images)
-clean-images
+make clean-images
 
 # cleanup for compose, preserves everything except services/containers
-clean-compose
+make clean-compose
 
 # cleanup for stack/kubernetes, preserves everything except stack/services/containers
-clean-stack
+make clean-stack
 
 endef
 
@@ -174,14 +174,14 @@ print-%:
 bin-all: bin-conda bin-kubectl bin-minikube bin-minio bin-prometheus
 
 bin-conda: mkdir
-	ifeq ($(VENV_OS), linux)
-		OS = Linux
-	endif
-	ifeq ($(VENV_OS), darwin)
-		OS = MacOSX
-	endif
+ifeq ($(VENV_OS), linux)
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
-		https://repo.anaconda.com/miniconda/Miniconda3-latest-$(OS)-x86_64.sh
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+endif
+ifeq ($(VENV_OS), darwin)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+endif
 	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
 
 bin-kubectl: mkdir
@@ -218,7 +218,7 @@ bin-traefik: mkdir
 
 build-%:
 	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml build
+		-f $(DIR)/lib/$*/docker-compose.yml build --no-cache
 
 .PHONY: clean-all
 clean-all: clean-stack clean-containers clean-secrets clean-volumes \
@@ -239,26 +239,26 @@ clean-compose: clean-containers
 clean-conda:
 	$(CONDA) deactivate
 	$(CONDA) env remove -n $(VENV_NAME)
-	rm -f minio-access-key minio-secret-key
+	rm -f minio-access-key minio-secret-key aws-credentials
 
 .PHONY: clean-containers
 clean-containers:
-	docker stop `docker ps -q` || return 0
-	docker container prune
+	docker stop `docker ps -q`
+	docker container prune -f
 
 .PHONY: clean-images
 clean-images:
-	docker image prune -a
+	docker image prune -a -f
 
-.PHONY: clean-network
-clean-network:
-	docker network prune
+.PHONY: clean-networks
+clean-networks:
+	docker network prune -f
 
 .PHONY: clean-secrets
 clean-secrets:
-	docker secret rm `docker secret ls -q` || return 0
-	rm -f minio-access-key minio-secret-key portainer-user portainer-key \
-		swarm-manager-token swarm-worker-token
+	docker secret rm `docker secret ls -q`
+	rm -f minio-access-key minio-secret-key aws-credentials \
+		portainer-user portainer-key swarm-manager-token swarm-worker-token
 
 .PHONY: clean-stack
 clean-stack:
@@ -310,7 +310,7 @@ docker-net:
 docker-push:
 	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
-	$(foreach MODULE, $(TOIL_MODULES), docker push $(TOIL_DOCKER_REGISTRY)/$(MODULE):latest;)
+	$(foreach MODULE, $(TOIL_MODULES), docker push $(DOCKER_REGISTRY)/$(MODULE):latest;)
 
 .PHONY: docker-secrets
 docker-secrets: minio-secrets
@@ -337,9 +337,9 @@ init-compose: docker-secrets
 .PHONY: init-conda
 init-conda: bin-all minio-secrets
 	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON)
-	#pip install -r $(DIR)/etc/venv/requirements.txt
 	@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
 	@echo "Activate conda env: conda activate $(VENV_NAME)"
+	@echo "Install requirements: pip install -r $(DIR)/etc/venv/requirements.txt"
 
 .PHONY: init-docker
 init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE) init-conda
@@ -377,6 +377,9 @@ minikube: bin-minikube
 minio-secrets:
 	echo admin > minio-access-key
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio-secret-key
+	echo '[default]' > aws-credentials
+	echo "aws_access_key_id=`cat minio-access-key`" >> aws-credentials
+	echo "aws_secret_access_key=`cat minio-secret-key`" >> aws-credentials
 
 ssl-cert:
 	openssl genrsa -out $(DIR)/etc/ssl/selfsigned-root-ca.key 4096
@@ -427,6 +430,7 @@ swarm-join:
 swarm-secrets: docker-secrets
 	docker secret create minio-access-key $(DIR)/minio-access-key
 	docker secret create minio-secret-key $(DIR)/minio-secret-key
+	docker secret create aws-credentials $(DIR)/aws-credentials
 	docker secret create portainer-user $(DIR)/portainer-user
 	docker secret create portainer-key $(DIR)/portainer-key
 	docker secret create traefik-ssl-key $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).key
@@ -437,9 +441,9 @@ swarm-secrets: docker-secrets
 toil-docker:
 	VIRTUAL_ENV=1 $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
 	$(foreach MODULE,$(TOIL_MODULES), \
-		docker tag $(TOIL_DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION)-$(TOIL_BUILD_HASH) \
-		$(TOIL_DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION);)
+		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION)-$(TOIL_BUILD_HASH) \
+		$(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION);)
 	$(foreach MODULE,$(TOIL_MODULES), \
-		docker tag $(TOIL_DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION) \
-		$(TOIL_DOCKER_REGISTRY)/$(MODULE):latest;)
+		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION) \
+		$(DOCKER_REGISTRY)/$(MODULE):latest;)
 

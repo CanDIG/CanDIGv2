@@ -1,4 +1,6 @@
-FROM python:3.6-alpine
+ARG venv_python
+
+FROM python:${venv_python}-alpine
 
 LABEL Maintainer="CanDIG Project"
 
@@ -27,12 +29,9 @@ RUN apk add \
 	postgresql-dev \
 	libffi-dev
 
-RUN mkdir /app
-WORKDIR /app
-
-RUN git clone https://github.com/c3g/chord_drs.git
-
+COPY chord_drs /app/chord_drs
 WORKDIR /app/chord_drs
+
 RUN pip install -r requirements.txt && flask db upgrade
 
 # Run the model service server

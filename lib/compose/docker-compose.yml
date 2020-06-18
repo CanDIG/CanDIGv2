@@ -24,6 +24,8 @@ volumes:
     external: true
 
 secrets:
+  aws-credentials:
+    file: $PWD/aws-credentials
   minio-access-key:
     file: $PWD/minio-access-key
   minio-secret-key:

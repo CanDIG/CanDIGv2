@@ -24,6 +24,8 @@ volumes:
     external: true
 
 secrets:
+  aws-credentials:
+    external: true
   minio-access-key:
     external: true
   minio-secret-key:

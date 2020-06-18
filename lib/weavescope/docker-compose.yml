@@ -2,9 +2,10 @@ version: '3.7'
 
 services:
   weave-app:
-    image: weaveworks/scope:${WEAVE_VERSION}
+    image: weaveworks/scope:${WEAVE_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
+      - agent-net
     ports:
       - "${WEAVE_UI_PORT}:4040"
     deploy:

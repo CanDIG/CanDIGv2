@@ -4,7 +4,9 @@ services:
   chord-drs:
     build:
       context: $PWD/lib/drs-server
-    image: candig/chord-drs:${CHORD_DRS_VERSION}
+      args:
+        venv_python: ${VENV_PYTHON}
+    image: candig/chord-drs:${CHORD_DRS_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     ports:
