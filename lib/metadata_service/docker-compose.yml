@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+  metadata_service:
+    build:
+      context: $PWD/lib/metadata_service
+      args:
+        venv_python: ${VENV_PYTHON}
+    image: candig/metadata_service:${METADATA_SERVICE_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${METADATA_SERVICE_PORT}:8000"
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${METADATA_SERVICE_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:metadata_service.${CANDIG_DOMAIN}
+    command: ["runserver", "0.0.0.0:8000"]

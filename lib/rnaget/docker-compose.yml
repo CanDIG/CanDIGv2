@@ -1,15 +1,16 @@
-# tested on docker-engine 18.06.0
 version: '3.7'
 
 services:
-  igv-js:
+  rnaget:
     build:
-      context: $PWD/lib/igv-js
-    image: candig/igv-js:${IGVJS_VERSION:-latest}
+      context: $PWD/lib/rnaget
+      args:
+        venv_python: ${VENV_PYTHON}
+    image: candig/rnaget:${RNA_GET_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     ports:
-      - "${IGVJS_PORT}:80"
+      - "${RNA_GET_PORT}:3005"
     deploy:
       placement:
         constraints:
@@ -21,7 +22,7 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${IGVJS_PORT}
+        - traefik.port=${RNA_GET_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:igvjs.${CANDIG_DOMAIN}
-
+        - traefik.frontend.rule=Host:rnaget.${CANDIG_DOMAIN}
+    command: ["--host", "0.0.0.0", "--port", "3005"]

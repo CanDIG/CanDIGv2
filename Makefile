@@ -36,6 +36,9 @@ make init-swarm
 # create docker bridge networks
 make docker-net
 
+# pull images from $$DOCKER_REGISTRY
+make docker-pull
+
 # push docker images to CanDIG repo
 make docker-push
 
@@ -134,6 +137,9 @@ make clean-conda
 # stop all running containers and remove all run containers
 clean-containers
 
+# clear all screen sessions
+make clean-screens
+
 # clear swarm secrets
 make clean-secrets
 
@@ -206,7 +212,7 @@ bin-minio: mkdir
 
 bin-prometheus:
 	mkdir -p $(DIR)/bin/prometheus
-	curl -Lo $(DIR)/bin/prometheus/temp.tar.gz https://github.com/prometheus/prometheus/releases/download/v2.18.1/prometheus-2.18.1.$(VENV_OS)-amd64.tar.gz
+	curl -Lo $(DIR)/bin/prometheus/temp.tar.gz https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).$(VENV_OS)-amd64.tar.gz
 	tar --strip-components=1 -zxvf $(DIR)/bin/prometheus/temp.tar.gz -C $(DIR)/bin/prometheus
 	rm $(DIR)/bin/prometheus/temp.tar.gz
 	chmod 755 $(DIR)/bin/prometheus/prometheus
@@ -260,6 +266,10 @@ clean-secrets:
 	rm -f minio-access-key minio-secret-key aws-credentials \
 		portainer-user portainer-key swarm-manager-token swarm-worker-token
 
+.PHONY: clean-screens
+clean-screens:
+	screen -ls | grep pts | cut -d. -f1 | awk '{print $$1}' | xargs kill
+
 .PHONY: clean-stack
 clean-stack:
 	docker stack rm `docker stack ls | awk '{print $$1}'`
@@ -306,6 +316,12 @@ docker-net:
 		-o com.docker.network.bridge.enable_ip_masquerade=true \
 		docker_gwbridge
 
+.PHONY: docker-pull
+docker-pull:
+	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+		-f $(DIR)/lib/$(MODULE)/docker-compose.yml pull;)
+	$(foreach MODULE, $(TOIL_MODULES), docker pull $(DOCKER_REGISTRY)/$(MODULE):latest;)
+
 .PHONY: docker-push
 docker-push:
 	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
@@ -319,6 +335,7 @@ docker-secrets: minio-secrets
 
 .PHONY: docker-volumes
 docker-volumes:
+	docker volume create datasets-data
 	docker volume create minio-config
 	docker volume create minio-data $(MINIO_VOLUME_OPT)
 	docker volume create mc-config
@@ -341,10 +358,12 @@ init-conda: bin-all minio-secrets
 	@echo "Activate conda env: conda activate $(VENV_NAME)"
 	@echo "Install requirements: pip install -r $(DIR)/etc/venv/requirements.txt"
 
+# NOTE: make init-singularity? @p :0
 .PHONY: init-docker
 init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE) init-conda
 	git submodule update --init --recursive
 
+# FIXME: deploy a standalone k8s cluster with docker-compose @p :0
 .PHONY: init-kubernetes
 init-kubernetes: bin-kubectl init-swarm
 
@@ -368,6 +387,7 @@ kube-%:
 		--compose-file $(DIR)/lib/$*/docker-compose.yml \
 		$*
 
+# TODO: add singularity option for minikube @p :0
 .PHONY: minikube
 minikube: bin-minikube
 	minikube start --bootstrapper kubeadm --container-runtime $(MINIKUBE_CRI) \
