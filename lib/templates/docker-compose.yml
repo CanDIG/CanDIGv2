@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  {{service_name}}:
+    build:
+      context: $PWD/lib/{{service_name}}
+      #context: $PWD/lib/{{service_name}}/{{submodule_name}}
+      args:
+        venv_python: ${VENV_PYTHON}
+        image: candig/{{service_name}}:${{{service_version}}:-latest}
+    #volumes:
+      #- {{service_name}}-data:/data
+      #add volume name to lib/{compose,swarm,kubernetes}
+      #add volume name to docker-volumes in Makefile
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${{{service_port}}}:{{service_default_port}}"
+    deploy:
+      placement:
+        constraints:
+          - node.role == {{servie_role}}
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${{{service_port}}}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:{{service_name}}.${CANDIG_DOMAIN}
+    # use entrypoint if you want to override default entrypoint
+    #entrypoint: []
+    # use command if image has dafault entrypoint
+    command: ["--host", "0.0.0.0", "--port", "{{service_default_port}}"]
