@@ -13,6 +13,7 @@ RUN apk add \
 	automake \
 	make \
 	gcc \
+	linux-headers \
 	perl \
 	bash \
 	build-base \
@@ -26,13 +27,14 @@ RUN apk add \
 	yaml-dev \
 	libressl-dev \
 	git \
-	postgresql-dev \
-	libffi-dev
+	rust \
+	cargo
 
-COPY chord_drs /app/chord_drs
-WORKDIR /app/chord_drs
 
-RUN pip install -r requirements.txt && flask db upgrade
+COPY datasets_service /app/datasets_service
+WORKDIR /app/datasets_service
 
-# Run the model service server
-ENTRYPOINT ["flask", "run"]
+# TODO: fix build issue pyo3
+RUN pip install -r requirements.txt
+
+ENTRYPOINT [ "python", "-m", "candig_dataset_service" ]

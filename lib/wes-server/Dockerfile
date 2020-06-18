@@ -13,11 +13,11 @@ RUN apt-get update && \
   libssl-dev uuid-dev libgpgme11-dev libseccomp-dev \
   pkg-config squashfs-tools cryptsetup
 
-ENV VERSION=1.13.1 OS=linux ARCH=amd64
+ENV VERSION=1.13 OS=linux ARCH=amd64
 RUN wget -O /tmp/go${VERSION}.${OS}-${ARCH}.tar.gz https://dl.google.com/go/go${VERSION}.${OS}-${ARCH}.tar.gz && \
   tar -C /usr/local -xzf /tmp/go${VERSION}.${OS}-${ARCH}.tar.gz
 
-ENV VERSION=3.5.1
+ENV VERSION=3.5.2
 ENV GOPATH=/root/go
 ENV PATH=${GOPATH}/bin:/usr/local/go/bin:${PATH}
 

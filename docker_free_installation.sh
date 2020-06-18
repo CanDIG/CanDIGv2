@@ -14,13 +14,13 @@ make bin-minio
 make minio-secrets
 
 # start minio server instance
-make minio-server 
+make minio-server
 
 # start drs server instance
-make conda-drs-server 
+make conda-drs-server
 
 # start htsget server instance
-make conda-htsget-server 
+make conda-htsget-server
 
 # start federation-service instance
 make conda-federation-service

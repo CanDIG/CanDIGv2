@@ -3,7 +3,7 @@ version: '3.7'
 
 services:
   mc:
-    image: minio/mc:${MINIO_VERSION}
+    image: minio/mc:${MINIO_VERSION:-latest}
     volumes:
       - mc-config:/root/.mc
     networks:

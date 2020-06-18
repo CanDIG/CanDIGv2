@@ -13,6 +13,7 @@ RUN apk add \
 	automake \
 	make \
 	gcc \
+	linux-headers \
 	perl \
 	bash \
 	build-base \
@@ -25,14 +26,12 @@ RUN apk add \
 	curl-dev \
 	yaml-dev \
 	libressl-dev \
-	git \
-	postgresql-dev \
-	libffi-dev
+	git
 
-COPY chord_drs /app/chord_drs
-WORKDIR /app/chord_drs
+COPY candig_authz_service /app/candig_authz_service
 
-RUN pip install -r requirements.txt && flask db upgrade
+WORKDIR /app/candig_authz_service
+RUN pip install -r requirements.txt && \
+	pip install git+https://github.com/candig/candig_authz_service.git
 
-# Run the model service server
-ENTRYPOINT ["flask", "run"]
+ENTRYPOINT ["candig_authz_service"]

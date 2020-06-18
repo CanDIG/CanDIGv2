@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   minio:
-    image: minio/minio:${MINIO_VERSION}
+    image: minio/minio:${MINIO_VERSION:-latest}
     volumes:
       - minio-data:/data
       - minio-config:/root/.minio
@@ -32,7 +32,7 @@ services:
         target: access_key
       - source: minio-secret-key
         target: secret_key
-    command: ["server", "${MINO_DATA_DIR}"]
+    command: ["server", "/data"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s

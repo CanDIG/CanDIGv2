@@ -1,18 +1,20 @@
 version: '3.7'
 
 services:
-  htsget-app:
+  candig_server:
     build:
-      context: $PWD/lib/htsget-server/htsget_app
-    image: candig/htsget-app:${HTSGET_APP_VERSION:-latest}
+      context: $PWD/lib/candig_server
+      args:
+        venv_python: 3.6
+    image: candig/candig_server:${CANDIG_SERVER_VERSION}
     networks:
       - ${DOCKER_NET}
     ports:
-      - "${HTSGET_APP_PORT}:3000"
+      - "${CANDIG_SERVER_PORT}:3000"
     deploy:
       placement:
         constraints:
-          - node.role == worker
+          - node.role == manager
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -20,7 +22,7 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${HTSGET_APP_PORT}
+        - traefik.port=${CANDIG_SERVER_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:htsget-app.${CANDIG_DOMAIN}
+        - traefik.frontend.rule=Host:candig_server.${CANDIG_DOMAIN}
     command: ["--host", "0.0.0.0", "--port", "3000"]

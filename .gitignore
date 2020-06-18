@@ -1,6 +1,7 @@
 #secrets
 minio-access-key
 minio-secret-key
+aws-credentials
 portainer-user
 portainer-key
 portainer-secret

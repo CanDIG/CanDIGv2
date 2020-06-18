@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   traefik:
-    image: traefik:${TRAEFIK_VERSION}
+    image: traefik:${TRAEFIK_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     volumes:
@@ -32,7 +32,7 @@ services:
       - source: traefik-ssl-crt
         target: site.crt
     environment:
-      - traefik_net=${TRAEFIK_NET}
+      - traefik_net=${DOCKER_NET}
       - traefik_domain=${CANDIG_DOMAIN}
       - traefik_swarm=${TRAEFIK_SWARM}
     command:
@@ -42,7 +42,7 @@ services:
       - --consul.endpoint=consul:${CONSUL_HTTP_PORT}
       - --docker
       - --docker.domain=${CANDIG_DOMAIN}
-      - --docker.network=${TRAEFIK_NET}
+      - --docker.network=${DOCKER_NET}
       - --docker.swarmmode=${TRAEFIK_SWARM}
       - --docker.watch
       - --defaultEntrypoints='http, https'

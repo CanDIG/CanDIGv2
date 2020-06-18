@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   consul:
-    image: progrium/consul
+    image: progrium/consul:${CONSUL_VERSION:-lateset}
     networks:
       - ${DOCKER_NET}
     ports:

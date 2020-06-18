@@ -12,6 +12,8 @@ networks:
     external: true
 
 volumes:
+  datasets-data:
+    external: true
   minio-data:
     external: true
   minio-config:

@@ -1,16 +1,16 @@
 version: '3.7'
 
 services:
-  chord-drs:
+  metadata_service:
     build:
-      context: $PWD/lib/drs-server
+      context: $PWD/lib/metadata_service
       args:
         venv_python: ${VENV_PYTHON}
-    image: candig/chord-drs:${CHORD_DRS_VERSION:-latest}
+    image: candig/metadata_service:${METADATA_SERVICE_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     ports:
-      - "${CHORD_DRS_PORT}:5000"
+      - "${METADATA_SERVICE_PORT}:8000"
     deploy:
       placement:
         constraints:
@@ -22,7 +22,7 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${CHORD_DRS_PORT}
+        - traefik.port=${METADATA_SERVICE_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:chord-drs.${CANDIG_DOMAIN}
-    command: ["--host", "0.0.0.0", "--port", "5000"]
+        - traefik.frontend.rule=Host:metadata_service.${CANDIG_DOMAIN}
+    command: ["runserver", "0.0.0.0:8000"]

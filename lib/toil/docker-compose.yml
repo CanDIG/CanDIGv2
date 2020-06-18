@@ -2,12 +2,7 @@ version: '3.7'
 
 services:
   toil-master:
-    build:
-      context: $PWD/lib/toil
-      args:
-        toil_version: ${TOIL_VERSION}
-        wes_version: ${WES_VERSION}
-    image: candig/toil:${TOIL_VERSION}
+    image: candig/toil:${TOIL_VERSION:-latest}
     volumes:
       - toil-jobstore:/jobStoreParentDir
       - /var/run/docker.sock:/var/run/docker.sock:rw
@@ -36,11 +31,17 @@ services:
         - traefik.frontend.rule=Host:toil-master.${CANDIG_DOMAIN}
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
+      #- AWS_ACCESS_KEY_ID=toil
+      #- AWS_SECRET_ACCESS_KEY=toilsecretkey
+      - AWS_DEFAULT_REGION=${MINIO_REGION}
+      - AWS_DEFAULT_OUTPUT=json
     secrets:
       - source: minio-access-key
         target: access_key
       - source: minio-secret-key
         target: secret_key
+      - source: aws-credentials
+        target: ~/.aws/credentials
     entrypoint: ["mesos-master"]
     command:
       - --registry=in_memory
@@ -71,11 +72,17 @@ services:
         - traefik.frontend.rule=Host:toil-worker.${CANDIG_DOMAIN}
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
+      #- AWS_ACCESS_KEY_ID=toil
+      #- AWS_SECRET_ACCESS_KEY=toilsecretkey
+      - AWS_DEFAULT_REGION=${MINIO_REGION}
+      - AWS_DEFAULT_OUTPUT=json
     secrets:
       - source: minio-access-key
         target: access_key
       - source: minio-secret-key
         target: secret_key
+      - source: aws-credentials
+        target: ~/.aws/credentials
     entrypoint: ["mesos-slave"]
     command:
       - --work_dir=/var/lib/mesos

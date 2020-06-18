@@ -5,11 +5,12 @@ env ?= .env
 #overrides ?= site.env
 
 include $(env)
-export $(shell sed 's/=.*//' $(env))
+#export $(shell sed 's/=.*//' $(env))
 
 #include $(overrides)
 #export $(shell sed 's/=.*//' $(overrides))
 
+SHELL = bash
 DIR = $(PWD)
 CONDA = $(DIR)/bin/miniconda3/condabin/conda
 
@@ -34,6 +35,9 @@ make init-swarm
 
 # create docker bridge networks
 make docker-net
+
+# pull images from $$DOCKER_REGISTRY
+make docker-pull
 
 # push docker images to CanDIG repo
 make docker-push
@@ -127,29 +131,35 @@ make clean-bin
 # clear selfsigned-certs
 make clean-certs
 
+# clear conda environment and secrets
+make clean-conda
+
 # stop all running containers and remove all run containers
 clean-containers
 
+# clear all screen sessions
+make clean-screens
+
 # clear swarm secrets
-clean-secrets
+make clean-secrets
 
 # remove all peristant volumes
-clean-volumes
+make clean-volumes
 
 # leave docker-swarm
-clean-swarm
+make clean-swarm
 
 # clear container networks
-clean-network
+make clean-networks
 
 # clear all images (including base images)
-clean-images
+make clean-images
 
 # cleanup for compose, preserves everything except services/containers
-clean-compose
+make clean-compose
 
 # cleanup for stack/kubernetes, preserves everything except stack/services/containers
-clean-stack
+make clean-stack
 
 endef
 
@@ -170,33 +180,39 @@ print-%:
 bin-all: bin-conda bin-kubectl bin-minikube bin-minio bin-prometheus
 
 bin-conda: mkdir
+ifeq ($(VENV_OS), linux)
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
-		https://repo.anaconda.com/miniconda/Miniconda3-latest-$(VENV_OS)-x86_64.sh
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+endif
+ifeq ($(VENV_OS), darwin)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+endif
 	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
 
 bin-kubectl: mkdir
 	$(eval KUBECTL_VERSION = \
 		$(shell curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt))
 	curl -Lo $(DIR)/bin/kubectl \
-		https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/linux/amd64/kubectl
+		https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/$(VENV_OS)/amd64/kubectl
 	chmod 755 $(DIR)/bin/kubectl
 
 bin-minikube: mkdir
 	curl -Lo $(DIR)/bin/minikube \
-		https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+		https://storage.googleapis.com/minikube/releases/latest/minikube-$(VENV_OS)-amd64
 	chmod 755 $(DIR)/bin/minikube
 
 bin-minio: mkdir
 	curl -Lo $(DIR)/bin/minio \
-		https://dl.minio.io/server/minio/release/linux-amd64/minio
+		https://dl.minio.io/server/minio/release/$(VENV_OS)-amd64/minio
 	curl -Lo $(DIR)/bin/mc \
-		https://dl.minio.io/client/mc/release/linux-amd64/mc
+		https://dl.minio.io/client/mc/release/$(VENV_OS)-amd64/mc
 	chmod 755 $(DIR)/bin/minio
 	chmod 755 $(DIR)/bin/mc
 
-bin-prometheus: 
+bin-prometheus:
 	mkdir -p $(DIR)/bin/prometheus
-	curl -Lo $(DIR)/bin/prometheus/temp.tar.gz https://github.com/prometheus/prometheus/releases/download/v2.18.1/prometheus-2.18.1.linux-amd64.tar.gz
+	curl -Lo $(DIR)/bin/prometheus/temp.tar.gz https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).$(VENV_OS)-amd64.tar.gz
 	tar --strip-components=1 -zxvf $(DIR)/bin/prometheus/temp.tar.gz -C $(DIR)/bin/prometheus
 	rm $(DIR)/bin/prometheus/temp.tar.gz
 	chmod 755 $(DIR)/bin/prometheus/prometheus
@@ -208,11 +224,11 @@ bin-traefik: mkdir
 
 build-%:
 	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml build
+		-f $(DIR)/lib/$*/docker-compose.yml build --no-cache
 
 .PHONY: clean-all
 clean-all: clean-stack clean-containers clean-secrets clean-volumes \
-	clean-swarm clean-networks clean-images clean-certs clean-bin
+	clean-swarm clean-networks clean-images clean-certs clean-conda clean-bin
 
 .PHONY: clean-bin
 clean-bin:
@@ -225,24 +241,34 @@ clean-certs:
 .PHONY: clean-compose
 clean-compose: clean-containers
 
+.PHONY: clean-conda
+clean-conda:
+	$(CONDA) deactivate
+	$(CONDA) env remove -n $(VENV_NAME)
+	rm -f minio-access-key minio-secret-key aws-credentials
+
 .PHONY: clean-containers
 clean-containers:
-	docker stop `docker ps -q` || return 0
-	docker rm -v `docker ps -aq` || return 0
+	docker stop `docker ps -q`
+	docker container prune -f
 
 .PHONY: clean-images
 clean-images:
-	docker rmi `docker images -q`
+	docker image prune -a -f
 
-.PHONY: clean-network
-clean-network:
-	docker network rm bridge-net traefik-net agent-net docker_gwbridge
+.PHONY: clean-networks
+clean-networks:
+	docker network prune -f
 
 .PHONY: clean-secrets
 clean-secrets:
 	docker secret rm `docker secret ls -q`
-	rm -f minio-access-key minio-secret-key portainer-user portainer-key \
-		swarm-manager-token swarm-worker-token
+	rm -f minio-access-key minio-secret-key aws-credentials \
+		portainer-user portainer-key swarm-manager-token swarm-worker-token
+
+.PHONY: clean-screens
+clean-screens:
+	screen -ls | grep pts | cut -d. -f1 | awk '{print $$1}' | xargs kill
 
 .PHONY: clean-stack
 clean-stack:
@@ -290,11 +316,17 @@ docker-net:
 		-o com.docker.network.bridge.enable_ip_masquerade=true \
 		docker_gwbridge
 
+.PHONY: docker-pull
+docker-pull:
+	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+		-f $(DIR)/lib/$(MODULE)/docker-compose.yml pull;)
+	$(foreach MODULE, $(TOIL_MODULES), docker pull $(DOCKER_REGISTRY)/$(MODULE):latest;)
+
 .PHONY: docker-push
 docker-push:
 	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$(MODULE)/docker-compose.yml push;)
-	$(foreach MODULE, $(TOIL_MODULES), docker push $(TOIL_DOCKER_REGISTRY)/$(MODULE):latest;)
+	$(foreach MODULE, $(TOIL_MODULES), docker push $(DOCKER_REGISTRY)/$(MODULE):latest;)
 
 .PHONY: docker-secrets
 docker-secrets: minio-secrets
@@ -303,6 +335,7 @@ docker-secrets: minio-secrets
 
 .PHONY: docker-volumes
 docker-volumes:
+	docker volume create datasets-data
 	docker volume create minio-config
 	docker volume create minio-data $(MINIO_VOLUME_OPT)
 	docker volume create mc-config
@@ -321,12 +354,16 @@ init-compose: docker-secrets
 .PHONY: init-conda
 init-conda: bin-all minio-secrets
 	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON)
-	#pip install -r $(DIR)/etc/venv/requirements.txt
+	@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
+	@echo "Activate conda env: conda activate $(VENV_NAME)"
+	@echo "Install requirements: pip install -r $(DIR)/etc/venv/requirements.txt"
 
+# NOTE: make init-singularity? @p :0
 .PHONY: init-docker
-init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE)
+init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE) init-conda
 	git submodule update --init --recursive
 
+# FIXME: deploy a standalone k8s cluster with docker-compose @p :0
 .PHONY: init-kubernetes
 init-kubernetes: bin-kubectl init-swarm
 
@@ -350,6 +387,7 @@ kube-%:
 		--compose-file $(DIR)/lib/$*/docker-compose.yml \
 		$*
 
+# TODO: add singularity option for minikube @p :0
 .PHONY: minikube
 minikube: bin-minikube
 	minikube start --bootstrapper kubeadm --container-runtime $(MINIKUBE_CRI) \
@@ -359,6 +397,9 @@ minikube: bin-minikube
 minio-secrets:
 	echo admin > minio-access-key
 	dd if=/dev/urandom bs=1 count=16 2>/dev/null | base64 | rev | cut -b 2- | rev > minio-secret-key
+	echo '[default]' > aws-credentials
+	echo "aws_access_key_id=`cat minio-access-key`" >> aws-credentials
+	echo "aws_secret_access_key=`cat minio-secret-key`" >> aws-credentials
 
 ssl-cert:
 	openssl genrsa -out $(DIR)/etc/ssl/selfsigned-root-ca.key 4096
@@ -409,6 +450,7 @@ swarm-join:
 swarm-secrets: docker-secrets
 	docker secret create minio-access-key $(DIR)/minio-access-key
 	docker secret create minio-secret-key $(DIR)/minio-secret-key
+	docker secret create aws-credentials $(DIR)/aws-credentials
 	docker secret create portainer-user $(DIR)/portainer-user
 	docker secret create portainer-key $(DIR)/portainer-key
 	docker secret create traefik-ssl-key $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).key
@@ -419,9 +461,9 @@ swarm-secrets: docker-secrets
 toil-docker:
 	VIRTUAL_ENV=1 $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
 	$(foreach MODULE,$(TOIL_MODULES), \
-		docker tag $(TOIL_DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION)-$(TOIL_BUILD_HASH) \
-		$(TOIL_DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION);)
+		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION)-$(TOIL_BUILD_HASH) \
+		$(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION);)
 	$(foreach MODULE,$(TOIL_MODULES), \
-		docker tag $(TOIL_DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION) \
-		$(TOIL_DOCKER_REGISTRY)/$(MODULE):latest;)
+		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION) \
+		$(DOCKER_REGISTRY)/$(MODULE):latest;)
 

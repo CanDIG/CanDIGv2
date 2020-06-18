@@ -12,6 +12,8 @@ networks:
     external: true
 
 volumes:
+  datasets-data:
+    external: true
   minio-data:
     external: true
   minio-config:
@@ -24,6 +26,8 @@ volumes:
     external: true
 
 secrets:
+  aws-credentials:
+    file: $PWD/aws-credentials
   minio-access-key:
     file: $PWD/minio-access-key
   minio-secret-key:
@@ -37,4 +41,4 @@ secrets:
   traefik-ssl-crt:
     file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.crt
   wes-dependency-resolver:
-    file: $PWD/etc/yml/$WES_DEPENDENCY_RESOLVER
+    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}
