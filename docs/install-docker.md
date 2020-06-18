@@ -141,6 +141,7 @@ sudo systemctl restart docker
   * Edit `.env` with your site's local configuration
 
 3. Create Cluster
+
 ```bash
 # view helpful commands
 make
@@ -150,35 +151,71 @@ make init-docker
 
 # activate conda
 source ./bin/miniconda3/etc/profile.d/conda.sh
+conda activate $VENV_NAME
+pip install -r ./etc/venv/requirements.txt
 
 # create images
 make images
+
+# push updated images (optional)
+make docker-push
+```
+
+## Deploy CanDIGv2 Services
+
+```bash
+# pull latest CanDIG images (instead of make images)
+make docker-pull
 
 # deploy stack (if using docker-compose environment)
 make compose
 
 # deploy stack (if using docker-swarm environment)
+# requires minimum 2 nodes connected (1 manager, 1 worker)
+# add additional manager/worker nodes
+make swarm-join
+
+# check cluster status
+docker node ls
+
+# deploy CanDIGv2 services
 make stack
 ```
 
 ## Cleanup CanDIG Compose Environment
 
-Use the following steps to clean up running CanDIGv2 services in a docker-compose configuration. *Note* that these steps are destructive and will remove *ALL* containers, secrets, volumes, networks, and images. If you are using docker in a shared environment (i.e. with other non-CanDIGv2 containers running) please consider running the cleanup manually for now.
+Use the following steps to clean up running CanDIGv2 services in a docker-compose configuration. *Note* that these steps are destructive and will remove *ALL* containers, secrets, volumes, networks, and images. If you are using docker in a shared environment (i.e. with other non-CanDIGv2 containers running) please consider running the cleanup steps manually instead.
+
+The following steps are performed by `make clean-all`:
 
 ```bash
-# 1. stop and remove running containers
+# 1. stop and remove running stacks
+make clean-stack
+
+# 2. stop and remove remaining containers
 make clean-containers
 
-# 2. remove all secrets from ./tmp/secrets/
-make clean secrets
+# 3. remove all secrets from docker and local dir
+make clean-secrets
 
-# 3. remove all docker volumes
+# 4. remove all docker volumes
 make clean-volumes
 
-# 4. delete all unused networks
+# 5. leave swarm-cluster
+make clean-swarm
+
+# 6. remove all unused networks
 make clean-networks
 
+# 7. delete all cached images
 make clean-images
 
+# 8. remove selfsigned-certs (including root ca)
 make clean-certs
+
+# 9. remove conda environment
+make clean-conda
+
+# 10. remove bin dir (inlcuding miniconda)
+make clean-bin
 ```

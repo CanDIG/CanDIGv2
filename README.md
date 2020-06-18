@@ -63,7 +63,7 @@ services:
 
 ## `make` Deployment
 
-```sh
+```make
 # view available options
 make
 
@@ -84,6 +84,9 @@ make init-swarm
 
 # create docker bridge networks
 make docker-net
+
+# pull images from $DOCKER_REGISTRY
+make docker-pull
 
 # push docker images to CanDIG repo
 make docker-push
@@ -112,9 +115,6 @@ make bin-minio
 # generate secrets for minio server/client
 make minio-secrets
 
-# start minio server instance
-make minio-server
-
 # create minikube environment for (kubernetes) integration testing
 make minikube
 
@@ -136,17 +136,24 @@ make images
 # create toil images using upstream Toil repo
 make toil-docker
 
-# deploy/test all modules in $MODULES using docker-compose
+# deploy/test all modules in $CANDIG_MODULES using docker-compose
 make compose
 
-# deploy/test all modules in $MODULES using docker stack
+# deploy/test all modules in $CANDIG_MODULES using docker stack
 make stack
 
-# deploy/test all modules in $MODULES using kubernetes
+# deploy/test all modules in $CANDIG_MODULES using kubernetes
 make kubernetes
 
-# deploy/test all modules in $MODULES using conda
+# deploy/test all modules in $CANDIG_MODULES using conda
 make conda
+
+# deploys all modules using Tox
+make tox
+
+# deploys individual module using tox
+# $module is the name of the sub-folder in lib
+make tox-$module
 
 # deploy/test individual modules using conda
 # $module is the name of the sub-folder in lib/
@@ -173,28 +180,34 @@ make clean-bin
 # clear selfsigned-certs
 make clean-certs
 
+# clear conda environment and secrets
+make clean-conda
+
 # stop all running containers and remove all run containers
 clean-containers
 
+# clear all screen sessions
+make clean-screens
+
 # clear swarm secrets
-clean-secrets
+make clean-secrets
 
 # remove all peristant volumes
-clean-volumes
+make clean-volumes
 
-# (foricibily) leave docker-swarm
-clean-swarm
+# leave docker-swarm
+make clean-swarm
 
-# clear bridge-net/traefik-net/agent-net
-clean-network
+# clear container networks
+make clean-networks
 
 # clear all images (including base images)
-clean-images
+make clean-images
 
 # cleanup for compose, preserves everything except services/containers
-clean-compose
+make clean-compose
 
 # cleanup for stack/kubernetes, preserves everything except stack/services/containers
-clean-stack
+make clean-stack
 ```
 
