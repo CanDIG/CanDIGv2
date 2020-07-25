@@ -5,7 +5,7 @@ env ?= .env
 #overrides ?= site.env
 
 include $(env)
-export $(shell sed 's/=.*//' $(env))
+#export $(shell sed 's/=.*//' $(env))
 
 #include $(overrides)
 #export $(shell sed 's/=.*//' $(overrides))
