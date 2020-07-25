@@ -180,7 +180,7 @@ mkdir:
 print-%:
 	@echo '$*=$($*)'
 
-bin-all: bin-conda bin-kompose bin-kubectl bin-minikube bin-minio bin-prometheus
+bin-all: bin-conda bin-kompose bin-kubectl bin-minikube bin-minio bin-traefik bin-prometheus
 
 bin-conda: mkdir
 ifeq ($(VENV_OS), linux)
