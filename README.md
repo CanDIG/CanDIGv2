@@ -1,4 +1,5 @@
 # CanDIG v2 PoC
+
 - - -
 
 ## Overview
@@ -35,10 +36,11 @@ The `.env` file in the project root directory contains a set of global variables
 the various parameters, plugins, and config options that operators can modify for testing purposes.
 
 Some of the functionality that is controlled through `.env` are:
-  * change docker network, driver, and swarm host
-  * modify ports, protocols, and plugins for various services
-  * version control and app pinning
-  * pre-defined defaults for turnkey deployment
+
+* change docker network, driver, and swarm host
+* modify ports, protocols, and plugins for various services
+* version control and app pinning
+* pre-defined defaults for turnkey deployment
 
 Compose supports declaring default environment variables in an environment file named `.env` placed in the folder
 where the `docker-compose` command is executed (current working directory). Similarly, when deploying CanDIGv2

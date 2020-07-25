@@ -1,4 +1,5 @@
-# CanDIG Install Guide
+# CanDIGv2 Install Guide
+
 - - -
 
 ## Install OS Dependencies
@@ -91,7 +92,7 @@ sudo systemctl start docker
 sudo usermod -aG docker $(whoami)
 ```
 
-## Install gVisor (Optional)
+## Install gVisor (Deprecated)
 
 ```bash
 wget https://storage.googleapis.com/gvisor/releases/nightly/latest/runsc
@@ -132,15 +133,16 @@ EOF'
 sudo systemctl restart docker
 ```
 
-## Install CanDIG Dependencies
+## Install CanDIGv2 Dependencies
 
-1. Clone/pull latest CanDIGv2 repo from `https://github.com/CanDIG/CanDIGv2.git`
+1. Clone/pull latest CanDIGv2 code from `https://github.com/CanDIG/CanDIGv2.git`
 
 2. Create/modify `.env` file
-  * `cp -i etc/env/example.env .env`
-  * Edit `.env` with your site's local configuration
 
-3. Create Cluster
+* `cp -i etc/env/example.env .env`
+* Edit `.env` with your site's local configuration
+
+## Create CanDIGv2 Cluster
 
 ```bash
 # view helpful commands
@@ -153,29 +155,37 @@ make init-docker
 source ./bin/miniconda3/etc/profile.d/conda.sh
 conda activate $VENV_NAME
 pip install -r ./etc/venv/requirements.txt
-
-# create images
-make images
-
-# push updated images (optional)
-make docker-push
 ```
 
-## Deploy CanDIGv2 Services
+## Deploy CanDIGv2 Services (Compose)
 
 ```bash
-# pull latest CanDIG images (instead of make images)
+# create images (optional)
+make images
+
+# pull latest CanDIGv2 images (instead of make images)
 make docker-pull
 
 # deploy stack (if using docker-compose environment)
 make compose
 
+# push updated images to $DOCKER_REGISTRY (optional)
+docker login && make docker-push
+```
+
+## Deploy CanDIGv2 Services (Swarm)
+
+```bash
 # deploy stack (if using docker-swarm environment)
 # requires minimum 2 nodes connected (1 manager, 1 worker)
+
+# create initial manager node
+make init-swarm
+
 # add additional manager/worker nodes
 make swarm-join
 
-# check cluster status
+# check cluster status (READY:ACTIVE)
 docker node ls
 
 # deploy CanDIGv2 services

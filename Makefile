@@ -5,7 +5,7 @@ env ?= .env
 #overrides ?= site.env
 
 include $(env)
-#export $(shell sed 's/=.*//' $(env))
+export $(shell sed 's/=.*//' $(env))
 
 #include $(overrides)
 #export $(shell sed 's/=.*//' $(overrides))
@@ -177,7 +177,7 @@ mkdir:
 print-%:
 	@echo '$*=$($*)'
 
-bin-all: bin-conda bin-kubectl bin-minikube bin-minio bin-prometheus
+bin-all: bin-conda bin-kompose bin-kubectl bin-minikube bin-minio bin-prometheus
 
 bin-conda: mkdir
 ifeq ($(VENV_OS), linux)
@@ -223,7 +223,7 @@ bin-traefik: mkdir
 	chmod 755 $(DIR)/bin/traefik
 
 build-%:
-	docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$*/docker-compose.yml build --no-cache
 
 .PHONY: clean-all
@@ -345,7 +345,7 @@ docker-volumes:
 
 .PHONY: images
 images: toil-docker
-	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+	$(foreach MODULE, $(CANDIG_MODULES), DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose -f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
 		-f $(DIR)/lib/$(MODULE)/docker-compose.yml build;)
 
 .PHONY: init-compose
@@ -368,7 +368,7 @@ init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE) init-conda
 init-kubernetes: bin-kubectl init-swarm
 
 .PHONY: init-swarm
-init-swarm: swarm-init swarm-secrets
+init-swarm: swarm-init swarm-net swarm-secrets
 
 .PHONY: kubernetes
 kubernetes:
@@ -401,6 +401,11 @@ minio-secrets:
 	echo "aws_access_key_id=`cat minio-access-key`" >> aws-credentials
 	echo "aws_secret_access_key=`cat minio-secret-key`" >> aws-credentials
 
+push-%:
+	docker-compose \
+		-f $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+		-f $(DIR)/lib/$*/docker-compose.yml push
+
 ssl-cert:
 	openssl genrsa -out $(DIR)/etc/ssl/selfsigned-root-ca.key 4096
 	openssl req -new -key $(DIR)/etc/ssl/selfsigned-root-ca.key \
@@ -429,22 +434,24 @@ stack:
 
 stack-%:
 	docker stack deploy \
-		--compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
-		--compose-file $(DIR)/lib/$*/docker-compose.yml \
-		$*
+		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
+		--compose-file $(DIR)/lib/$*/docker-compose.yml CanDIGv2
 
 .PHONY: swarm-init
 swarm-init:
 	docker swarm init --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP)
 	docker swarm join-token manager -q > swarm-manager-token
 	docker swarm join-token worker -q > swarm-worker-token
-	docker network create --driver overlay --opt encrypted=true traefik-net
-	docker network create --driver overlay --opt encrypted=true agent-net
 
 .PHONY: swarm-join
 swarm-join:
 	docker swarm join --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP) \
 		--token `cat $(DIR)/swarm-$(SWARM_MODE)-token` $(SWARM_MANAGER_IP)
+
+.PHONY: swarm-net
+swarm-net:
+	docker network create --driver overlay --opt encrypted=true traefik-net
+	docker network create --driver overlay --internal --opt encrypted=true agent-net
 
 .PHONY: swarm-secrets
 swarm-secrets: docker-secrets
@@ -459,7 +466,7 @@ swarm-secrets: docker-secrets
 
 .PHONY: toil-docker
 toil-docker:
-	VIRTUAL_ENV=1 $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
+	VIRTUAL_ENV=1 DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 TOIL_DOCKER_REGISTRY=$(DOCKER_REGISTRY) $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
 	$(foreach MODULE,$(TOIL_MODULES), \
 		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION)-$(TOIL_BUILD_HASH) \
 		$(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION);)

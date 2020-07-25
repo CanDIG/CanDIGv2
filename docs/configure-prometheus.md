@@ -1,8 +1,9 @@
 # Configuring Prometheus
 
-Before configuring the APIs we first need to tell Prometheus which services to monitor. Prometheus collects metrics from monitored targets by scraping metrics HTTP endpoints on these targets. 
+Before configuring the APIs we first need to tell Prometheus which services to monitor. Prometheus collects metrics from monitored targets by scraping metrics HTTP endpoints on these targets.
 
 In order to do that, each service must be added to the `scrape_configs` section on `prometheus.yml` file under `bin\prometheus` (make sure you have downloaded Prometheus by running the command `make bin-prometheus` first). Here is an example:
+
 ```yml
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
@@ -27,6 +28,7 @@ In order to expose the `/metrics` endpoint of Flask Application, the below steps
 
 - Install `prometheus_flask_exporter` library from Pypi
 - On the file where you instantiate your Flask app, import `PrometheusMetrics` and add your app:
+
 ```python
 from prometheus_flask_exporter import PrometheusMetrics
 
@@ -38,13 +40,13 @@ That’s really it! By adding an import and a line to initialize PrometheusMetri
 
 These are the basics configuration, for more information please visit Prometheus Flask exporter Github's [page](https://github.com/rycus86/prometheus_flask_exporter)
 
-
 ## For DJango Applications
 
 In order to expose the `/metrics` endpoint of DJango Application, the below steps must be followed:
 
 - Install `django-prometheus` library from Pypi
 - In your `settings.py`:
+
 ```python
 INSTALLED_APPS = (
    ...
@@ -62,6 +64,7 @@ MIDDLEWARE_CLASSES = (
 ```
 
 In your `urls.py`:
+
 ```python
 urlpatterns = [
     ...
