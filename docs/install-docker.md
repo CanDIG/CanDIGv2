@@ -192,9 +192,41 @@ docker node ls
 make stack
 ```
 
-## Cleanup CanDIG Compose Environment
+## Create CanDIGv2 Minikube VM
 
-Use the following steps to clean up running CanDIGv2 services in a docker-compose configuration. *Note* that these steps are destructive and will remove *ALL* containers, secrets, volumes, networks, and images. If you are using docker in a shared environment (i.e. with other non-CanDIGv2 containers running) please consider running the cleanup steps manually instead.
+This method is still experimental but should be able to provide a means to convert existing CanDIGv2 `docker-compose.yml` into native kubernetes service definitions. Using the provided steps will help to create a dev minikube cluster where you can test kubernetes deployments. If the stack successfully deploys on the minikube vm, is stable, and passes all QA steps, it can be reasonably assumed that the `kompose` build will work with other kubernetes clusters (i.e. Azure AKS/Amazon EKS).
+
+The minikube CLI can also be used to provision a multi-vm cluster using the vm hypervisor options in `.env`. Modify the `MINIKUBE_*` options in `.env`, then launch a single-node or multi-node kubernetes cluster with:
+
+```bash
+make minikube
+```
+
+The minikube vm can be doubly used as a `docker node`, allowing developers to reuse the vm as a docker api host and/or a docker swarm manager/worker. To switch the current `$DOCKER_HOST` to minikube, use:
+
+```bash
+eval $($PWD/bin/minikube docker-env)
+$PWD/bin/minikube kubectl
+```
+
+Users are encouraged to use this docker environment for CanDIGv2 development as it provides an isolated domain from the host environment, increasing security and reducing conflicts with host processes.
+
+### Deploy CanDIGv2 Services (Kubernetes)
+
+```bash
+# deploy kubernetes (if using minikube/kubernetes environment)
+# requires running minikube vm or kubectl context for existing cluster
+
+# create initial namespace
+make init-kubernetes
+
+# deploy CanDIGv2 services
+make kubernetes
+```
+
+## Cleanup CanDIGv2 Compose/Swarm Environment
+
+Use the following steps to clean up running CanDIGv2 services in a docker-compose configuration. *Note* that these steps are destructive and will remove **ALL** containers, secrets, volumes, networks, certs, and images. If you are using docker in a shared environment (i.e. with other non-CanDIGv2 containers running) please consider running the cleanup steps manually instead.
 
 The following steps are performed by `make clean-all`:
 
@@ -228,4 +260,10 @@ make clean-conda
 
 # 10. remove bin dir (inlcuding miniconda)
 make clean-bin
+```
+
+## Cleanup CanDIGv2 Kubernetes Environment
+
+```bash
+TODO: complete this section
 ```
