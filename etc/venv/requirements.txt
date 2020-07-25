@@ -1,4 +1,4 @@
-toil[all]==4.0.0
+toil[all]==4.1.0
 cwltool
 cwltool[deps]
 ga4gh-dos-schemas
@@ -14,3 +14,4 @@ docker-compose>=1.26.0
 docker>=4.2.1
 python-dotenv
 tox
+connexion
