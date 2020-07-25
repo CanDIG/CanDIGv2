@@ -1,12 +1,12 @@
 version: '3.7'
 
 services:
-  cnv_service:
+  cnv-service:
     build:
       context: $PWD/lib/cnv_service
       args:
         venv_python: ${VENV_PYTHON}
-    image: candig/cnv_service:${CNV_SERVICE_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/cnv_service:${CNV_SERVICE_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     ports:
@@ -24,5 +24,5 @@ services:
         - traefik.enable=true
         - traefik.port=${CNV_SERVICE_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:cnv_service.${CANDIG_DOMAIN}
+        - traefik.frontend.rule=Host:cnv-service.${CANDIG_DOMAIN}
     command: ["--host", "0.0.0.0", "--port", "8870"]

@@ -26,12 +26,17 @@ RUN apk add \
 	curl-dev \
 	yaml-dev \
 	libressl-dev \
-	git
+	git \
+	libxml2-dev \
+	libxml2
 
 COPY candig_authz_service /app/candig_authz_service
 
 WORKDIR /app/candig_authz_service
+
 RUN pip install -r requirements.txt && \
 	pip install git+https://github.com/candig/candig_authz_service.git
+
+COPY access_list.tsv .
 
 ENTRYPOINT ["candig_authz_service"]

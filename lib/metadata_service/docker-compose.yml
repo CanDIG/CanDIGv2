@@ -1,12 +1,12 @@
 version: '3.7'
 
 services:
-  metadata_service:
+  metadata-service:
     build:
       context: $PWD/lib/metadata_service
       args:
         venv_python: ${VENV_PYTHON}
-    image: candig/metadata_service:${METADATA_SERVICE_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/metadata_service:${METADATA_SERVICE_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     ports:
@@ -25,4 +25,8 @@ services:
         - traefik.port=${METADATA_SERVICE_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:metadata_service.${CANDIG_DOMAIN}
+    environment:
+      - DATASET_SERVICE_URL=${DATASET_SERVICE_URL}
+      - METADATA_SERVICE_HOST=${METADATA_SERVICE_HOST}
+      - METADATA_DEBUG=${METADATA_DEBUG}
     command: ["runserver", "0.0.0.0:8000"]

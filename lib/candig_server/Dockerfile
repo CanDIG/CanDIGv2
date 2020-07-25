@@ -1,40 +1,14 @@
 ARG venv_python
 
-FROM python:${venv_python}-alpine
+FROM python:${venv_python}-buster
 
 LABEL Maintainer="CanDIG Project"
 
-USER root
-
-RUN apk update
-
-RUN apk add \
-	autoconf \
-	automake \
-	make \
-	gcc \
-	linux-headers \
-	perl \
-	bash \
-	build-base \
-	musl-dev \
-	zlib-dev \
-	bzip2-dev \
-	xz-dev \
-	libcurl \
-	curl \
-	curl-dev \
-	yaml-dev \
-	libressl-dev \
-	wget \
-	git \
-	libffi-dev
-
 RUN mkdir -p /app/candig-server
+
 WORKDIR /app/candig-server
 
-RUN pip install candig-server==1.3.0 && \
-	pip install candig-ingest==1.3.1
+RUN pip install candig-server==1.3.0 && pip install candig-ingest==1.3.1
 
 # Uncomment below lines if you want to ingest some mock data
 RUN mkdir candig-example-data && \

@@ -4,7 +4,7 @@ ARG wes_version
 FROM candig/toil:$toil_version
 LABEL maintainer=CanDIG
 
-RUN pip install wes-service
+RUN pip install wes-service && pip install -U connexion
 
 WORKDIR /root
 
@@ -24,3 +24,11 @@ ENV PATH=${GOPATH}/bin:/usr/local/go/bin:${PATH}
 RUN wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz && \
   tar xvf singularity-$VERSION.tar.gz && \
   cd singularity && ./mconfig && cd ./builddir && make && make install
+
+COPY mesos-wes.sh /root/mesos-wes.sh
+
+RUN chmod 755 /root/mesos-wes.sh
+
+WORKDIR /root
+
+ENTRYPOINT [ "wes-server" ]

@@ -6,7 +6,7 @@ services:
       context: $PWD/lib/drs-server
       args:
         venv_python: ${VENV_PYTHON}
-    image: candig/chord-drs:${CHORD_DRS_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/chord-drs:${CHORD_DRS_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     ports:

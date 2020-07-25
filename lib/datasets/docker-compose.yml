@@ -6,7 +6,7 @@ services:
       context: $PWD/lib/datasets
       args:
         venv_python: ${VENV_PYTHON}
-    image: candig/datasets:${DATASETS_SERVICE_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/datasets:${DATASETS_SERVICE_VERSION:-latest}
     volumes:
       - datasets-data:/app/datasets_service/tmp
     networks:
@@ -27,4 +27,4 @@ services:
         - traefik.port=${DATASETS_SERVICE_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:datasets.${CANDIG_DOMAIN}
-    command: ["--host", "0.0.0.0", "--port", "8880", "--database", "./tmp/data/datasets.db", "--logfile", "./tmp/log/datasets.log"]
+    command: ["--host", "0.0.0.0", "--port", "8880", "--database", "datasets.db", "--logfile", "datasets.log"]

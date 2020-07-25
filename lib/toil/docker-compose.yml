@@ -1,8 +1,8 @@
 version: '3.7'
 
 services:
-  toil-master:
-    image: candig/toil:${TOIL_VERSION:-latest}
+  toil-server:
+    image: ${DOCKER_REGISTRY}/toil:${TOIL_VERSION:-latest}
     volumes:
       - toil-jobstore:/jobStoreParentDir
       - /var/run/docker.sock:/var/run/docker.sock:rw
@@ -28,7 +28,7 @@ services:
         - traefik.enable=true
         - traefik.port=${TOIL_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:toil-master.${CANDIG_DOMAIN}
+        - traefik.frontend.rule=Host:toil-server.${CANDIG_DOMAIN}
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
       #- AWS_ACCESS_KEY_ID=toil
@@ -50,7 +50,7 @@ services:
       - --allocation_interval=500ms
 
   toil-worker:
-    image: candig/toil:${TOIL_VERSION}
+    image: ${DOCKER_REGISTRY}/toil:${TOIL_VERSION}
     volumes:
       - toil-jobstore:/jobStoreParentDir
       - /var/run/docker.sock:/var/run/docker.sock:rw
@@ -86,7 +86,7 @@ services:
     entrypoint: ["mesos-slave"]
     command:
       - --work_dir=/var/lib/mesos
-      - --master=toil-master:5050
+      - --master=toil-server:5050
       - --ip=${TOIL_IP}
       - --attributes=preeemtable:false
       #- --launcher=linux
@@ -94,4 +94,3 @@ services:
       #- --image_providers=appc,docker
       #- --isolation=filesystem/linux,docker/runtime
       #- --resources=cpus:4
-

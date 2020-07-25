@@ -1,12 +1,12 @@
 version: '3.7'
 
 services:
-  candig_server:
+  candig-server:
     build:
       context: $PWD/lib/candig_server
       args:
         venv_python: 3.6
-    image: candig/candig_server:${CANDIG_SERVER_VERSION}
+    image: ${DOCKER_REGISTRY}/candig_server:${CANDIG_SERVER_VERSION}
     networks:
       - ${DOCKER_NET}
     ports:
@@ -24,5 +24,5 @@ services:
         - traefik.enable=true
         - traefik.port=${CANDIG_SERVER_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:candig_server.${CANDIG_DOMAIN}
+        - traefik.frontend.rule=Host:candig-server.${CANDIG_DOMAIN}
     command: ["--host", "0.0.0.0", "--port", "3000"]

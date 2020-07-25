@@ -5,8 +5,8 @@ services:
     build:
       context: $PWD/lib/rnaget
       args:
-        venv_python: ${VENV_PYTHON}
-    image: candig/rnaget:${RNA_GET_VERSION:-latest}
+        venv_python: 3.6
+    image: ${DOCKER_REGISTRY}/rnaget:${RNA_GET_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     ports:

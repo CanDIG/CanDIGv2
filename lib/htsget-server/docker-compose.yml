@@ -4,7 +4,9 @@ services:
   htsget-app:
     build:
       context: $PWD/lib/htsget-server/htsget_app
-    image: candig/htsget-app:${HTSGET_APP_VERSION:-latest}
+      args:
+        venv_python: ${VENV_PYTHON}
+    image: ${DOCKER_REGISTRY}/htsget-app:${HTSGET_APP_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     ports:

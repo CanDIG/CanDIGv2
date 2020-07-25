@@ -1,36 +1,13 @@
 ARG venv_python
 
-FROM python:${venv_python}-alpine
+FROM python:${venv_python}-buster
 
 LABEL Maintainer="CanDIG Project"
 
-USER root
-
-RUN apk update
-
-RUN apk add \
-  autoconf \
-  automake \
-  make \
-  gcc \
-  linux-headers \
-  perl \
-  bash \
-  build-base \
-  musl-dev \
-  zlib-dev \
-  bzip2-dev \
-  xz-dev \
-  libcurl \
-  curl \
-  curl-dev \
-  yaml-dev \
-  libressl-dev \
-  git \
-  openblas-dev \
-  hdf5-dev
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y npm
 
 COPY rnaget_service /app/rnaget_service
+
 WORKDIR /app/rnaget_service
 
 RUN pip install -r requirements.txt && \

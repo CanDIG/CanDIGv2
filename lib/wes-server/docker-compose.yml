@@ -7,14 +7,20 @@ services:
       args:
         toil_version: ${TOIL_VERSION}
         wes_version: ${WES_VERSION}
-    image: candig/wes-server:${WES_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/wes-server:${WES_VERSION:-latest}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - toil-jobstore:/jobStoreParentDir
     networks:
       - ${DOCKER_NET}
     ports:
+      - "${TOIL_PORT}:5050"
+      - "${TOIL_UI_PORT}:3000"
       - "${WES_PORT}:5000"
+    # keep the following ports free
+    # 3903 - mtail service
+    # 9100 - node exporter
+    # 9090 - prometheus service
     deploy:
       placement:
         constraints:
@@ -44,13 +50,59 @@ services:
         target: ~/.aws/credentials
       - source: wes-dependency-resolver
         target: dependency_resolver.yml
-    entrypoint: ["wes-server"]
-    command:
+    entrypoint:
+      - ./mesos-wes.sh
       - --backend=${WES_BACKEND}
       - --port=5000
       - --opt=runner=${WES_CWL_RUNNER}
       - --opt=extra=--jobStore=file:/jobStoreParentDir
       - ${WES_OPT}
       #- --opt=extra=--batchSystem=Mesos
-      #- --opt=extra=--mesosMaster=toil-master:5050
+      #- --opt=extra=--mesosMaster=wes-server:5050
       #- --opt=extra=--beta-dependency-resolvers-configuration=/run/secrets/dependency_resolver.yml
+
+  wes-worker:
+    image: ${DOCKER_REGISTRY}/wes-server:${WES_VERSION:-latest}
+    volumes:
+      - toil-jobstore:/jobStoreParentDir
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${TOIL_WORKER_PORT}:5051"
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${TOIL_WORKER_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:wes-worker.${CANDIG_DOMAIN}
+    environment:
+      - MESOS_SYSTEMD_ENABLE_SUPPORT=false
+      #- AWS_ACCESS_KEY_ID=toil
+      #- AWS_SECRET_ACCESS_KEY=toilsecretkey
+      - AWS_DEFAULT_REGION=${MINIO_REGION}
+      - AWS_DEFAULT_OUTPUT=json
+    secrets:
+      - source: minio-access-key
+        target: access_key
+      - source: minio-secret-key
+        target: secret_key
+      - source: aws-credentials
+        target: ~/.aws/credentials
+    entrypoint: ["mesos-slave"]
+    command:
+      - --work_dir=/var/lib/mesos
+      - --master=wes-server:5050
+      - --ip=${TOIL_IP}
+      - --attributes=preeemtable:false
+      #- --launcher=linux
+      - --containerizers=docker,mesos
+      #- --image_providers=appc,docker
+      #- --isolation=filesystem/linux,docker/runtime
+      #- --resources=cpus:4
