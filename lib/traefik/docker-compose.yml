@@ -38,8 +38,6 @@ services:
     command:
       - traefik
       - --api
-      - --consul
-      - --consul.endpoint=consul:${CONSUL_HTTP_PORT}
       - --docker
       - --docker.domain=${CANDIG_DOMAIN}
       - --docker.network=${DOCKER_NET}
@@ -48,6 +46,8 @@ services:
       - --defaultEntrypoints='http, https'
       - --entryPoints="Name:http Address::${TRAEFIK_HTTP_PORT} Redirect.EntryPoint:https"
       - --entryPoints="Name:https Address::${TRAEFIK_HTTPS_PORT} TLS:/run/secrets/site.crt,/run/secrets/site.key"
-      - --kubernetes
-      - --metrics
-      - --metrics.prometheus.buckets=0.1,0.3,1.2,5.0
+      #- --consul
+      #- --consul.endpoint=consul:${CONSUL_HTTP_PORT}
+      #- --kubernetes
+      #- --metrics
+      #- --metrics.prometheus.buckets=0.1,0.3,1.2,5.0
