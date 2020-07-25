@@ -1,0 +1,165 @@
+version: '3.7'
+
+services:
+  {{service_name}}:
+    build:
+      context: $PWD/lib/{{service_name}}
+      #context: $PWD/lib/{{service_name}}/{{submodule_name}}
+      args:
+        venv_python: ${VENV_PYTHON}
+        image: ${DOCKER_REGISTRY}/{{service_name}}:${{{service_version}}:-latest}
+    #volumes:
+      #- {{service_name}}-data:/data
+      #add volume name to lib/{compose,swarm,kubernetes}
+      #add volume name to docker-volumes in Makefile
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${{{service_port}}}:{{service_default_port}}"
+    deploy:
+      placement:
+        constraints:
+          - node.role == {{servie_role}}
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${{{service_port}}}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:{{service_name}}.${CANDIG_DOMAIN}
+    # use entrypoint if you want to override default entrypoint
+    #entrypoint: []
+    # use command if image has dafault entrypoint
+    command: ["--host", "0.0.0.0", "--port", "{{service_default_port}}"]
+
+  prometheus:
+    image: prom/prometheus:${PROMETHEUS_VERSION:-latest}
+    volumes:
+      - $PWD/lib/montioring/prometheus/:/etc/prometheus/
+      - prometheus-data:/prometheus
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${PROMETHEUS_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:prometheus.${CANDIG_DOMAIN}
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+
+  node-exporter:
+    image: prom/node-exporter:${NODE_EXPORTER_VERSION:-latest}
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    ports:
+      - "${NODE_EXPORTER_PORT}:9100"
+    networks:
+      - ${DOCKER_NET}
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${NODE_EXPORTER_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:node-exporter.${CANDIG_DOMAIN}
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+
+  alertmanager:
+    image: prom/alertmanager:${ALERT_MANAGER_VERSION:-latest}
+    ports:
+      - "${ALERT_MANAGER_PORT}:9093"
+    volumes:
+      - "$PWD/lib/monitoring/alertmanager/:/etc/alertmanager/"
+    networks:
+      - ${DOCKER_NET}
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${PROMETHEUS_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:prometheus.${CANDIG_DOMAIN}
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    deploy:
+      placement:
+        constraints:
+           - node.role==manager
+      restart_policy:
+        condition: on-failure
+
+  cadvisor:
+    image: google/cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - 8088:8080
+    networks:
+      - monitor-net
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ./grafana/config.monitoring
+    networks:
+      - monitor-net
+    user: "472"
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+      labels:
+        -  "traefik.frontend.rule=Host:grafana.localhost"
+        - "traefik.backend=grafana"
+        - "traefik.port=3000"
+        - "traefik.docker.network=traefik"
+      restart_policy:
+        condition: on-failure

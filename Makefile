@@ -358,6 +358,7 @@ docker-volumes:
 	docker volume create mc-config
 	docker volume create toil-jobstore
 	docker volume create portainer-data
+	docker volume create prometheus-data
 	docker volume create jupyter-data
 
 .PHONY: images

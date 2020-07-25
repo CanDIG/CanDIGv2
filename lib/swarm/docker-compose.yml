@@ -24,6 +24,8 @@ volumes:
     external: true
   portainer-data:
     external: true
+  prometheus-data:
+    external: true
 
 secrets:
   aws-credentials:

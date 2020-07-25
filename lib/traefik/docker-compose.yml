@@ -49,3 +49,5 @@ services:
       - --entryPoints="Name:http Address::${TRAEFIK_HTTP_PORT} Redirect.EntryPoint:https"
       - --entryPoints="Name:https Address::${TRAEFIK_HTTPS_PORT} TLS:/run/secrets/site.crt,/run/secrets/site.key"
       - --kubernetes
+      - --metrics
+      - --metrics.prometheus.buckets=0.1,0.3,1.2,5.0
