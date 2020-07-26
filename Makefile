@@ -352,14 +352,16 @@ docker-secrets: minio-secrets
 
 .PHONY: docker-volumes
 docker-volumes:
+	docker volume create consul-data
 	docker volume create datasets-data
+	docker volume create grafana-data
+	docker volume create jupyter-data
+	docker volume create mc-config
 	docker volume create minio-config
 	docker volume create minio-data $(MINIO_VOLUME_OPT)
-	docker volume create mc-config
-	docker volume create toil-jobstore
 	docker volume create portainer-data
 	docker volume create prometheus-data
-	docker volume create jupyter-data
+	docker volume create toil-jobstore
 
 .PHONY: images
 images: toil-docker

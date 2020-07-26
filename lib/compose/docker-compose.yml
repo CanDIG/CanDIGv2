@@ -26,6 +26,8 @@ volumes:
     external: true
   prometheus-data:
     external: true
+  consul-data:
+    external: true
 
 secrets:
   aws-credentials:

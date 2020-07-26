@@ -15,6 +15,7 @@ volumes:
   toil-jobstore:
   portainer-data:
   prometheus-data:
+  consul-data:
 
 secrets:
   aws-credentials:

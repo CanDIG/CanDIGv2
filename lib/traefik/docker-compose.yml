@@ -6,11 +6,18 @@ services:
     networks:
       - ${DOCKER_NET}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "${TRAEFIK_HTTP_PORT}:80"
-      - "${TRAEFIK_HTTPS_PORT}:443"
-      - "${TRAEFIK_UI_PORT}:8080"
+      - target: 80
+        published: ${TRAEFIK_HTTP_PORT}
+        mode: host
+      - target: 443
+        published: ${TRAEFIK_HTTPS_PORT}
+        mode: host
+      - target: 8080
+        published: ${TRAEFIK_UI_PORT}
+        protocol: tcp
+        mode: ingress
     deploy:
       placement:
         constraints:
@@ -38,6 +45,8 @@ services:
     command:
       - traefik
       - --api
+      - --consul
+      - --consul.endpoint=consul:${CONSUL_HTTP_PORT}
       - --docker
       - --docker.domain=${CANDIG_DOMAIN}
       - --docker.network=${DOCKER_NET}
@@ -46,8 +55,6 @@ services:
       - --defaultEntrypoints='http, https'
       - --entryPoints="Name:http Address::${TRAEFIK_HTTP_PORT} Redirect.EntryPoint:https"
       - --entryPoints="Name:https Address::${TRAEFIK_HTTPS_PORT} TLS:/run/secrets/site.crt,/run/secrets/site.key"
-      #- --consul
-      #- --consul.endpoint=consul:${CONSUL_HTTP_PORT}
-      #- --kubernetes
-      #- --metrics
-      #- --metrics.prometheus.buckets=0.1,0.3,1.2,5.0
+      - --kubernetes
+      - --metrics
+      - --metrics.prometheus.buckets=0.1,0.3,1.2,5.0

@@ -2,14 +2,20 @@ version: '3.7'
 
 services:
   consul:
-    image: progrium/consul:${CONSUL_VERSION:-lateset}
+    image: consul:${CONSUL_VERSION:-lateset}
+    volumes:
+      - consul-data:/consul/data
     networks:
       - ${DOCKER_NET}
     ports:
-      - "${CONSUL_RPC_PORT}:8400"
+      # RPC PORT 8400 in -server mode
+      - "${CONSUL_RPC_PORT}:8502"
       - "${CONSUL_HTTP_PORT}:8500"
-      - "${CONSUL_DNS_PORT}:53/udp"
-      - "8300-8310:8300-8310"
+      - "${CONSUL_DNS_PORT}:8600/udp"
+      - "${CONSUL_LAN_PORT}:8301/tcp"
+      - "${CONSUL_LAN_PORT}:8301/udp"
+      - "${CONSUL_WAN_PORT}:8302/tcp"
+      - "${CONSUL_WAN_PORT}:8302/udp"
     deploy:
       placement:
         constraints:
@@ -24,11 +30,3 @@ services:
         - traefik.port=${CONSUL_HTTP_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:consul.${CANDIG_DOMAIN}
-    expose:
-      - "8300"
-      - "8301"
-      - "8301/udp"
-      - "8302"
-      - "8302/udp"
-    command: -server -bootstrap -log-level debug -ui-dir /ui
-
