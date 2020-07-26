@@ -7,7 +7,7 @@ services:
       #context: $PWD/lib/{{service_name}}/{{submodule_name}}
       args:
         venv_python: ${VENV_PYTHON}
-        image: ${DOCKER_REGISTRY}/{{service_name}}:${{{service_version}}:-latest}
+    image: ${DOCKER_REGISTRY}/{{service_name}}:${{{service_version}}:-latest}
     #volumes:
       #- {{service_name}}-data:/data
       #add volume name to lib/{compose,swarm,kubernetes}
@@ -25,6 +25,13 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+    # deploy:
+    #   mode: global
+    #   restart_policy:
+    #     condition: on-failure
+    #     delay: 5s
+    #     max_attempts: 3
+    #     window: 120s
       labels:
         - traefik.enable=true
         - traefik.port=${{{service_port}}}
