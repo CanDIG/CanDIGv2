@@ -28,6 +28,8 @@ volumes:
     external: true
   consul-data:
     external: true
+  grafana-data:
+    external: true
 
 secrets:
   aws-credentials:

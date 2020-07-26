@@ -16,6 +16,7 @@ volumes:
   portainer-data:
   prometheus-data:
   consul-data:
+  grafana-data:
 
 secrets:
   aws-credentials:
