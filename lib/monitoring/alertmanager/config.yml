@@ -1,10 +1,32 @@
+global:
+  resolve_timeout: 5m
+
 route:
-    receiver: 'slack'
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+  receiver: 'web.hook'
 
 receivers:
-    - name: 'slack'
-      slack_configs:
-          - send_resolved: true
-            username: 'Prometheus'
-            channel: '#tmp-candig2-alerts'
-            api_url: 'https://hooks.slack.com/services/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'
+- name: 'web.hook'
+  webhook_configs:
+  - url: 'http://127.0.0.1:5001/'
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']
+
+# route:
+#     receiver: 'slack'
+
+# receivers:
+#     - name: 'slack'
+#       slack_configs:
+#           - send_resolved: true
+#             username: 'Prometheus'
+#             channel: '#<channel>'
+#             api_url: 'https://<api_url>'

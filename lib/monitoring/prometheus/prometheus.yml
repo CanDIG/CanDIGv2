@@ -5,7 +5,7 @@ global:
   # Attach these labels to any time series or alerts when communicating with
   # external systems (federation, remote storage, Alertmanager).
   external_labels:
-      monitor: 'docker-host-alpha'
+      monitor: 'candig.local'
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
@@ -51,7 +51,7 @@ scrape_configs:
   - job_name: 'rnaget'
     static_configs:
       - targets: ['rnaget:3005']
-      
+
   # https://prometheus.io/docs/guides/dockerswarm/
   # Create a job for Docker Swarm containers.
   - job_name: 'dockerswarm'
@@ -86,5 +86,5 @@ alerting:
   alertmanagers:
   - scheme: http
     static_configs:
-    - targets: 
+    - targets:
       - 'alertmanager:9093'
