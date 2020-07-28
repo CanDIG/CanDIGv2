@@ -38,10 +38,11 @@ services:
         target: site.key
       - source: traefik-ssl-crt
         target: site.crt
-    environment:
-      - traefik_net=${DOCKER_NET}
-      - traefik_domain=${CANDIG_DOMAIN}
-      - traefik_swarm=${TRAEFIK_SWARM}
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
     command:
       - traefik
       - --api

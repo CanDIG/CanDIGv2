@@ -42,6 +42,11 @@ services:
         target: secret_key
       - source: aws-credentials
         target: ~/.aws/credentials
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
     entrypoint: ["mesos-master"]
     command:
       - --registry=in_memory
@@ -83,6 +88,11 @@ services:
         target: secret_key
       - source: aws-credentials
         target: ~/.aws/credentials
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
     entrypoint: ["mesos-slave"]
     command:
       - --work_dir=/var/lib/mesos

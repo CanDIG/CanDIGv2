@@ -26,4 +26,9 @@ services:
         - traefik.port=${AUTHORIZATION_SERVICE_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:authorization.${CANDIG_DOMAIN}
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
     command: ["--host", "0.0.0.0", "--port", "7000"]

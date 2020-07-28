@@ -1,0 +1,74 @@
+version: '3.7'
+
+services:
+
+  fluentd:
+    build:
+      context: $PWD/lib/logging/fluentd
+      args:
+        version: ${FLUENTD_VERSION}
+    image: ${DOCKER_REGISTRY}/fluentd:${FLUENTD_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${FLUENTD_PORT}:24224"
+      - "${FLUENTD_PORT}:24224/udp"
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${FLUENTD_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:fluentd.${CANDIG_DOMAIN}
+
+  elasticsearch:
+    image: elasticsearch:${ELASTIC_SEARCH_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${ELASTIC_SEARCH_HTTP_PORT}:9200"
+      - "${ELASTIC_SEARCH_TRANSPORT}:9300"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${ELASTIC_SEARCH_HTTP_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:elasticsearch.${CANDIG_DOMAIN}
+    environment:
+      - "discovery.type=single-node"
+
+  kibana:
+    image: kibana:${KIBANA_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${KIBANA_PORT}:5601"
+    depends_on:
+      - elasticsearch
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${KIBANA_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:kibana.${CANDIG_DOMAIN}

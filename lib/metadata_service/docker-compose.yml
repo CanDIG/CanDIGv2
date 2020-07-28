@@ -29,4 +29,9 @@ services:
       - DATASET_SERVICE_URL=${DATASET_SERVICE_URL}
       - METADATA_SERVICE_HOST=${METADATA_SERVICE_HOST}
       - METADATA_DEBUG=${METADATA_DEBUG}
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
     command: ["runserver", "0.0.0.0:8000"]

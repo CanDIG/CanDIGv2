@@ -25,10 +25,9 @@ services:
         - traefik.port=${CHORD_DRS_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:chord-drs.${CANDIG_DOMAIN}
-    # logging:
-    #   driver: "fluentd"
-    #   options:
-    #     tag: candig.{{.Name}}
-    #     fluentd-address: localhost:24224
-    #     tag: httpd.access
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
     command: ["--host", "0.0.0.0", "--port", "5000"]

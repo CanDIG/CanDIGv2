@@ -32,6 +32,11 @@ services:
         target: access_key
       - source: minio-secret-key
         target: secret_key
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
     command: ["server", "/data"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
