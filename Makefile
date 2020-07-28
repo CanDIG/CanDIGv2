@@ -324,6 +324,11 @@ tox-%:
 	git submodule update --init --recursive
 	dotenv -f .env run tox -e $*
 
+# TODO test docker config
+.PhONY: docker-config
+docker-config:
+	docker config create foo bar
+
 .PHONY: docker-net
 docker-net:
 	docker network create --driver bridge --subnet=$(DOCKER_BRIDGE_IP) --attachable bridge-net
@@ -448,15 +453,12 @@ ssl-cert:
 
 .PHONY: stack
 stack:
-	docker stack deploy \
-		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
-		$(foreach MODULE, $(CANDIG_MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-		CanDIGv2
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) stack-$(MODULE);)
 
 stack-%:
 	docker stack deploy \
 		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
-		--compose-file $(DIR)/lib/$*/docker-compose.yml CanDIGv2
+		--compose-file $(DIR)/lib/$*/docker-compose.yml $(DOCKER_NAMESPACE)
 
 .PHONY: swarm-init
 swarm-init:
