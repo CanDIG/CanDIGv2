@@ -50,6 +50,11 @@ services:
         target: ~/.aws/credentials
       - source: wes-dependency-resolver
         target: dependency_resolver.yml
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
     entrypoint:
       - ./mesos-wes.sh
       - --backend=${WES_BACKEND}
@@ -95,6 +100,11 @@ services:
         target: secret_key
       - source: aws-credentials
         target: ~/.aws/credentials
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
     entrypoint: ["mesos-slave"]
     command:
       - --work_dir=/var/lib/mesos

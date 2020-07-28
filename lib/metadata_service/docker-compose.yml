@@ -24,9 +24,14 @@ services:
         - traefik.enable=true
         - traefik.port=${METADATA_SERVICE_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:metadata_service.${CANDIG_DOMAIN}
+        - traefik.frontend.rule=Host:metadata-service.${CANDIG_DOMAIN}
     environment:
       - DATASET_SERVICE_URL=${DATASET_SERVICE_URL}
       - METADATA_SERVICE_HOST=${METADATA_SERVICE_HOST}
       - METADATA_DEBUG=${METADATA_DEBUG}
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
     command: ["runserver", "0.0.0.0:8000"]

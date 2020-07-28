@@ -1,4 +1,3 @@
-# tested on docker-engine 18.06.0
 version: '3.7'
 
 networks:
@@ -23,6 +22,12 @@ volumes:
   toil-jobstore:
     external: true
   portainer-data:
+    external: true
+  prometheus-data:
+    external: true
+  consul-data:
+    external: true
+  grafana-data:
     external: true
 
 secrets:

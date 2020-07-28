@@ -54,6 +54,9 @@ make bin-all
 # download miniconda package
 make bin-conda
 
+#download kompose (for kubernetes deployment)
+make bin-kompose
+
 # download kubectl (for kubernetes deployment)
 make bin-kubectl
 
@@ -177,7 +180,7 @@ mkdir:
 print-%:
 	@echo '$*=$($*)'
 
-bin-all: bin-conda bin-kompose bin-kubectl bin-minikube bin-minio bin-prometheus
+bin-all: bin-conda bin-kompose bin-kubectl bin-minikube bin-minio bin-traefik bin-prometheus
 
 bin-conda: mkdir
 ifeq ($(VENV_OS), linux)
@@ -189,6 +192,10 @@ ifeq ($(VENV_OS), darwin)
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
 endif
 	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
+
+bin-kompose: mkdir
+	curl -L https://github.com/kubernetes/kompose/releases/download/v1.21.0/kompose-$(VENV_OS)-amd64 -o $(DIR)/bin/kompose
+	chmod 755 $(DIR)/bin/kubectl
 
 bin-kubectl: mkdir
 	$(eval KUBECTL_VERSION = \
@@ -256,6 +263,16 @@ clean-containers:
 clean-images:
 	docker image prune -a -f
 
+.PHONY: clean-kubernetes
+clean-kubernetes:
+	$(DIR)/bin/kompose --file $(DIR)/lib/kubernetes/docker-compose.yml \
+		$(foreach MODULE, $(CANDIG_MODULES), --file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+		down
+
+.PHONY: clean-minikube
+clean-minikube:
+	$(DIR)/bin/minikube delete
+
 .PHONY: clean-networks
 clean-networks:
 	docker network prune -f
@@ -307,6 +324,11 @@ tox-%:
 	git submodule update --init --recursive
 	dotenv -f .env run tox -e $*
 
+# TODO test docker config
+.PhONY: docker-config
+docker-config:
+	docker config create foo bar
+
 .PHONY: docker-net
 docker-net:
 	docker network create --driver bridge --subnet=$(DOCKER_BRIDGE_IP) --attachable bridge-net
@@ -335,13 +357,16 @@ docker-secrets: minio-secrets
 
 .PHONY: docker-volumes
 docker-volumes:
+	docker volume create consul-data
 	docker volume create datasets-data
+	docker volume create grafana-data
+	docker volume create jupyter-data
+	docker volume create mc-config
 	docker volume create minio-config
 	docker volume create minio-data $(MINIO_VOLUME_OPT)
-	docker volume create mc-config
-	docker volume create toil-jobstore
 	docker volume create portainer-data
-	docker volume create jupyter-data
+	docker volume create prometheus-data
+	docker volume create toil-jobstore
 
 .PHONY: images
 images: toil-docker
@@ -363,36 +388,37 @@ init-conda: bin-all minio-secrets
 init-docker: docker-net docker-volumes ssl-cert init-$(DOCKER_MODE) init-conda
 	git submodule update --init --recursive
 
-# FIXME: deploy a standalone k8s cluster with docker-compose @p :0
 .PHONY: init-kubernetes
-init-kubernetes: bin-kubectl init-swarm
+init-kubernetes: bin-all
+	$(DIR)/bin/kubectl create namespace candig
+
 
 .PHONY: init-swarm
 init-swarm: swarm-init swarm-net swarm-secrets
 
 .PHONY: kubernetes
 kubernetes:
-	docker stack deploy \
-		--orchestrator $(DOCKER_MODE) \
-		--namespace $(DOCKER_NAMESPACE) \
-		--compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
-		$(foreach MODULE, $(CANDIG_MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-		CanDIGv2
+	$(DIR)/bin/kompose --file $(DIR)/lib/kubernetes/docker-compose.yml \
+		$(foreach MODULE, $(CANDIG_MODULES), --file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+		up
+
+	# docker stack deploy \
+	# 	--orchestrator $(DOCKER_MODE) \
+	# 	--namespace $(DOCKER_NAMESPACE) \
+	# 	--compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
+	# 	$(foreach MODULE, $(CANDIG_MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+	# 	CanDIGv2
 
 kube-%:
-	docker stack deploy \
-		--orchestrator $(DOCKER_MODE) \
-		--namespace $(DOCKER_NAMESPACE) \
-		--compose-file $(DIR)/lib/$(DOCKER_MODE)/docker-compose.yml \
-		--compose-file $(DIR)/lib/$*/docker-compose.yml \
-		$*
+	$(DIR)/bin/kompose --file $(DIR)/lib/kubernetes/docker-compose.yml \
+		--file $(DIR)/lib/$*/docker-compose.yml up
 
-# TODO: add singularity option for minikube @p :0
 .PHONY: minikube
-minikube: bin-minikube
-	minikube start --bootstrapper kubeadm --container-runtime $(MINIKUBE_CRI) \
+minikube:
+	$(DIR)/bin/minikube start --container-runtime $(MINIKUBE_CRI) \
 		--cpus $(MINIKUBE_CPUS) --memory $(MINIKUBE_MEM) --disk-size $(MINIKUBE_DISK) \
-		--network-plugin cni --enable-default-cni --vm-driver $(MINIKUBE_DRIVER)
+		--network-plugin cni --cni $(MINIKUBE_CNI) --driver $(MINIKUBE_DRIVER) \
+		--dns-domain $(CANDIG_DOMAIN) --nodes $(MINIKUBE_NODES)
 
 minio-secrets:
 	echo admin > minio-access-key
@@ -427,15 +453,12 @@ ssl-cert:
 
 .PHONY: stack
 stack:
-	docker stack deploy \
-		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
-		$(foreach MODULE, $(CANDIG_MODULES), --compose-file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-		CanDIGv2
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) stack-$(MODULE);)
 
 stack-%:
 	docker stack deploy \
 		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
-		--compose-file $(DIR)/lib/$*/docker-compose.yml CanDIGv2
+		--compose-file $(DIR)/lib/$*/docker-compose.yml $(DOCKER_NAMESPACE)
 
 .PHONY: swarm-init
 swarm-init:

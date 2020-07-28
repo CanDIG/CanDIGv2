@@ -6,11 +6,18 @@ services:
     networks:
       - ${DOCKER_NET}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "${TRAEFIK_HTTP_PORT}:80"
-      - "${TRAEFIK_HTTPS_PORT}:443"
-      - "${TRAEFIK_UI_PORT}:8080"
+      - target: 80
+        published: ${TRAEFIK_HTTP_PORT}
+        mode: host
+      - target: 443
+        published: ${TRAEFIK_HTTPS_PORT}
+        mode: host
+      - target: 8080
+        published: ${TRAEFIK_UI_PORT}
+        protocol: tcp
+        mode: ingress
     deploy:
       placement:
         constraints:
@@ -31,10 +38,11 @@ services:
         target: site.key
       - source: traefik-ssl-crt
         target: site.crt
-    environment:
-      - traefik_net=${DOCKER_NET}
-      - traefik_domain=${CANDIG_DOMAIN}
-      - traefik_swarm=${TRAEFIK_SWARM}
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
     command:
       - traefik
       - --api
@@ -49,3 +57,5 @@ services:
       - --entryPoints="Name:http Address::${TRAEFIK_HTTP_PORT} Redirect.EntryPoint:https"
       - --entryPoints="Name:https Address::${TRAEFIK_HTTPS_PORT} TLS:/run/secrets/site.crt,/run/secrets/site.key"
       - --kubernetes
+      - --metrics
+      - --metrics.prometheus.buckets=0.1,0.3,1.2,5.0

@@ -1,58 +1,36 @@
-# tested on docker-engine 18.06.0
 version: '3.7'
 
 networks:
   bridge:
-    external: true
   bridge-net:
-    external: true
   traefik-net:
-    external: true
   agent-net:
-    external: true
 
 volumes:
   datasets-data:
-    external: true
   minio-data:
-    external: true
   minio-config:
-    external: true
   mc-config:
-    external: true
   toil-jobstore:
-    external: true
   portainer-data:
-    external: true
-
-#secrets:
-  #minio-access-key:
-    #file: $PWD/minio-access-key
-  #minio-secret-key:
-    #file: $PWD/minio-secret-key
-  #portainer-user:
-    #file: $PWD/portainer-user
-  #portainer-secret:
-    #file: $PWD/portainer-secret
-  #traefik-ssl-key:
-    #file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.key
-  #traefik-ssl-crt:
-    #file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.crt
-  #wes-dependency-resolver:
-    #file: $PWD/etc/yml/$WES_DEPENDENCY_RESOLVER
+  prometheus-data:
+  consul-data:
+  grafana-data:
 
 secrets:
+  aws-credentials:
+    file: $PWD/aws-credentials
   minio-access-key:
-    external: true
+    file: $PWD/minio-access-key
   minio-secret-key:
-    external: true
+    file: $PWD/minio-secret-key
   portainer-user:
-    external: true
+    file: $PWD/portainer-user
   portainer-key:
-    external: true
+    file: $PWD/portainer-key
   traefik-ssl-key:
-    external: true
+    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.key
   traefik-ssl-crt:
-    external: true
+    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.crt
   wes-dependency-resolver:
-    eternal: true
+    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}
