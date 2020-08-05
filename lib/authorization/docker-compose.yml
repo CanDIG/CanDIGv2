@@ -6,7 +6,7 @@ services:
       context: $PWD/lib/authorization
       args:
         # authorization needs py3.6
-        venv_python: 3.6
+        venv_python: '3.6'
     image: ${DOCKER_REGISTRY}/authorization:${AUTHORIZATION_SERVICE_VERSION:-latest}
     networks:
       - ${DOCKER_NET}

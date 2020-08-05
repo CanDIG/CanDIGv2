@@ -5,7 +5,7 @@ services:
     build:
       context: $PWD/lib/drs-server
       args:
-        venv_python: ${VENV_PYTHON}
+        venv_python: "${VENV_PYTHON}"
     image: ${DOCKER_REGISTRY}/chord-drs:${CHORD_DRS_VERSION:-latest}
     networks:
       - ${DOCKER_NET}

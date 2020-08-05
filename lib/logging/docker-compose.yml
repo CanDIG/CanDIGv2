@@ -6,7 +6,7 @@ services:
     build:
       context: $PWD/lib/logging/fluentd
       args:
-        version: ${FLUENTD_VERSION}
+        version: "${FLUENTD_VERSION}"
     image: ${DOCKER_REGISTRY}/fluentd:${FLUENTD_VERSION:-latest}
     networks:
       - ${DOCKER_NET}

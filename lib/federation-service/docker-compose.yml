@@ -5,7 +5,7 @@ services:
     build:
       context: $PWD/lib/federation-service
       args:
-        venv_python: ${VENV_PYTHON}
+        venv_python: "${VENV_PYTHON}"
     image: ${DOCKER_REGISTRY}/federation-service:${FEDERATION_SERVICE_VERSION:-latest}
     networks:
       - ${DOCKER_NET}

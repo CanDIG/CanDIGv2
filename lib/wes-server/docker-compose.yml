@@ -5,8 +5,8 @@ services:
     build:
       context: $PWD/lib/wes-server
       args:
-        toil_version: ${TOIL_VERSION}
-        wes_version: ${WES_VERSION}
+        toil_version: "${TOIL_VERSION}"
+        wes_version: "${WES_VERSION}"
     image: ${DOCKER_REGISTRY}/wes-server:${WES_VERSION:-latest}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw

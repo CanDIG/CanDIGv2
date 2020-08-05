@@ -5,7 +5,7 @@ services:
     build:
       context: $PWD/lib/datasets
       args:
-        venv_python: ${VENV_PYTHON}
+        venv_python: "${VENV_PYTHON}"
     image: ${DOCKER_REGISTRY}/datasets:${DATASETS_SERVICE_VERSION:-latest}
     volumes:
       - datasets-data:/app/datasets_service/tmp
