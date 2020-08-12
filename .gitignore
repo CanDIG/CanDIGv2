@@ -1,13 +1,3 @@
-#secrets
-minio-access-key
-minio-secret-key
-aws-credentials
-portainer-user
-portainer-key
-portainer-secret
-swarm-manager-token
-swarm-worker-token
-
 #data files/directories
 *.bam
 /data

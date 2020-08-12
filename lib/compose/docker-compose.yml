@@ -5,6 +5,8 @@ networks:
     external: true
   bridge-net:
     external: true
+  ingress:
+    external: true
   traefik-net:
     external: true
   agent-net:
@@ -30,20 +32,23 @@ volumes:
   grafana-data:
     external: true
 
+configs:
+  wes-dependency-resolver:
+    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
+
 secrets:
   aws-credentials:
-    file: $PWD/aws-credentials
+    file: $PWD/tmp/secrets/aws-credentials
   minio-access-key:
-    file: $PWD/minio-access-key
+    file: $PWD/tmp/secrets/minio-access-key
   minio-secret-key:
-    file: $PWD/minio-secret-key
+    file: $PWD/tmp/secrets/minio-secret-key
   portainer-user:
-    file: $PWD/portainer-user
-  portainer-key:
-    file: $PWD/portainer-key
+    file: $PWD/tmp/secrets/portainer-user
+  portainer-secret:
+    file: $PWD/tmp/secrets/portainer-secret
   traefik-ssl-key:
-    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.key
+    file: $PWD/tmp/secrets/etc/ssl/${TRAEFIK_SSL_CERT}.key
   traefik-ssl-crt:
-    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.crt
-  wes-dependency-resolver:
-    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}
+    file: $PWD/tmp/secrets/etc/ssl/${TRAEFIK_SSL_CERT}.crt
+

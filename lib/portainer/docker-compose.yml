@@ -51,6 +51,6 @@ services:
     secrets:
       - source: portainer-user
         target: user_name
-      - source: portainer-key
+      - source: portainer-secret
         target: secret_key
 
