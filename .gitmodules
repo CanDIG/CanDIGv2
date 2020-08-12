@@ -25,3 +25,6 @@
 [submodule "lib/authorization/candig_authz_service"]
 	path = lib/authorization/candig_authz_service
 	url = https://github.com/CanDIG/candig_authz_service
+[submodule "lib/chord-metadata/chord_metadata_service"]
+	path = lib/chord-metadata/chord_metadata_service
+	url = https://github.com/c3g/chord_metadata_service.git

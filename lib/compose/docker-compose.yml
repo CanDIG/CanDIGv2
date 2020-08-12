@@ -39,6 +39,12 @@ configs:
 secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials
+  metadata-app-secret:
+    file: $PWD/tmp/secrets/metadata-app-secret
+  metadata-db-user:
+    file: $PWD/tmp/secrets/metadata-db-user
+  metadata-db-secret:
+    file: $PWD/tmp/secrets/metadata-db-secret
   minio-access-key:
     file: $PWD/tmp/secrets/minio-access-key
   minio-secret-key:

@@ -39,6 +39,12 @@ configs:
 secrets:
   aws-credentials:
     external: true
+  metadata-app-secret:
+    external: true
+  metadata-db-user:
+    external: true
+  metadata-db-secret:
+    external: true
   minio-access-key:
     external: true
   minio-secret-key:
