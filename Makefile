@@ -28,6 +28,7 @@ mkdir:
 	mkdir -p $(DIR)/tmp/configs
 	mkdir -p $(DIR)/tmp/data
 	mkdir -p $(DIR)/tmp/secrets
+	mkdir -p $(DIR)/tmp/ssl
 
 #>>>
 # download all package binaries
@@ -170,7 +171,7 @@ clean-bin:
 #<<<
 .PHONY: clean-certs
 clean-certs:
-	rm -f $(DIR)/etc/ssl/selfsigned-*
+	rm -f $(DIR)/tmp/ssl/selfsigned-*
 
 #TODO: test/verify clean-compose works
 #>>>
@@ -536,22 +537,22 @@ secret-%:
 
 #<<<
 ssl-cert:
-	openssl genrsa -out $(DIR)/etc/ssl/selfsigned-root-ca.key 4096
-	openssl req -new -key $(DIR)/etc/ssl/selfsigned-root-ca.key \
-		-out $(DIR)/etc/ssl/selfsigned-root-ca.csr -sha256 \
+	openssl genrsa -out $(DIR)/tmp/ssl/selfsigned-root-ca.key 4096
+	openssl req -new -key $(DIR)/tmp/ssl/selfsigned-root-ca.key \
+		-out $(DIR)/tmp/ssl/selfsigned-root-ca.csr -sha256 \
 		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed CA'
-	openssl x509 -req -days 3650 -in $(DIR)/etc/ssl/selfsigned-root-ca.csr \
-		-signkey $(DIR)/etc/ssl/selfsigned-root-ca.key -sha256 \
-		-out $(DIR)/etc/ssl/selfsigned-root-ca.crt \
+	openssl x509 -req -days 3650 -in $(DIR)/tmp/ssl/selfsigned-root-ca.csr \
+		-signkey $(DIR)/tmp/ssl/selfsigned-root-ca.key -sha256 \
+		-out $(DIR)/tmp/ssl/selfsigned-root-ca.crt \
 		-extfile $(DIR)/etc/ssl/root-ca.cnf -extensions root_ca
-	openssl genrsa -out $(DIR)/etc/ssl/selfsigned-site.key 4096
-	openssl req -new -key $(DIR)/etc/ssl/selfsigned-site.key \
-		-out $(DIR)/etc/ssl/selfsigned-site.csr -sha256 \
+	openssl genrsa -out $(DIR)/tmp/ssl/selfsigned-site.key 4096
+	openssl req -new -key $(DIR)/tmp/ssl/selfsigned-site.key \
+		-out $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
 		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed Cert'
-	openssl x509 -req -days 750 -in $(DIR)/etc/ssl/selfsigned-site.csr -sha256 \
-		-CA $(DIR)/etc/ssl/selfsigned-root-ca.crt \
-		-CAkey $(DIR)/etc/ssl/selfsigned-root-ca.key \
-		-CAcreateserial -out $(DIR)/etc/ssl/selfsigned-site.crt \
+	openssl x509 -req -days 750 -in $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
+		-CA $(DIR)/tmp/ssl/selfsigned-root-ca.crt \
+		-CAkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
+		-CAcreateserial -out $(DIR)/tmp/ssl/selfsigned-site.crt \
 		-extfile $(DIR)/etc/ssl/site.cnf -extensions server
 
 #>>>
@@ -623,8 +624,8 @@ swarm-secrets:
 	docker secret create aws-credentials $(DIR)/tmp/secrets/aws-credentials
 	docker secret create portainer-user $(DIR)/tmp/secrets/portainer-user
 	docker secret create portainer-secret $(DIR)/tmp/secrets/portainer-secret
-	docker secret create traefik-ssl-key $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).key
-	docker secret create traefik-ssl-crt $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).crt
+	docker secret create traefik-ssl-key $(DIR)/tmp/ssl/$(TRAEFIK_SSL_CERT).key
+	docker secret create traefik-ssl-crt $(DIR)/tmp/ssl/$(TRAEFIK_SSL_CERT).crt
 	docker secret create metadata-app-secret $(DIR)/tmp/secrets/metadata-app-secret
 	docker secret create metadata-db-user $(DIR)/tmp/secrets/metadata-db-user
 	docker secret create metadata-db-secret $(DIR)/tmp/secrets/metadata-db-secret
