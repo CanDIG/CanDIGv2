@@ -147,4 +147,3 @@ To deploy CanDIGv2, follow one of the available install guides in `docs/`:
 * [Tox Deployment Guide](./docs/install-tox.md)
 
 View additional Makefile options with `make help`.
-

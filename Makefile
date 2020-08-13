@@ -672,4 +672,3 @@ print-%:
 help:
 	@sed -n -e '/^#>>>/,/^#<<</ { /^#>>>/d; /^#<<</d; p; }' Makefile \
 		| sed 's/# make/make/g'
-
