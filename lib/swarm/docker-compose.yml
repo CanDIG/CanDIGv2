@@ -59,4 +59,3 @@ secrets:
     external: true
   traefik-ssl-crt:
     external: true
-

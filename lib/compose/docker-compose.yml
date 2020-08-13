@@ -59,4 +59,3 @@ secrets:
     file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.key
   traefik-ssl-crt:
     file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.crt
-
