@@ -9,8 +9,8 @@ services:
     build:
       context: $PWD/lib/monitoring/prometheus
       args:
-        version: "${PROMETHEUS_VERSION}"
-    image: ${DOCKER_REGISTRY}/prometheus:${PROMETHEUS_VERSION:-latest}
+        version: "v${PROMETHEUS_VERSION}"
+    image: ${DOCKER_REGISTRY}/prometheus:v${PROMETHEUS_VERSION:-latest}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - prometheus-data:/prometheus
@@ -69,7 +69,7 @@ services:
     build:
       context: $PWD/lib/monitoring/alertmanager
       args:
-        version: "{ALERT_MANAGER_VERSION}"
+        version: "${ALERT_MANAGER_VERSION}"
     image: ${DOCKER_REGISTRY}/alertmanager:${ALERT_MANAGER_VERSION:-latest}
     ports:
       - "${ALERT_MANAGER_PORT}:9093"
