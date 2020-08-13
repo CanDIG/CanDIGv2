@@ -92,69 +92,42 @@ sudo systemctl start docker
 sudo usermod -aG docker $(whoami)
 ```
 
-## Install gVisor (Deprecated)
+## Initialize CanDIGv2 Repo
 
 ```bash
-wget https://storage.googleapis.com/gvisor/releases/nightly/latest/runsc
-wget https://storage.googleapis.com/gvisor/releases/nightly/latest/runsc.sha512
-sha512sum -c runsc.sha512
-chmod a+x runsc
-sudo mv runsc /usr/local/bin
-rm runsc.sha512
+# 1. initialize repo and submodules
+git clone -b stable https://github.com/CanDIG/CanDIGv2.git
+git submodule update --init --recursive
 
-sudo mkdir -p /etc/docker
+# 2. fetch binaries and initialize candig virtualenv
+make bin-all
+make init-conda
+source etc/venv/activate.sh
 
-# change storage-driver to overlay2 if OS does not use BTRFS filesystem
-# change network portion (x.x.0.1/16) of bip if subnet is already used in local network
-# change platform for runsc to kvm if kvm on available on host or guest VM is not KVM
-# change network from sandbox to host if you want to use host network stack
-# change runsc overlay to true if you want to persist modifications to running containers
-
-sudo bash -c 'cat > /etc/docker/daemon.json << EOF
-{
-  "storage-driver": "overlay2",
-  "bip": "11.11.0.1/16",
-  "features": {
-    "buildkit": true
-  },
-  "runtimes": {
-    "runsc": {
-      "path": "/usr/local/bin/runsc",
-        "runtimeArgs": [
-          "--platform=ptrace",
-          "--network=sandbox",
-          "--overlay=false"
-        ]
-    }
-  }
-}
-EOF'
-
-sudo systemctl restart docker
+# 3. copy and edit .env with your site's local configuration
+cp -i etc/env/example.env .env
 ```
 
-## Install CanDIGv2 Dependencies
+## Create CanDIGv2 Development VM
 
-1. Clone/pull latest CanDIGv2 code from `https://github.com/CanDIG/CanDIGv2.git`
+Using the provided steps will help to create a `docker-machine` cluster on VirtualBox. The `make` CLI can also be used to provision and connect a multi-vm Swarm cluster. Users are encouraged to use this docker environment for CanDIGv2 development as it provides an isolated domain from the host environment, increasing security and reducing conflicts with host processes. Modify the `MINIKUBE_*` options in `.env`, then launch a single-node or multi-node `docker-machine` with `make machine-$vm_name`, where `$vm_name` is a unique vm name.
 
-2. Create/modify `.env` file
+To build a development swarm cluster run the following:
 
-* `cp -i etc/env/example.env .env`
-* Edit `.env` with your site's local configuration
+* create a swarm manager with `make machine-manager`, additional nodes with `make machine-manager2`...
+* create a swarm worker with `make machine-worker`, additional nodes with `make machine-worker2`...
 
-## Create CanDIGv2 Cluster
+To switch your local docker-client to use `docker-machine`, run `eval $(bin/docker-machine env manager)`. Add this line into `bashrc`  with `bin/docker-machine env manager >> $HOME/.bashrc` in order to set `docker-machine` as the default `$DOCKER_HOST` for all shells.
+
+You can move on to the initialize instructions for Docker.
+
+## Initialize CanDIGv2 (Docker)
+
+The following commands will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Only perform these actions once as it will override any previous configurations and secrets. Once completed, you can deploy a Compose or Swarm stack.
 
 ```bash
-# view helpful commands
-make
-
-# initialize
+# initialize docker environment
 make init-docker
-
-# activate conda
-source ./bin/miniconda3/etc/profile.d/conda.sh
-conda activate $VENV_NAME
-pip install -r ./etc/venv/requirements.txt
 ```
 
 ## Deploy CanDIGv2 Services (Compose)
@@ -170,20 +143,32 @@ make docker-pull
 make compose
 
 # push updated images to $DOCKER_REGISTRY (optional)
-docker login && make docker-push
+docker login
+make docker-push
 ```
 
 ## Deploy CanDIGv2 Services (Swarm)
+> Note: swarm deployment requires minimum 2 nodes connected (1 manager, 1 worker)
+
+1. Create initial manager node
 
 ```bash
-# deploy stack (if using docker-swarm environment)
-# requires minimum 2 nodes connected (1 manager, 1 worker)
-
-# create initial manager node
+eval $(bin/docker-machine env manager)
 make init-swarm
+```
 
-# add additional manager/worker nodes
+2. Add additional manager/worker nodes
+
+```bash
+# set the SWARM_MODE and SWARM_MANAGER_IP in .env
+eval $(bin/docker-machine env worker)
 make swarm-join
+```
+
+3. Deploy CanDIGv2 stack on the docker swarm
+
+```bash
+eval $(bin/docker-machine env manager)
 
 # check cluster status (READY:ACTIVE)
 docker node ls
@@ -192,78 +177,46 @@ docker node ls
 make stack
 ```
 
-## Create CanDIGv2 Minikube VM
-
-This method is still experimental but should be able to provide a means to convert existing CanDIGv2 `docker-compose.yml` into native kubernetes service definitions. Using the provided steps will help to create a dev minikube cluster where you can test kubernetes deployments. If the stack successfully deploys on the minikube vm, is stable, and passes all QA steps, it can be reasonably assumed that the `kompose` build will work with other kubernetes clusters (i.e. Azure AKS/Amazon EKS).
-
-The minikube CLI can also be used to provision a multi-vm cluster using the vm hypervisor options in `.env`. Modify the `MINIKUBE_*` options in `.env`, then launch a single-node or multi-node kubernetes cluster with:
-
-```bash
-make minikube
-```
-
-The minikube vm can be doubly used as a `docker node`, allowing developers to reuse the vm as a docker api host and/or a docker swarm manager/worker. To switch the current `$DOCKER_HOST` to minikube, use:
-
-```bash
-eval $($PWD/bin/minikube docker-env)
-$PWD/bin/minikube kubectl
-```
-
-Users are encouraged to use this docker environment for CanDIGv2 development as it provides an isolated domain from the host environment, increasing security and reducing conflicts with host processes.
-
-### Deploy CanDIGv2 Services (Kubernetes)
-
-```bash
-# deploy kubernetes (if using minikube/kubernetes environment)
-# requires running minikube vm or kubectl context for existing cluster
-
-# create initial namespace
-make init-kubernetes
-
-# deploy CanDIGv2 services
-make kubernetes
-```
-
 ## Cleanup CanDIGv2 Compose/Swarm Environment
 
-Use the following steps to clean up running CanDIGv2 services in a docker-compose configuration. *Note* that these steps are destructive and will remove **ALL** containers, secrets, volumes, networks, certs, and images. If you are using docker in a shared environment (i.e. with other non-CanDIGv2 containers running) please consider running the cleanup steps manually instead.
+Use the following steps to clean up running CanDIGv2 services in a docker-compose configuration. Note that these steps are destructive and will remove **ALL** containers, secrets, volumes, networks, certs, and images. If you are using docker in a shared environment (i.e. with other non-CanDIGv2 containers running) please consider running the cleanup steps manually instead.
 
 The following steps are performed by `make clean-all`:
 
 ```bash
 # 1. stop and remove running stacks
 make clean-stack
+make clean-compose
 
 # 2. stop and remove remaining containers
 make clean-containers
 
-# 3. remove all secrets from docker and local dir
+# 3. remove all configs/secrets from docker and local dir
 make clean-secrets
+make clean-configs
 
-# 4. remove all docker volumes
+# 4. remove all docker volumes and local data dir
 make clean-volumes
 
-# 5. leave swarm-cluster
-make clean-swarm
-
-# 6. remove all unused networks
+# 5. remove all unused networks
 make clean-networks
 
-# 7. delete all cached images
+# 6. delete all cached images
 make clean-images
 
-# 8. remove selfsigned-certs (including root ca)
+# 7. leave swarm-cluster
+make clean-swarm
+
+# 8. destroy all docker-machine instances
+make clean-machines
+
+# 9. remove selfsigned-certs (including root-ca)
 make clean-certs
 
-# 9. remove conda environment
+# 10. remove conda environment
 make clean-conda
 
-# 10. remove bin dir (inlcuding miniconda)
+# 11. remove bin dir (inlcuding miniconda)
 make clean-bin
 ```
 
-## Cleanup CanDIGv2 Kubernetes Environment
-
-```bash
-TODO: complete this section
-```

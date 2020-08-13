@@ -1,6 +1,6 @@
 [submodule "lib/toil/toil-docker"]
 	path = lib/toil/toil-docker
-	url = git@github.com:CanDIG/toil.git
+	url = https://github.com/DataBiosphere/toil.git
 [submodule "lib/htsget-server/htsget_app"]
 	path = lib/htsget-server/htsget_app
 	url = https://github.com/canDIG/htsget_app
@@ -25,3 +25,6 @@
 [submodule "lib/authorization/candig_authz_service"]
 	path = lib/authorization/candig_authz_service
 	url = https://github.com/CanDIG/candig_authz_service
+[submodule "lib/chord-metadata/chord_metadata_service"]
+	path = lib/chord-metadata/chord_metadata_service
+	url = https://github.com/c3g/chord_metadata_service.git

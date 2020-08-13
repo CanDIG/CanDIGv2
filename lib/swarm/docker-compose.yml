@@ -5,6 +5,8 @@ networks:
     external: true
   bridge-net:
     external: true
+  ingress:
+    external: true
   traefik-net:
     external: true
   agent-net:
@@ -30,8 +32,18 @@ volumes:
   grafana-data:
     external: true
 
+configs:
+  wes-dependency-resolver:
+    external: true
+
 secrets:
   aws-credentials:
+    external: true
+  metadata-app-secret:
+    external: true
+  metadata-db-user:
+    external: true
+  metadata-db-secret:
     external: true
   minio-access-key:
     external: true
@@ -39,12 +51,10 @@ secrets:
     external: true
   portainer-user:
     external: true
-  portainer-key:
+  portainer-secret:
     external: true
   traefik-ssl-key:
     external: true
   traefik-ssl-crt:
-    external: true
-  wes-dependency-resolver:
     external: true
 

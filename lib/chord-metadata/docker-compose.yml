@@ -1,0 +1,99 @@
+version: '3.7'
+
+services:
+  chord-metadata:
+    build:
+      context: $PWD/lib/chord-metadata
+      args:
+        venv_python: "${VENV_PYTHON}"
+    image: ${DOCKER_REGISTRY}/chord-metadata:${CHORD_METADATA_VERSION:-latest}
+    #volumes:
+      #- chord-metadata-data:/data
+      #add volume name to lib/{compose,swarm,kubernetes}
+      #add volume name to docker-volumes in Makefile
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${CHORD_METADATA_PORT}:8000"
+    depends_on:
+      - metadata-db
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${CHORD_METADATA_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:chord-metadata.${CANDIG_DOMAIN}
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
+    environment:
+      - CHORD_URL="${CHORD_METADATA_HOST}"
+      - CHORD_PERMISSIONS="${CHORD_METADATA_AUTH}"
+      - CHORD_DEBUG="${CHORD_METADATA_DEBUG}"
+    secrets:
+      - source: metadata-app-secret
+        target: /app/chord_metadata_service/metadata/secrets.py
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        python manage.py makemigrations
+        python manage.py migrate
+        python manage.py runserver
+    #healthcheck:
+      #test: ["CMD", "curl", "-f", "http://localhost:8000/metrics"]
+      #interval: 30s
+      #timeout: 20s
+      #retries: 3
+
+  metadata-db:
+    image: postgres:13-alpine
+    #volumes:
+      #- chord-metadata-data:/data
+      #add volume name to lib/{compose,swarm,kubernetes}
+      #add volume name to docker-volumes in Makefile
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${CHORD_METADATA_PORT}:8000"
+    depends_on:
+      - metadata-db
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${CHORD_METADATA_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:chord-metadata.${CANDIG_DOMAIN}
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
+    # use entrypoint if you want to override default entrypoint
+    #entrypoint: []
+    # use command if image has dafault entrypoint
+    command: ["--host", "0.0.0.0", "--port", "8000"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/metrics"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+

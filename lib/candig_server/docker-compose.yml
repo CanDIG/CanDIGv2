@@ -5,7 +5,7 @@ services:
     build:
       context: $PWD/lib/candig_server
       args:
-        venv_python: 3.6
+        venv_python: '3.6'
     image: ${DOCKER_REGISTRY}/candig_server:${CANDIG_SERVER_VERSION}
     networks:
       - ${DOCKER_NET}

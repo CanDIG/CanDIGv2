@@ -3,6 +3,7 @@ version: '3.7'
 networks:
   bridge:
   bridge-net:
+  ingress:
   traefik-net:
   agent-net:
 
@@ -17,20 +18,29 @@ volumes:
   consul-data:
   grafana-data:
 
+configs:
+  wes-dependency-resolver:
+    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
+
 secrets:
   aws-credentials:
-    file: $PWD/aws-credentials
+    file: $PWD/tmp/secrets/aws-credentials
+  metadata-app-secret:
+    file: $PWD/tmp/secrets/metadata-app-secret
+  metadata-db-user:
+    file: $PWD/tmp/secrets/metadata-db-user
+  metadata-db-secret:
+    file: $PWD/tmp/secrets/metadata-db-secret
   minio-access-key:
-    file: $PWD/minio-access-key
+    file: $PWD/tmp/secrets/minio-access-key
   minio-secret-key:
-    file: $PWD/minio-secret-key
+    file: $PWD/tmp/secrets/minio-secret-key
   portainer-user:
-    file: $PWD/portainer-user
-  portainer-key:
-    file: $PWD/portainer-key
+    file: $PWD/tmp/secrets/portainer-user
+  portainer-secret:
+    file: $PWD/tmp/secrets/portainer-secret
   traefik-ssl-key:
-    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.key
+    file: $PWD/tmp/secrets/etc/ssl/${TRAEFIK_SSL_CERT}.key
   traefik-ssl-crt:
-    file: $PWD/etc/ssl/${TRAEFIK_SSL_CERT}.crt
-  wes-dependency-resolver:
-    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}
+    file: $PWD/tmp/secrets/etc/ssl/${TRAEFIK_SSL_CERT}.crt
+

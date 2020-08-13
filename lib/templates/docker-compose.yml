@@ -6,7 +6,7 @@ services:
       context: $PWD/lib/{{service_name}}
       #context: $PWD/lib/{{service_name}}/{{submodule_name}}
       args:
-        venv_python: ${VENV_PYTHON}
+        venv_python: "${VENV_PYTHON}"
     image: ${DOCKER_REGISTRY}/{{service_name}}:${{{service_version}}:-latest}
     #volumes:
       #- {{service_name}}-data:/data
@@ -48,9 +48,20 @@ services:
       options:
         tag: docker.{{.Name}}
         fluentd-async-connect: "true"
+    # WARNING: environment variables are world readable
+    # DO NOT pass secrets through here
+    environment:
+      - MINIO_REGION="${MINIO_REGION}"
+      - CANDIG_DOMAIN="${CANDIG_DOMAIN}"
+    # passes secrets to container as plaintext file (default: /run/secrets/<target>)
+    secrets:
+      - source: minio-access-key
+        target: access_key
+      - source: minio-secret-key
+        target: secret_key
     # use entrypoint if you want to override default entrypoint
     #entrypoint: []
-    # use command if image has dafault entrypoint
+    # use command if you want to add arguments to entrypoint
     command: ["--host", "0.0.0.0", "--port", "{{service_default_port}}"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:{{service_default_port}}/metrics"]

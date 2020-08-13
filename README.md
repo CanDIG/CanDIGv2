@@ -21,8 +21,8 @@ dataflow for genomic data.
                                                 +----------+---------+       | consul:8300      (tcp)     |
                   +-----------------------+     | traefik:8000 (tcp) |       |       :8400      (tcp)     |
                   | weave_app:4040  (tcp) +-----+        :80   (tcp) +-------+       :8500      (tcp)     |
-                  | wea|e_probe           |     |        :443  (tcp) |       |       :8502      (tcp)     |
-                  +-----------------------+     +----+-----+-----+---+       |       :8301+8302 (tcp/udp) |
+                  | weave_probe           |     |        :443  (tcp) |       |       :8502      (tcp)     |
+                  +-----------------------+     +----+-----+-----+---+       |       :8301-8302 (tcp/udp) |
                                                      |     |     |           |       :8600      (udp)     |
                                                      |     |     |           +----------------------------+
                                                      |     |     |
@@ -51,7 +51,7 @@ dataflow for genomic data.
                                                            |
 +---------------------------------+    +--------------------------------------+   +----------------------------+
 |    +-----------------------+    |    | +----------------------------------+ |   | +------------------------+ |
-|    | metadata_service:8008 |    |    | | authorization_service:7000 (tcp) | |   | | cnv_service:8870 (tcp) | |
+|    | chord_metadata:8008   |    |    | | authorization_service:7000 (tcp) | |   | | cnv_service:8870 (tcp) | |
 |    +-----------------------+    |    | +----------------------------------+ |   | +------------------------+ |
 | +-----------------------------+ +----+  +-------------------------------+   +---+                            |
 | | datasets_service:8880 (tcp) | |    |  | federation_service:4232 (tcp) |   |   |   +-------------------+    |
@@ -83,23 +83,30 @@ dataflow for genomic data.
 
 ```plaintext
 CanDIGv2/
-  ├── .env                        - global variables
-  ├── Makefile                    - actions for repeatable testing/deployment
-  ├── bin/                        - local binaries directory
-  ├── doc/                        - documentation for various aspects of CanDIGv2
-  ├── etc/                        - contains misc files/config/scripts
-  │   ├── docker/                 - docker configurations
-  │   ├── env/                    - sample env files for site.env
-  │   ├── ssl/                    - ssl rootCA/site configs and certs
-  │   ├── venv/                   - dependency files for virtualenvs (conda, pip, etc.)
-  │   └── yml/                    - various yaml based configs (toil, traefik, etc.)
-  └── lib/                        - contains modules of servies/apps
-     ├── compose/                 - set of base docker variables for Compose
-     ├── kubernetes/              - set of base docker variables for Kubernetes
-     ├── swarm/                   - set of base docker variables for Swarm
-     └── ga4gh-dos/               - example module, folder name = module name (i.e. make compose-ga4gh-dos)
-          ├── docker-compose.yml  - minimum requirement of module, contains deployment context
-          └── Dockerfile          - contains build context for module
+ ├── .env                          - global variables
+ ├── Makefile                      - functions for repeatable testing/deployment (Docker/Kubernetes)
+ ├── tox.ini                       - functions for repeatable testing/deployment (Python Venv/Screen)
+ ├── bin/                          - local binaries directory
+ ├── docs/                         - documentation for various aspects of CanDIGv2
+ ├── etc/                          - contains misc files/config/scripts
+ │    ├── docker/                  - docker configurations
+ │    ├── env/                     - sample env files for site.env
+ │    ├── ssl/                     - ssl root-ca/site configs and certs
+ │    ├── venv/                    - dependency files for virtualenvs (conda, pip, etc.)
+ │    └── yml/                     - various yaml based configs (toil, traefik, etc.)
+ ├── lib/                          - contains modules of servies/apps
+ │    ├── compose/                 - set of base docker variables for Compose
+ │    ├── kubernetes/              - set of base docker variables for Kubernetes
+ │    ├── swarm/                   - set of base docker variables for Swarm
+ │    ├── templates/               - set of template files used to create new module(s)
+ │    └── ga4gh-dos/               - example module, folder name = module name (e.g. make compose-ga4gh-dos)
+ │         ├── docker-compose.yml  - minimum requirement of module, contains deployment context
+ │         ├── Dockerfile          - contains build context for module
+ │         └── run.sh              - script which used for conda deployment (DEPRECATED)
+ └── tmp/                          - contains temporary files used for runtime functionality
+      ├── configs/                 - directory to store config files that are added to services post-deployment
+      ├── data/                    - directory to store local data for running services
+      └── secrets/                 - directory to store randomly generated secrets for service deployment
 ```
 
 ## `.env` Environment File
@@ -131,157 +138,12 @@ services:
 ...
 ```
 
-### `site.env` Site Overrides (Deprecated)
-
-~~The `site.env` file is an easy way to keep a set of overrides for the various parameters contained in `.env`. This file is read by `Makefile` and any corresponding values will override the global default for CanDIGv2. Site operators are encouraged to keep changes in `site.env` rather than in `.env` directly, as `.env` may be modified from time-to-time by the CanDIG development team. The `site.env` will always override the same global export value for `.env`. Please note that `site.env` will not be saved with repo by default (blocked in `.gitignore`). This is by design to allow developers to test different configurations of CanDIGv2.~~
-
 ## `make` Deployment
 
-```make
-# view available options
-make
+To deploy CanDIGv2, follow one of the available install guides in `docs/`:
 
-# initialize docker and create required docker networks
-make init-docker
+* [Docker Deployment Guide](./docs/install-docker.md)
+* [Kubernetes Deployment Guide](./docs/install-kubernetes.md)
+* [Tox Deployment Guide](./docs/install-tox.md)
 
-# initialize docker-compose environment
-make init-compose
-
-# initialize conda environment
-make init-conda
-
-# initialize kubernetes environment
-make init-kubernetes
-
-# initialize docker-swarm environment
-make init-swarm
-
-# create docker bridge networks
-make docker-net
-
-# pull images from $DOCKER_REGISTRY
-make docker-pull
-
-# push docker images to CanDIG repo
-make docker-push
-
-# create docker secrets for CanDIG services
-make docker-secrets
-
-# create persistant volumes for docker containers
-make docker-volumes
-
-# download all package binaries
-make bin-all
-
-# download miniconda package
-make bin-conda
-
-# download kubectl (for kubernetes deployment)
-make bin-kubectl
-
-# download latest minikube binary from Google repo
-make bin-minikube
-
-# download minio server/client
-make bin-minio
-
-# generate secrets for minio server/client
-make minio-secrets
-
-# create minikube environment for (kubernetes) integration testing
-make minikube
-
-# generate root-ca and site ssl certs using openssl
-make ssl-cert
-
-# initialize primary docker-swarm master node
-make swarm-init
-
-# join a docker swarm cluster using manager/worker token
-make swarm-join
-
-# create docker swarm compatbile secrets
-make swarm-secrets
-
-# (re)build service image for all modules
-make images
-
-# create toil images using upstream Toil repo
-make toil-docker
-
-# deploy/test all modules in $CANDIG_MODULES using docker-compose
-make compose
-
-# deploy/test all modules in $CANDIG_MODULES using docker stack
-make stack
-
-# deploy/test all modules in $CANDIG_MODULES using kubernetes
-make kubernetes
-
-# deploy/test all modules in $CANDIG_MODULES using conda
-make conda
-
-# deploys all modules using Tox
-make tox
-
-# deploys individual module using tox
-# $module is the name of the sub-folder in lib
-make tox-$module
-
-# deploy/test individual modules using conda
-# $module is the name of the sub-folder in lib/
-make conda-$module
-
-# (re)build service image and deploy/test using docker-compose
-# $module is the name of the sub-folder in lib/
-make build-$module
-
-# deploy/test individual modules using docker-compose
-# $module is the name of the sub-folder in lib/
-make compose-$module
-
-# deploy/test indivudual modules using docker stack
-# $module is the name of the sub-folder in lib/
-make stack-$module
-
-# run all cleanup functions
-make clean-all
-
-# clear downloaded binaries
-make clean-bin
-
-# clear selfsigned-certs
-make clean-certs
-
-# clear conda environment and secrets
-make clean-conda
-
-# stop all running containers and remove all run containers
-clean-containers
-
-# clear all screen sessions
-make clean-screens
-
-# clear swarm secrets
-make clean-secrets
-
-# remove all peristant volumes
-make clean-volumes
-
-# leave docker-swarm
-make clean-swarm
-
-# clear container networks
-make clean-networks
-
-# clear all images (including base images)
-make clean-images
-
-# cleanup for compose, preserves everything except services/containers
-make clean-compose
-
-# cleanup for stack/kubernetes, preserves everything except stack/services/containers
-make clean-stack
-```
-
+View additional Makefile options with `make help`.
