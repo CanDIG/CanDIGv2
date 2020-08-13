@@ -99,13 +99,13 @@ sudo usermod -aG docker $(whoami)
 git clone -b stable https://github.com/CanDIG/CanDIGv2.git
 git submodule update --init --recursive
 
-# 2. fetch binaries and initialize candig virtualenv
+# 2. copy and edit .env with your site's local configuration
+cp -i etc/env/example.env .env
+
+# 3. fetch binaries and initialize candig virtualenv
 make bin-all
 make init-conda
 source etc/venv/activate.sh
-
-# 3. copy and edit .env with your site's local configuration
-cp -i etc/env/example.env .env
 ```
 
 ## Create CanDIGv2 Development VM
