@@ -25,8 +25,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
+metadata_app_secret = open('/run/secrets/metadata_app_secret', 'r')
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk^q*7cb9(cd!wn1&_*osyc')
+SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", metadata_app_secret.read())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("CHORD_DEBUG", "true").lower() == "true"
@@ -150,13 +152,14 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
 #     }
 # }
 
+metadata_db_secret = open('/run/secrets/metadata_db_secret', 'r')
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get("POSTGRES_DATABASE", 'metadata'),
         'USER': os.environ.get("POSTGRES_USER", 'admin'),
-        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'admin'),
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", metadata_db_secret.read()),
 
         # Use sockets if we're inside a CHORD container / as a priority
         'HOST': os.environ.get("POSTGRES_SOCKET_DIR", os.environ.get("POSTGRES_HOST", "localhost")),

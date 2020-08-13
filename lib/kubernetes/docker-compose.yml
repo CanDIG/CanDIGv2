@@ -19,6 +19,8 @@ volumes:
   grafana-data:
 
 configs:
+  chord-metadata-settings:
+    external: true
   wes-dependency-resolver:
     file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
 
@@ -40,7 +42,6 @@ secrets:
   portainer-secret:
     file: $PWD/tmp/secrets/portainer-secret
   traefik-ssl-key:
-    file: $PWD/tmp/secrets/etc/ssl/${TRAEFIK_SSL_CERT}.key
+    file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.key
   traefik-ssl-crt:
-    file: $PWD/tmp/secrets/etc/ssl/${TRAEFIK_SSL_CERT}.crt
-
+    file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.crt
