@@ -33,6 +33,8 @@ volumes:
     external: true
 
 configs:
+  chord-metadata-settings:
+    external: true
   wes-dependency-resolver:
     external: true
 

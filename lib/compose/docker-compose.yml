@@ -33,6 +33,8 @@ volumes:
     external: true
 
 configs:
+  chord-metadata-settings:
+    file: $PWD/lib/chord-metadata/settings.py
   wes-dependency-resolver:
     file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
 

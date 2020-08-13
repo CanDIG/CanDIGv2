@@ -8,25 +8,27 @@ USER root
 
 RUN apk update
 
-RUN apk add \
+RUN apk add --no-cache \
 	autoconf \
 	automake \
-	make \
-	gcc \
-	linux-headers \
-	perl \
 	bash \
 	build-base \
-	musl-dev \
-	zlib-dev \
 	bzip2-dev \
-	xz-dev \
-	libcurl \
 	curl \
 	curl-dev \
-	yaml-dev \
+	gcc \
+	git \
+	libcurl \
 	libressl-dev \
-	git
+	linux-headers \
+	make \
+	musl-dev \
+	perl \
+	postgresql-dev \
+	postgresql-libs \
+	xz-dev \
+	yaml-dev \
+	zlib-dev
 
 RUN mkdir /app
 WORKDIR /app

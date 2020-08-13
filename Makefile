@@ -586,6 +586,7 @@ stack-%:
 #<<<
 .PHONY: swarm-configs
 swarm-configs:
+	docker config create chord-metadata-settings $(DIR)/lib/chord-metadata/settings.py
 	docker config create wes-dependency-resolver $(DIR)/etc/yml/$(WES_DEPENDENCY_RESOLVER).yml
 
 #<<<
@@ -624,6 +625,9 @@ swarm-secrets:
 	docker secret create portainer-secret $(DIR)/tmp/secrets/portainer-secret
 	docker secret create traefik-ssl-key $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).key
 	docker secret create traefik-ssl-crt $(DIR)/etc/ssl/$(TRAEFIK_SSL_CERT).crt
+	docker secret create metadata-app-secret $(DIR)/tmp/secrets/metadata-app-secret
+	docker secret create metadata-db-user $(DIR)/tmp/secrets/metadata-db-user
+	docker secret create metadata-db-secret $(DIR)/tmp/secrets/metadata-db-secret
 
 #>>>
 # create toil images using upstream CanDIG Toil repo

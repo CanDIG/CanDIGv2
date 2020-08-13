@@ -19,6 +19,8 @@ volumes:
   grafana-data:
 
 configs:
+  chord-metadata-settings:
+    external: true
   wes-dependency-resolver:
     file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
 

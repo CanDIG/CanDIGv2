@@ -40,9 +40,19 @@ services:
       - CHORD_URL="${CHORD_METADATA_HOST}"
       - CHORD_PERMISSIONS="${CHORD_METADATA_AUTH}"
       - CHORD_DEBUG="${CHORD_METADATA_DEBUG}"
+      - POSTGRES_HOST="metadata-db"
+      - POSTGRES_USER="admin"
+    configs:
+      - source: chord-metadata-settings
+        target: /app/chord_metadata_service/metadata/settings.py
+        mode: 0644
     secrets:
       - source: metadata-app-secret
-        target: /app/chord_metadata_service/metadata/secrets.py
+        target: metadata_app_secret
+      - source: metadata-db-user
+        target: metadata_db_user
+      - source: metadata-db-secret
+        target: metadata_db_secret
     entrypoint:
       - /bin/sh
       - -c
@@ -59,15 +69,13 @@ services:
   metadata-db:
     image: postgres:13-alpine
     #volumes:
-      #- chord-metadata-data:/data
+      #- chord-metadata-db:/var/lib/postgresql/data
       #add volume name to lib/{compose,swarm,kubernetes}
       #add volume name to docker-volumes in Makefile
     networks:
       - ${DOCKER_NET}
-    ports:
-      - "${CHORD_METADATA_PORT}:8000"
-    depends_on:
-      - metadata-db
+    # ports:
+    #   - "${CHORD_METADATA_PORT}:8000"
     deploy:
       placement:
         constraints:
@@ -77,23 +85,27 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      labels:
-        - traefik.enable=true
-        - traefik.port=${CHORD_METADATA_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:chord-metadata.${CANDIG_DOMAIN}
+      # labels:
+      #   - traefik.enable=true
+      #   - traefik.port=${CHORD_METADATA_PORT}
+      #   - traefik.docker.network=${DOCKER_NET}
+      #   - traefik.frontend.rule=Host:metadata-db.${CANDIG_DOMAIN}
     logging:
       driver: "fluentd"
       options:
         tag: docker.{{.Name}}
         fluentd-async-connect: "true"
-    # use entrypoint if you want to override default entrypoint
-    #entrypoint: []
-    # use command if image has dafault entrypoint
-    command: ["--host", "0.0.0.0", "--port", "8000"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/metrics"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
+    environment:
+      - POSTGRES_USER="admin"
+      - POSTGRES_PASSWORD_FILE="/run/secrets/metadata_db_secret"
+    secrets:
+      - source: metadata-db-user
+        target: metadata_db_user
+      - source: metadata-db-secret
+        target: metadata_db_secret
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/metrics"]
+    #   interval: 30s
+    #   timeout: 20s
+    #   retries: 3
 
