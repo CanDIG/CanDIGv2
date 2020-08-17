@@ -10,10 +10,10 @@ Since Tox is a Python package it is recommended to install it on a Python virtua
 pip install tox
 ```
 
-Also python-dotenv should be installed on your virtual environment using:
+Also python-dotenv with cli option should be installed on your virtual environment using:
 
 ```bash
-pip install python-dotenv
+pip install python-dotenv[cli]
 ```
 
 ## Install CanDIG Dependencies
@@ -23,7 +23,7 @@ pip install python-dotenv
 2. Create/modify `.env` file
 ```bash
 # Copy and Edit `.env` with your site's local configuration
-`cp -i etc/env/example.env .env`
+cp -i etc/env/example.env .env
 ```
 
 3. Initialize submodules
