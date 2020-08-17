@@ -25,7 +25,12 @@ pip install python-dotenv
 * `cp -i etc/env/example.env .env`
 * Edit `.env` with your site's local configuration
 
-3. Create CanDIG Daemons
+3. Initialize submodules
+```bash
+git submodule update --init --recursive
+```
+
+4. Create CanDIG Daemons
 
 ```bash
 # view helpful commands
@@ -48,7 +53,7 @@ In order to add and run a new service, you must follow bellow steps:
 git submodule add http://github.com/username/service_name libs/service_name_dir
 ```
 
-1. Add service to ```tox.ini``` file using bellow sections:
+2. Add service to ```tox.ini``` file using bellow sections:
 
 ```ini
 [testenv:new_service_name]
