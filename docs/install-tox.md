@@ -21,9 +21,10 @@ pip install python-dotenv
 1. Clone/pull latest CanDIGv2 repo from `https://github.com/CanDIG/CanDIGv2.git`
 
 2. Create/modify `.env` file
-
-* `cp -i etc/env/example.env .env`
-* Edit `.env` with your site's local configuration
+```bash
+# Copy and Edit `.env` with your site's local configuration
+`cp -i etc/env/example.env .env`
+```
 
 3. Initialize submodules
 ```bash
