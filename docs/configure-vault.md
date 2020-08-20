@@ -118,9 +118,10 @@ vault auth list -format=json
 # Should be in ["jwt"]["accessor"]
 ```
 
+Do note the name of this alias will need to match the username of the OIDC provider
+(e.g. the content of the preferred_username field in this current setup with KC).
+
 And for the entity alias itself:
-Also do note the name of this alias will need to match the username of the OIDC provider
-(e.g. the content of the preferred_username field).
 
 ```
 vault write identity/entity-alias -<<EOF
