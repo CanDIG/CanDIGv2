@@ -5,7 +5,7 @@ services:
     image: openpolicyagent/opa:${OPA_VERSION:-latest}
     volumes:
       # TODO: temp solution
-      - ./opa_service:/data
+      - $PWD/lib/opa/opa_service:/data
     networks:
       - ${DOCKER_NET}
     ports:
@@ -30,3 +30,8 @@ services:
         tag: docker.{{.Name}}
         fluentd-async-connect: "true"
     command: ["run", "--server", "/data/metadata-service.json", "/data/metadata-service.rego"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8181/health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
