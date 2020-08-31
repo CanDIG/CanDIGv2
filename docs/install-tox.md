@@ -1,4 +1,4 @@
-# CanDIG Install Guide
+# CanDIGv2 Install Guide (Tox)
 
 - - -
 

@@ -410,10 +410,10 @@ images: toil-docker
 #<<<
 .PHONY: init-conda
 init-conda:
-	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON)
+	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip
 	@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
 	@echo "Activate conda env: conda activate $(VENV_NAME)"
-	@echo "Install requirements: pip install -r $(DIR)/etc/venv/requirements.txt"
+	@echo "Install requirements: pip install -U -r $(DIR)/etc/venv/requirements.txt"
 
 #>>>
 # initialize docker and create required docker networks, volumes, certs, secrets, and conda env
