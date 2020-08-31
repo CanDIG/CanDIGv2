@@ -10,10 +10,10 @@ Since Tox is a Python package it is recommended to install it on a Python virtua
 pip install tox
 ```
 
-Also python-dotenv should be installed on your virtual environment using:
+Also python-dotenv with cli option should be installed on your virtual environment using:
 
 ```bash
-pip install python-dotenv
+pip install python-dotenv[cli]
 ```
 
 ## Install CanDIG Dependencies
@@ -21,11 +21,17 @@ pip install python-dotenv
 1. Clone/pull latest CanDIGv2 repo from `https://github.com/CanDIG/CanDIGv2.git`
 
 2. Create/modify `.env` file
+```bash
+# Copy and Edit `.env` with your site's local configuration
+cp -i etc/env/example.env .env
+```
 
-* `cp -i etc/env/example.env .env`
-* Edit `.env` with your site's local configuration
+3. Initialize submodules
+```bash
+git submodule update --init --recursive
+```
 
-3. Create CanDIG Daemons
+4. Create CanDIG Daemons
 
 ```bash
 # view helpful commands
@@ -48,7 +54,7 @@ In order to add and run a new service, you must follow bellow steps:
 git submodule add http://github.com/username/service_name libs/service_name_dir
 ```
 
-1. Add service to ```tox.ini``` file using bellow sections:
+2. Add service to ```tox.ini``` file using bellow sections:
 
 ```ini
 [testenv:new_service_name]
