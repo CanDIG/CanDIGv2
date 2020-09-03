@@ -1,0 +1,77 @@
+{
+    "api_id": "11",
+    "use_keyless": true,
+    "active": true,
+    "strip_auth_data": false,
+    
+    "config_data": {
+      "KC_RTYPE": "code",
+      "KC_REALM": "candig",
+      "KC_CLIENT_ID": "cq_candig",
+      "KC_SERVER": "http://192.168.1.147:8081",
+      "KC_SCOPE": "openid+email",
+      "KC_RMODE": "query",
+      "USE_SSL": false,
+      "KC_SECRET": "748ceaef-650b-4ad8-b34d-b43a711599da",
+      "TYK_SERVER": "http://192.168.1.147:8080",
+      "MAX_TOKEN_AGE": 43200
+    },
+
+    "auth": {
+	"auth_header_name": ""
+    },
+
+    "name": "Authentication",
+    "slug": "authentication",
+
+    "proxy": {
+	"target_url": "http://192.168.1.147:8080/auth/login",
+	"strip_listen_path": false,
+	"listen_path": "/auth/"
+    },
+
+    "version_data": {
+	"not_versioned": true,
+	"versions": {
+	    "Default": {
+		"name": "Default",
+		"use_extended_paths": true,
+		"extended_paths": {
+		    "virtual": [
+                        {
+			    "response_function_name": "logoutHandler",
+			    "function_source_type": "file",
+			    "function_source_uri": "middleware/virtualLogout.js",
+			    "path": "logout",
+			    "method": "GET",
+			    "use_session": false,
+			    "proxy_on_error": false
+		        },
+			{
+			    "response_function_name": "tokenHandler",
+			    "function_source_type": "file",
+			    "function_source_uri": "middleware/virtualToken.js",
+			    "path": "token",
+			    "method": "POST",
+			    "use_session": false,
+			    "proxy_on_error": false
+			},
+			{
+			    "response_function_name": "loginHandler",
+			    "function_source_type": "file",
+			    "function_source_uri": "middleware/virtualLogin.js",
+			    "path": "login",
+			    "method": "GET",
+			    "use_session": false,
+			    "proxy_on_error": false
+			}
+		    ],
+		    "do_not_track_endpoints": [{
+			"path": "token",
+			"method": "POST"
+		    }]
+		}
+	    }
+	}
+    }
+}

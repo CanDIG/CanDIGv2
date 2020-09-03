@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  keycloak:
+    image: jboss/keycloak:9.0.2
+    container_name: keycloak
+    command: ["-b", "0.0.0.0", "-Dkeycloak.migration.strategy=IGNORE_EXISTING"]
+    ports:
+      - "${KC_LOCAL_PORT}:8081"
+    env_file:
+      - ./volumes/secrets.env
+    #networks:
+    #  - ${DOCKER_NET}
+    volumes:
+      - ./volumes/keycloak-db:/opt/jboss/keycloak/standalone/data
+      - ./volumes/standalone-ha.xml:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml

@@ -317,6 +317,10 @@ clean-volumes:
 compose:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
 
+
+compose-kc:
+	docker-compose -f $(DIR)/lib/keycloak/docker-compose.yml up -d
+
 #>>>
 # deploy/test individual modules using docker-compose
 # $module is the name of the sub-folder in lib/
