@@ -1,0 +1,24 @@
+version: '3.6'
+
+services:
+
+  vault:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 8200:8200
+    volumes:
+      - ./policies:/vault/policies
+      - ./data:/vault/data
+      - ./logs:/vault/logs
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
+    command: server -config=/vault/config/vault-config.json
+    cap_add:
+      - IPC_LOCK    
+    networks:
+      - docker-compose-test-network
+networks:
+  docker-compose-test-network:
+    external: true
