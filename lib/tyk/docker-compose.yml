@@ -2,11 +2,16 @@ version: '3.7'
 
 services:
   tyk:
+    container_name: tyk
+    build:
+      context: ${PWD}/lib/tyk
     image: tykio/tyk-gateway:v2.9.3.1
-    #networks:
-    #  - ${DOCKER_NET}
+    networks:
+      - ${DOCKER_NET}
+      # - docker-compose-test-network
     ports:
-      - "8080:8080"
+      - "${TYK_SERVICE_PORT}:8080"
+      # - "8080:8080"
     deploy:
       placement:
         constraints:
@@ -29,6 +34,13 @@ services:
     depends_on:
       - tyk-redis
   tyk-redis:
+    container_name: tyk-redis
     image: redis:4.0.14-alpine
+    networks:
+     - ${DOCKER_NET}
     volumes:
       - ./volumes/redis-data:/data
+
+networks:
+  bridge-net:
+    external: true
