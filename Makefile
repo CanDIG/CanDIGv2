@@ -317,9 +317,19 @@ clean-volumes:
 compose:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
 
-
+#-- Temp --
 compose-kc:
 	docker-compose -f $(DIR)/lib/keycloak/docker-compose.yml up -d
+	docker-compose -f $(DIR)/lib/vault/docker-compose.yml up -d
+	docker-compose -f $(DIR)/lib/tyk/docker-compose.yml up -d
+compose-kc-down:
+	docker-compose -f $(DIR)/lib/keycloak/docker-compose.yml down
+	docker-compose -f $(DIR)/lib/vault/docker-compose.yml down
+	docker-compose -f $(DIR)/lib/tyk/docker-compose.yml down
+
+setup-tyk-kc-vault:
+	./etc/setup/scripts/setup.sh
+# --
 
 #>>>
 # deploy/test individual modules using docker-compose
@@ -453,7 +463,8 @@ init-swarm: swarm-init swarm-networks swarm-configs swarm-secrets
 kubernetes:
 	$(DIR)/bin/kompose --file $(DIR)/lib/kubernetes/docker-compose.yml \
 		$(foreach MODULE, $(CANDIG_MODULES), --file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-		up
+		convert
+		# up
 
 #>>>
 # deploys individual module using kompose

@@ -10,3 +10,15 @@
 /bin
 /etc/ssl/selfsigned-*
 */miniconda3
+
+
+# vault
+lib/vault/data/*
+lib/vault/logs/*
+lib/vault/policies/*
+
+# keycloak
+lib/keycloak/volumes/*
+
+# tyk
+lib/tyk/volumes/*
