@@ -10,22 +10,22 @@ networks:
 services:
   keycloak:
     build:
-      context: ${PWD}/lib/keycloak
+      context: . #${PWD}/lib/keycloak
     image: jboss/keycloak:9.0.2
     container_name: keycloak
     command: ["-b", "${KEYCLOAK_SERVICE_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING"]
     # command: ["-b", "0.0.0.0", "-Dkeycloak.migration.strategy=IGNORE_EXISTING"]
     ports:
-      - "${KEYCLOAK_SERVICE_PORT}:8081"
+      - "${KEYCLOAK_SERVICE_PUBLIC_PORT}:8081"
       # - "$8081:8081"
     env_file:
-      - ${PWD}/lib/keycloak/volumes/secrets.env
-      # - ./volumes/secrets.env
+      #- ${PWD}/lib/keycloak/volumes/secrets.env
+       - ./volumes/secrets.env
     networks:
       - ${DOCKER_NET}
       # - docker-compose-test-network
     volumes:
-      - ${PWD}/lib/keycloak/volumes/keycloak-db:/opt/jboss/keycloak/standalone/data
-      - ${PWD}/lib/keycloak/volumes/standalone-ha.xml:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
-      # - ./volumes/keycloak-db:/opt/jboss/keycloak/standalone/data
-      # - ./volumes/standalone-ha.xml:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
+      #- ${PWD}/lib/keycloak/volumes/keycloak-db:/opt/jboss/keycloak/standalone/data
+      #- ${PWD}/lib/keycloak/volumes/standalone-ha.xml:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
+      - ./volumes/keycloak-db:/opt/jboss/keycloak/standalone/data
+      - ./volumes/standalone-ha.xml:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml

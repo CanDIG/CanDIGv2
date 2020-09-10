@@ -8,7 +8,7 @@
       "KC_RTYPE": "code",
       "KC_REALM": "${KC_REALM}",
       "KC_CLIENT_ID": "${KC_CLIENT_ID}",
-      "KC_SERVER": "${KEYCLOAK_SERVICE_URL}",
+      "KC_SERVER": "${KEYCLOAK_SERVICE_PUBLIC_URL}",
       "KC_SCOPE": "openid+email",
       "KC_RMODE": "query",
       "USE_SSL": false,

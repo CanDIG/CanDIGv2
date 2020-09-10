@@ -1,5 +1,5 @@
 #! /bin/bash
-# This script will set up a full tyk environment on your cluster
+# This script will set up a full tyk environment on your local CanDIGv2 cluster
 
 # ** Be sure to invoke this from the Makefile at the project's root directory [CanDigV2] **
 
