@@ -10,7 +10,7 @@ services:
       - ${DOCKER_NET}
       # - docker-compose-test-network
     ports:
-      - "${TYK_SERVICE_PORT}:8080"
+      - "${TYK_SERVICE_PUBLIC_PORT}:8080"
       # - "8080:8080"
     deploy:
       placement:
