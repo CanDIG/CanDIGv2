@@ -16,6 +16,7 @@
 lib/vault/data/*
 lib/vault/logs/*
 lib/vault/policies/*
+lib/vault/config/.keys
 
 # keycloak
 lib/keycloak/volumes/*

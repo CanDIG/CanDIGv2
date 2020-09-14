@@ -10,11 +10,11 @@ echo "- Done with prereqs.. -"
 echo
 # --
 
-echo "Setting up Keycloak"
-${PWD}/etc/setup/scripts/subtasks/keycloak_setup.sh
+#echo "Setting up Keycloak"
+#${PWD}/etc/setup/scripts/subtasks/keycloak_setup.sh
 
 #echo "Setting up Tyk"
 #${PWD}/etc/setup/scripts/subtasks/tyk_setup.sh
 
-#echo "Setting up Vault"
-#${PWD}/etc/setup/scripts/subtasks/vault_setup.sh
+echo "Setting up Vault"
+${PWD}/etc/setup/scripts/subtasks/vault_setup.sh
