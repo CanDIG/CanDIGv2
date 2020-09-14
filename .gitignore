@@ -19,6 +19,7 @@ lib/vault/policies/*
 
 # keycloak
 lib/keycloak/volumes/*
+lib/keycloak/volumes/secrets.env
 
 # tyk
 lib/tyk/volumes/*

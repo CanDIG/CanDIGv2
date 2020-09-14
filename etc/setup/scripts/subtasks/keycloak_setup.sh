@@ -249,7 +249,7 @@ echo ">> .. set..."
 
 echo ">> Getting KC_SECRET .."
 export KC_SECRET=$(get_secret  ${KC_REALM})
-#echo "** Retrieved KC_SECRET as ${KC_SECRET} **"
+echo "** Retrieved KC_SECRET as ${KC_SECRET} **"
 echo ">> .. got it..."
 
 echo ">> Adding user .."
