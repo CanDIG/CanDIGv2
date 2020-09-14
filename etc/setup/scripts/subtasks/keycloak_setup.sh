@@ -39,6 +39,7 @@ envsubst < ${PWD}/etc/setup/templates/configs/keycloak/configuration/secrets.env
 
 # echo 
 mkdir ${PWD}/lib/keycloak/volumes/keycloak-db
+chmod 777 ${PWD}/lib/keycloak/volumes/keycloak-db
 
 
 # Copy files from template configs

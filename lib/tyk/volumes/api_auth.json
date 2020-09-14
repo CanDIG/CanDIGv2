@@ -12,7 +12,7 @@
       "KC_SCOPE": "openid+email",
       "KC_RMODE": "query",
       "USE_SSL": false,
-      "KC_SECRET": "6398a7c4-62c9-4d56-a2c3-b5986718fa65",
+      "KC_SECRET": "98a1c97e-28eb-4e77-94bb-2f370ee7d78f",
       "TYK_SERVER": "http://candig.local:8080",
       "MAX_TOKEN_AGE": 43200
     },
