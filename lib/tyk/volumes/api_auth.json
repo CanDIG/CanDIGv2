@@ -8,12 +8,12 @@
       "KC_RTYPE": "code",
       "KC_REALM": "candig",
       "KC_CLIENT_ID": "cq_candig",
-      "KC_SERVER": "http://192.168.1.147:8081",
+      "KC_SERVER": "http://keycloak:8081",
       "KC_SCOPE": "openid+email",
       "KC_RMODE": "query",
       "USE_SSL": false,
-      "KC_SECRET": "748ceaef-650b-4ad8-b34d-b43a711599da",
-      "TYK_SERVER": "http://192.168.1.147:8080",
+      "KC_SECRET": "6398a7c4-62c9-4d56-a2c3-b5986718fa65",
+      "TYK_SERVER": "http://candig.local:8080",
       "MAX_TOKEN_AGE": 43200
     },
 
@@ -25,7 +25,7 @@
     "slug": "authentication",
 
     "proxy": {
-	"target_url": "http://192.168.1.147:8080/auth/login",
+	"target_url": "http://0.0.0.0:8080/auth/login",
 	"strip_listen_path": false,
 	"listen_path": "/auth/"
     },
