@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 # This script will set up a full vault environment on your local CanDIGv2 cluster
 
+# Automates instructions written at
+# https://github.com/CanDIG/CanDIGv2/blob/stable/docs/configure-vault.md
 
 # vault-config.json
 echo "Working on vault-config.json .."
@@ -10,82 +12,64 @@ envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-config.json.tpl > ${PW
 # boot container
 docker-compose -f ${PWD}/lib/vault/docker-compose.yml up -d
 
-# ssh into container
-# # example keys/tokens (TODO: automate)
-# KEY_1=5f1xhr4FdqobnMUmkoV2ewRhRGFXBQf+7DSjW8cgmvn+
-# KEY_2=oMcAdjCm2UITy0fcAqvNEpk7jnfc278XffXq7HQgSDll
-# KEY_3=TukMeCpJroaPF/4lEPOH2M8Cd/iX18nfsb7Pz8PAWX95
-# ROOT_LOGIN_TOKEN=s.Zlbes4X0ER3Eaym5MKmpHBCa
-# --
-
 # -- todo: run only if not already initialized --
 # gather keys and login token
-stuff=$(docker exec -it vault sh -c "vault operator init" | head -7 | rev | cut -d " " -f1 | rev)
+stuff=$(docker exec -it vault sh -c "vault operator init") # | head -7 | rev | cut -d " " -f1 | rev)
 
 echo "found stuff as ${stuff}"
 
-declare -a key_array
-key_count=1
-max_keys=3
-while IFS= read -r line ; do 
+key_1=$(echo -n "${stuff}" | grep 'Unseal Key 1: ' | awk '{print $4}' | tr -d '[:space:]')
+key_2=$(echo -n "${stuff}" | grep 'Unseal Key 2: ' | awk '{print $4}' | tr -d '[:space:]')
+key_3=$(echo -n "${stuff}" | grep 'Unseal Key 3: ' | awk '{print $4}' | tr -d '[:space:]')
+key_4=$(echo -n "${stuff}" | grep 'Unseal Key 4: ' | awk '{print $4}' | tr -d '[:space:]')
+key_5=$(echo -n "${stuff}" | grep 'Unseal Key 5: ' | awk '{print $4}' | tr -d '[:space:]')
+key_root=$(echo -n "${stuff}" | grep 'Initial Root Token: ' | awk '{print $4}' | tr -d '[:space:]')
 
-    if [[ max_keys -ge key_count  ]]; then
-    
-        key_array+=("${line}")
-        #echo "found: ${key_array}"
-    fi
+echo "found key1: ${key_1}"
+echo "found key2: ${key_2}"
+echo "found key3: ${key_3}"
+echo "found root: ${key_root}"
 
-    if [[ 7 -eq key_count  ]]; then
-        ROOT_LOGIN_TOKEN=$line
-        #echo "found root token: ROOT_LOGIN_TOKEN : $ROOT_LOGIN_TOKEN"; 
-    fi
-    #key_count=$(eval ($key_count+1))
-    key_count=$(echo $(($key_count+1)))
 
-done <<< "$stuff"
-
-# unseal the vault
-sleep 1
-echo "${key_array[0]}"
-sleep 1
-echo "${key_array[1]}"
-sleep 1
-echo "${key_array[2]}"
-sleep 1
-
-# doesn't work yet ---
-#echo "unsealing vault with keys "#'${key_array[0]}', '${key_array[1]}', '${key_array[2]}'"
-echo "something"
-sleep 1
-export cmd1="vault operator unseal '${key_array[0]}'" 
-sleep 1
-export cmd2="vault operator unseal '${key_array[1]}'"
-sleep 1
-export cmd3="vault operator unseal '${key_array[2]}'"
-sleep 1
-
-echo "set command to ${cmd1}"
-sleep 1
-echo "set command to ${cmd2}"
-sleep 1
-echo "set command to ${cmd3}"
-sleep 1
-
-result=$(docker exec -it -e RUN_ME="${cmd1}" vault sh -c "$(echo '$RUN_ME')")
-echo $result
-sleep 1
-docker exec -it vault sh -c "${cmd2}"
-sleep 1
-docker exec -it -e RUN_ME="${cmd3}" vault sh -c "$RUN_ME"
-sleep 1
+# result=$(docker exec -it -e key=$key_1 vault sh -c "echo \${key}; # vault operator unseal \${key}")
+# echo $result
+# todo: automate key inputs
+docker exec -it vault sh -c "vault operator unseal \${key_1}"
+docker exec -it vault sh -c "vault operator unseal \${key_2}"
+docker exec -it vault sh -c "vault operator unseal \${key_3}"
 
 # login
-#echo ">> logging in with ${ROOT_LOGIN_TOKEN}"
-#docker exec -it vault sh -c "vault login $ROOT_LOGIN_TOKEN"
+echo
+echo ">> logging in with ${key_root}"
+docker exec -it vault sh -c "vault login \${key_root}"
 
 # configuration
-#docker exec -it vault sh -c "vault audit enable file file_path=/tmp/vault-audit.log"
-# ..
+# audit file
+echo
+echo ">> enabling audit file"
+docker exec -it vault sh -c "vault audit enable file file_path=/tmp/vault-audit.log"
+
+# enable jwt
+echo
+echo "enabling jwt"
+docker exec -it vault sh -c "vault auth enable jwt"
+
+# audit file
+echo
+echo ">> setting up tyk policy"
+docker exec -it vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [\"create\", \"read\"]}' >> vault-policy.hcl; vault policy write tyk vault-policy.hcl"
+
+# user claims
+echo
+echo ">> setting up user claims"
+docker exec -it vault sh -c "vault write auth/jwt/role/test-role user_claim=preferred_username bound_audiences=cq_candig role_type=jwt policies=tyk ttl=1h"
+
+# user claims
+echo
+echo ">> configuring jwt stuff"
+docker exec -it vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"test-role\""
+
+
 # ---
 
 

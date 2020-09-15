@@ -70,59 +70,14 @@ cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone-ha.xml $
 KEYCLOAK_CONTAINERS=$(echo $(docker ps | grep keycloak | wc -l))
 echo "Number of keycloak containers running: ${KEYCLOAK_CONTAINERS}"
 if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
-   echo "Please ensure the keycloak container being configured is running to continue with the rest of the setup!"
-   exit 0
+   echo "Booting keycloak container!"
+   docker-compose -f ${PWD}/lib/keycloak/docker-compose.yml up -d
+   sleep 5
 fi
 
 
-# OPTIND=1
-# unset KC_ADD_USER
-
-# while getopts "a" opt; do
-#   case $opt in
-#     a)
-#       KC_ADD_USER=true
-#       ;;
-#    \?)
-#       usage
-#       exit 1
-#       ;;
-#   esac
-# done
-
-# shift $((OPTIND -1))
-# echo $#
-# echo $1
-# echo $2
-# if [[ $# -eq 1 ]]; then
-#    usage
-#    exit 1
-# elif [[ $# -eq 2 ]]; then
-#   KEYCLOAK_SERVICE_PUBLIC_URL=$1
-#   KEYCLOAK_SERVICE_PUBLIC_PORT=$2
-# elif [[ $# -gt 2 ]]; then
-#   usage
-#   exit 1
-# fi
-
-
-# FUNCTIONS
-# valid_json () {
-
-#   putative=${1}
-
-#   echo $putative | python3 -c 'import json,sys;obj=json.load(sys.stdin)' 2> /dev/null
-#   ret_val=$?
-#   if [ $ret_val = 0 ]; then
-#      echo JSON is valid
-#   else
-#      echo JSON is not valid
-#      exit $ret_val
-#   fi
-
-# }
-
 ###############
+
 add_user() {
   # CONTAINER_NAME_CANDIG_AUTH is the name of the keycloak server inside the compose network
   docker exec ${CONTAINER_NAME_CANDIG_AUTH} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER} -p ${KC_TEST_PW} -r ${KC_REALM}
@@ -179,6 +134,10 @@ get_realm_clients () {
 
 
 #################################
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0192a2c9211001cbcaf6871daa79ffce77304fc3
 set_client () {
   realm=$1
   client=$2
@@ -227,8 +186,15 @@ get_secret () {
     ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients/$id/client-secret 2> /dev/null |\
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["value"])'
 }
+<<<<<<< HEAD
 ##################################
 
+=======
+
+##################################
+
+
+>>>>>>> 0192a2c9211001cbcaf6871daa79ffce77304fc3
 # SCRIPT START
 
 echo "-- Starting setup calls to keycloak --"
