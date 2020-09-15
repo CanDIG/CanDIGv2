@@ -319,13 +319,23 @@ compose:
 
 #-- Temp --
 compose-kc:
-	docker-compose -f $(DIR)/lib/keycloak/docker-compose.yml up -d
-	docker-compose -f $(DIR)/lib/vault/docker-compose.yml up -d
-	docker-compose -f $(DIR)/lib/tyk/docker-compose.yml up -d
+	docker-compose -f $(DIR)/lib/keycloak/docker-compose.yml up -d 2>&1
+	docker-compose -f $(DIR)/lib/vault/docker-compose.yml up -d 2>&1
+	docker-compose -f $(DIR)/lib/tyk/docker-compose.yml up -d 2>&1
 compose-kc-down:
 	docker-compose -f $(DIR)/lib/keycloak/docker-compose.yml down
 	docker-compose -f $(DIR)/lib/vault/docker-compose.yml down
 	docker-compose -f $(DIR)/lib/tyk/docker-compose.yml down
+compose-kc-clean: compose-kc-down \
+	# clean keycloak
+	sudo rm -r $(DIR)/lib/keycloak/volumes/* & 2>&1
+	# clean tyk
+	sudo rm -r $(DIR)/lib/tyk/volumes/* & 2>&1
+	# clean vault
+	sudo rm -r $(DIR)/lib/vault/config/vault-config.json 2>&1
+	sudo rm -r $(DIR)/lib/vault/data/ & 2>&1 
+	sudo rm -r $(DIR)/lib/vault/logs/ & 2>&1 
+	sudo rm -r $(DIR)/lib/vault/policies/ 2>&1
 
 setup-tyk-kc-vault:
 	./etc/setup/scripts/setup.sh

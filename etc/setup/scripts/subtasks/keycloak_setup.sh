@@ -134,10 +134,6 @@ get_realm_clients () {
 
 
 #################################
-<<<<<<< HEAD
-=======
-
->>>>>>> 0192a2c9211001cbcaf6871daa79ffce77304fc3
 set_client () {
   realm=$1
   client=$2
@@ -186,15 +182,8 @@ get_secret () {
     ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients/$id/client-secret 2> /dev/null |\
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["value"])'
 }
-<<<<<<< HEAD
 ##################################
 
-=======
-
-##################################
-
-
->>>>>>> 0192a2c9211001cbcaf6871daa79ffce77304fc3
 # SCRIPT START
 
 echo "-- Starting setup calls to keycloak --"

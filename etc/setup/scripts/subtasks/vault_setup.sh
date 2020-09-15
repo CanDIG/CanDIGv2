@@ -31,6 +31,11 @@ echo "found key3: ${key_3}"
 echo "found root: ${key_root}"
 
 
+echo
+echo "Please provide the above keys to the following prompts in order to unseal the vault and login as root;"
+echo
+
+
 # result=$(docker exec -it -e key=$key_1 vault sh -c "echo \${key}; # vault operator unseal \${key}")
 # echo $result
 # todo: automate key inputs
@@ -64,10 +69,54 @@ echo
 echo ">> setting up user claims"
 docker exec -it vault sh -c "vault write auth/jwt/role/test-role user_claim=preferred_username bound_audiences=cq_candig role_type=jwt policies=tyk ttl=1h"
 
-# user claims
+# configure jwt
 echo
 echo ">> configuring jwt stuff"
 docker exec -it vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"test-role\""
+
+
+# create user
+echo
+echo ">> creating user $KC_TEST_USER"
+test_user_output=$(docker exec -it vault sh -c "echo '{\"name\":\"${KC_TEST_USER}\",\"metadata\":{\"dataset123\":4}}' > bob.json; vault write identity/entity @bob.json; rm bob.json;")
+
+ENTITY_ID=$(echo "${test_user_output}" | grep id | awk '{print $2}' | tr -d '[:space:]')
+echo ">>> found entity id : ${ENTITY_ID}"
+
+# setup alias
+echo ">> setting up alias for $KC_TEST_USER"
+AUTH_LIST_OUTPUT=$(docker exec -it vault sh -c "vault auth list -format=json")
+#echo "auth list output:"
+#echo "${AUTH_LIST_OUTPUT}"
+
+JWT_ACCESSOR_VALUE=$(echo "${AUTH_LIST_OUTPUT}" | grep accessor | head -1 | awk '{print $2}' | tr -d '"' | tr -d ',' | tr -d '[:space:]')
+echo ">>> found jwt accessor : ${JWT_ACCESSOR_VALUE}"
+
+#exit 0
+
+echo ">>> writing alias"
+docker exec -it vault sh -c "echo '{\"name\":\"${KC_TEST_USER}\",\"mount_accessor\":\"${JWT_ACCESSOR_VALUE}\",\"canonical_id\":\"${ENTITY_ID}\"}' > alias.json; vault write identity/entity-alias @alias.json; rm alias.json;"
+
+
+
+# enable identity tokens
+echo ">>> enabling identity tokens"
+docker exec -it vault sh -c "echo '{\"rotation_period\":\"24h\",\"allowed_client_ids\":[\"cq_candig\"]}' > test-key.json; vault write identity/oidc/key/test-key @test-key.json; rm test-key.json;"
+echo
+
+
+# match key and insert custom info into the jwt
+echo ">>> matching key and inserting custom info into the jwt"
+docker exec -it vault sh -c "echo '{\"key\":\"test-key\",\"client_id\":\"cq_candig\",\"template\":\"{\\\"permissions\\\":{{identity.entity.metadata}} }\"}' > test-role.json; vault write identity/oidc/role/test-role @test-role.json; rm test-role.json;"
+echo
+
+# vault write identity/oidc/role/test-role -<<EOF
+# {
+#     "key": "test-key",
+#     "client_id": "cq_candig",
+#     "template": "{\"permissions\": {{identity.entity.metadata}}}"
+# }
+# EOF
 
 
 # ---
