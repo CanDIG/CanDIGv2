@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 # -- Prerequisites --
 echo
 echo "- Generating prerequisites; -"
