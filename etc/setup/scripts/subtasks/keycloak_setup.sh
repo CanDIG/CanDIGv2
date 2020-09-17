@@ -204,6 +204,11 @@ set_client ${KC_REALM} ${KC_CLIENT_ID} "${TYK_LISTEN_PATH}" ${KC_LOGIN_REDIRECT_
 echo ">> .. set..."
 
 echo ">> Getting KC_SECRET .."
+# TODO: Fix;
+# WARNING: Despite being exported,
+# KC_SECRET is not properly useable
+# elsewhere in the setup process.
+# e.g.: Tyk (needs manual intervention)
 export KC_SECRET=$(get_secret  ${KC_REALM})
 echo "** Retrieved KC_SECRET as ${KC_SECRET} **"
 echo ">> .. got it..."
