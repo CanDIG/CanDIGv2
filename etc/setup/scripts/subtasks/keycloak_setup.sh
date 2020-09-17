@@ -31,6 +31,8 @@ usage () {
 # with project .env variables, and then spit 
 # them out to ./lib/keyclaok/volumes/*
 
+mkdir -p ${PWD}/lib/keycloak/volumes
+
 # secrets.env
 echo "Working on secrets.env .."
 envsubst < ${PWD}/etc/setup/templates/configs/keycloak/configuration/secrets.env.tpl > ${PWD}/lib/keycloak/volumes/secrets.env

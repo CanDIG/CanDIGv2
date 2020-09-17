@@ -13,7 +13,7 @@
 
 # vault-config.json
 echo "Working on vault-config.json .."
-mkdir ${PWD}/lib/vault/config
+mkdir -p ${PWD}/lib/vault/config
 envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-config.json.tpl > ${PWD}/lib/vault/config/vault-config.json
 
 # boot container

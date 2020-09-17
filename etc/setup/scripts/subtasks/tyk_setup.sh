@@ -7,6 +7,7 @@
 # with project .env variables, and then spit 
 # them out to ./lib/tyk/volumes/*
 
+mkdir -p ${PWD}/lib/tyk/volumes
 
 # api_auth.json
 echo "Working on api_auth.json .."
