@@ -327,6 +327,9 @@ compose-kc-down:
 	docker-compose -f $(DIR)/lib/vault/docker-compose.yml down
 	docker-compose -f $(DIR)/lib/tyk/docker-compose.yml down
 compose-kc-clean: compose-kc-down \
+	# needs sudo to run;
+	./etc/setup/scripts/sudo_check.sh
+
 	# clean keycloak
 	sudo rm -r $(DIR)/lib/keycloak/volumes/* & 2>&1
 	# clean tyk
