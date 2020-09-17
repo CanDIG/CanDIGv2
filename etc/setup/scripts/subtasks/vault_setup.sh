@@ -22,8 +22,7 @@ docker-compose -f ${PWD}/lib/vault/docker-compose.yml up -d
 # -- todo: run only if not already initialized --
 # gather keys and login token
 stuff=$(docker exec -it vault sh -c "vault operator init") # | head -7 | rev | cut -d " " -f1 | rev)
-
-echo "found stuff as ${stuff}"
+#echo "found stuff as ${stuff}"
 
 key_1=$(echo -n "${stuff}" | grep 'Unseal Key 1: ' | awk '{print $4}' | tr -d '[:space:]')
 key_2=$(echo -n "${stuff}" | grep 'Unseal Key 2: ' | awk '{print $4}' | tr -d '[:space:]')
@@ -35,6 +34,8 @@ key_root=$(echo -n "${stuff}" | grep 'Initial Root Token: ' | awk '{print $4}' |
 echo "found key1: ${key_1}"
 echo "found key2: ${key_2}"
 echo "found key3: ${key_3}"
+echo "found key4: ${key_4}"
+echo "found key5: ${key_5}"
 echo "found root: ${key_root}"
 
 
@@ -45,13 +46,50 @@ echo
 
 # result=$(docker exec -it -e key=$key_1 vault sh -c "echo \${key}; # vault operator unseal \${key}")
 # echo $result
-docker exec -it vault sh -c "vault operator unseal \${key_1}"
-docker exec -it vault sh -c "vault operator unseal \${key_2}"
-docker exec -it vault sh -c "vault operator unseal \${key_3}"
+# docker exec -it vault sh -c "vault operator unseal" # \${key_1}"
+# docker exec -it vault sh -c "vault operator unseal" # \${key_2}"
+# docker exec -it vault sh -c "vault operator unseal" # \${key_3}"
+
+echo "Vault is sealed. Please input three of the keys above, one at a time until it unlocks! : "
+
+VAULT_SEALED=True
+while [ VAULT_SEALED ]
+do
+    VAULT_SEALED=False
+    
+    UNSEAL_RESULT=$(docker exec -it vault sh -c "vault operator unseal")
+
+    SEALED_LINE=$(echo "${UNSEAL_RESULT}" | grep Sealed | head -n 1 ) #| awk '{print $2}' | tr -d '[:space:]')
+    HAS_SEALED_LINE=$(echo "${SEALED_LINE}" | grep Sealed | wc -l)
+
+    ERROR_LINE=$(echo "${UNSEAL_RESULT}" | grep [eE]rror | head -n 1 ) #| awk '{print $1}' | tr -d '[:space:]')
+    HAS_ERROR_LINE=$(echo "${ERROR_LINE}" | grep [eE]rror | wc -l)
+
+    if [[ HAS_SEALED_LINE -gt 0 ]]; then
+        echo "sealed line found, try again ; found ${SEALED_LINE}"
+
+        IS_SEALED=$(echo "${SEALED_LINE}" | grep "true" | wc -l)
+        if [[ IS_SEALED -gt 0 ]]; then
+            echo "still sealed"
+            VAULT_SEALED=True
+        else
+            VAULT_SEALED=False # exit loop here
+            break
+        fi
+    fi
+
+    if [[ HAS_ERROR_LINE -gt 0 ]]; then        
+        echo "error found:"
+        echo "${ERROR_LINE}"
+        echo
+        VAULT_SEALED=True   
+    fi
+done
+
 
 # login
 echo
-echo ">> logging in with ${key_root}"
+echo ">> logging in -- copy and paste this: ${key_root}"
 docker exec -it vault sh -c "vault login \${key_root}"
 
 # configuration
@@ -84,9 +122,12 @@ docker exec -it vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${
 # create user
 echo
 echo ">> creating user $KC_TEST_USER"
-test_user_output=$(docker exec -it vault sh -c "echo '{\"name\":\"${KC_TEST_USER}\",\"metadata\":{\"dataset123\":4}}' > bob.json; vault write identity/entity @bob.json; rm bob.json;")
 
-ENTITY_ID=$(echo "${test_user_output}" | grep id | awk '{print $2}' | tr -d '[:space:]')
+PRESUMED_PERMISSIONS_DATASTRUCTURE_TEMPLATE="{\"name\":\"${KC_TEST_USER}\",\"metadata\":{\"dataset123\":4}}"
+
+test_user_output=$(docker exec -it vault sh -c "echo '${PRESUMED_PERMISSIONS_DATASTRUCTURE_TEMPLATE}' > bob.json; vault write identity/entity @bob.json; rm bob.json;")
+
+ENTITY_ID=$(echo "${test_user_output}" | grep id | awk '{print $2}')
 echo ">>> found entity id : ${ENTITY_ID}"
 
 # setup alias
@@ -103,7 +144,11 @@ echo ">>> found jwt accessor : ${JWT_ACCESSOR_VALUE}"
 
 echo
 echo ">> writing alias"
-docker exec -it vault sh -c "echo '{\"name\":\"${KC_TEST_USER}\",\"mount_accessor\":\"${JWT_ACCESSOR_VALUE}\",\"canonical_id\":\"${ENTITY_ID}\"}' > alias.json; vault write identity/entity-alias @alias.json; rm alias.json;"
+# echo "using ${KC_TEST_USER}"
+# echo "using ${JWT_ACCESSOR_VALUE}"
+# echo "using ${ENTITY_ID}"
+STRUCTURE="{\\\"name\\\":\\\"${KC_TEST_USER}\\\",\\\"mount_accessor\\\":\\\"${JWT_ACCESSOR_VALUE}\\\",\\\"canonical_id\\\":\\\"${ENTITY_ID}\\\"}"
+docker exec -it vault sh -c "echo ${STRUCTURE} | tr -d '[:space:]' > alias.json; echo 'catting alias.json'; cat alias.json ; vault write identity/entity-alias @alias.json;" # rm alias.json;"
 
 
 

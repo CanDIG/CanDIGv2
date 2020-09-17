@@ -217,5 +217,8 @@ echo ">> Adding user .."
 add_user
 echo ">> .. added..."
 
+echo 
+echo ">> .. waiting for keycloak to restart..."
 while !  docker logs --tail 5  ${CONTAINER_NAME_CANDIG_AUTH} | grep "Admin console listening on http://127.0.0.1:9990" ; do sleep 1 ; done
 docker exec ${CONTAINER_NAME_CANDIG_AUTH}  rm /opt/jboss/keycloak/standalone/configuration/keycloak-add-user.json 2> /dev/null
+echo ">> .. ready..."

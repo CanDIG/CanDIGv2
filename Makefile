@@ -318,15 +318,15 @@ compose:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
 
 #-- Temp --
-compose-kc:
+compose-authz:
 	docker-compose -f $(DIR)/lib/keycloak/docker-compose.yml up -d 2>&1
 	docker-compose -f $(DIR)/lib/vault/docker-compose.yml up -d 2>&1
 	docker-compose -f $(DIR)/lib/tyk/docker-compose.yml up -d 2>&1
-compose-kc-down:
+compose-authz-down:
 	docker-compose -f $(DIR)/lib/keycloak/docker-compose.yml down
 	docker-compose -f $(DIR)/lib/vault/docker-compose.yml down
 	docker-compose -f $(DIR)/lib/tyk/docker-compose.yml down
-compose-kc-clean: compose-kc-down \
+compose-authz-clean: compose-authz-down \
 	# needs sudo to run;
 	./etc/setup/scripts/sudo_check.sh
 
@@ -340,7 +340,7 @@ compose-kc-clean: compose-kc-down \
 	sudo rm -r $(DIR)/lib/vault/logs/ & 2>&1 
 	sudo rm -r $(DIR)/lib/vault/policies/ 2>&1
 
-setup-tyk-kc-vault:
+setup-authz:
 	./etc/setup/scripts/setup.sh
 # --
 
