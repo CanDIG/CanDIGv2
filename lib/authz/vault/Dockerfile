@@ -3,14 +3,14 @@
 FROM alpine:3.7
 
 # set vault version
-ENV VAULT_VERSION 1.5.0
+ARG VAULT_VERSION
 
 # maintainer
 LABEL maintainer="brennan.brouillette@c3g.ca"
 
 # create a new directory
-RUN mkdir /vault
-RUN mkdir /vault/config
+RUN mkdir -p /vault/config
+
 WORKDIR /vault
 
 # download dependencies

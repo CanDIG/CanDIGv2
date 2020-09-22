@@ -475,8 +475,7 @@ init-swarm: swarm-init swarm-networks swarm-configs swarm-secrets
 kubernetes:
 	$(DIR)/bin/kompose --file $(DIR)/lib/kubernetes/docker-compose.yml \
 		$(foreach MODULE, $(CANDIG_MODULES), --file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-		convert
-		# up
+		up
 
 #>>>
 # deploys individual module using kompose

@@ -27,3 +27,6 @@ lib/authz/keycloak/data/secrets.env
 
 # tyk
 lib/authz/tyk/data/*
+
+# opa 
+lib/opa/*
