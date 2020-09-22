@@ -29,42 +29,42 @@ usage () {
 
 # Load Keycloak template (.tpl) files, populate them 
 # with project .env variables, and then spit 
-# them out to ./lib/keyclaok/volumes/*
+# them out to ./lib/keyclaok/data/*
 
-mkdir -p ${PWD}/lib/keycloak/volumes
+mkdir -p ${PWD}/lib/authz/keycloak/data
 
 # secrets.env
 echo "Working on secrets.env .."
-envsubst < ${PWD}/etc/setup/templates/configs/keycloak/configuration/secrets.env.tpl > ${PWD}/lib/keycloak/volumes/secrets.env
+envsubst < ${PWD}/etc/setup/templates/configs/keycloak/configuration/secrets.env.tpl > ${PWD}/lib/authz/keycloak/data/secrets.env
 #temp
-#touch ${PWD}/lib/keycloak/volumes/secrets.env
+#touch ${PWD}/lib/authz/keycloak/data/secrets.env
 
 # echo 
-mkdir ${PWD}/lib/keycloak/volumes/keycloak-db
-chmod 777 ${PWD}/lib/keycloak/volumes/keycloak-db
+mkdir ${PWD}/lib/authz/keycloak/data/keycloak-db
+chmod 777 ${PWD}/lib/authz/keycloak/data/keycloak-db
 
 
 # Copy files from template configs
 echo "Copying application-roles.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-roles.properties ${PWD}/lib/keycloak/volumes/application-roles.properties
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-roles.properties ${PWD}/lib/authz/keycloak/data/application-roles.properties
 
 echo "Copying application-users.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-users.properties ${PWD}/lib/keycloak/volumes/application-users.properties
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-users.properties ${PWD}/lib/authz/keycloak/data/application-users.properties
 
 echo "Copying logging.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/logging.properties ${PWD}/lib/keycloak/volumes/logging.properties
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/logging.properties ${PWD}/lib/authz/keycloak/data/logging.properties
 
 echo "Copying mgmt-groups.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-groups.properties ${PWD}/lib/keycloak/volumes/mgmt-groups.properties
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-groups.properties ${PWD}/lib/authz/keycloak/data/mgmt-groups.properties
 
 echo "Copying mgmt-users.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-users.properties ${PWD}/lib/keycloak/volumes/mgmt-users.properties
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-users.properties ${PWD}/lib/authz/keycloak/data/mgmt-users.properties
 
 echo "Copying standalone.xml .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone.xml ${PWD}/lib/keycloak/volumes/standalone.xml
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone.xml ${PWD}/lib/authz/keycloak/data/standalone.xml
 
 echo "Copying standalone-ha.xml .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone-ha.xml ${PWD}/lib/keycloak/volumes/standalone-ha.xml
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone-ha.xml ${PWD}/lib/authz/keycloak/data/standalone-ha.xml
 
 
 
@@ -73,7 +73,7 @@ KEYCLOAK_CONTAINERS=$(echo $(docker ps | grep keycloak | wc -l))
 echo "Number of keycloak containers running: ${KEYCLOAK_CONTAINERS}"
 if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
    echo "Booting keycloak container!"
-   docker-compose -f ${PWD}/lib/keycloak/docker-compose.yml up -d
+   docker-compose -f ${PWD}/lib/authz/docker-compose.yml up -d keycloak
    sleep 5
 fi
 

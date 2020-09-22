@@ -13,11 +13,11 @@
 
 # vault-config.json
 echo "Working on vault-config.json .."
-mkdir -p ${PWD}/lib/vault/config
-envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-config.json.tpl > ${PWD}/lib/vault/config/vault-config.json
+mkdir -p ${PWD}/lib/authz/vault/config
+envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-config.json.tpl > ${PWD}/lib/authz/vault/config/vault-config.json
 
 # boot container
-docker-compose -f ${PWD}/lib/vault/docker-compose.yml up -d
+docker-compose -f ${PWD}/lib/authz/docker-compose.yml up -d vault
 
 # -- todo: run only if not already initialized --
 # gather keys and login token
@@ -66,13 +66,13 @@ do
     HAS_ERROR_LINE=$(echo "${ERROR_LINE}" | grep [eE]rror | wc -l)
 
     if [[ HAS_SEALED_LINE -gt 0 ]]; then
-        echo "sealed line found, try again ; found ${SEALED_LINE}"
 
         IS_SEALED=$(echo "${SEALED_LINE}" | grep "true" | wc -l)
         if [[ IS_SEALED -gt 0 ]]; then
-            echo "still sealed"
+            echo "Vault still sealed.. please continue"
             VAULT_SEALED=True
         else
+            echo "Great! Vault no longer sealed.."
             VAULT_SEALED=False # exit loop here
             break
         fi

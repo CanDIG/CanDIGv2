@@ -319,26 +319,25 @@ compose:
 
 #-- Temp --
 compose-authz:
-	docker-compose -f $(DIR)/lib/keycloak/docker-compose.yml up -d 2>&1
-	docker-compose -f $(DIR)/lib/vault/docker-compose.yml up -d 2>&1
-	docker-compose -f $(DIR)/lib/tyk/docker-compose.yml up -d 2>&1
+	docker-compose -f $(DIR)/lib/authz/docker-compose.yml up -d 2>&1
 compose-authz-down:
-	docker-compose -f $(DIR)/lib/keycloak/docker-compose.yml down
-	docker-compose -f $(DIR)/lib/vault/docker-compose.yml down
-	docker-compose -f $(DIR)/lib/tyk/docker-compose.yml down
+	docker-compose -f $(DIR)/lib/authz/docker-compose.yml down
 compose-authz-clean: compose-authz-down \
 	# needs sudo to run;
 	./etc/setup/scripts/sudo_check.sh
 
 	# clean keycloak
-	sudo rm -r $(DIR)/lib/keycloak/volumes/* & 2>&1
+	sudo rm -r $(DIR)/lib/authz/keycloak/data/* & 2>&1
+
 	# clean tyk
-	sudo rm -r $(DIR)/lib/tyk/volumes/* & 2>&1
+	sudo rm -r $(DIR)/lib/authz/tyk/data/* & 2>&1
+
 	# clean vault
-	sudo rm -r $(DIR)/lib/vault/config/vault-config.json 2>&1
-	sudo rm -r $(DIR)/lib/vault/data/ & 2>&1 
-	sudo rm -r $(DIR)/lib/vault/logs/ & 2>&1 
-	sudo rm -r $(DIR)/lib/vault/policies/ 2>&1
+	sudo rm -r $(DIR)/lib/authz/vault/config/vault-config.json 2>&1
+	sudo rm -r $(DIR)/lib/authz/vault/data* & 2>&1 
+	sudo rm -r $(DIR)/lib/authz/vault/logs/ & 2>&1 
+	sudo rm -r $(DIR)/lib/authz/vault/policies/ 2>&1
+
 
 setup-authz:
 	./etc/setup/scripts/setup.sh
