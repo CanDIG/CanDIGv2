@@ -22,10 +22,9 @@ echo
 echo "Setting up Vault;"
 ${PWD}/etc/setup/scripts/subtasks/vault_setup.sh
 
-# TODO: OPA
-# echo
-# echo "Setting up OPA;"
-#${PWD}/etc/setup/scripts/subtasks/opa_setup.sh
+echo
+echo "Setting up OPA;"
+${PWD}/etc/setup/scripts/subtasks/opa_setup.sh
 
 echo
 echo "-- AuthZ Setup Done! --"

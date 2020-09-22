@@ -338,6 +338,10 @@ compose-authz-clean: compose-authz-down \
 	sudo rm -r $(DIR)/lib/authz/vault/logs/ & 2>&1 
 	sudo rm -r $(DIR)/lib/authz/vault/policies/ 2>&1
 
+## TEMP
+compose-opa:
+	docker-compose -f $(DIR)/lib/authz/docker-compose.yml up opa 2>&1
+##
 
 setup-authz:
 	./etc/setup/scripts/setup.sh

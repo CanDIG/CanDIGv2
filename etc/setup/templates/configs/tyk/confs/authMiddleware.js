@@ -65,6 +65,41 @@ authMiddleware.NewProcessRequest(function(request, session, spec) {
                     // Response
                     request.SetHeaders["Authorization"] = "Bearer " + idToken;
                     request.SetHeaders['X-CanDIG-Authz'] = 'Bearer ' + vault_data.data.token;
+
+                    // OPA
+                    // TEMP SETUP
+                    var decodedPayload = JSON.parse(b64dec(tokenPayload));
+                    
+                    // Retrieve Prefered Username from authentication token received from Tyk
+                    var preferred_username = decodedPayload.preferred_username;
+                    var opaUrl="http://opa:8181"
+                    var opaPayload = {
+                        "input": {
+                            "kcToken": idToken,
+                            "vaultToken": vault_data.data.token,
+                            // temp
+                            "name": preferred_username
+                        }
+                    };
+                    var serializedOpaPayload = JSON.stringify(opaPayload)
+
+                    log("Sending payload to opa: " + serializedOpaPayload)
+
+                    var requestParams = {
+                        "Method": "POST",
+                        "Domain": opaUrl,
+                        "Resource": "/v1/data/permissions/allowed",
+                        "Body": serializedOpaPayload
+                    };
+            
+                    var opaResp = TykMakeHttpRequest(JSON.stringify(requestParams));
+                    var opaRespJson = JSON.parse(JSON.parse(opaResp).Body);
+                    log("OPA Response: " + JSON.stringify(opaRespJson))
+
+                    if (opaRespJson.result == false || opaRespJson.result == undefined) {
+                        request.ReturnOverrides.ResponseCode = 403
+                        request.ReturnOverrides.ResponseError = "Access Denied"
+                    }
                 }
             }
 
