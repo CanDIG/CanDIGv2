@@ -30,3 +30,6 @@ lib/authz/tyk/data/*
 
 # opa 
 lib/opa/*
+lib/authz/opa/*
+lib/authz/opa/policy.rego
+

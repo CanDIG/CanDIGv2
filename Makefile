@@ -325,18 +325,17 @@ compose-authz-down:
 compose-authz-clean: compose-authz-down \
 	# needs sudo to run;
 	./etc/setup/scripts/sudo_check.sh
-
 	# clean keycloak
 	sudo rm -r $(DIR)/lib/authz/keycloak/data/* & 2>&1
-
 	# clean tyk
 	sudo rm -r $(DIR)/lib/authz/tyk/data/* & 2>&1
-
 	# clean vault
 	sudo rm -r $(DIR)/lib/authz/vault/config/vault-config.json 2>&1
 	sudo rm -r $(DIR)/lib/authz/vault/data* & 2>&1 
 	sudo rm -r $(DIR)/lib/authz/vault/logs/ & 2>&1 
 	sudo rm -r $(DIR)/lib/authz/vault/policies/ 2>&1
+	# clean opa
+	sudo rm -r $(DIR)/lib/authz/opa/* 2>&1
 
 ## TEMP
 compose-opa:

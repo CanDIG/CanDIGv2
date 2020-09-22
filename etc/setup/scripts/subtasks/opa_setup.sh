@@ -1,6 +1,13 @@
 #! /usr/bin/env bash
 # This script will set up a full opa environment on your local CanDIGv2 cluster
 
+mkdir -p ${PWD}/lib/authz/opa/data
+
+# policy.rego
+echo "Working on policy.rego .."
+envsubst < ${PWD}/etc/setup/templates/configs/opa/policy.rego.tpl > ${PWD}/lib/authz/opa/policy.rego
+
+
 # Verify if opa container is running
 OPA_CONTAINERS=$(echo $(docker ps | grep opa | wc -l))
 echo "Number of opa containers running: ${OPA_CONTAINERS}"

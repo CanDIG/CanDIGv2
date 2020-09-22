@@ -82,7 +82,12 @@ fi
 
 add_user() {
   # CONTAINER_NAME_CANDIG_AUTH is the name of the keycloak server inside the compose network
+  echo "Adding ${KC_TEST_USER}"
   docker exec ${CONTAINER_NAME_CANDIG_AUTH} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER} -p ${KC_TEST_PW} -r ${KC_REALM}
+
+  echo "Adding alice"
+  docker exec ${CONTAINER_NAME_CANDIG_AUTH} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u alice -p alicepass123 -r ${KC_REALM}
+
   echo "Restarting the keycloak container"
   docker restart ${CONTAINER_NAME_CANDIG_AUTH}
 }
@@ -184,6 +189,12 @@ get_secret () {
     ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients/$id/client-secret 2> /dev/null |\
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["value"])'
 }
+
+get_public_key () {
+  curl \
+    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM} 2> /dev/null |\
+    python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["public_key"])'
+}
 ##################################
 
 # SCRIPT START
@@ -206,14 +217,18 @@ set_client ${KC_REALM} ${KC_CLIENT_ID} "${TYK_LISTEN_PATH}" ${KC_LOGIN_REDIRECT_
 echo ">> .. set..."
 
 echo ">> Getting KC_SECRET .."
-# TODO: Fix;
-# WARNING: Despite being exported,
-# KC_SECRET is not properly useable
-# elsewhere in the setup process.
-# e.g.: Tyk (needs manual intervention)
 export KC_SECRET=$(get_secret  ${KC_REALM})
 echo "** Retrieved KC_SECRET as ${KC_SECRET} **"
 echo ">> .. got it..."
+echo
+
+
+echo ">> Getting KC_PUBLIC_KEY .."
+export KC_PUBLIC_KEY=$(get_public_key  ${KC_REALM})
+echo "** Retrieved KC_PUBLIC_KEY as ${KC_PUBLIC_KEY} **"
+echo ">> .. got it..."
+echo
+
 
 echo ">> Adding user .."
 add_user
