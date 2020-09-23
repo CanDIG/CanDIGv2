@@ -1,4 +1,6 @@
 #! /usr/bin/env bash
+set -e
+
 # This script will set up a full keycloak environment on your local CanDIGv2 cluster
 
 usage () {
