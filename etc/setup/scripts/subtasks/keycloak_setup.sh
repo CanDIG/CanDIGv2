@@ -47,17 +47,11 @@ chmod 777 ${PWD}/lib/authz/keycloak/data/keycloak-db
 
 
 # Copy files from template configs
-echo "Copying application-roles.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-roles.properties ${PWD}/lib/authz/keycloak/data/application-roles.properties
-
 echo "Copying application-users.properties .."
 cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-users.properties ${PWD}/lib/authz/keycloak/data/application-users.properties
 
 echo "Copying logging.properties .."
 cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/logging.properties ${PWD}/lib/authz/keycloak/data/logging.properties
-
-echo "Copying mgmt-groups.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-groups.properties ${PWD}/lib/authz/keycloak/data/mgmt-groups.properties
 
 echo "Copying mgmt-users.properties .."
 cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-users.properties ${PWD}/lib/authz/keycloak/data/mgmt-users.properties
@@ -235,9 +229,8 @@ echo
 echo ">> Adding user .."
 add_user
 echo ">> .. added..."
-
 echo 
+
 echo ">> .. waiting for keycloak to restart..."
 while !  docker logs --tail 5  ${CONTAINER_NAME_CANDIG_AUTH} | grep "Admin console listening on http://127.0.0.1:9990" ; do sleep 1 ; done
-docker exec ${CONTAINER_NAME_CANDIG_AUTH}  rm /opt/jboss/keycloak/standalone/configuration/keycloak-add-user.json 2> /dev/null
 echo ">> .. ready..."

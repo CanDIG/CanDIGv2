@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
+set -e
 
 # Simple usage;
 # Run prior to any code blocks that require sudo to avoid unexpected prompts
