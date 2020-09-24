@@ -5,12 +5,19 @@ import input
 now := time.now_ns()/1000000000
 
 default allowed = false
+
 default iss = "${TYK_PROVIDERS_ISSUER}"
 default aud = "${KC_CLIENT_ID}"
 
 default full_authn_pk=`-----BEGIN PUBLIC KEY-----
 ${KC_PUBLIC_KEY}
 -----END PUBLIC KEY-----`
+
+default full_authz_pk=`-----BEGIN PUBLIC KEY-----
+${VAULT_PUBLIC_KEY}
+-----END PUBLIC KEY-----`
+
+default authz_jwks=`${VAULT_JWKS}`
 
 allowed = true {
     # retrieve authentication token parts
@@ -23,6 +30,9 @@ allowed = true {
     # Verify authentication token signature
     authN_token_is_valid := io.jwt.verify_rs256(input.kcToken, full_authn_pk)
 
+    # Verify authentication token signature
+    authZ_token_is_valid := io.jwt.verify_rs256(input.vaultToken, authz_jwks)
+
 
     all([
         # Authentication
@@ -31,10 +41,9 @@ allowed = true {
         authN_token_payload.iss == iss, 
         authN_token_payload.iat < now,
         
-        # temp example; discriminate by user name
-        ## authN_token_payload.preferred_username == "bob"
 
         # Authorization
+        authZ_token_is_valid == true,
         ##authZ_token_payload.aud == aud, 
         ##authZ_token_payload.iss == iss, 
         authZ_token_payload.iat < now,

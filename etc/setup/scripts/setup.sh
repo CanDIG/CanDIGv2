@@ -22,7 +22,7 @@ ${PWD}/etc/setup/scripts/subtasks/tyk_setup.sh
 
 echo
 echo "Setting up Vault;"
-${PWD}/etc/setup/scripts/subtasks/vault_setup.sh
+source ${PWD}/etc/setup/scripts/subtasks/vault_setup.sh
 
 echo
 echo "Setting up OPA;"
