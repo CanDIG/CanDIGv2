@@ -8,27 +8,35 @@ default allowed = false
 default iss = "${TYK_PROVIDERS_ISSUER}"
 default aud = "${KC_CLIENT_ID}"
 
-default pk_header="-----BEGIN PUBLIC KEY-----"
-default kc_public_key = "${KC_PUBLIC_KEY}"
-default pk_footer="-----END PUBLIC KEY-----"
+default full_authn_pk=`-----BEGIN PUBLIC KEY-----
+${KC_PUBLIC_KEY}
+-----END PUBLIC KEY-----`
 
 allowed = true {
     # retrieve authentication token parts
-    [auth_token_header, auth_token_payload, auth_token_signature] := io.jwt.decode(input.kcToken)
+    [authN_token_header, authN_token_payload, authN_token_signature] := io.jwt.decode(input.kcToken)
 
-    
-    # temp example; discriminate by user name
-    #auth_token_payload.preferred_username = "bob"
+    # retrieve authorization token parts
+    [authZ_token_header, authZ_token_payload, authZ_token_signature] := io.jwt.decode(input.vaultToken)
 
 
-    # TODO: elaborate rules using authorization token
-    #[authz_token_header, authz_token_payload, authz_token_signature] := io.jwt.decode(input.vaultToken)
-    
-    # ...
+    # Verify authentication token signature
+    authN_token_is_valid := io.jwt.verify_rs256(input.kcToken, full_authn_pk)
 
-    # TODO: Verify signature
-    #auth_token_is_valid := io.jwt.verify_rs256(input.kcToken, concat("", [pk_header, kc_public_key, pk_footer]))
-    #auth_token_is_valid==true
 
-    all([auth_token_payload.aud == aud, auth_token_payload.iss == iss, auth_token_payload.iat < now])
+    all([
+        # Authentication
+        authN_token_is_valid == true, 
+        authN_token_payload.aud == aud, 
+        authN_token_payload.iss == iss, 
+        authN_token_payload.iat < now,
+        
+        # temp example; discriminate by user name
+        ## authN_token_payload.preferred_username == "bob"
+
+        # Authorization
+        ##authZ_token_payload.aud == aud, 
+        ##authZ_token_payload.iss == iss, 
+        authZ_token_payload.iat < now,
+    ])
 }
