@@ -60,25 +60,22 @@ authMiddleware.NewProcessRequest(function(request, session, spec) {
                 log(request.SetHeaders["Authorization"])   
                 // more requests...             
                 // TODO: Implement Vault Access
+
                 var vault_data = call_vault(request, session, spec, idToken);
+
                 if(vault_data != undefined) {
                     // Response
                     request.SetHeaders["Authorization"] = "Bearer " + idToken;
                     request.SetHeaders['X-CanDIG-Authz'] = 'Bearer ' + vault_data.data.token;
 
                     // OPA
-                    // TEMP SETUP
-                    var decodedPayload = JSON.parse(b64dec(tokenPayload));
+                    // TEMP SETUP -- To be moved to a service adjacent to
+                    // to service we are aiming to protect
                     
-                    // Retrieve Prefered Username from authentication token received from Tyk
-                    var preferred_username = decodedPayload.preferred_username;
-                    var opaUrl="http://opa:8181"
                     var opaPayload = {
                         "input": {
                             "kcToken": idToken,
                             "vaultToken": vault_data.data.token,
-                            // temp
-                            "name": preferred_username
                         }
                     };
                     var serializedOpaPayload = JSON.stringify(opaPayload)
@@ -87,8 +84,8 @@ authMiddleware.NewProcessRequest(function(request, session, spec) {
 
                     var requestParams = {
                         "Method": "POST",
-                        "Domain": opaUrl,
-                        "Resource": "/v1/data/permissions/allowed",
+                        "Domain": spec.config_data.OPA_URL,
+                        "Resource": spec.config_data.OPA_GLOBAL_RESOURCE,
                         "Body": serializedOpaPayload
                     };
             
@@ -130,10 +127,6 @@ log("Authorization middleware initialised");
 
 // --- Vault ---
 
-// WARNING please remember to change these:
-//var vaultUrl = "http://0.0.0.0:8200";
-var vaultUrl = "http://vault:8200";
-var vaultRole = "test-role";
 
 //var authMiddleware = new TykJS.TykMiddleware.NewMiddleware({});
 //authMiddleware.NewProcessRequest(function(request, session, spec) {
@@ -158,17 +151,15 @@ function call_vault(request, session, spec, tykToken) {
         var decodedPayload = JSON.parse(b64dec(tokenPayload));
         log("Decoded Payload: "+JSON.stringify(decodedPayload))
         
-        //Hm use sub (UUID) or preferred_username?
-        var userId = decodedPayload.sub;
         
         var data = {
             "jwt": token,
-            "role": vaultRole
+            "role": spec.config_data.VAULT_ROLE
         };
         var requestParams = {
             "Method": "POST",
-            "Domain": vaultUrl,
-            "Resource": "/v1/auth/jwt/login",
+            "Domain": spec.config_data.VAULT_SERVICE_URL,
+            "Resource": spec.config_data.VAULT_SERVICE_RESOURCE,
             "Body": JSON.stringify(data)
         };
 
@@ -192,8 +183,8 @@ function call_vault(request, session, spec, tykToken) {
             var requestParams = {
                 "Headers": headers,
                 "Method": "GET",
-                "Domain": vaultUrl,
-                "Resource": "/v1/identity/oidc/token/" + vaultRole,
+                "Domain": spec.config_data.VAULT_SERVICE_URL,
+                "Resource": "/v1/identity/oidc/token/" + spec.config_data.VAULT_ROLE,
             };
 
             var resp = TykMakeHttpRequest(JSON.stringify(requestParams));

@@ -83,16 +83,21 @@
     },
     
     "config_data": {
-	"SESSION_ENDPOINTS": [
-	    "/",
-	    "/gene_search",
-	    "/patients_overview",
-	    "/sample_analysis",
-	    "/custom_visualization",
-	    "/api_info",
-	    "/serverinfo"
-	],
-	"TYK_SERVER": "${CANDIG_PUBLIC_URL}"
+        "SESSION_ENDPOINTS": [
+            "/",
+            "/gene_search",
+            "/patients_overview",
+            "/sample_analysis",
+            "/custom_visualization",
+            "/api_info",
+            "/serverinfo"
+        ],
+        "TYK_SERVER": "${CANDIG_PUBLIC_URL}",
+        "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
+        "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",
+        "VAULT_ROLE":"test-role",
+        "OPA_URL":"${OPA_URL}",
+        "OPA_GLOBAL_RESOURCE":"/v1/data/permissions/allowed"
     },
     "openid_options": {
 	"segregate_by_client": false,
