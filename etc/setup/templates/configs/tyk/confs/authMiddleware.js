@@ -68,35 +68,37 @@ authMiddleware.NewProcessRequest(function(request, session, spec) {
                     request.SetHeaders["Authorization"] = "Bearer " + idToken;
                     request.SetHeaders['X-CanDIG-Authz'] = 'Bearer ' + vault_data.data.token;
 
-                    // OPA
-                    // TEMP SETUP -- To be moved to a service adjacent to
-                    // to service we are aiming to protect
+                    // // OPA
+                    // // TEMP SETUP -- To be moved to a service adjacent to
+                    // // to service we are aiming to protect
                     
-                    var opaPayload = {
-                        "input": {
-                            "kcToken": idToken,
-                            "vaultToken": vault_data.data.token,
-                        }
-                    };
-                    var serializedOpaPayload = JSON.stringify(opaPayload)
+                    // var opaPayload = {
+                    //     "input": {
+                    //         "kcToken": idToken,
+                    //         "vaultToken": vault_data.data.token,
+                    //     }
+                    // };
+                    // var serializedOpaPayload = JSON.stringify(opaPayload)
 
-                    log("Sending payload to opa: " + serializedOpaPayload)
+                    // log("Sending payload to opa: " + serializedOpaPayload)
 
-                    var requestParams = {
-                        "Method": "POST",
-                        "Domain": spec.config_data.OPA_URL,
-                        "Resource": spec.config_data.OPA_GLOBAL_RESOURCE,
-                        "Body": serializedOpaPayload
-                    };
+                    // var requestParams = {
+                    //     "Method": "POST",
+                    //     "Domain": spec.config_data.OPA_URL,
+                    //     "Resource": spec.config_data.OPA_GLOBAL_RESOURCE,
+                    //     "Body": serializedOpaPayload
+                    // };
             
-                    var opaResp = TykMakeHttpRequest(JSON.stringify(requestParams));
-                    var opaRespJson = JSON.parse(JSON.parse(opaResp).Body);
-                    log("OPA Response: " + JSON.stringify(opaRespJson))
+                    // var opaResp = TykMakeHttpRequest(JSON.stringify(requestParams));
+                    // var opaRespJson = JSON.parse(JSON.parse(opaResp).Body);
+                    // log("OPA Response: " + JSON.stringify(opaRespJson))
 
-                    if (opaRespJson.result == false || opaRespJson.result == undefined) {
-                        request.ReturnOverrides.ResponseCode = 403
-                        request.ReturnOverrides.ResponseError = "Access Denied"
-                    }
+                    // if (opaRespJson.result == false || opaRespJson.result == undefined) {
+                    //     request.ReturnOverrides.ResponseCode = 403
+                    //     request.ReturnOverrides.ResponseError = "Access Denied"
+                    // }
+
+                    // -- 
                 }
             }
 
