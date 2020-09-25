@@ -6,8 +6,8 @@ LABEL Maintainer="CanDIG Project"
 
 RUN mkdir -p /app/candig-server-arbiter
 
-COPY server.py /app/candig-server-arbiter/server.py
-COPY requirements.txt /app/candig-server-arbiter/requirements.txt
+COPY server.py /app/candig-server-arbiter
+COPY requirements.txt /app/candig-server-arbiter
 
 WORKDIR /app/candig-server-arbiter
 
@@ -21,4 +21,8 @@ RUN pip install -r requirements.txt
 # 	ingest candig-example-data/registry.db mock1 clinical_metadata_tier1.json && \
 # 	ingest candig-example-data/registry.db mock2 clinical_metadata_tier2.json
 
-ENTRYPOINT ["python3 -u server.py"]
+RUN ls /app
+RUN ls /app/candig-server-arbiter
+#RUN ls /app
+
+ENTRYPOINT ["python3", "-u", "/app/candig-server-arbiter/server.py"]
