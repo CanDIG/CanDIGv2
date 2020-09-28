@@ -111,17 +111,8 @@ async def handle(request):
     # print(f"Found token: {authN_token}")
     # print(f"Found token: {authZ_token}")
 
-    #print(train_request_json)
 
-    # id = train_request_json["AnalysisId"]
-    # X = np.array(train_request_json["X"])
-    # y = np.array(train_request_json["y"])
-    # wh = train_request_json["WebHook"]
-
-    # run training async task
-    # t1 = threading.Thread(target=handle_multi_reg_training, args=(id, X, y, wh))
-    # t1.start()
-
+    # reach resource authz server
     opa_request = { 
         "input" : {
             "kcToken" : authN_token,
@@ -129,35 +120,28 @@ async def handle(request):
         }
     }
 
-
-    # reach resource authz server
     try:
         response = requests.post(authz_url, json=opa_request)
         # check response
         allow = response.json()
         if 'code' in allow and allow['code'] == 'internal_error':
-            return 'authz error'
+            return web.HTTPInternalServerError(body=json.dumps({'error': json.dumps(allow)}))
         
     except Exception as e:
         print(e)
-        return 'error'
+        return web.HTTPInternalServerError(body=json.dumps({'error': f'Unknown error: {e}'}))
 
 
-    #print(f"path: {path}, allow: {allow['result']}")
-    print(f"path: {request.path}, response: {allow}")
-    
     if 'result' in allow and allow['result'] == True:
         # forward request to resource server
         try:
             url=f"http://{resource_host}:{resource_port}{request.path}"
-
 
             print(f"Calling URL : {url} using method {request.method}")
 
             if request.method == "GET" :
                 # simply get resource
                 resource = requests.get(url)
-
             else:
                 # assume json payload from inbound request
                 payload = await request.text()
@@ -172,11 +156,9 @@ async def handle(request):
 
         except Exception as e:
             print(e)
-            return 'error'
         
+    return web.HTTPUnauthorized(body=json.dumps({'error': 'Access Denied'}))
 
-    print(f'returning {allow}')
-    return allow
     
     
     # print('there was a request')
@@ -185,10 +167,13 @@ async def handle(request):
 
 @asyncio.coroutine
 def init(loop):
-    app = web.Application(loop=loop)    
+    app = web.Application(loop=loop)
+
+    # accept all GET and POST calls with any path
     app.router.add_route('GET', '/{tail:.*}', handle)
     app.router.add_route('POST', '/{tail:.*}', handle)
 
+    # start server
     srv = yield from loop.create_server(app.make_handler(), '0.0.0.0', port)
     print(f"Server started at http://0.0.0.0:{port}")
     return srv
