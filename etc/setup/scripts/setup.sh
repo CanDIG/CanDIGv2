@@ -25,8 +25,12 @@ echo "Setting up Vault;"
 source ${PWD}/etc/setup/scripts/subtasks/vault_setup.sh
 
 echo
-echo "Setting up OPA;"
+echo "Setting up OPAs;"
 ${PWD}/etc/setup/scripts/subtasks/opa_setup.sh
+
+echo
+echo "Setting up Arbiters;"
+${PWD}/etc/setup/scripts/subtasks/arbiter_setup.sh
 
 echo
 echo "-- AuthZ Setup Done! --"

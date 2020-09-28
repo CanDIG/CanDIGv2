@@ -41,6 +41,7 @@ allowed = true {
         authN_token_payload.iss == iss, 
         authN_token_payload.iat < now,
         
+        authN_token_payload.preferred_username == "bob",
 
         # Authorization
         authZ_token_is_valid == true,

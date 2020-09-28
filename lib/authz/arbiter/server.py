@@ -1,17 +1,14 @@
 # CanDIG-Server Arbiter
-#from flask import Flask, request
 import random
 import json
 import requests
 
-#from quart import jsonify, Quart, request
 import os
 import time
 import threading
 
-
-#app = Quart(__name__)
-#app = Flask(__name__)
+import asyncio
+from aiohttp import web
 
 
 # --- environment vars
@@ -53,34 +50,12 @@ except Exception as e:
     resource_port="3001"
     print(f"Default Resource Port : {resource_port}")
 
-
+print(f"Sources: {resource_authz_host}:{resource_authz_port}, {resource_host}:{resource_port}")
 
 
 authz_url=f"http://{resource_authz_host}:{resource_authz_port}/v1/data/permissions/allowed"
 
 # ---
-
-# # Route all paths and methods
-# # @app.route("/", defaults={"path": ""})
-# # @app.route("/<path:path>")
-# @app.route('/', defaults={'u_path': ''})
-# @app.route('/<path:u_path>')
-# def route_all(u_path):
-   
-
-#     # except Exception as e:
-#     #     print(e)
-#     #     return 'error'
-
-
-# if __name__ == '__main__':
-#     app.run(debug=(mode == "debug"), host='0.0.0.0', port=port)
-
-
-
-import asyncio
-
-from aiohttp import web
 
 @asyncio.coroutine
 async def handle(request):
