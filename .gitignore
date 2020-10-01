@@ -36,3 +36,9 @@ lib/authz/opa/policy.rego
 
 lib/candig_server/authz/opa/*.rego
 
+
+
+
+# tests
+etc/tests/integration/authz/geckodriver
+etc/tests/integration/authz/geckodriver.log
