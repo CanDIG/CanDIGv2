@@ -168,10 +168,6 @@ docker exec -it vault sh -c "echo '{\"key\":\"test-key\",\"client_id\":\"${KC_CL
 echo
 
 
-
-
-
-# TODO: Retrieve jwt public key
 echo
 echo ">> getting jwt public key"
 #docker exec -it vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"test-role\""
