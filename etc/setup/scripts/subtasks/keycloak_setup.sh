@@ -10,6 +10,8 @@ usage () {
   echo "KC_ADMIN_PW: ${KC_ADMIN_PW}"
   echo "KC_TEST_USER: ${KC_TEST_USER}"
   echo "KC_TEST_PW: ${KC_TEST_PW}"
+  echo "KC_TEST_USER: ${KC_TEST_USER_TWO}"
+  echo "KC_TEST_PW: ${KC_TEST_PW_TWO}"
   echo "KEYCLOAK_SERVICE_PUBLIC_URL: ${KEYCLOAK_SERVICE_PUBLIC_URL}"
   echo "KEYCLOAK_SERVICE_PUBLIC_PORT: ${KEYCLOAK_SERVICE_PUBLIC_PORT}"
   echo "CONTAINER_NAME_CANDIG_AUTH: ${CONTAINER_NAME_CANDIG_AUTH}"
@@ -76,13 +78,13 @@ fi
 
 ###############
 
-add_user() {
+add_users() {
   # CONTAINER_NAME_CANDIG_AUTH is the name of the keycloak server inside the compose network
   echo "Adding ${KC_TEST_USER}"
   docker exec ${CONTAINER_NAME_CANDIG_AUTH} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER} -p ${KC_TEST_PW} -r ${KC_REALM}
 
-  echo "Adding alice"
-  docker exec ${CONTAINER_NAME_CANDIG_AUTH} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u alice -p alicepass123 -r ${KC_REALM}
+  echo "Adding ${KC_TEST_USER_TWO}"
+  docker exec ${CONTAINER_NAME_CANDIG_AUTH} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER_TWO} -p ${KC_TEST_PW_TWO} -r ${KC_REALM}
 
   echo "Restarting the keycloak container"
   docker restart ${CONTAINER_NAME_CANDIG_AUTH}
@@ -227,7 +229,7 @@ echo
 
 
 echo ">> Adding user .."
-add_user
+add_users
 echo ">> .. added..."
 echo 
 

@@ -121,7 +121,7 @@ echo ">> configuring jwt stuff"
 docker exec -it vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"test-role\""
 
 
-# create user
+# create users
 echo
 echo ">> creating user $KC_TEST_USER"
 
@@ -132,12 +132,28 @@ test_user_output=$(docker exec -it vault sh -c "echo '${PRESUMED_PERMISSIONS_DAT
 ENTITY_ID=$(echo "${test_user_output}" | grep id | awk '{print $2}')
 echo ">>> found entity id : ${ENTITY_ID}"
 
-# setup alias
+
+echo
+echo ">> creating user $KC_TEST_USER_TWO"
+
+PRESUMED_PERMISSIONS_DATASTRUCTURE_TEMPLATE_TWO="{\"name\":\"${KC_TEST_USER_TWO}\",\"metadata\":{\"dataset123\":1}}"
+
+test_user_output_two=$(docker exec -it vault sh -c "echo '${PRESUMED_PERMISSIONS_DATASTRUCTURE_TEMPLATE_TWO}' > alice.json; vault write identity/entity @alice.json; rm alice.json;")
+
+ENTITY_ID_TWO=$(echo "${test_user_output_two}" | grep id | awk '{print $2}')
+echo ">>> found entity id 2: ${ENTITY_ID_TWO}"
+
+
+
+
+
+# setup aliases
 echo
 echo ">> setting up alias for $KC_TEST_USER"
 AUTH_LIST_OUTPUT=$(docker exec -it vault sh -c "vault auth list -format=json")
 #echo "auth list output:"
 #echo "${AUTH_LIST_OUTPUT}"
+#exit 0
 
 JWT_ACCESSOR_VALUE=$(echo "${AUTH_LIST_OUTPUT}" | grep accessor | head -1 | awk '{print $2}' | tr -d '"' | tr -d ',' | tr -d '[:space:]')
 echo ">>> found jwt accessor : ${JWT_ACCESSOR_VALUE}"
@@ -152,6 +168,8 @@ echo ">> writing alias"
 STRUCTURE="{\\\"name\\\":\\\"${KC_TEST_USER}\\\",\\\"mount_accessor\\\":\\\"${JWT_ACCESSOR_VALUE}\\\",\\\"canonical_id\\\":\\\"${ENTITY_ID}\\\"}"
 docker exec -it vault sh -c "echo ${STRUCTURE} | tr -d '[:space:]' > alias.json; echo 'catting alias.json'; cat alias.json ; vault write identity/entity-alias @alias.json;" # rm alias.json;"
 
+STRUCTURE="{\\\"name\\\":\\\"${KC_TEST_USER_TWO}\\\",\\\"mount_accessor\\\":\\\"${JWT_ACCESSOR_VALUE}\\\",\\\"canonical_id\\\":\\\"${ENTITY_ID_TWO}\\\"}"
+docker exec -it vault sh -c "echo ${STRUCTURE} | tr -d '[:space:]' > alias.json; echo 'catting alias.json'; cat alias.json ; vault write identity/entity-alias @alias.json;" # rm alias.json;"
 
 
 # enable identity tokens

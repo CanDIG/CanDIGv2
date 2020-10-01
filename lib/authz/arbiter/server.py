@@ -62,7 +62,7 @@ async def handle(request):
         authZ_token_header = request.headers['X-CanDIG-Authz']
     except Exception as e:
         print(e)
-        return 'authorization error'
+        return web.HTTPInternalServerError(body=json.dumps({'error': 'Authorization Error'}))
 
     authN_token = authN_token_header
     authZ_token = authZ_token_header
@@ -96,39 +96,43 @@ async def handle(request):
         # check response
         allow = response.json()
         if 'code' in allow and allow['code'] == 'internal_error':
-            return web.HTTPInternalServerError(body=json.dumps({'error': json.dumps(allow)}))
+            return web.HTTPInternalServerError(body=json.dumps({'error': f"Resource authz agent error: {json.dumps(allow)}"}))
         
     except Exception as e:
         print(e)
-        return web.HTTPInternalServerError(body=json.dumps({'error': f'Unknown error: {e}'}))
+        return web.HTTPInternalServerError(body=json.dumps({'error': 'Resource authz agent unreachable'}))
 
+    if 'result' in allow :
+        if allow['result'] == True:
+            # forward request to resource server
+            try:
+                url=f"http://{resource_host}:{resource_port}{request.path}"
 
-    if 'result' in allow and allow['result'] == True:
-        # forward request to resource server
-        try:
-            url=f"http://{resource_host}:{resource_port}{request.path}"
+                print(f"Calling URL : {url} using method {request.method}")
 
-            print(f"Calling URL : {url} using method {request.method}")
+                if request.method == "GET" :
+                    # simply get resource
+                    resource = requests.get(url)
+                else:
+                    # assume json payload from inbound request
+                    payload = await request.text()
 
-            if request.method == "GET" :
-                # simply get resource
-                resource = requests.get(url)
-            else:
-                # assume json payload from inbound request
-                payload = await request.text()
+                    # relay payload to resource
+                    resource = requests.post(url, data=payload)
 
-                # relay payload to resource
-                resource = requests.post(url, data=payload)
+                #print(f'resource returned status {resource}')
 
-            print(f'returned status {resource}')
+                # naively return all headers and all content
+                return web.Response(headers=resource.headers, body=resource.content)
 
-            # naively return all headers and all content
-            return web.Response(headers=resource.headers, body=resource.content)
+            except Exception as e:
+                print(e)
+                return web.HTTPUnauthorized(body=json.dumps({'error': 'Unknown'}))
+        else:
+            return web.HTTPUnauthorized(body=json.dumps({'error': 'Access Denied'}))
+    else:
+        return web.HTTPInternalServerError(body=json.dumps({'error': 'Resource authz agent misconfigured'}))
 
-        except Exception as e:
-            print(e)
-        
-    return web.HTTPUnauthorized(body=json.dumps({'error': 'Access Denied'}))
 
 @asyncio.coroutine
 def init(loop):
