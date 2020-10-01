@@ -1,17 +1,14 @@
-# CanDIG-Server Arbiter
-import random
 import json
 import requests
 
 import os
-import time
 import threading
 
 import asyncio
 from aiohttp import web
 
 
-# --- environment vars
+# --- environment variables
 try:
     mode = os.environ["ARBITER_MODE"] # debug | prod  
 except Exception as e:
@@ -59,9 +56,6 @@ authz_url=f"http://{resource_authz_host}:{resource_authz_port}/v1/data/permissio
 
 @asyncio.coroutine
 async def handle(request):
-    #try:
-    # prepare data
-    #train_request_json = await request.get_json()
 
     try:
         authN_token_header = request.headers['Authorization']
@@ -83,8 +77,10 @@ async def handle(request):
 
 
     print(f"Path: {request.path}")
-    # print(f"Found token: {authN_token}")
-    # print(f"Found token: {authZ_token}")
+
+    if mode=="debug":
+        print(f"[DEBUG] Found token: {authN_token}")
+        print(f"[DEBUG] Found token: {authZ_token}")
 
 
     # reach resource authz server
@@ -121,10 +117,10 @@ async def handle(request):
                 # assume json payload from inbound request
                 payload = await request.text()
 
-                # relay body to resource
+                # relay payload to resource
                 resource = requests.post(url, data=payload)
 
-            print(f'returning {resource}')
+            print(f'returned status {resource}')
 
             # naively return all headers and all content
             return web.Response(headers=resource.headers, body=resource.content)
@@ -133,12 +129,6 @@ async def handle(request):
             print(e)
         
     return web.HTTPUnauthorized(body=json.dumps({'error': 'Access Denied'}))
-
-    
-    
-    # print('there was a request')
-    # text = "Hello "
-    # return web.Response(body=text.encode('utf-8'))
 
 @asyncio.coroutine
 def init(loop):

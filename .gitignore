@@ -29,8 +29,10 @@ lib/authz/keycloak/data/secrets.env
 lib/authz/tyk/data/*
 
 # opa 
-lib/opa/*
+# keep global policies
+#lib/opa/*
 lib/authz/opa/*
 lib/authz/opa/policy.rego
-lib/*/authz/opa/*.rego
+
+lib/candig_server/authz/opa/*.rego
 

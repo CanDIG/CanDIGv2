@@ -13,9 +13,9 @@ default full_authn_pk=`-----BEGIN PUBLIC KEY-----
 ${KC_PUBLIC_KEY}
 -----END PUBLIC KEY-----`
 
-default full_authz_pk=`-----BEGIN PUBLIC KEY-----
-${VAULT_PUBLIC_KEY}
------END PUBLIC KEY-----`
+#default full_authz_pk=`-----BEGIN PUBLIC KEY-----
+#${VAULT_PUBLIC_KEY}
+#-----END PUBLIC KEY-----`
 
 default authz_jwks=`${VAULT_JWKS}`
 

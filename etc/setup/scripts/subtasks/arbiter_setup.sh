@@ -12,13 +12,13 @@ fi
 
 
 
-# Verify if arbiter container is running
+# Verify if any arbiter containers are running
 ARBITER_CONTAINERS=$(echo $(docker ps | grep arbiter | wc -l))
 echo "Number of arbiter containers running: ${ARBITER_CONTAINERS}"
 if [[ $ARBITER_CONTAINERS -eq 0 ]]; then
+   # First arbiter of potentially many..
    echo "Booting candig server arbiter container!"
    docker-compose -f ${PWD}/lib/candig_server/docker-compose.yml up -d candig-server-arbiter
-   sleep 5
 fi
 
 echo "-- Arbiter Setup Done! --"
