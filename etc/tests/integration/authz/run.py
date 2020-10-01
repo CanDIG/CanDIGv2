@@ -6,6 +6,10 @@ import os
 import unittest
 import time
 
+import asyncio
+#import aiounittest
+from aiounittest import async_test
+
 def login(driver, username, password):
     # ensure we were redirected
     assert "Log in to candig" in driver.title
@@ -26,13 +30,14 @@ def login(driver, username, password):
 
 
 
+candig_url="http://candig.local:8080"
+debug_pause_time=1
 class TestAuthorizations(unittest.TestCase):
-    candig_url="http://candig.local:8080"
-    debug_pause_time=1
     
-    def test_bob(self):
+    @async_test
+    async def test_bob(self):
         driver = webdriver.Firefox()
-        driver.get(self.candig_url)
+        driver.get(candig_url)
 
         # credentials
         u1 = os.environ["KC_TEST_USER"]
@@ -40,7 +45,7 @@ class TestAuthorizations(unittest.TestCase):
         login(driver, u1, p1)
 
         
-        time.sleep(self.debug_pause_time)
+        time.sleep(debug_pause_time)
 
         # verify successful login
         text=driver.find_elements_by_xpath("/html/body/div[1]/div[1]/a[2]")[0].text
@@ -49,16 +54,17 @@ class TestAuthorizations(unittest.TestCase):
         driver.quit()
 
 
-    def test_alice(self):
+    @async_test
+    async def test_alice(self):
         driver = webdriver.Firefox()
-        driver.get(self.candig_url)
+        driver.get(candig_url)
 
         # credentials
         u2 = os.environ["KC_TEST_USER_TWO"]
         p2 = os.environ["KC_TEST_PW_TWO"]
         login(driver, u2, p2)
 
-        time.sleep(self.debug_pause_time)
+        time.sleep(debug_pause_time)
 
         # verify denied login
         self.assertTrue("Access Denied" in driver.find_elements_by_tag_name("body")[0].text)
