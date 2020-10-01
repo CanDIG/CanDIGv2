@@ -32,4 +32,5 @@ lib/authz/tyk/data/*
 lib/opa/*
 lib/authz/opa/*
 lib/authz/opa/policy.rego
+lib/*/authz/opa/*.rego
 
