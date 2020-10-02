@@ -17,8 +17,7 @@ def setup(request):
         cls = item.getparent(pytest.Class)
         setattr(cls.obj, "driver", driver)
         setattr(cls.obj, "candig_url", "http://candig.local:8080")
-        setattr(cls.obj, "debug_pause_time", 0.5)
-
+        setattr(cls.obj, "debug_pause_time", 5)
 
     yield driver
     driver.close()

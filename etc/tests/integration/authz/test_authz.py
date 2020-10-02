@@ -38,7 +38,6 @@ class TestAuthorizations():
         u1 = os.environ["KC_TEST_USER"]
         p1 = os.environ["KC_TEST_PW"]
         login(self.driver, u1, p1)
-
         
         time.sleep(self.debug_pause_time)
 
