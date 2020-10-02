@@ -37,8 +37,10 @@ lib/authz/opa/policy.rego
 lib/candig_server/authz/opa/*.rego
 
 
+# test metadata
+etc/tests/integration/*/__pycache__/*
+etc/tests/integration/*/.pytest_cache/*
+etc/tests/integration/*/.pytest_cache/*
 
-
-# tests
-etc/tests/integration/authz/geckodriver
-etc/tests/integration/authz/geckodriver.log
+etc/tests/integration/*/geckodriver
+etc/tests/integration/*/geckodriver.log
