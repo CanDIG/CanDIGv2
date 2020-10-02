@@ -1,5 +1,4 @@
 from selenium import webdriver
-from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
 from selenium.webdriver.common.keys import Keys
 import os
@@ -39,7 +38,7 @@ class TestAuthorizations():
         p1 = os.environ["KC_TEST_PW"]
         login(self.driver, u1, p1)
         
-        time.sleep(self.debug_pause_time)
+        time.sleep(self.debug_pause_time_seconds)
 
         # verify successful login
         text=self.driver.find_elements_by_xpath("/html/body/div[1]/div[1]/a[2]")[0].text
@@ -54,7 +53,7 @@ class TestAuthorizations():
         p2 = os.environ["KC_TEST_PW_TWO"]
         login(self.driver, u2, p2)
 
-        time.sleep(self.debug_pause_time)
+        time.sleep(self.debug_pause_time_seconds)
 
         # verify denied login
         assert "Access Denied" in self.driver.find_elements_by_tag_name("body")[0].text
