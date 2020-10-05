@@ -5,6 +5,10 @@ set -e
 echo
 echo "- Generating prerequisites; -"
 
+mkdir -p ${PWD}/lib/authz/tyk
+mkdir -p ${PWD}/lib/authz/keycloak
+mkdir -p ${PWD}/lib/authz/vault
+
 export KC_CLIENT_ID_64=$(echo -n ${KC_CLIENT_ID} | base64)
 echo "Generated KC_CLIENT_ID_64 as ${KC_CLIENT_ID_64}"
 
