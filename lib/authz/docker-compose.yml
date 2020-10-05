@@ -2,8 +2,8 @@ version: '3.7'
 
 services:
   keycloak:
-    build:
-      context: ${PWD}/lib/authz/keycloak
+    # build:
+    #   context: ${PWD}/lib/authz/keycloak
     image: jboss/keycloak:${KEYCLOAK_VERSION}
     container_name: keycloak
     command: ["-b", "${KEYCLOAK_SERVICE_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING"]
