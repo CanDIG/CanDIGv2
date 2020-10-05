@@ -1,13 +1,27 @@
+import os
 import pytest
 from selenium import webdriver
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-import os
+from selenium.webdriver.chrome.options import Options
+
+# Resources
+# Firefox: http://chromedriver.chromium.org/
+# Chrome: http://github.com/mozilla/geckodriver/releases
+
+# to run, use
+# pytest -s -v -n=4
 
 @pytest.fixture(scope="session")
 def setup(request):
 
-    driver = webdriver.Firefox(executable_path="./geckodriver")
-    # TODO ?? : test both Firefox and Chrome
+    # Firefox
+    #driver = webdriver.Firefox(executable_path="./geckodriver")
+
+    # Chrome/Brave
+    options = Options()
+    options.binary_location = '/usr/bin/brave-browser'
+    driver_path = './chromedriver'
+    driver = webdriver.Chrome(options = options, executable_path = driver_path)
 
     candig_url= os.environ["CANDIG_PUBLIC_URL"]
 
@@ -16,7 +30,7 @@ def setup(request):
         cls = item.getparent(pytest.Class)
         setattr(cls.obj, "driver", driver)
         setattr(cls.obj, "candig_url", candig_url)
-        setattr(cls.obj, "debug_pause_time_seconds", 2)
+        setattr(cls.obj, "debug_pause_time_seconds", 0)
 
     yield driver
     driver.close()

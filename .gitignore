@@ -44,3 +44,4 @@ etc/tests/integration/*/.pytest_cache/*
 
 etc/tests/integration/*/geckodriver
 etc/tests/integration/*/geckodriver.log
+etc/tests/integration/*/chromedriver

@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 import os
 import unittest
 import time
-
+import requests
 import pytest
 
 
@@ -28,7 +28,7 @@ def login(driver, username, password):
 
 
 @pytest.mark.usefixtures("setup")
-class TestAuthorizations():
+class TestLogins():
     
     def test_bob(self):
         self.driver.get(self.candig_url)
@@ -41,8 +41,7 @@ class TestAuthorizations():
         time.sleep(self.debug_pause_time_seconds)
 
         # verify successful login
-        text=self.driver.find_elements_by_xpath("/html/body/div[1]/div[1]/a[2]")[0].text
-        assert "dashboard" in text.lower()
+        assert "Dashboard" in self.driver.title
 
 
     def test_alice(self):
