@@ -5,6 +5,10 @@ set -e
 
 #mkdir -p ${PWD}/lib/authz/opa/data
 
+# -- TEMP:
+mkdir -p ${PWD}/lib/candig_server/authz/opa
+# --
+
 # policy.rego
 echo "Working on candig_server_policy.rego .."
 envsubst < ${PWD}/etc/setup/templates/configs/opa/candig_server_policy.rego.tpl > ${PWD}/lib/candig_server/authz/opa/policy.rego
