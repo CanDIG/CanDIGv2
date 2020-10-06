@@ -52,7 +52,7 @@ echo
 # docker exec -it vault sh -c "vault operator unseal" # \${key_2}"
 # docker exec -it vault sh -c "vault operator unseal" # \${key_3}"
 
-echo "Vault is sealed. Please input three of the keys above, one at a time until it unlocks! : "
+echo "Vault is sealed. Please input three of the keys above, one at a time (copy-paste, enter) until it unlocks! : "
 
 VAULT_SEALED=True
 while [ VAULT_SEALED ]
