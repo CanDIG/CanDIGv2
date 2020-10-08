@@ -322,6 +322,8 @@ compose-authz:
 	docker-compose -f $(DIR)/lib/authz/docker-compose.yml up -d 2>&1
 compose-authz-down:
 	docker-compose -f $(DIR)/lib/authz/docker-compose.yml down
+	# closes the candig server along with its corresponding arbiter and opa 
+	docker-compose -f $(DIR)/lib/candig_server/docker-compose.yml down
 compose-authz-clean: compose-authz-down \
 	# needs sudo to run;
 	./etc/setup/scripts/sudo_check.sh
@@ -346,7 +348,11 @@ compose-opa:
 ##
 
 setup-authz:
+	# sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authz
 	./etc/setup/scripts/setup.sh
+setup-authz-prototype: setup-authz \
+	# intended to run candig server alongside its necessary "sidecar" parts
+	docker-compose -f $(DIR)/lib/candig_server/docker-compose.yml up -d candig-server 2>&1
 # --
 
 #>>>
