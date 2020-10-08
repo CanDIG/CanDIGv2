@@ -325,6 +325,7 @@ compose-authz-down:
 compose-authz-clean: compose-authz-down \
 	# needs sudo to run;
 	./etc/setup/scripts/sudo_check.sh
+
 	# clean keycloak
 	sudo rm -r $(DIR)/lib/authz/keycloak/data/* & 2>&1
 	# clean tyk
