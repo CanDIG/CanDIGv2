@@ -44,7 +44,7 @@ envsubst < ${PWD}/etc/setup/templates/configs/keycloak/configuration/secrets.env
 #touch ${PWD}/lib/authz/keycloak/data/secrets.env
 
 # echo 
-mkdir ${PWD}/lib/authz/keycloak/data/keycloak-db
+mkdir -p ${PWD}/lib/authz/keycloak/data/keycloak-db
 chmod 777 ${PWD}/lib/authz/keycloak/data/keycloak-db
 
 
