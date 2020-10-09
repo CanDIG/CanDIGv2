@@ -5,7 +5,7 @@ services:
     # build:
     #   context: ${PWD}/lib/authz/keycloak
     image: jboss/keycloak:${KEYCLOAK_VERSION}
-    container_name: keycloak
+    container_name: ${CONTAINER_NAME_CANDIG_AUTH}
     command: ["-b", "${KEYCLOAK_SERVICE_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING"]
     ports:
        - "${KEYCLOAK_SERVICE_PUBLIC_PORT}:8081"
