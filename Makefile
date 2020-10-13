@@ -360,12 +360,12 @@ setup-authz-prototype: setup-authz \
 
 test-authz-prototype-chrome:
 	# run after starting the authz module and candig-server
-													# currently only 4 tests exist, so run all 4 in parallel
+													# assume 4 cores
 	$(DIR)/etc/tests/integration/authz/run_tests.sh 4 chrome 
 
 test-authz-prototype-firefox:
 	# run after starting the authz module and candig-server
-													# currently only 4 tests exist, so run all 4 in parallel
+													# assume 4 cores
 	$(DIR)/etc/tests/integration/authz/run_tests.sh 4 firefox 
 
 # --
