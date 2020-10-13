@@ -10,18 +10,46 @@ from selenium.webdriver.chrome.options import Options
 
 # to run, use
 # pytest -s -v -n=4
+# from this directory
 
 @pytest.fixture(scope="session")
 def setup(request):
 
-    # Firefox
-    #driver = webdriver.Firefox(executable_path="./geckodriver")
+    driverenv = os.environ["DRIVER_ENV"]
+    if driverenv=="firefox":
+        # Firefox
+        driver = webdriver.Firefox(executable_path=f'{os.getcwd()}/etc/tests/integration/authz/geckodriver')
+    elif driverenv=="chrome":
+        # Chrome/Brave
+        options = Options()
+        # Change this to reflect the working machine's setup
+        options.binary_location = '/usr/bin/brave-browser'
 
-    # Chrome/Brave
-    options = Options()
-    options.binary_location = '/usr/bin/brave-browser'
-    driver_path = './chromedriver'
-    driver = webdriver.Chrome(options = options, executable_path = driver_path)
+        driver_path = f'{os.getcwd()}/etc/tests/integration/authz/chromedriver'
+        driver = webdriver.Chrome(options = options, executable_path = driver_path)    
+    else:
+        raise Exception("Missing driver configuration! Please check the Makefile and ensure 'firefox' or 'chrome' is being passed to the run_tests.sh file!")
+    # switch(tempenv)
+    # {
+    #     case "firefox":
+    #         # Firefox
+    #         driver = webdriver.Firefox(executable_path=f'{os.getcwd()}/etc/tests/integration/authz/geckodriver')
+    #         break;
+    #     case "chrome": 
+    #         # Chrome/Brave
+    #         options = Options()
+    #         # Change this to reflect the working machine's setup
+    #         options.binary_location = '/usr/bin/brave-browser'
+
+    #         driver_path = f'{os.getcwd()}/etc/tests/integration/authz/chromedriver'
+    #         driver = webdriver.Chrome(options = options, executable_path = driver_path)
+    #         break;
+
+    #     case: "": 
+    #         raise Exception("Missing driver configuration!")
+    #         break;
+    # }
+    
 
     candig_url= os.environ["CANDIG_PUBLIC_URL"]
 
