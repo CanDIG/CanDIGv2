@@ -30,7 +30,7 @@ def login(driver, username, password):
 @pytest.mark.usefixtures("setup")
 class TestLogins():
     
-    def test_bob(self):
+    def test_login_bob(self):
         self.driver.get(self.candig_url)
 
         # credentials
@@ -44,7 +44,7 @@ class TestLogins():
         assert "Dashboard" in self.driver.title
 
 
-    def test_alice(self):
+    def test_login_alice(self):
         self.driver.get(self.candig_url)
 
         # credentials
