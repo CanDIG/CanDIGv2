@@ -4,6 +4,7 @@ import time
 import requests
 import pytest
 import json
+import random
 
 
 @pytest.mark.usefixtures("setup")
@@ -33,3 +34,65 @@ class TestAuthorization():
         response = requests.request('POST', self.candig_server_authz_url, json=body)
 
         assert response.status_code == 200
+
+
+    # def test_get_candig_server_authorization_does_defend_against_hs256_alg_token_tampering(self):
+    #     # TODO: test HS256 attack against RS256
+    #     body = { 
+    #         "input" : {
+    #             "kcToken": "",
+    #             "vaultToken": ""
+    #          }
+    #     }
+    #     response = requests.request('POST', self.candig_server_authz_url, json=body)
+
+    #     assert response.status_code in [400, 500]
+
+
+    # def test_get_candig_server_authorization_does_defend_against_none_alg_token_tampering(self):
+    #     # TODO: test "none alg"
+    #     body = { 
+    #         "input" : {
+    #             "kcToken": "",
+    #             "vaultToken": ""
+    #          }
+    #     }
+    #     response = requests.request('POST', self.candig_server_authz_url, json=body)
+
+    #     assert response.status_code in [400, 500]
+
+
+    def test_get_candig_server_authorization_does_defend_against_jibberish_bruteforce(self):
+
+        start = time.time()         # the variable that holds the starting time
+        elapsed = 0                 # the variable that holds the number of seconds elapsed.
+        limit_sec=3
+
+        while elapsed < limit_sec : # only run for the limited number of seconds
+
+            # create jibberish
+            j1hash1 = random.getrandbits(random.randint(256,512))
+            j1hash2 = random.getrandbits(random.randint(256,512))
+            j1hash3 = random.getrandbits(random.randint(256,512))
+            j2hash1 = random.getrandbits(random.randint(256,512))
+            j2hash2 = random.getrandbits(random.randint(256,512))
+            j2hash3 = random.getrandbits(random.randint(256,512))
+
+            jib1=("%032x" % j1hash1) + "." + ("%032x" % j1hash2) + "." + ("%032x" % j1hash3)
+            jib2=("%032x" % j2hash1) + "." + ("%032x" % j2hash2) + "." + ("%032x" % j2hash3)
+
+            # generates things like :
+            # 1efda8374250e[...]6aaff58d9f1c4f2.7f1913e3c0ea281fe6[...]06c123cb6133efb121f9e.45b916cbd5eca17[...]504ef991f00266ddeff
+            # to immitate a jwt format         #                                            #
+
+            body = { 
+                "input" : {
+                    "kcToken": jib1,
+                    "vaultToken": jib2
+                }
+            }
+            response = requests.request('POST', self.candig_server_authz_url, json=body)
+
+            assert response.status_code in [400, 500]        
+            
+            elapsed = time.time() - start # update the time elapsed

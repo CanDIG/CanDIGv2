@@ -358,14 +358,17 @@ setup-authz-prototype: setup-authz \
 	# intended to run candig server alongside its necessary "sidecar" parts
 	docker-compose -f $(DIR)/lib/candig_server/docker-compose.yml up -d candig-server 2>&1
 
+test-authz-prototype: test-authz-prototype-chrome test-authz-prototype-firefox \
+	# ...
+
 test-authz-prototype-chrome:
 	# run after starting the authz module and candig-server
-													# one process per test
+													# one (ish) process per test
 	$(DIR)/etc/tests/integration/authz/run_tests.sh 15 chrome 
 
 test-authz-prototype-firefox:
 	# run after starting the authz module and candig-server
-													# one process per test
+													# one (ish) process per test
 	$(DIR)/etc/tests/integration/authz/run_tests.sh 15 firefox 
 
 # --

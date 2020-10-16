@@ -52,6 +52,7 @@ def setup(request):
 
 
     candig_url= os.environ["CANDIG_PUBLIC_URL"]
+    candigauth_url= os.environ["KEYCLOAK_SERVICE_PUBLIC_URL"]
     permissions_data_store_url=os.environ['VAULT_SERVICE_PUBLIC_URL']
     #temp
     candig_server_authz_url='http://0.0.0.0:8182/v1/data/permissions/allowed'
@@ -62,6 +63,7 @@ def setup(request):
         setattr(cls.obj, "driver", driver)
         setattr(cls.obj, "debug_pause_time_seconds", 0)
         setattr(cls.obj, "candig_url", candig_url)
+        setattr(cls.obj, "candigauth_url", candigauth_url)
         setattr(cls.obj, "permissions_data_store_url", permissions_data_store_url)
         setattr(cls.obj, "candig_server_authz_url", candig_server_authz_url)
 
