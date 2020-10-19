@@ -118,7 +118,7 @@ docker exec -it vault sh -c "vault write auth/jwt/role/test-role user_claim=pref
 # configure jwt
 echo
 echo ">> configuring jwt stuff"
-docker exec -it vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"http://${CONTAINER_NAME_CANDIG_AUTH}:8081/auth/realms/candig\" default_role=\"test-role\""
+docker exec -it vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"http://${CANDIG_AUTH_CONTAINER_NAME}:8081/auth/realms/candig\" default_role=\"test-role\""
 
 
 # create users

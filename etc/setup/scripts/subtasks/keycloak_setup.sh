@@ -12,9 +12,9 @@ usage () {
   echo "KC_TEST_PW: ${KC_TEST_PW}"
   echo "KC_TEST_USER: ${KC_TEST_USER_TWO}"
   echo "KC_TEST_PW: ${KC_TEST_PW_TWO}"
-  echo "KEYCLOAK_SERVICE_PUBLIC_URL: ${KEYCLOAK_SERVICE_PUBLIC_URL}"
+  echo "KEYCLOAK_SERVICE_PRIVATE_URL: ${KEYCLOAK_SERVICE_PRIVATE_URL}"
   echo "KEYCLOAK_SERVICE_PUBLIC_PORT: ${KEYCLOAK_SERVICE_PUBLIC_PORT}"
-  echo "CONTAINER_NAME_CANDIG_AUTH: ${CONTAINER_NAME_CANDIG_AUTH}"
+  echo "CANDIG_AUTH_CONTAINER_NAME: ${CANDIG_AUTH_CONTAINER_NAME}"
 
   echo
 }
@@ -24,7 +24,7 @@ usage () {
 #    usage
 #    exit 1
 # # elif [[ $# -eq 2 ]]; then
-# #   KEYCLOAK_SERVICE_PUBLIC_URL=$1
+# #   KEYCLOAK_SERVICE_PRIVATE_URL=$1
 # #   KEYCLOAK_SERVICE_PUBLIC_PORT=$2
 # # elif [[ $# -gt 2 ]]; then
 # #   usage
@@ -79,15 +79,15 @@ fi
 ###############
 
 add_users() {
-  # CONTAINER_NAME_CANDIG_AUTH is the name of the keycloak server inside the compose network
+  # CANDIG_AUTH_CONTAINER_NAME is the name of the keycloak server inside the compose network
   echo "Adding ${KC_TEST_USER}"
-  docker exec ${CONTAINER_NAME_CANDIG_AUTH} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER} -p ${KC_TEST_PW} -r ${KC_REALM}
+  docker exec ${CANDIG_AUTH_CONTAINER_NAME} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER} -p ${KC_TEST_PW} -r ${KC_REALM}
 
   echo "Adding ${KC_TEST_USER_TWO}"
-  docker exec ${CONTAINER_NAME_CANDIG_AUTH} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER_TWO} -p ${KC_TEST_PW_TWO} -r ${KC_REALM}
+  docker exec ${CANDIG_AUTH_CONTAINER_NAME} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER_TWO} -p ${KC_TEST_PW_TWO} -r ${KC_REALM}
 
   echo "Restarting the keycloak container"
-  docker restart ${CONTAINER_NAME_CANDIG_AUTH}
+  docker restart ${CANDIG_AUTH_CONTAINER_NAME}
 }
 
 ###############
@@ -98,7 +98,7 @@ get_token () {
     -d "username=$KC_ADMIN_USER" \
     -d "password=$KC_ADMIN_PW" \
     -d "grant_type=password" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/master/protocol/openid-connect/token" 2> /dev/null )
+    "${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/realms/master/protocol/openid-connect/token" 2> /dev/null )
   echo ${BID} | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["access_token"])'
 }
 
@@ -115,7 +115,7 @@ set_realm () {
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
     -X POST -H "Content-Type: application/json"  -d "${JSON}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms"
+    "${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms"
 }
 
 
@@ -124,7 +124,7 @@ get_realm () {
 
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}" | jq .
+    "${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms/${realm}" | jq .
 }
 
 #################################
@@ -134,7 +134,7 @@ get_realm_clients () {
 
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients" | jq -S .
+    "${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms/${realm}/clients" | jq -S .
 }
 
 
@@ -174,23 +174,23 @@ set_client () {
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
     -X POST -H "Content-Type: application/json"  -d "${JSON}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients"
+    "${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms/${realm}/clients"
 }
 
 get_secret () {
   id=$(curl -H "Authorization: bearer ${KC_TOKEN}" \
-    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients 2> /dev/null \
+    ${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms/${KC_REALM}/clients 2> /dev/null \
     | python3 -c 'import json,sys;obj=json.load(sys.stdin); print([l["id"] for l in obj if l["clientId"] ==
     "'"$KC_CLIENT_ID"'" ][0])')
 
   curl -H "Authorization: bearer ${KC_TOKEN}" \
-    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients/$id/client-secret 2> /dev/null |\
+    ${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms/${KC_REALM}/clients/$id/client-secret 2> /dev/null |\
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["value"])'
 }
 
 get_public_key () {
   curl \
-    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM} 2> /dev/null |\
+    ${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/realms/${KC_REALM} 2> /dev/null |\
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["public_key"])'
 }
 ##################################
@@ -198,7 +198,7 @@ get_public_key () {
 # SCRIPT START
 
 echo "-- Starting setup calls to keycloak --"
-echo "$KC_ADMIN_USER $KC_ADMIN_PW $KEYCLOAK_SERVICE_PUBLIC_URL"
+echo "$KC_ADMIN_USER $KC_ADMIN_PW $KEYCLOAK_SERVICE_PRIVATE_URL"
 
 echo ">> Getting KC_TOKEN .."
 KC_TOKEN=$(get_token)
@@ -234,5 +234,5 @@ echo ">> .. added..."
 echo 
 
 echo ">> .. waiting for keycloak to restart..."
-while !  docker logs --tail 5  ${CONTAINER_NAME_CANDIG_AUTH} | grep "Admin console listening on http://127.0.0.1:9990" ; do sleep 1 ; done
+while !  docker logs --tail 5  ${CANDIG_AUTH_CONTAINER_NAME} | grep "Admin console listening on http://127.0.0.1:9990" ; do sleep 1 ; done
 echo ">> .. ready..."
