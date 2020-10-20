@@ -6,7 +6,7 @@ now := time.now_ns()/1000000000
 
 default allowed = false
 
-default iss = "${TYK_PROVIDERS_ISSUER}"
+default iss = "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM}"
 default aud = "${KC_CLIENT_ID}"
 
 default full_authn_pk=`-----BEGIN PUBLIC KEY-----
