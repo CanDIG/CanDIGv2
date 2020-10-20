@@ -7,6 +7,7 @@ services:
       args:
         venv_python: '3.6'
     image: ${DOCKER_REGISTRY}/candig_server:${CANDIG_SERVER_VERSION}
+    container_name: ${CANDIG_SERVER_CONTAINER_NAME}
     networks:
       - ${DOCKER_NET}
     ports:
@@ -34,6 +35,7 @@ services:
 
   candig-server-authorization:
     image: openpolicyagent/opa:${OPA_VERSION}
+    container_name: ${CANDIG_SERVER_AUTHORIZATION_CONTAINER_NAME}
     volumes:
       - ./authz/opa/policy.rego:/policy.rego
     networks:
@@ -72,6 +74,7 @@ services:
 
   candig-server-arbiter:
     image: ${DOCKER_REGISTRY}/arbiter:latest
+    container_name: ${CANDIG_ARBITER_HOST}
     networks:
       - ${DOCKER_NET}
     ports:
@@ -79,7 +82,7 @@ services:
     environment:
       - ARBITER_MODE=prod
       - ARBITER_INTERNAL_PORT=${CANDIG_ARBITER_SERVICE_PORT}
-      - RESOURCE_AUTHZ_HOST=candig_server_candig-server-authorization_1
+      - RESOURCE_AUTHZ_HOST=${CANDIG_SERVER_AUTHORIZATION_CONTAINER_NAME}
       - RESOURCE_AUTHZ_PORT=8181
       - RESOURCE_HOST=${CANDIG_SERVER_CONTAINER_NAME}
       - RESOURCE_PORT=${CANDIG_SERVER_PORT}
