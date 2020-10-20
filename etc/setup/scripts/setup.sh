@@ -1,6 +1,14 @@
 #! /usr/bin/env bash
 set -e
 
+# checks for dev or prod
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied! please pass dev or prod"
+    exit 1
+fi
+
+
 # -- Prerequisites --
 echo
 echo "- Generating prerequisites; -"
@@ -17,7 +25,8 @@ echo "- Done with prereqs.. -"
 
 echo
 echo "Setting up Keycloak;"
-source ${PWD}/etc/setup/scripts/subtasks/keycloak_setup.sh
+source ${PWD}/etc/setup/scripts/subtasks/keycloak_setup.sh 
+#$1
 
 
 echo

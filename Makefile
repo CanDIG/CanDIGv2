@@ -352,7 +352,7 @@ compose-opa:
 
 setup-authz:
 	# sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authz
-	./etc/setup/scripts/setup.sh
+	./etc/setup/scripts/setup.sh dev
 
 setup-authz-prototype: setup-authz \
 	# intended to run candig server alongside its necessary "sidecar" parts

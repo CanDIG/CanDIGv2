@@ -1,6 +1,16 @@
 #! /usr/bin/env bash
 set -e
 
+# checks for dev or prod
+if [ $1 == "dev" ]
+  then
+    DEV_FLAG="-k"
+    echo "Dev Mode: True"
+else
+
+    echo "--- PRODUCTION MODE ---"
+fi
+
 # This script will set up a full keycloak environment on your local CanDIGv2 cluster
 
 usage () {
@@ -12,7 +22,7 @@ usage () {
   echo "KC_TEST_PW: ${KC_TEST_PW}"
   echo "KC_TEST_USER: ${KC_TEST_USER_TWO}"
   echo "KC_TEST_PW: ${KC_TEST_PW_TWO}"
-  echo "KEYCLOAK_SERVICE_PRIVATE_URL: ${KEYCLOAK_SERVICE_PRIVATE_URL}"
+  echo "KEYCLOAK_SERVICE_PUBLIC_URL: ${KEYCLOAK_SERVICE_PUBLIC_URL}"
   echo "KEYCLOAK_SERVICE_PUBLIC_PORT: ${KEYCLOAK_SERVICE_PUBLIC_PORT}"
   echo "CANDIG_AUTH_CONTAINER_NAME: ${CANDIG_AUTH_CONTAINER_NAME}"
 
@@ -24,7 +34,7 @@ usage () {
 #    usage
 #    exit 1
 # # elif [[ $# -eq 2 ]]; then
-# #   KEYCLOAK_SERVICE_PRIVATE_URL=$1
+# #   KEYCLOAK_SERVICE_PUBLIC_URL=$1
 # #   KEYCLOAK_SERVICE_PUBLIC_PORT=$2
 # # elif [[ $# -gt 2 ]]; then
 # #   usage
@@ -111,7 +121,7 @@ get_token () {
     -d "username=$KC_ADMIN_USER" \
     -d "password=$KC_ADMIN_PW" \
     -d "grant_type=password" \
-    "${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/realms/master/protocol/openid-connect/token" 2> /dev/null )
+    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/master/protocol/openid-connect/token" $DEV_FLAG 2> /dev/null )
   echo ${BID} | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["access_token"])'
 }
 
@@ -128,7 +138,7 @@ set_realm () {
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
     -X POST -H "Content-Type: application/json"  -d "${JSON}" \
-    "${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms"
+    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms" $DEV_FLAG
 }
 
 
@@ -137,7 +147,7 @@ get_realm () {
 
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
-    "${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms/${realm}" | jq .
+    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}" $DEV_FLAG | jq .
 }
 
 #################################
@@ -147,7 +157,7 @@ get_realm_clients () {
 
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
-    "${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms/${realm}/clients" | jq -S .
+    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients" $DEV_FLAG | jq -S .
 }
 
 
@@ -187,23 +197,23 @@ set_client () {
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
     -X POST -H "Content-Type: application/json"  -d "${JSON}" \
-    "${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms/${realm}/clients"
+    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients" $DEV_FLAG
 }
 
 get_secret () {
   id=$(curl -H "Authorization: bearer ${KC_TOKEN}" \
-    ${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms/${KC_REALM}/clients 2> /dev/null \
+    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients $DEV_FLAG 2> /dev/null \
     | python3 -c 'import json,sys;obj=json.load(sys.stdin); print([l["id"] for l in obj if l["clientId"] ==
     "'"$KC_CLIENT_ID"'" ][0])')
 
   curl -H "Authorization: bearer ${KC_TOKEN}" \
-    ${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/admin/realms/${KC_REALM}/clients/$id/client-secret 2> /dev/null |\
+    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients/$id/client-secret $DEV_FLAG 2> /dev/null |\
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["value"])'
 }
 
 get_public_key () {
   curl \
-    ${KEYCLOAK_SERVICE_PRIVATE_URL}/auth/realms/${KC_REALM} 2> /dev/null |\
+    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM} $DEV_FLAG 2> /dev/null |\
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["public_key"])'
 }
 ##################################
@@ -211,7 +221,7 @@ get_public_key () {
 # SCRIPT START
 
 echo "-- Starting setup calls to keycloak --"
-echo "$KC_ADMIN_USER $KC_ADMIN_PW $KEYCLOAK_SERVICE_PRIVATE_URL"
+echo "$KC_ADMIN_USER $KC_ADMIN_PW $KEYCLOAK_SERVICE_PUBLIC_URL"
 
 echo ">> Getting KC_TOKEN .."
 KC_TOKEN=$(get_token)
