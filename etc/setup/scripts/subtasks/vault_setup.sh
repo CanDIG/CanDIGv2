@@ -118,7 +118,14 @@ docker exec -it vault sh -c "vault write auth/jwt/role/test-role user_claim=pref
 # configure jwt
 echo
 echo ">> configuring jwt stuff"
-docker exec -it vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"test-role\""
+
+# temp: in prod mode, explicitly indicating port 443 breaks vaults internal oidc provider checks.
+# simply remove the ":443 from the authentication services public url for this purpose:
+if [[ $KEYCLOAK_SERVICE_PUBLIC_URL == *":443"* ]]; then
+  TEMP_KEYCLOAK_SERVICE_PUBLIC_URL = $(echo $KEYCLOAK_SERVICE_PUBLIC_URL | grep -o '^[^\:443]*')
+fi
+
+docker exec -it vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"test-role\""
 #http://${CANDIG_AUTH_CONTAINER_NAME}:8081/auth/realms/candig
 
 # create users
