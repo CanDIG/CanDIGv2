@@ -98,6 +98,10 @@ if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
    echo "Booting keycloak container!"
    docker-compose -f ${PWD}/lib/authz/docker-compose.yml up -d keycloak
    sleep 5
+
+   echo ">> .. waiting for keycloak to start..."
+   while !  docker logs --tail 1000  ${CANDIG_AUTH_CONTAINER_NAME} | grep "JAVA_OPTS:" ; do sleep 1 ; done
+   echo ">> .. ready..."
 fi
 
 
