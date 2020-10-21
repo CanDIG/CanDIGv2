@@ -52,6 +52,8 @@ mkdir -p ${PWD}/lib/authz/keycloak/data
 # simply remove the ":443 from the authentication services public url for this purpose:
 if [[ $KEYCLOAK_SERVICE_PUBLIC_URL == *":443"* ]]; then
     TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(echo ${KEYCLOAK_SERVICE_PUBLIC_URL//:443})
+elif [[ $KEYCLOAK_SERVICE_PUBLIC_URL == *":80"* ]]; then
+    TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(echo ${KEYCLOAK_SERVICE_PUBLIC_URL//:80})
 else
     TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(echo $KEYCLOAK_SERVICE_PUBLIC_URL)
 fi
