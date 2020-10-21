@@ -100,7 +100,7 @@ if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
    sleep 5
 
    echo ">> .. waiting for keycloak to start..."
-   while !  docker logs --tail 1000  ${CANDIG_AUTH_CONTAINER_NAME} | grep "JAVA_OPTS:" ; do sleep 1 ; done
+   while !  docker logs --tail 1000  ${CANDIG_AUTH_CONTAINER_NAME} | grep "Undertow HTTPS listener https listening on 0.0.0.0" ; do sleep 1 ; done
    echo ">> .. ready..."
 fi
 
