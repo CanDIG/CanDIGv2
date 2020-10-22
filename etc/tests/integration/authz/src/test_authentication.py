@@ -5,9 +5,12 @@ import requests
 import pytest
 import json
 import base64
-import pickle
 import hmac
 import hashlib
+import random
+
+# References:
+# https://medium.com/swlh/hacking-json-web-tokens-jwts-9122efe91e4a
 
 # -- helper functions --
 def fix_padding(data):
@@ -36,7 +39,6 @@ def login(driver, username, password):
 @pytest.mark.usefixtures("setup")
 class TestAuthentication():
     
-    # TODO;
     def test_authentication_does_defend_against_hs256_alg_token_tampering_with_login(self):
         
         # get public key
@@ -77,7 +79,7 @@ class TestAuthentication():
         # 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCIsICJraWQiOiAibmxJc1dDOFhGYnlhRUtXLWRIMG9udUduREEtdE9RZk9JTmdJeUZDelpWNCJ9'
 
         # Resign new token with public key
-        new_authN_signature = hmac.new(bytes(public_key,"utf-8"), bytes(f"{new_authN_header}.{authN_payload}", "utf-8"), hashlib.sha256 ).hexdigest()
+        new_authN_signature = hmac.new(bytes(public_key,"utf-8"), msg=bytes(f"{new_authN_header}.{authN_payload}", "utf-8"), digestmod=hashlib.sha256).hexdigest()
         # '46215c1759b1899ca56d225730c7bf99c30179a5b05e7df6d308f7526e8a0f53'
 
         new_authN_token = f"{new_authN_header}.{authN_payload}.{new_authN_signature}"
@@ -96,7 +98,6 @@ class TestAuthentication():
         response = requests.request('GET', self.candig_url, cookies=cookies)
 
         assert response.status_code == 401 and "Key not authorised" in response.content.decode("utf-8")
-        
 
 
     def test_authentication_does_defend_against_none_alg_token_tampering_with_login(self):
@@ -148,3 +149,101 @@ class TestAuthentication():
 
         assert response.status_code == 401 and "Key not authorised" in response.content.decode("utf-8")
         
+    
+    def test_authentication_does_defend_against_non_valid_signature_bruteforce_with_login(self):
+        # get public key
+        public_key_response = requests.request('GET', self.candigauth_url + "/auth/realms/candig")
+        jsonified = json.loads(public_key_response.content)
+        public_key = jsonified['public_key']
+
+        # open a logged in browser session
+        self.driver.get(self.candig_url)
+
+        # credentials
+        u1 = os.environ["KC_TEST_USER"]
+        p1 = os.environ["KC_TEST_PW"]
+        login(self.driver, u1, p1)
+
+        # get session_id, aka: authN token
+        cookies = self.driver.get_cookies()
+
+        old_authN_token = [json.loads(json.dumps(c)) for c in cookies if 'session_id' in json.dumps(c)][0]['value']
+
+        authN_header, authN_payload, authN_signature = old_authN_token.split('.')
+
+        decoded_authN_header_json = json.loads(base64.b64decode(fix_padding(authN_header)))
+
+        
+        # verify access with old token
+        cookies = {'session_id': old_authN_token}
+        response = requests.request('GET', self.candig_url, cookies=cookies)
+
+        assert response.status_code == 200 and "Dashboard" in response.content.decode("utf-8")
+
+        start = time.time()         # the variable that holds the starting time
+        elapsed = 0                 # the variable that holds the number of seconds elapsed.
+        limit_sec=3
+
+        while elapsed < limit_sec : # only run for the limited number of seconds
+
+            new_authN_signature = "" + ("%032x" % random.getrandbits(random.randint(256,1024)))
+
+            new_authN_token = f"{authN_header}.{authN_payload}.{new_authN_signature}"
+
+            # show new token doesn't work
+            cookies = {'session_id': new_authN_token}
+            response = requests.request('GET', self.candig_url, cookies=cookies)
+
+            assert response.status_code == 401 and "Key not authorised" in response.content.decode("utf-8")
+            
+            elapsed = time.time() - start # update the time elapsed
+
+
+    def test_authentication_does_defend_against_secret_key_bruteforce_with_login(self):
+
+        # open a logged in browser session
+        self.driver.get(self.candig_url)
+
+        # credentials
+        u1 = os.environ["KC_TEST_USER"]
+        p1 = os.environ["KC_TEST_PW"]
+        login(self.driver, u1, p1)
+
+        # get session_id, aka: authN token
+        cookies = self.driver.get_cookies()
+
+        old_authN_token = [json.loads(json.dumps(c)) for c in cookies if 'session_id' in json.dumps(c)][0]['value']
+
+        authN_header, authN_payload, authN_signature = old_authN_token.split('.')
+
+        
+        # verify access with old token
+        cookies = {'session_id': old_authN_token}
+        response = requests.request('GET', self.candig_url, cookies=cookies)
+
+        assert response.status_code == 200 and "Dashboard" in response.content.decode("utf-8")
+
+        start = time.time()         # the variable that holds the starting time
+        elapsed = 0                 # the variable that holds the number of seconds elapsed.
+        limit_sec=3
+
+        while elapsed < limit_sec : # only run for the limited number of seconds
+
+            new_random_secret_key = "" + ("%032x" % random.getrandbits(random.randint(256,1024)))
+
+            # Resign new token with public key
+            new_authN_signature = hmac.new(bytes(new_random_secret_key,"utf-8"), msg=bytes(f"{authN_header}.{authN_payload}", "utf-8"), digestmod=hashlib.sha256).hexdigest()
+            # '46215c1759b1899ca56d225730c7bf99c30179a5b05e7df6d308f7526e8a0f53'
+
+            new_authN_token = f"{authN_header}.{authN_payload}.{new_authN_signature}"
+            # 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCIsICJraWQiOiAibmxJc1dDOFhGYnlhRUtXLWRIMG9udUduREEtdE9RZk9JTmdJeUZDelpWNCJ9.eyJleHAiOjE2MDMzOTIyNTQsImlhdCI6MTYwMzM5MTk1NCwiYXV0aF90aW1lIjoxNjAzMzkxOTU0LCJqdGkiOiI0NTgzMjlhNS1mODE1LTQ1NGItOTNmMC1mMjFhZDYyZDc2NzQiLCJpc3MiOiJodHRwOi8vY2FuZGlnYXV0aC5sb2NhbDo4MDgxL2F1dGgvcmVhbG1zL2NhbmRpZyIsImF1ZCI6ImNxX2NhbmRpZyIsInN1YiI6ImNlMWE5ODkxLTA0NzgtNGZjMS1iYjRjLTc3NjZhMGY4MzIxYyIsInR5cCI6IklEIiwiYXpwIjoiY3FfY2FuZGlnIiwic2Vzc2lvbl9zdGF0ZSI6IjYyZGNkOWVhLWE1ZTMtNGQ3OC1hOWMxLWIxMzcxMDQ4YWFkNyIsImFjciI6IjEiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsInByZWZlcnJlZF91c2VybmFtZSI6ImJvYiJ9.46215c1759b1899ca56d225730c7bf99c30179a5b05e7df6d308f7526e8a0f53'
+
+
+            # show new token doesn't work
+            cookies = {'session_id': new_authN_token}
+            response = requests.request('GET', self.candig_url, cookies=cookies)
+
+            assert response.status_code == 401 and "Key not authorised" in response.content.decode("utf-8")
+            
+            elapsed = time.time() - start # update the time elapsed
+

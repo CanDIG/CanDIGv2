@@ -33,6 +33,11 @@ function isTokenExpired(idToken) {
     return sysTime>tokenExpires
 }
 
+// function isTokenValid(idToken) {
+//     // TODO
+//     return true;
+// }
+
 authMiddleware.NewProcessRequest(function(request, session, spec) {
     log("Running Authorization JSVM middleware")
 
@@ -50,6 +55,11 @@ authMiddleware.NewProcessRequest(function(request, session, spec) {
             log("Manipulating Cookie")
             var idToken = tokenCookie.split("=")[1];
 
+            // TODO: Verify token validity
+            // if (isTokenValid(idToken) == false) {
+            //     break;
+            // }
+
             if (isTokenExpired(idToken)) {
                 request.ReturnOverrides.ResponseCode = 302;
                 request.ReturnOverrides.ResponseHeaders = {
@@ -59,7 +69,6 @@ authMiddleware.NewProcessRequest(function(request, session, spec) {
             } else {
                 log(request.SetHeaders["Authorization"])   
                 // more requests...             
-                // TODO: Implement Vault Access
 
                 var vault_data = call_vault(request, session, spec, idToken);
 
