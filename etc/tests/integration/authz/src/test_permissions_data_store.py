@@ -27,9 +27,9 @@ class TestPermissionsDataStore():
         assert public_keys[0]['alg'] == "RS256"
 
 
-    def test_can_get_alices_stuff(self):
-        pass
+    # def test_can_get_alices_stuff(self):
+    #     pass
     
 
-    def test_can_get_bobs_stuff(self):
-        pass
+    # def test_can_get_bobs_stuff(self):
+    #     pass
