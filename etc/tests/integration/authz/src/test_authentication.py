@@ -115,7 +115,7 @@ class TestAuthentication():
         cookies = {'session_id': new_authN_token}
         response = requests.request('GET', self.candig_url, cookies=cookies)
 
-        assert response.status_code == 401 and "Key not authorised" in response.content.decode("utf-8")
+        assert response.status_code == 500 and "Invalid key!" in response.content.decode("utf-8")
 
 
     def test_authentication_does_defend_against_none_alg_token_tampering_with_login(self):
@@ -165,7 +165,7 @@ class TestAuthentication():
         cookies = {'session_id': new_authN_token}
         response = requests.request('GET', self.candig_url, cookies=cookies)
 
-        assert response.status_code == 401 and "Key not authorised" in response.content.decode("utf-8")
+        assert response.status_code == 500 and "Invalid key!" in response.content.decode("utf-8")
         
     
     def test_authentication_does_defend_against_non_valid_signature_bruteforce_with_login(self):

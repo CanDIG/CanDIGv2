@@ -27,12 +27,13 @@ envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/policies.json.tpl > ${PW
 echo "Working on tyk.conf .."
 envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/tyk.conf.tpl > ${PWD}/lib/authz/tyk/data/tyk.conf
 
+echo "Working on authMiddleware.js .."
+envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/authMiddleware.js > ${PWD}/lib/authz/tyk/data/authMiddleware.js
+
 ## TODO: tyk_analytics.conf , key_request.json.tpl
 
 
 # Copy files from template configs
-echo "Copying authMiddleware.js .."
-cp ${PWD}/etc/setup/templates/configs/tyk/confs/authMiddleware.js ${PWD}/lib/authz/tyk/data/authMiddleware.js
 
 echo "Copying oidcDistributedClaimsConduitMiddleware.js .."
 cp ${PWD}/etc/setup/templates/configs/tyk/confs/oidcDistributedClaimsConduitMiddleware.js ${PWD}/lib/authz/tyk/data/oidcDistributedClaimsConduitMiddleware.js
