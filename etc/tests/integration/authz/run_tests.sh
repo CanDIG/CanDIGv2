@@ -5,6 +5,7 @@
 
 export PYTHONPATH=./src;
 export DRIVER_ENV=$2
-echo $DRIVER_ENV
+export HEADLESS_MODE=$3
+
 pytest --rootdir=$(pwd)/etc/tests/integration/authz -s -v -n=$1 --ignore=lib/ --ignore=bin/ --ignore=docs/ --ignore=tmp/ 
 #pytest --collect-only

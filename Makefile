@@ -364,12 +364,12 @@ test-authz-prototype: test-authz-prototype-chrome test-authz-prototype-firefox \
 test-authz-prototype-chrome:
 	# run after starting the authz module and candig-server
 													# one (ish) process per test
-	$(DIR)/etc/tests/integration/authz/run_tests.sh 15 chrome 
+	$(DIR)/etc/tests/integration/authz/run_tests.sh 20 chrome True
 
 test-authz-prototype-firefox:
 	# run after starting the authz module and candig-server
 													# one (ish) process per test
-	$(DIR)/etc/tests/integration/authz/run_tests.sh 15 firefox 
+	$(DIR)/etc/tests/integration/authz/run_tests.sh 20 firefox True
 
 # --
 

@@ -2,7 +2,8 @@ import os
 import pytest
 from selenium import webdriver
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options as ffOptions
+from selenium.webdriver.chrome.options import Options as chOptions
 import random
 
 # Resources
@@ -19,6 +20,7 @@ def setup(request):
     testname = os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0]
     print(testname)
 
+    headless_mode = (os.environ["HEADLESS_MODE"] == 'True')
     
     if "login" in testname:
         driverenv = os.environ["DRIVER_ENV"]
@@ -26,15 +28,21 @@ def setup(request):
 
         if driverenv=="firefox":
             # Firefox
-            driver = webdriver.Firefox(executable_path=f'{common_path}/geckodriver')
+            fireFoxOptions = ffOptions()
+            if headless_mode:
+                fireFoxOptions.headless = True
+
+            driver = webdriver.Firefox(executable_path=f'{common_path}/geckodriver', options=fireFoxOptions)
         elif driverenv=="chrome":
             # Chrome/Brave
-            options = Options()
+            chromeOptions = chOptions()
+            if headless_mode:
+                chromeOptions.headless = True
             # Change this to reflect the working machine's setup
-            options.binary_location = '/usr/bin/brave-browser'
+            chromeOptions.binary_location = '/usr/bin/brave-browser'
 
             driver_path = f'{common_path}/chromedriver'
-            driver = webdriver.Chrome(options = options, executable_path = driver_path)    
+            driver = webdriver.Chrome(options = chromeOptions, executable_path = driver_path)    
         else:
             raise Exception("Missing driver configuration! Please check the Makefile and ensure 'firefox' or 'chrome' is being passed to the run_tests.sh file!")
     
@@ -49,7 +57,6 @@ def setup(request):
 
     else:
         driver=None
-
 
     candig_url= os.environ["CANDIG_PUBLIC_URL"]
     candigauth_url= os.environ["KEYCLOAK_SERVICE_PUBLIC_URL"]

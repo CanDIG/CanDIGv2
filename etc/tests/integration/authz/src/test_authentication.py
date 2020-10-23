@@ -231,7 +231,7 @@ class TestAuthentication():
 
             new_random_secret_key = "" + ("%032x" % random.getrandbits(random.randint(256,1024)))
 
-            # Resign new token with public key
+            # Resign new token with new random key
             new_authN_signature = hmac.new(bytes(new_random_secret_key,"utf-8"), msg=bytes(f"{authN_header}.{authN_payload}", "utf-8"), digestmod=hashlib.sha256).hexdigest()
             # '46215c1759b1899ca56d225730c7bf99c30179a5b05e7df6d308f7526e8a0f53'
 

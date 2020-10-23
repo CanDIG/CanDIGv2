@@ -57,3 +57,17 @@ class TestLogins():
         # verify denied login
         assert "Access Denied" in self.driver.find_elements_by_tag_name("body")[0].text
 
+
+    def test_login_bogus_user(self):
+        self.driver.get(self.candig_url)
+
+        # credentials
+        username = "nobody"
+        password = "jibberishPassword123$$$$"
+        login(self.driver, username, password)
+
+        time.sleep(self.debug_pause_time_seconds)
+
+        # verify invalid login
+        assert "Invalid username or password." in self.driver.find_elements_by_xpath("//*[@id='kc-content-wrapper']/div[1]")[0].text
+
