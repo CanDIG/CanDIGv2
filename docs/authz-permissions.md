@@ -43,7 +43,7 @@ information.
     - `iat`:
     - `exp`:
 
-## First draft
+## Draft v001
 
 Trying to keep things minimal for the first draft we will focus on a few
 options -
@@ -72,7 +72,7 @@ The payload may look like -
 The following part depends on the role's template -
 
 ```json
-"permissions": { // depends on Vault Role template
+"permissions": {
     "dataset123": "4"
 },
 ```
