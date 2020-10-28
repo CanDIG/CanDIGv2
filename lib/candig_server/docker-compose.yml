@@ -1,17 +1,17 @@
-version: '3.7'
+version: '3.3'
 
 services:
   candig-server:
-    container_name: candig-server
     build:
-      context: $PWD   #/lib/candig_server
+      context: . #$PWD/lib/candig_server
       args:
         venv_python: '3.6'
-    image: candig/candig_server:1.3.0
+    image: ${DOCKER_REGISTRY}/candig_server:${CANDIG_SERVER_VERSION}
+    container_name: ${CANDIG_SERVER_CONTAINER_NAME}
     networks:
-      - bridge-net
+      - ${DOCKER_NET}
     ports:
-      - "3001:3000"
+      - "${CANDIG_SERVER_PORT}:3000"
     deploy:
       placement:
         constraints:
@@ -23,15 +23,90 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=3001
-        - traefik.docker.network=docker-compose-test-network
-        - traefik.frontend.rule=Host:candig-server.localhost
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+        - traefik.port=${CANDIG_SERVER_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:candig-server.${CANDIG_DOMAIN}
+    # logging:
+    #   driver: "fluentd"
+    #   options:
+    #     tag: docker.{{.Name}}
+    #     fluentd-async-connect: "true"
     command: ["--host", "0.0.0.0", "--port", "3000"]
+
+  candig-server-authorization:
+    image: openpolicyagent/opa:${OPA_VERSION}
+    container_name: ${CANDIG_SERVER_AUTHORIZATION_CONTAINER_NAME}
+    volumes:
+      - ./authz/opa/policy.rego:/policy.rego
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${CANDIG_AUTHZ_SERVICE_PORT}:8181"
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${CANDIG_AUTHZ_SERVICE_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:opa.${CANDIG_DOMAIN}
+    # logging:
+    #   driver: "fluentd"
+    #   options:
+    #     tag: docker.{{.Name}}
+    #     fluentd-async-connect: "true"
+    command:
+      - "run"
+      - "--server"
+      - "--log-level=${OPA_LOG_LEVEL}"
+      - "/policy.rego"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:${CANDIG_AUTHZ_SERVICE_PORT}/health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  candig-server-arbiter:
+    image: ${DOCKER_REGISTRY}/arbiter:latest
+    container_name: ${CANDIG_ARBITER_HOST}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${CANDIG_ARBITER_SERVICE_PORT}:${CANDIG_ARBITER_SERVICE_PORT}"
+    environment:
+      - ARBITER_MODE=prod
+      - ARBITER_INTERNAL_PORT=${CANDIG_ARBITER_SERVICE_PORT}
+      - RESOURCE_AUTHZ_HOST=${CANDIG_SERVER_AUTHORIZATION_CONTAINER_NAME}
+      - RESOURCE_AUTHZ_PORT=8181
+      - RESOURCE_HOST=${CANDIG_SERVER_CONTAINER_NAME}
+      - RESOURCE_PORT=${CANDIG_SERVER_PORT}
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${CANDIG_ARBITER_SERVICE_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:candig-server-arbiter.${CANDIG_DOMAIN}
+    # logging:
+    #   driver: "fluentd"
+    #   options:
+    #     tag: docker.{{.Name}}
+    #     fluentd-async-connect: "true"
+    command: ["--host", "0.0.0.0", "--port", "${CANDIG_ARBITER_SERVICE_PORT}"]
+    
 
 networks:
   bridge-net:

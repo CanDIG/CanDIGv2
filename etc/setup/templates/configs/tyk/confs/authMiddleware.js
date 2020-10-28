@@ -2,6 +2,15 @@
 
 var authMiddleware = new TykJS.TykMiddleware.NewMiddleware({});
 
+//var jwt = require('jsonwebtoken');
+
+var iss = "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM}"
+var aud = "${KC_CLIENT_ID}"
+
+var full_authn_pk="-----BEGIN PUBLIC KEY-----\n${KC_PUBLIC_KEY}\n-----END PUBLIC KEY-----"
+
+
+
 function getCookie(request, cookie_name) {
     if (!("Cookie" in request.Headers)) {
 	return undefined;
@@ -16,21 +25,42 @@ function getCookie(request, cookie_name) {
     return valueCookie
 }
 
-function isTokenExpired(idToken) {
-    tokenPayload = idToken.split(".")[1]
-    padding = tokenPayload.length % 4
-
-    if (padding != 0) {
-        _.times(4-padding, function() {
-            tokenPayload += "="
-        })
-    }
-
-    decodedPayload = JSON.parse(b64dec(tokenPayload))
+function isTokenExpired(decodedPayload) {
+    log("-- Checking token expiration --")
     tokenExpires = decodedPayload["exp"]
     sysTime = (new Date).getTime()/1000 | 0;
 
     return sysTime>tokenExpires
+}
+function isTokenValid(decodedHeader, decodedPayload, decodedSignature) {
+    log("-- Verifying Token Validity --")
+
+    // Verify token
+    var isValid = false;
+    try{
+        log("Found alg as " + decodedHeader["alg"])
+        //log("Found aud as " + decodedPayload["aud"])
+        //log("Found iss as " + decodedPayload["iss"])
+
+        isValid = decodedHeader["alg"] == "RS256" && decodedPayload["aud"] == aud && decodedPayload["iss"] == iss 
+        
+        // TODO: Verify against public key!
+        //jwt.verify(token, full_authn_pk, { algorithms: ['RS256'] })
+        var concat = b64enc(JSON.stringify(decodedHeader)) + "." + b64enc(JSON.stringify(decodedPayload))
+        log("Concatted : " + concat)
+        
+    } catch(err) {
+        log('Error verifying token! : ' + err);
+        isValid = false;
+    }
+
+    if (isValid) {
+        log('Token is valid!');
+    } else {
+        log('Token is invalid!');
+    }
+
+    return isValid;
 }
 
 authMiddleware.NewProcessRequest(function(request, session, spec) {
@@ -50,21 +80,53 @@ authMiddleware.NewProcessRequest(function(request, session, spec) {
             log("Manipulating Cookie")
             var idToken = tokenCookie.split("=")[1];
 
-            if (isTokenExpired(idToken)) {
+            tokenHeader = idToken.split(".")[0]
+            headerPadding = tokenHeader.length % 4
+
+            if (headerPadding != 0) {
+                _.times(4-headerPadding, function() {
+                    tokenHeader += "="
+                })
+            }
+
+            tokenPayload = idToken.split(".")[1]
+            payloadPadding = tokenPayload.length % 4
+            
+            if (payloadPadding != 0) {
+                _.times(4-payloadPadding, function() {
+                    tokenPayload += "="
+                })
+            }
+
+            tokenSignature = idToken.split(".")[2]
+            
+        
+            decodedHeader = JSON.parse(b64dec(tokenHeader))
+            decodedPayload = JSON.parse(b64dec(tokenPayload))
+        
+            if (isTokenExpired(decodedPayload)) {
                 request.ReturnOverrides.ResponseCode = 302;
                 request.ReturnOverrides.ResponseHeaders = {
                     "Location": spec.config_data.TYK_SERVER + "/auth/login?app_url=" + request.URL
                 };
                 log(request.URL);
-            } else {
+
+            } else if (isTokenValid(decodedHeader, decodedPayload, tokenSignature) == false) {
+                log("--- Token invalid. Rejecting Call ---")
+                request.ReturnOverrides.ResponseCode = 500;
+                request.ReturnOverrides.ResponseError = "Invalid key! Check your token and try again."
+
+            }  else {
                 log(request.SetHeaders["Authorization"])   
                 // more requests...             
-                // TODO: Implement Vault Access
+
                 var vault_data = call_vault(request, session, spec, idToken);
+
                 if(vault_data != undefined) {
                     // Response
                     request.SetHeaders["Authorization"] = "Bearer " + idToken;
                     request.SetHeaders['X-CanDIG-Authz'] = 'Bearer ' + vault_data.data.token;
+                    
                 }
             }
 
@@ -95,10 +157,6 @@ log("Authorization middleware initialised");
 
 // --- Vault ---
 
-// WARNING please remember to change these:
-//var vaultUrl = "http://0.0.0.0:8200";
-var vaultUrl = "http://vault:8200";
-var vaultRole = "test-role";
 
 //var authMiddleware = new TykJS.TykMiddleware.NewMiddleware({});
 //authMiddleware.NewProcessRequest(function(request, session, spec) {
@@ -123,17 +181,15 @@ function call_vault(request, session, spec, tykToken) {
         var decodedPayload = JSON.parse(b64dec(tokenPayload));
         log("Decoded Payload: "+JSON.stringify(decodedPayload))
         
-        //Hm use sub (UUID) or preferred_username?
-        var userId = decodedPayload.sub;
         
         var data = {
             "jwt": token,
-            "role": vaultRole
+            "role": spec.config_data.VAULT_ROLE
         };
         var requestParams = {
             "Method": "POST",
-            "Domain": vaultUrl,
-            "Resource": "/v1/auth/jwt/login",
+            "Domain": spec.config_data.VAULT_SERVICE_URL,
+            "Resource": spec.config_data.VAULT_SERVICE_RESOURCE,
             "Body": JSON.stringify(data)
         };
 
@@ -157,8 +213,8 @@ function call_vault(request, session, spec, tykToken) {
             var requestParams = {
                 "Headers": headers,
                 "Method": "GET",
-                "Domain": vaultUrl,
-                "Resource": "/v1/identity/oidc/token/" + vaultRole,
+                "Domain": spec.config_data.VAULT_SERVICE_URL,
+                "Resource": "/v1/identity/oidc/token/" + spec.config_data.VAULT_ROLE,
             };
 
             var resp = TykMakeHttpRequest(JSON.stringify(requestParams));

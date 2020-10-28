@@ -16,14 +16,34 @@
 
 
 # vault
-lib/vault/data/*
-lib/vault/logs/*
-lib/vault/policies/*
-lib/vault/config/*
+lib/authz/vault/data/*
+lib/authz/vault/logs/*
+lib/authz/vault/policies/*
+lib/authz/vault/config/*
 
 # keycloak
-lib/keycloak/volumes/*
-lib/keycloak/volumes/secrets.env
+lib/authz/keycloak/data/*
+lib/authz/keycloak/data/secrets.env
 
 # tyk
-lib/tyk/volumes/*
+lib/authz/tyk/data/*
+
+# opa 
+# keep global policies
+#lib/opa/*
+lib/authz/opa/*
+lib/authz/opa/policy.rego
+
+lib/candig_server/authz/opa/*.rego
+
+
+# test metadata
+etc/tests/integration/*/__pycache__/*
+etc/tests/integration/*/.pytest_cache/*
+etc/tests/integration/*/src/__pycache__/*
+etc/tests/integration/*/src/.pytest_cache/*
+
+etc/tests/integration/*/geckodriver
+etc/tests/integration/*/geckodriver.log
+etc/tests/integration/*/chromedriver
+geckodriver.log

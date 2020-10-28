@@ -83,22 +83,25 @@
     },
     
     "config_data": {
-	"SESSION_ENDPOINTS": [
-	    "/",
-	    "/gene_search",
-	    "/patients_overview",
-	    "/sample_analysis",
-	    "/custom_visualization",
-	    "/api_info",
-	    "/serverinfo"
-	],
-	"TYK_SERVER": "${CANDIG_PUBLIC_URL}"
+        "SESSION_ENDPOINTS": [
+            "/",
+            "/gene_search",
+            "/patients_overview",
+            "/sample_analysis",
+            "/custom_visualization",
+            "/api_info",
+            "/serverinfo"
+        ],
+        "TYK_SERVER": "${CANDIG_PUBLIC_URL}",
+        "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
+        "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",
+        "VAULT_ROLE":"test-role"
     },
     "openid_options": {
 	"segregate_by_client": false,
 	"providers": [
             {
-                "issuer": "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM}",
+                "issuer": "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM}",
                 "client_ids": {
                     "${KC_CLIENT_ID_64}": "${TYK_POLICY_ID}"
                 }

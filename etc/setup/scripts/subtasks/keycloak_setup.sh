@@ -1,4 +1,16 @@
 #! /usr/bin/env bash
+set -e
+
+# checks for dev or prod
+if [ $1 == "dev" ]
+  then
+    DEV_FLAG="-k"
+    echo "Dev Mode: True"
+else
+
+    echo "--- PRODUCTION MODE ---"
+fi
+
 # This script will set up a full keycloak environment on your local CanDIGv2 cluster
 
 usage () {
@@ -8,9 +20,11 @@ usage () {
   echo "KC_ADMIN_PW: ${KC_ADMIN_PW}"
   echo "KC_TEST_USER: ${KC_TEST_USER}"
   echo "KC_TEST_PW: ${KC_TEST_PW}"
+  echo "KC_TEST_USER: ${KC_TEST_USER_TWO}"
+  echo "KC_TEST_PW: ${KC_TEST_PW_TWO}"
   echo "KEYCLOAK_SERVICE_PUBLIC_URL: ${KEYCLOAK_SERVICE_PUBLIC_URL}"
   echo "KEYCLOAK_SERVICE_PUBLIC_PORT: ${KEYCLOAK_SERVICE_PUBLIC_PORT}"
-  echo "CONTAINER_NAME_CANDIG_AUTH: ${CONTAINER_NAME_CANDIG_AUTH}"
+  echo "CANDIG_AUTH_CONTAINER_NAME: ${CANDIG_AUTH_CONTAINER_NAME}"
 
   echo
 }
@@ -29,42 +43,51 @@ usage () {
 
 # Load Keycloak template (.tpl) files, populate them 
 # with project .env variables, and then spit 
-# them out to ./lib/keyclaok/volumes/*
+# them out to ./lib/keyclaok/data/*
 
-mkdir -p ${PWD}/lib/keycloak/volumes
+mkdir -p ${PWD}/lib/authz/keycloak/data
+
+
+# temp: in prod mode, explicitly indicating port 443 breaks vaults internal oidc provider checks.
+# simply remove the ":443 from the authentication services public url for this purpose:
+if [[ $KEYCLOAK_SERVICE_PUBLIC_URL == *":443"* ]]; then
+    TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(echo $KEYCLOAK_SERVICE_PUBLIC_URL | sed -e 's/\(:443\)$//g')
+elif [[ $KEYCLOAK_SERVICE_PUBLIC_URL == *":80"* ]]; then
+    TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(echo $KEYCLOAK_SERVICE_PUBLIC_URL | sed -e 's/\(:80\)$//g')
+else
+    TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(echo $KEYCLOAK_SERVICE_PUBLIC_URL)
+fi
+
+export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL
+
+
 
 # secrets.env
 echo "Working on secrets.env .."
-envsubst < ${PWD}/etc/setup/templates/configs/keycloak/configuration/secrets.env.tpl > ${PWD}/lib/keycloak/volumes/secrets.env
+envsubst < ${PWD}/etc/setup/templates/configs/keycloak/configuration/secrets.env.tpl > ${PWD}/lib/authz/keycloak/data/secrets.env
 #temp
-#touch ${PWD}/lib/keycloak/volumes/secrets.env
+#touch ${PWD}/lib/authz/keycloak/data/secrets.env
 
 # echo 
-mkdir ${PWD}/lib/keycloak/volumes/keycloak-db
-chmod 777 ${PWD}/lib/keycloak/volumes/keycloak-db
+mkdir -p ${PWD}/lib/authz/keycloak/data/keycloak-db
+chmod 777 ${PWD}/lib/authz/keycloak/data/keycloak-db
 
 
 # Copy files from template configs
-echo "Copying application-roles.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-roles.properties ${PWD}/lib/keycloak/volumes/application-roles.properties
-
 echo "Copying application-users.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-users.properties ${PWD}/lib/keycloak/volumes/application-users.properties
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-users.properties ${PWD}/lib/authz/keycloak/data/application-users.properties
 
 echo "Copying logging.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/logging.properties ${PWD}/lib/keycloak/volumes/logging.properties
-
-echo "Copying mgmt-groups.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-groups.properties ${PWD}/lib/keycloak/volumes/mgmt-groups.properties
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/logging.properties ${PWD}/lib/authz/keycloak/data/logging.properties
 
 echo "Copying mgmt-users.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-users.properties ${PWD}/lib/keycloak/volumes/mgmt-users.properties
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-users.properties ${PWD}/lib/authz/keycloak/data/mgmt-users.properties
 
 echo "Copying standalone.xml .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone.xml ${PWD}/lib/keycloak/volumes/standalone.xml
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone.xml ${PWD}/lib/authz/keycloak/data/standalone.xml
 
 echo "Copying standalone-ha.xml .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone-ha.xml ${PWD}/lib/keycloak/volumes/standalone-ha.xml
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone-ha.xml ${PWD}/lib/authz/keycloak/data/standalone-ha.xml
 
 
 
@@ -73,18 +96,27 @@ KEYCLOAK_CONTAINERS=$(echo $(docker ps | grep keycloak | wc -l))
 echo "Number of keycloak containers running: ${KEYCLOAK_CONTAINERS}"
 if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
    echo "Booting keycloak container!"
-   docker-compose -f ${PWD}/lib/keycloak/docker-compose.yml up -d
+   docker-compose -f ${PWD}/lib/authz/docker-compose.yml up -d keycloak
    sleep 5
+
+   echo ">> .. waiting for keycloak to start..."
+   while !  docker logs --tail 1000  ${CANDIG_AUTH_CONTAINER_NAME} | grep "Undertow HTTPS listener https listening on 0.0.0.0" ; do sleep 1 ; done
+   echo ">> .. ready..."
 fi
 
 
 ###############
 
-add_user() {
-  # CONTAINER_NAME_CANDIG_AUTH is the name of the keycloak server inside the compose network
-  docker exec ${CONTAINER_NAME_CANDIG_AUTH} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER} -p ${KC_TEST_PW} -r ${KC_REALM}
+add_users() {
+  # CANDIG_AUTH_CONTAINER_NAME is the name of the keycloak server inside the compose network
+  echo "Adding ${KC_TEST_USER}"
+  docker exec ${CANDIG_AUTH_CONTAINER_NAME} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER} -p ${KC_TEST_PW} -r ${KC_REALM}
+
+  echo "Adding ${KC_TEST_USER_TWO}"
+  docker exec ${CANDIG_AUTH_CONTAINER_NAME} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER_TWO} -p ${KC_TEST_PW_TWO} -r ${KC_REALM}
+
   echo "Restarting the keycloak container"
-  docker restart ${CONTAINER_NAME_CANDIG_AUTH}
+  docker restart ${CANDIG_AUTH_CONTAINER_NAME}
 }
 
 ###############
@@ -95,7 +127,7 @@ get_token () {
     -d "username=$KC_ADMIN_USER" \
     -d "password=$KC_ADMIN_PW" \
     -d "grant_type=password" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/master/protocol/openid-connect/token" 2> /dev/null )
+    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/master/protocol/openid-connect/token" $DEV_FLAG 2> /dev/null )
   echo ${BID} | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["access_token"])'
 }
 
@@ -112,7 +144,7 @@ set_realm () {
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
     -X POST -H "Content-Type: application/json"  -d "${JSON}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms"
+    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms" $DEV_FLAG
 }
 
 
@@ -121,7 +153,7 @@ get_realm () {
 
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}" | jq .
+    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}" $DEV_FLAG | jq .
 }
 
 #################################
@@ -131,7 +163,7 @@ get_realm_clients () {
 
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients" | jq -S .
+    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients" $DEV_FLAG | jq -S .
 }
 
 
@@ -171,18 +203,24 @@ set_client () {
   curl \
     -H "Authorization: bearer ${KC_TOKEN}" \
     -X POST -H "Content-Type: application/json"  -d "${JSON}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients"
+    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients" $DEV_FLAG
 }
 
 get_secret () {
   id=$(curl -H "Authorization: bearer ${KC_TOKEN}" \
-    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients 2> /dev/null \
+    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients $DEV_FLAG 2> /dev/null \
     | python3 -c 'import json,sys;obj=json.load(sys.stdin); print([l["id"] for l in obj if l["clientId"] ==
     "'"$KC_CLIENT_ID"'" ][0])')
 
   curl -H "Authorization: bearer ${KC_TOKEN}" \
-    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients/$id/client-secret 2> /dev/null |\
+    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients/$id/client-secret $DEV_FLAG 2> /dev/null |\
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["value"])'
+}
+
+get_public_key () {
+  curl \
+    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM} $DEV_FLAG 2> /dev/null |\
+    python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["public_key"])'
 }
 ##################################
 
@@ -206,21 +244,24 @@ set_client ${KC_REALM} ${KC_CLIENT_ID} "${TYK_LISTEN_PATH}" ${KC_LOGIN_REDIRECT_
 echo ">> .. set..."
 
 echo ">> Getting KC_SECRET .."
-# TODO: Fix;
-# WARNING: Despite being exported,
-# KC_SECRET is not properly useable
-# elsewhere in the setup process.
-# e.g.: Tyk (needs manual intervention)
 export KC_SECRET=$(get_secret  ${KC_REALM})
 echo "** Retrieved KC_SECRET as ${KC_SECRET} **"
 echo ">> .. got it..."
+echo
+
+
+echo ">> Getting KC_PUBLIC_KEY .."
+export KC_PUBLIC_KEY=$(get_public_key  ${KC_REALM})
+echo "** Retrieved KC_PUBLIC_KEY as ${KC_PUBLIC_KEY} **"
+echo ">> .. got it..."
+echo
+
 
 echo ">> Adding user .."
-add_user
+add_users
 echo ">> .. added..."
-
 echo 
+
 echo ">> .. waiting for keycloak to restart..."
-while !  docker logs --tail 5  ${CONTAINER_NAME_CANDIG_AUTH} | grep "Admin console listening on http://127.0.0.1:9990" ; do sleep 1 ; done
-docker exec ${CONTAINER_NAME_CANDIG_AUTH}  rm /opt/jboss/keycloak/standalone/configuration/keycloak-add-user.json 2> /dev/null
+while !  docker logs --tail 5  ${CANDIG_AUTH_CONTAINER_NAME} | grep "Admin console listening on http://127.0.0.1:9990" ; do sleep 1 ; done
 echo ">> .. ready..."
