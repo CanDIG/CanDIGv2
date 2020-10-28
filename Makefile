@@ -340,6 +340,7 @@ compose-authz-clean: compose-authz-down \
 	sudo rm -r $(DIR)/lib/authz/vault/data* & 2>&1 
 	sudo rm -r $(DIR)/lib/authz/vault/logs/ & 2>&1 
 	sudo rm -r $(DIR)/lib/authz/vault/policies/ & 2>&1
+	sudo rm -r $(DIR)/lib/authz/vault/keys.txt & 2>&1
 	# clean opa
 	#sudo rm -r $(DIR)/lib/authz/opa/* & 2>&1
 	# TODO: refactor

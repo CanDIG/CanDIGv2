@@ -20,6 +20,7 @@ lib/authz/vault/data/*
 lib/authz/vault/logs/*
 lib/authz/vault/policies/*
 lib/authz/vault/config/*
+lib/authz/vault/keys.txt
 
 # keycloak
 lib/authz/keycloak/data/*
