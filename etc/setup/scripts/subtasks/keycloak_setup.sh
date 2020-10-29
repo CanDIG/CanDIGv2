@@ -46,6 +46,8 @@ usage () {
 # them out to ./lib/keyclaok/data/*
 
 mkdir -p ${PWD}/lib/authz/keycloak/data
+chown -R $USER ${PWD}/lib/authz/keycloak
+chgrp -R $USER ${PWD}/lib/authz/keycloak
 
 
 # temp: in prod mode, explicitly indicating port 443 breaks vaults internal oidc provider checks.

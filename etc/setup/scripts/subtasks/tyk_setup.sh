@@ -10,6 +10,8 @@ set -e
 # them out to ./lib/authz/tyk/data/*
 
 mkdir -p ${PWD}/lib/authz/tyk/data
+chown -R $USER ${PWD}/lib/authz/tyk
+chgrp -R $USER ${PWD}/lib/authz/tyk
 
 # api_auth.json
 echo "Working on api_auth.json .."

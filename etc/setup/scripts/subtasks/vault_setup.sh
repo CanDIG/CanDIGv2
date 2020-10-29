@@ -12,16 +12,23 @@ set -e
 # https://stackoverflow.com/questions/35703317/docker-exec-write-text-to-file-in-container
 # https://www.vaultproject.io/api-docs/secret/identity/entity#batch-delete-entities
 
+mkdir -p ${PWD}/lib/authz/vault/config
+chown -R $USER ${PWD}/lib/authz/vault
+chgrp -R $USER ${PWD}/lib/authz/vault
 
 # vault-config.json
 echo "Working on vault-config.json .."
-mkdir -p ${PWD}/lib/authz/vault/config
 envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-config.json.tpl > ${PWD}/lib/authz/vault/config/vault-config.json
 
 # boot container
 docker-compose -f ${PWD}/lib/authz/docker-compose.yml up -d vault
 
 # -- todo: run only if not already initialized --
+# --- temp
+echo ">> waiting 3 seconds to let vault start"
+sleep 3
+# ---
+
 # gather keys and login token
 stuff=$(docker exec vault sh -c "vault operator init") # | head -7 | rev | cut -d " " -f1 | rev)
 echo "found stuff as ${stuff}"
