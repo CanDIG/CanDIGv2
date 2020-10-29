@@ -7,8 +7,8 @@ set -e
 
 # -- TEMP:
 mkdir -p ${PWD}/lib/candig_server/authz/opa
-chown -R $USER ${PWD}/lib/candig_server/authz
-chgrp -R $USER ${PWD}/lib/candig_server/authz
+sudo chown -R $USER ${PWD}/lib/candig_server/authz
+sudo chgrp -R $USER ${PWD}/lib/candig_server/authz
 # --
 
 # policy.rego
