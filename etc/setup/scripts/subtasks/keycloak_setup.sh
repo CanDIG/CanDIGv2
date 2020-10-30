@@ -5,9 +5,6 @@ set -e
 if [ $MODE == "dev" ]
   then
     DEV_FLAG="-k"
-else
-    PROD_SUDO="sudo"
-    export PROD_SUDO
 fi
 echo "--- MODE : ${MODE} ---"
 
@@ -46,8 +43,10 @@ usage () {
 # them out to ./lib/keyclaok/data/*
 
 mkdir -p ${PWD}/lib/authz/keycloak/data
-$PROD_SUDO chown -R $USER ${PWD}/lib/authz/keycloak
-$PROD_SUDO chgrp -R $USER ${PWD}/lib/authz/keycloak
+sudo chown $USER ${PWD}/lib/authz/keycloak
+sudo chown $USER ${PWD}/lib/authz/keycloak/data
+sudo chgrp $USER ${PWD}/lib/authz/keycloak
+sudo chown $USER ${PWD}/lib/authz/keycloak/data
 
 # temp: in prod mode, explicitly indicating port 443 breaks vaults internal oidc provider checks.
 # simply remove the ":443 from the authentication services public url for this purpose:

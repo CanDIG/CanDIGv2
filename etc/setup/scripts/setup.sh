@@ -2,7 +2,7 @@
 set -e
 
 # checks for dev or prod
-if [ $MODE -eq "" ]
+if [ $MODE == "" ]
   then
     echo "Please check the MODE in your environment varibles!"
     exit 1
