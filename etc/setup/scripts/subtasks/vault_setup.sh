@@ -144,11 +144,7 @@ STRUCTURE="{\\\"name\\\":\\\"${KC_TEST_USER}\\\",\\\"mount_accessor\\\":\\\"${JW
 docker exec vault sh -c "echo ${STRUCTURE} | tr -d '[:space:]' > alias.json; echo 'catting alias.json'; cat alias.json ; vault write identity/entity-alias @alias.json;" # rm alias.json;"
 
 STRUCTURE="{\\\"name\\\":\\\"${KC_TEST_USER_TWO}\\\",\\\"mount_accessor\\\":\\\"${JWT_ACCESSOR_VALUE}\\\",\\\"canonical_id\\\":\\\"${ENTITY_ID_TWO}\\\"}"
-<<<<<<< HEAD
-docker exec -it vault sh -c "echo ${STRUCTURE} | tr -d '[:space:]' > alias.json; echo 'catting alias.json'; cat alias.json ; vault write identity/entity-alias @alias.json;" # rm alias.json;"
-=======
 docker exec vault sh -c "echo ${STRUCTURE} | tr -d '[:space:]' > alias.json; echo 'catting alias.json'; cat alias.json ; vault write identity/entity-alias @alias.json;" # rm alias.json;"
->>>>>>> brouillette/dev/authz-arbiter
 
 
 # enable identity tokens
