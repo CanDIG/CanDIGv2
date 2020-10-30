@@ -13,8 +13,8 @@ set -e
 # https://www.vaultproject.io/api-docs/secret/identity/entity#batch-delete-entities
 
 mkdir -p ${PWD}/lib/authz/vault/config
-sudo chown -R $USER ${PWD}/lib/authz/vault
-sudo chgrp -R $USER ${PWD}/lib/authz/vault
+$PROD_SUDO chown -R $USER ${PWD}/lib/authz/vault
+$PROD_SUDO chgrp -R $USER ${PWD}/lib/authz/vault
 
 # vault-config.json
 echo "Working on vault-config.json .."

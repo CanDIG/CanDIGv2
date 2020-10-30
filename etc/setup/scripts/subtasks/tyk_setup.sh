@@ -10,8 +10,8 @@ set -e
 # them out to ./lib/authz/tyk/data/*
 
 mkdir -p ${PWD}/lib/authz/tyk/data
-sudo chown -R $USER ${PWD}/lib/authz/tyk
-sudo chgrp -R $USER ${PWD}/lib/authz/tyk
+$PROD_SUDO chown -R $USER ${PWD}/lib/authz/tyk
+$PROD_SUDO chgrp -R $USER ${PWD}/lib/authz/tyk
 
 # api_auth.json
 echo "Working on api_auth.json .."

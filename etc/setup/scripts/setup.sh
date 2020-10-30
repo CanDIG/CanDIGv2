@@ -2,9 +2,9 @@
 set -e
 
 # checks for dev or prod
-if [ $# -eq 0 ]
+if [ $MODE -eq "" ]
   then
-    echo "No arguments supplied! please pass dev or prod"
+    echo "Please check the MODE in your environment varibles!"
     exit 1
 fi
 
