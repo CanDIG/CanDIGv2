@@ -46,8 +46,8 @@ function isTokenValid(decodedHeader, decodedPayload, decodedSignature) {
         
         // TODO: Verify against public key!
         //jwt.verify(token, full_authn_pk, { algorithms: ['RS256'] })
-        var concat = b64enc(JSON.stringify(decodedHeader)) + "." + b64enc(JSON.stringify(decodedPayload))
-        log("Concatted : " + concat)
+        //var concat = b64enc(JSON.stringify(decodedHeader)) + "." + b64enc(JSON.stringify(decodedPayload))
+        //log("Concatted : " + concat)
         
     } catch(err) {
         log('Error verifying token! : ' + err);

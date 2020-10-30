@@ -28,8 +28,6 @@ services:
 
   tyk:
     container_name: tyk
-    build:
-      context: ${PWD}/lib/authz/tyk
     image: tykio/tyk-gateway:${TYK_VERSION}
     networks:
       - ${DOCKER_NET}
