@@ -43,6 +43,29 @@ information.
     - `iat`:
     - `exp`:
 
+## Draft v002
+
+Includes basics of v001 but untroduces association with GA4GH.
+
+```json
+{
+  "aud": "cq_candig",
+  "exp": 1603988812,
+  "iat": 1603902412,
+  "iss": "/v1/identity/oidc",
+  "namespace": "root",
+  
+  "ga4gh_passport_v1": {
+    "ga4gh_visa_v1": {
+      
+    }
+  }
+
+  "sub": "b6a4b63c...9a7a247db34f"
+}
+```
+
+
 ## Draft v001
 
 Trying to keep things minimal for the first draft we will focus on a few
