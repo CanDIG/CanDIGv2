@@ -74,7 +74,7 @@ Includes basics of v001 but untroduces association with GA4GH.
         }
       }
     }
-  }
+  },
 
   "sub": "b6a4b63c...9a7a247db34f"
 }
