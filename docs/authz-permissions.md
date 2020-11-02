@@ -51,6 +51,10 @@ Includes basics of v001 but untroduces association with GA4GH.
 
 - Not using JWT within a JWT structure
 - `value` is not a string (as a result)
+- `level` is for the entire database unless `entities` is listed
+- `entities` is a list of URI spec'd strings where
+  - `namespace` is a specific table or schema or version
+  - uri paths can contain wild cards
 
 
 ```json
@@ -69,7 +73,7 @@ Includes basics of v001 but untroduces association with GA4GH.
           "level": 4,
           "entities": [
             "namespace://path/to/entity1",
-            "namespace://path/to/entity2/*"
+            "namespace2://path/to/entity2/*"
           ]
         }
       }
