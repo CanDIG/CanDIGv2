@@ -69,7 +69,7 @@ Includes basics of v001 but untroduces association with GA4GH.
           "level": 4,
           "entities": [
             "namespace://path/to/entity1",
-            "namespace://path/to/entity2/*",
+            "namespace://path/to/entity2/*"
           ]
         }
       }
