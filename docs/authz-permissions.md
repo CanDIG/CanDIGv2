@@ -17,6 +17,8 @@ information.
 
 ## JWT at a glance - the end goal?
 
+We are not sure yet if our structure will be absolutely identical to ga4gh.
+
 - `iss`: Issuer 
 - `iat`: Issued time
 - `exp`: Expiration time
@@ -47,6 +49,10 @@ information.
 
 Includes basics of v001 but untroduces association with GA4GH.
 
+- Not using JWT within a JWT structure
+- `value` is not a string (as a result)
+
+
 ```json
 {
   "aud": "cq_candig",
@@ -57,14 +63,22 @@ Includes basics of v001 but untroduces association with GA4GH.
   
   "ga4gh_passport_v1": {
     "ga4gh_visa_v1": {
-      
+      "type": "ControlledAccessGrants",
+      "value": {
+        "dataset1234": {
+          "level": 4,
+          "entities": [
+            "namespace://path/to/entity1",
+            "namespace://path/to/entity2/*",
+          ]
+        }
+      }
     }
   }
 
   "sub": "b6a4b63c...9a7a247db34f"
 }
 ```
-
 
 ## Draft v001
 
