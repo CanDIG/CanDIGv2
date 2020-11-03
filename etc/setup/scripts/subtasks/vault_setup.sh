@@ -100,9 +100,11 @@ docker exec vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${TEMP
 echo
 echo ">> creating user $KC_TEST_USER"
 
-PRESUMED_PERMISSIONS_DATASTRUCTURE_TEMPLATE="{\"name\":\"${KC_TEST_USER}\",\"metadata\":{\"dataset123\":4}}"
+export TEMPLATE_USER=$(echo $KC_TEST_USER)
+export TEMPLATE_DATASET_PERMISSIONS=4
+TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-datastructure.json.tpl)
 
-test_user_output=$(docker exec vault sh -c "echo '${PRESUMED_PERMISSIONS_DATASTRUCTURE_TEMPLATE}' > bob.json; vault write identity/entity @bob.json; rm bob.json;")
+test_user_output=$(docker exec vault sh -c "echo '${TEST_USER_PERMISSIONS_DATASTRUCTURE}' > ${KC_TEST_USER}.json; vault write identity/entity @${KC_TEST_USER}.json; rm ${KC_TEST_USER}.json;")
 
 ENTITY_ID=$(echo "${test_user_output}" | grep id | awk '{print $2}')
 echo ">>> found entity id : ${ENTITY_ID}"
@@ -111,14 +113,14 @@ echo ">>> found entity id : ${ENTITY_ID}"
 echo
 echo ">> creating user $KC_TEST_USER_TWO"
 
-PRESUMED_PERMISSIONS_DATASTRUCTURE_TEMPLATE_TWO="{\"name\":\"${KC_TEST_USER_TWO}\",\"metadata\":{\"dataset123\":1}}"
+export TEMPLATE_USER=$(echo $KC_TEST_USER_TWO)
+export TEMPLATE_DATASET_PERMISSIONS=1
+TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-datastructure.json.tpl)
 
-test_user_output_two=$(docker exec vault sh -c "echo '${PRESUMED_PERMISSIONS_DATASTRUCTURE_TEMPLATE_TWO}' > alice.json; vault write identity/entity @alice.json; rm alice.json;")
+test_user_output_two=$(docker exec vault sh -c "echo '${TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE}' > ${KC_TEST_USER_TWO}.json; vault write identity/entity @${KC_TEST_USER_TWO}.json; rm ${KC_TEST_USER_TWO}.json;")
 
 ENTITY_ID_TWO=$(echo "${test_user_output_two}" | grep id | awk '{print $2}')
 echo ">>> found entity id 2: ${ENTITY_ID_TWO}"
-
-
 
 
 
