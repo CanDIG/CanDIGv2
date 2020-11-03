@@ -26,13 +26,15 @@ allowed = true {
     # retrieve authorization token parts
     [authZ_token_header, authZ_token_payload, authZ_token_signature] := io.jwt.decode(input.vaultToken)
 
+    # retrieve rotated authZ jwks from the arbiter
+    rotated_authz_jwks := input.authZjwks
 
     # Verify authentication token signature
     authN_token_is_valid := io.jwt.verify_rs256(input.kcToken, full_authn_pk)
 
     # Verify authentication token signature
     # (disabled until vault key rotation accommodated for)
-    ##authZ_token_is_valid := io.jwt.verify_rs256(input.vaultToken, authz_jwks)
+    authZ_token_is_valid := io.jwt.verify_rs256(input.vaultToken, rotated_authz_jwks)
 
 
     all([
@@ -45,7 +47,7 @@ allowed = true {
         authN_token_payload.preferred_username == "${KC_TEST_USER}",
 
         # Authorization
-        ##authZ_token_is_valid == true,
+        authZ_token_is_valid == true,
         ##authZ_token_payload.aud == aud, 
         ##authZ_token_payload.iss == iss, 
         authZ_token_payload.iat < now,

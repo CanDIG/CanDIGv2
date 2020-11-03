@@ -78,16 +78,36 @@ async def handle(request):
 
     print(f"Path: {request.path}")
 
+
+
     if mode=="debug":
         print(f"[DEBUG] Found token: {authN_token}")
         print(f"[DEBUG] Found token: {authZ_token}")
+
+    try:
+        # get public jwks from permissions store
+        res = requests.get("http://vault:8200/v1/identity/oidc/.well-known/keys").json()
+
+        if mode=="debug":
+            print(f"[DEBUG] Got jwks: {res}")
+            
+        if 'keys' not in res :
+            return web.HTTPInternalServerError(body=json.dumps({'error': f"Permissions store error"}))
+        else :
+            authZ_jwks = str(res).replace("'", "\"") # ensure double quotes are used. OPA complains otherwise
+        
+    except Exception as e:
+        print(e)
+        return web.HTTPInternalServerError(body=json.dumps({'error': 'Permissions store agent unreachable'}))
+
 
 
     # reach resource authz server
     opa_request = { 
         "input" : {
             "kcToken" : authN_token,
-            "vaultToken": authZ_token
+            "vaultToken": authZ_token,
+            "authZjwks": authZ_jwks
         }
     }
 
