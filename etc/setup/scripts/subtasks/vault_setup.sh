@@ -162,15 +162,6 @@ echo ">> matching key and inserting custom info into the jwt"
 docker exec vault sh -c "echo '{\"key\":\"test-key\",\"client_id\":\"${KC_CLIENT_ID}\",\"template\":\"{\\\"permissions\\\":{{identity.entity.metadata}} }\"}' > test-role.json; vault write identity/oidc/role/test-role @test-role.json; rm test-role.json;"
 echo
 
-
-echo
-echo ">> getting jwt public key"
-#docker exec vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"test-role\""
-#VAULT_JWKS=$(curl -s localhost:8200/v1/identity/oidc/.well-known/keys)
-#echo "Found JWK as ${VAULT_JWKS}"
-#export VAULT_JWKS
-
-
 # ---
 
 
