@@ -2,7 +2,7 @@ import json
 import requests
 
 import os
-import threading
+import time, threading
 
 import asyncio
 from aiohttp import web
@@ -52,7 +52,42 @@ print(f"Sources: {resource_authz_host}:{resource_authz_port}, {resource_host}:{r
 
 authz_url=f"http://{resource_authz_host}:{resource_authz_port}/v1/data/permissions/allowed"
 
+permissions_store_keys_url="http://vault:8200/v1/identity/oidc/.well-known/keys"
+
 # ---
+
+
+
+authZ_jwks = ""
+def refresh_vault_jwks():
+    print(time.ctime())
+
+    try:
+        # get public jwks from permissions store
+        res = requests.get(permissions_store_keys_url).json()
+            
+        if 'keys' not in res :
+            raise Exception("Permissions store error")
+        else :
+            global authZ_jwks
+            
+            candidate = str(res).replace("'", "\"") # ensure double quotes are used. OPA complains otherwise
+
+            if candidate != authZ_jwks:
+                print("Discovered new Vault JWKS! Updating...")
+                
+                if mode=="debug":
+                    print(f"[DEBUG] {res}")
+
+                authZ_jwks = candidate
+        
+    except Exception as e:
+        print(e)
+        raise e
+
+    threading.Timer(60, refresh_vault_jwks).start()
+
+refresh_vault_jwks()
 
 @asyncio.coroutine
 async def handle(request):
@@ -83,23 +118,6 @@ async def handle(request):
     if mode=="debug":
         print(f"[DEBUG] Found token: {authN_token}")
         print(f"[DEBUG] Found token: {authZ_token}")
-
-    try:
-        # get public jwks from permissions store
-        res = requests.get("http://vault:8200/v1/identity/oidc/.well-known/keys").json()
-
-        if mode=="debug":
-            print(f"[DEBUG] Got jwks: {res}")
-            
-        if 'keys' not in res :
-            return web.HTTPInternalServerError(body=json.dumps({'error': f"Permissions store error"}))
-        else :
-            authZ_jwks = str(res).replace("'", "\"") # ensure double quotes are used. OPA complains otherwise
-        
-    except Exception as e:
-        print(e)
-        return web.HTTPInternalServerError(body=json.dumps({'error': 'Permissions store agent unreachable'}))
-
 
 
     # reach resource authz server
