@@ -12,7 +12,7 @@ services:
     networks:
       - ${DOCKER_NET}
     ports:
-      - "${CANCOGEN_DASHBOARD_PORT}:3000"
+      - "${CANCOGEN_DASHBOARD_PORT}:3003"
     deploy:
       placement:
         constraints:
