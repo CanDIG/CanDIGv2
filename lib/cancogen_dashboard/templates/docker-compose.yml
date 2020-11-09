@@ -1,0 +1,37 @@
+version: '3.7'
+
+services:
+  cancogen_dashboard:
+    build:
+      context: $PWD/lib/cancogen_dashboard
+
+    image: ${DOCKER_REGISTRY}/cancogen_dashboard:${CANCOGEN_DASHBOARD_VERSION:-latest}
+    volumes: 
+      - '.:/cancogen_dashboard'
+      - '/cancogen_dashboard/node_modules'
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${CANCOGEN_DASHBOARD_PORT}:3000"
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${CANCOGEN_DASHBOARD_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:cancogen_dashboard.${CANDIG_DOMAIN}
+    logging:
+      driver: "fluentd"
+      options:
+        tag: docker.{{.Name}}
+        fluentd-async-connect: "true"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
