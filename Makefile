@@ -73,7 +73,7 @@ bin-docker-machine: mkdir
 bin-kompose: mkdir
 	curl -Lo $(DIR)/bin/kompose \
 		https://github.com/kubernetes/kompose/releases/download/v1.21.0/kompose-$(VENV_OS)-amd64
-	chmod 755 $(DIR)/bin/kubectl
+	chmod 755 $(DIR)/bin/kompose
 
 #>>>
 # download latest kubectl (for kubernetes deployment)
