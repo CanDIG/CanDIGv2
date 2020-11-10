@@ -3,9 +3,9 @@ version: '3.7'
 services:
   cancogen_dashboard:
     build:
-      context: $PWD/lib/cancogen_dashboard
+      context: $PWD/lib/cancogen
 
-    image: ${DOCKER_REGISTRY}/cancogen_dashboard:${CANCOGEN_DASHBOARD_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/cancogen:${CANCOGEN_DASHBOARD_VERSION:-latest}
     volumes: 
       - '.:/cancogen_dashboard'
       - '/cancogen_dashboard/node_modules'
