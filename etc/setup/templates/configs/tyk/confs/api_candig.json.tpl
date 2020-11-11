@@ -65,11 +65,6 @@
 	        "name": "permissionsStoreMiddleware",
 	        "path": "/opt/tyk-gateway/middleware/permissionsStoreMiddleware.js",
 	        "require_session": false
-	    },
-        {
-	        "name": "oidcDistributedClaimsConduitMiddleware",
-	        "path": "/opt/tyk-gateway/middleware/oidcDistributedClaimsConduitMiddleware.js",
-	        "require_session": false
 	    }
     ],
 	"id_extractor": {
