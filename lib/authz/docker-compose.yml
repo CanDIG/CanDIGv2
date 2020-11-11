@@ -44,6 +44,7 @@ services:
         window: 120s
     volumes:
       - ./tyk/data/authMiddleware.js:/opt/tyk-gateway/middleware/authMiddleware.js
+      - ./tyk/data/permissionsStoreMiddleware.js:/opt/tyk-gateway/middleware/permissionsStoreMiddleware.js
       - ./tyk/data/oidcDistributedClaimsConduitMiddleware.js:/opt/tyk-gateway/middleware/oidcDistributedClaimsConduitMiddleware.js
       - ./tyk/data/tyk.conf:/opt/tyk-gateway/tyk.conf
       - ./tyk/data/virtualLogin.js:/opt/tyk-gateway/middleware/virtualLogin.js

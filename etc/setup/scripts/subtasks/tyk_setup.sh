@@ -37,6 +37,9 @@ envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/authMiddleware.js > ${PW
 
 # Copy files from template configs
 
+echo "Copying permissionsStoreMiddleware.js .."
+cp ${PWD}/etc/setup/templates/configs/tyk/confs/permissionsStoreMiddleware.js ${PWD}/lib/authz/tyk/data/permissionsStoreMiddleware.js
+
 echo "Copying oidcDistributedClaimsConduitMiddleware.js .."
 cp ${PWD}/etc/setup/templates/configs/tyk/confs/oidcDistributedClaimsConduitMiddleware.js ${PWD}/lib/authz/tyk/data/oidcDistributedClaimsConduitMiddleware.js
 
