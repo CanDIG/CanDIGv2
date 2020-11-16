@@ -8,8 +8,8 @@ WORKDIR /app/cancogen_dashboard
 
 ENV PATH /cancogen_dashboard/node_modules/.bin:$PATH
 
-COPY package.json ./
-COPY package-lock.json ./
+COPY cancogen_dashboard/package.json ./
+COPY cancogen_dashboard/package-lock.json ./
 RUN npm install
 
 
