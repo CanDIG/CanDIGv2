@@ -329,7 +329,7 @@ compose-authz-down:
 
 compose-authz-clean: compose-authz-down \
 	# needs sudo to run;
-	./etc/setup/scripts/sudo_check.sh
+	# for it to work, make sure your user does not need a password to use sudo
 
 	# clean keycloak
 	sudo rm -r $(DIR)/lib/authz/keycloak/data/* & 2>&1
@@ -353,7 +353,7 @@ compose-opa:
 
 setup-authz:
 	# sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authz
-	./etc/setup/scripts/setup.sh dev
+	./etc/setup/scripts/setup.sh
 
 setup-authz-prototype: setup-authz \
 	# intended to run candig server alongside its necessary "sidecar" parts

@@ -2,10 +2,13 @@ import json
 import requests
 
 import os
-import threading
+import time, threading
 
 import asyncio
 from aiohttp import web
+
+# References:
+# https://stackoverflow.com/questions/8600161/executing-periodic-actions-in-python
 
 
 # --- environment variables
@@ -47,12 +50,54 @@ except Exception as e:
     resource_port="3001"
     print(f"Default Resource Port : {resource_port}")
 
-print(f"Sources: {resource_authz_host}:{resource_authz_port}, {resource_host}:{resource_port}")
+
+try:
+    permissions_store_keys_url = os.environ["PERMISSIONS_STORE_URL"] + "/v1/identity/oidc/.well-known/keys"
+except Exception as e:
+    permissions_store_keys_url="http://vault:8200/v1/identity/oidc/.well-known/keys"
+    print(f"Default Permissions Store URL : {permissions_store_keys_url}")
+
+
+
+print(f"Sources: {resource_authz_host}:{resource_authz_port}, {resource_host}:{resource_port}, {permissions_store_keys_url}")
 
 
 authz_url=f"http://{resource_authz_host}:{resource_authz_port}/v1/data/permissions/allowed"
 
 # ---
+
+
+
+authZ_jwks = ""
+def refresh_vault_jwks():
+    print(time.ctime())
+
+    try:
+        # get public jwks from permissions store
+        res = requests.get(permissions_store_keys_url).json()
+            
+        if 'keys' not in res :
+            raise Exception("Permissions store error")
+        else :
+            global authZ_jwks
+            
+            candidate = str(res).replace("'", "\"") # ensure double quotes are used. OPA complains otherwise
+
+            if candidate != authZ_jwks:
+                print("Discovered new Vault JWKS! Updating...")
+
+                if mode=="debug":
+                    print(f"[DEBUG] {res}")
+
+                authZ_jwks = candidate
+        
+    except Exception as e:
+        print(e)
+        raise e
+
+    threading.Timer(60, refresh_vault_jwks).start()
+
+refresh_vault_jwks()
 
 @asyncio.coroutine
 async def handle(request):
@@ -78,6 +123,8 @@ async def handle(request):
 
     print(f"Path: {request.path}")
 
+
+
     if mode=="debug":
         print(f"[DEBUG] Found token: {authN_token}")
         print(f"[DEBUG] Found token: {authZ_token}")
@@ -87,7 +134,8 @@ async def handle(request):
     opa_request = { 
         "input" : {
             "kcToken" : authN_token,
-            "vaultToken": authZ_token
+            "vaultToken": authZ_token,
+            "authZjwks": authZ_jwks
         }
     }
 

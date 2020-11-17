@@ -17,7 +17,7 @@ ${KC_PUBLIC_KEY}
 #${VAULT_PUBLIC_KEY}
 #-----END PUBLIC KEY-----`
 
-default authz_jwks=`${VAULT_JWKS}`
+##default authz_jwks=`${VAULT_JWKS}`
 
 allowed = true {
     # retrieve authentication token parts
@@ -26,12 +26,15 @@ allowed = true {
     # retrieve authorization token parts
     [authZ_token_header, authZ_token_payload, authZ_token_signature] := io.jwt.decode(input.vaultToken)
 
+    # retrieve rotated authZ jwks from the arbiter
+    rotated_authz_jwks := input.authZjwks
 
     # Verify authentication token signature
     authN_token_is_valid := io.jwt.verify_rs256(input.kcToken, full_authn_pk)
 
     # Verify authentication token signature
-    authZ_token_is_valid := io.jwt.verify_rs256(input.vaultToken, authz_jwks)
+    # (disabled until vault key rotation accommodated for)
+    authZ_token_is_valid := io.jwt.verify_rs256(input.vaultToken, rotated_authz_jwks)
 
 
     all([

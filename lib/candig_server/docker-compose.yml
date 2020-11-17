@@ -86,6 +86,7 @@ services:
       - RESOURCE_AUTHZ_PORT=8181
       - RESOURCE_HOST=${CANDIG_SERVER_CONTAINER_NAME}
       - RESOURCE_PORT=${CANDIG_SERVER_PORT}
+      - PERMISSIONS_STORE_URL=${VAULT_SERVICE_URL}
     deploy:
       placement:
         constraints:

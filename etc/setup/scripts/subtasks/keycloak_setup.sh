@@ -2,14 +2,11 @@
 set -e
 
 # checks for dev or prod
-if [ $1 == "dev" ]
+if [ $MODE == "dev" ]
   then
     DEV_FLAG="-k"
-    echo "Dev Mode: True"
-else
-
-    echo "--- PRODUCTION MODE ---"
 fi
+echo "--- MODE : ${MODE} ---"
 
 # This script will set up a full keycloak environment on your local CanDIGv2 cluster
 
@@ -46,9 +43,10 @@ usage () {
 # them out to ./lib/keyclaok/data/*
 
 mkdir -p ${PWD}/lib/authz/keycloak/data
-sudo chown -R $USER ${PWD}/lib/authz/keycloak
-sudo chgrp -R $USER ${PWD}/lib/authz/keycloak
-
+sudo chown $USER ${PWD}/lib/authz/keycloak
+sudo chown $USER ${PWD}/lib/authz/keycloak/data
+sudo chgrp $USER ${PWD}/lib/authz/keycloak
+sudo chown $USER ${PWD}/lib/authz/keycloak/data
 
 # temp: in prod mode, explicitly indicating port 443 breaks vaults internal oidc provider checks.
 # simply remove the ":443 from the authentication services public url for this purpose:

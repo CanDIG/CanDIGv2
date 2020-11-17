@@ -61,12 +61,12 @@
 	    }
         ],
 	"post": [
-            {
-	        "name": "oidcDistributedClaimsConduitMiddleware",
-	        "path": "/opt/tyk-gateway/middleware/oidcDistributedClaimsConduitMiddleware.js",
+        {
+	        "name": "permissionsStoreMiddleware",
+	        "path": "/opt/tyk-gateway/middleware/permissionsStoreMiddleware.js",
 	        "require_session": false
 	    }
-        ],
+    ],
 	"id_extractor": {
 	    "extract_with": "",
 	    "extract_from": "",

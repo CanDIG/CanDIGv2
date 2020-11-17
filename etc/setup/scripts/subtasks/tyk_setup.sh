@@ -10,8 +10,8 @@ set -e
 # them out to ./lib/authz/tyk/data/*
 
 mkdir -p ${PWD}/lib/authz/tyk/data
-sudo chown -R $USER ${PWD}/lib/authz/tyk
-sudo chgrp -R $USER ${PWD}/lib/authz/tyk
+$PROD_SUDO chown -R $USER ${PWD}/lib/authz/tyk
+$PROD_SUDO chgrp -R $USER ${PWD}/lib/authz/tyk
 
 # api_auth.json
 echo "Working on api_auth.json .."
@@ -37,8 +37,8 @@ envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/authMiddleware.js > ${PW
 
 # Copy files from template configs
 
-echo "Copying oidcDistributedClaimsConduitMiddleware.js .."
-cp ${PWD}/etc/setup/templates/configs/tyk/confs/oidcDistributedClaimsConduitMiddleware.js ${PWD}/lib/authz/tyk/data/oidcDistributedClaimsConduitMiddleware.js
+echo "Copying permissionsStoreMiddleware.js .."
+cp ${PWD}/etc/setup/templates/configs/tyk/confs/permissionsStoreMiddleware.js ${PWD}/lib/authz/tyk/data/permissionsStoreMiddleware.js
 
 echo "Copying virtualLogin.js .."
 cp ${PWD}/etc/setup/templates/configs/tyk/confs/virtualLogin.js ${PWD}/lib/authz/tyk/data/virtualLogin.js
