@@ -8,9 +8,8 @@ WORKDIR /app/cancogen_dashboard
 
 ENV PATH /cancogen_dashboard/node_modules/.bin:$PATH
 
-COPY cancogen_dashboard/package.json ./
-COPY cancogen_dashboard/package-lock.json ./
-RUN npm install
+RUN apk add git
+RUN yarn install
 
 
-ENTRYPOINT ["npm", "start"]
+ENTRYPOINT ["yarn", "run"]

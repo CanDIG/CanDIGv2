@@ -2,13 +2,11 @@ version: '3.7'
 
 services:
   cancogen_dashboard:
+    tty: true
     build:
       context: $PWD/lib/cancogen
 
     image: ${DOCKER_REGISTRY}/cancogen:${CANCOGEN_DASHBOARD_VERSION:-latest}
-    volumes: 
-      - '.:/cancogen_dashboard'
-      - '/cancogen_dashboard/node_modules'
     networks:
       - ${DOCKER_NET}
     ports:
