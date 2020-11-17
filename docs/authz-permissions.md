@@ -45,6 +45,40 @@ We are not sure yet if our structure will be absolutely identical to ga4gh.
     - `iat`:
     - `exp`:
 
+
+## Draft v003
+
+The most basic version with only dataset level permissions.
+
+### Data model at the time of this writing
+
+- Project top level has
+  - One or more Datasets
+    - One or more Phenopackets (+ some extra data)
+      - One or more Patients
+
+```json
+{
+  "aud": "cq_candig",
+  "exp": 1603988812,
+  "iat": 1603902412,
+  "iss": "/v1/identity/oidc",
+  
+  "ga4gh_passport_v1": {
+    "ga4gh_visa_v1": {
+      "type": "ControlledAccessGrants",
+      "value": {
+        "dataset1234": {
+          "level": 4
+        }
+      }
+    }
+  },
+
+  "sub": "b6a4b63c...9a7a247db34f"
+}
+```
+
 ## Draft v002
 
 Includes basics of v001 but untroduces association with GA4GH.
