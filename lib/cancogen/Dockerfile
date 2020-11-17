@@ -9,6 +9,7 @@ WORKDIR /app/cancogen_dashboard
 ENV PATH /cancogen_dashboard/node_modules/.bin:$PATH
 
 RUN apk add git
+RUN yarn import
 RUN yarn install
 
 
