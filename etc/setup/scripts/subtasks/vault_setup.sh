@@ -102,7 +102,7 @@ echo ">> creating user $KC_TEST_USER"
 
 export TEMPLATE_USER=$(echo $KC_TEST_USER)
 export TEMPLATE_DATASET_PERMISSIONS=4
-TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-datastructure.json.tpl)
+TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-entity-entitlements.json.tpl)
 
 test_user_output=$(docker exec vault sh -c "echo '${TEST_USER_PERMISSIONS_DATASTRUCTURE}' > ${KC_TEST_USER}.json; vault write identity/entity @${KC_TEST_USER}.json; rm ${KC_TEST_USER}.json;")
 
@@ -115,7 +115,7 @@ echo ">> creating user $KC_TEST_USER_TWO"
 
 export TEMPLATE_USER=$(echo $KC_TEST_USER_TWO)
 export TEMPLATE_DATASET_PERMISSIONS=1
-TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-datastructure.json.tpl)
+TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-entity-entitlements.json.tpl)
 
 test_user_output_two=$(docker exec vault sh -c "echo '${TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE}' > ${KC_TEST_USER_TWO}.json; vault write identity/entity @${KC_TEST_USER_TWO}.json; rm ${KC_TEST_USER_TWO}.json;")
 
@@ -159,7 +159,9 @@ echo
 # match key and insert custom info into the jwt
 echo
 echo ">> matching key and inserting custom info into the jwt"
-docker exec vault sh -c "echo '{\"key\":\"test-key\",\"client_id\":\"${KC_CLIENT_ID}\",\"template\":\"{\\\"permissions\\\":{{identity.entity.metadata}} }\"}' > test-role.json; vault write identity/oidc/role/test-role @test-role.json; rm test-role.json;"
+VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-datastructure.json.tpl)
+docker exec vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > test-role.json; vault write identity/oidc/role/test-role @test-role.json; rm test-role.json;"
+#docker exec vault sh -c "echo '{\"key\":\"test-key\",\"client_id\":\"${KC_CLIENT_ID}\",\"template\":\"{\\\"ga4gh_passport_v1\\\":{{identity.entity.metadata}} }\"}' > test-role.json; vault write identity/oidc/role/test-role @test-role.json; rm test-role.json;"
 echo
 
 # ---

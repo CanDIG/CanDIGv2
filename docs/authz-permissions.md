@@ -69,7 +69,7 @@ The most basic version with only dataset level permissions.
       "type": "ControlledAccessGrants",
       "value": {
         "dataset1234": {
-          "level": 4
+          "access": 4
         }
       }
     }
