@@ -159,9 +159,12 @@ echo
 # match key and insert custom info into the jwt
 echo
 echo ">> matching key and inserting custom info into the jwt"
+# vault-datastructure.json.tpl has the template parameter which is supposed to be
+# json escaped or base64 escaped string and the braces have to be spaced apart 
+# because templating code requres {{}} which when followed by another brace
+# messes up Vault and it complains that there is a mismatch in balance of braces
 VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-datastructure.json.tpl)
 docker exec vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > test-role.json; vault write identity/oidc/role/test-role @test-role.json; rm test-role.json;"
-#docker exec vault sh -c "echo '{\"key\":\"test-key\",\"client_id\":\"${KC_CLIENT_ID}\",\"template\":\"{\\\"ga4gh_passport_v1\\\":{{identity.entity.metadata}} }\"}' > test-role.json; vault write identity/oidc/role/test-role @test-role.json; rm test-role.json;"
 echo
 
 # ---
