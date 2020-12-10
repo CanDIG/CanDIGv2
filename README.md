@@ -147,3 +147,13 @@ To deploy CanDIGv2, follow one of the available install guides in `docs/`:
 * [Tox Deployment Guide](./docs/install-tox.md)
 
 View additional Makefile options with `make help`.
+
+
+## Services and Components
+
+The follwing table lists the details from the Data Flow Diagram in the "Overview" section.
+
+| Service/Component Name                  | Source            | Notes                  |
+| ----------------------                  |----------------   |--------                |
+| Katsu (previously CHORD Metadata)       | link              | DFD: `chord_metadata`  |
+| CNV Service                             | link              | DFD: `cnv_service`     |
