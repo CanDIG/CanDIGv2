@@ -351,11 +351,11 @@ compose-opa:
 	docker-compose -f $(DIR)/lib/authz/docker-compose.yml up opa 2>&1
 ##
 
-setup-authz:
+compose-authz:
 	# sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authz
 	./etc/setup/scripts/setup.sh
 
-setup-authz-prototype: setup-authz \
+compose-authz-setup: compose-authz \
 	# intended to run candig server alongside its necessary "sidecar" parts
 	docker-compose -f $(DIR)/lib/candig_server/docker-compose.yml up -d candig-server 2>&1
 
