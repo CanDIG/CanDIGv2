@@ -355,8 +355,8 @@ compose-authz-setup:
 	# sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authz
 	./etc/setup/scripts/setup.sh
 
-compose-authz-setup-prototype: compose-authz-setup \
-	# intended to run candig server alongside its necessary "sidecar" parts
+compose-authz-setup-candig-server: compose-authz-setup \
+	# intended to run candig server alongside the authz module
 	docker-compose -f $(DIR)/lib/candig_server/docker-compose.yml up -d candig-server 2>&1
 
 test-authz-prototype: test-authz-prototype-chrome test-authz-prototype-firefox \
