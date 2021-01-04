@@ -10,15 +10,12 @@ import random
 # Firefox: http://chromedriver.chromium.org/
 # Chrome: http://github.com/mozilla/geckodriver/releases
 
-# to run, use
-# pytest -s -v -n=4
-# from this directory
+# to run, use `pytest -s -v -n=4` from this directory
 
 @pytest.fixture(scope="session")
 def setup(request):
 
     testname = os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0]
-    print(testname)
 
     headless_mode = (os.environ["HEADLESS_MODE"] == 'True')
     

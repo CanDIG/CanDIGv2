@@ -50,9 +50,6 @@ echo "Copying virtualToken.js .."
 cp ${PWD}/etc/setup/templates/configs/tyk/confs/virtualToken.js ${PWD}/lib/authz/tyk/data/virtualToken.js
 
 
-#read -p "Before we finish up here, scroll up a bit and copy the KC_SECRET that was spit out from the keycloak setup, and paste it into the tyk lib/authz/tyk/data/api_auth.json.. then hit enter to continue.."
-
-
 echo "-- Tyk Setup Done! --"
 echo
 

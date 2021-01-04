@@ -37,32 +37,6 @@ class TestAuthorization():
         assert response.status_code == 200
 
 
-    # def test_get_candig_server_authorization_does_defend_against_hs256_alg_token_tampering(self):
-    #     # TODO: test HS256 attack against RS256
-    #     body = { 
-    #         "input" : {
-    #             "kcToken": "",
-    #             "vaultToken": ""
-    #          }
-    #     }
-    #     response = requests.request('POST', self.candig_server_authz_url, json=body)
-
-    #     assert response.status_code in [400, 500]
-
-
-    # def test_get_candig_server_authorization_does_defend_against_none_alg_token_tampering(self):
-    #     # TODO: test "none alg"
-    #     body = { 
-    #         "input" : {
-    #             "kcToken": "",
-    #             "vaultToken": ""
-    #          }
-    #     }
-    #     response = requests.request('POST', self.candig_server_authz_url, json=body)
-
-    #     assert response.status_code in [400, 500]
-
-
     def test_get_candig_server_authorization_does_defend_against_jibberish_bruteforce(self):
 
         start = time.time()         # the variable that holds the starting time

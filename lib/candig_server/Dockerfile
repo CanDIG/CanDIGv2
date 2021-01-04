@@ -8,7 +8,7 @@ RUN mkdir -p /app/candig-server
 
 WORKDIR /app/candig-server
 
-RUN pip install candig-server==1.3.0 && pip install candig-ingest==1.3.1
+RUN pip install candig-server==1.4.0 && pip install candig-ingest==1.5.0
 
 # Uncomment below lines if you want to ingest some mock data
 RUN mkdir candig-example-data && \

@@ -2,8 +2,6 @@
 
 var authMiddleware = new TykJS.TykMiddleware.NewMiddleware({});
 
-//var jwt = require('jsonwebtoken');
-
 var iss = "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM}"
 var aud = "${KC_CLIENT_ID}"
 
@@ -50,15 +48,6 @@ authMiddleware.NewProcessRequest(function(request, session, spec) {
             log("Manipulating Cookie")
             var idToken = tokenCookie.split("=")[1];
 
-            // tokenHeader = idToken.split(".")[0]
-            // headerPadding = tokenHeader.length % 4
-
-            // if (headerPadding != 0) {
-            //     _.times(4-headerPadding, function() {
-            //         tokenHeader += "="
-            //     })
-            // }
-
             tokenPayload = idToken.split(".")[1]
             payloadPadding = tokenPayload.length % 4
             
@@ -68,10 +57,6 @@ authMiddleware.NewProcessRequest(function(request, session, spec) {
                 })
             }
 
-            // tokenSignature = idToken.split(".")[2]
-            
-        
-            // decodedHeader = JSON.parse(b64dec(tokenHeader))
             decodedPayload = JSON.parse(b64dec(tokenPayload))
         
             if (isTokenExpired(decodedPayload)) {

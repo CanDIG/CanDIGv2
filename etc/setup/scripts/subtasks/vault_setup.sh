@@ -128,14 +128,9 @@ echo ">>> found entity id 2: ${ENTITY_ID_TWO}"
 echo
 echo ">> setting up alias for $KC_TEST_USER"
 AUTH_LIST_OUTPUT=$(docker exec vault sh -c "vault auth list -format=json")
-#echo "auth list output:"
-#echo "${AUTH_LIST_OUTPUT}"
-#exit 0
 
 JWT_ACCESSOR_VALUE=$(echo "${AUTH_LIST_OUTPUT}" | grep accessor | head -1 | awk '{print $2}' | tr -d '"' | tr -d ',' | tr -d '[:space:]')
 echo ">>> found jwt accessor : ${JWT_ACCESSOR_VALUE}"
-
-#exit 0
 
 echo
 echo ">> writing alias"

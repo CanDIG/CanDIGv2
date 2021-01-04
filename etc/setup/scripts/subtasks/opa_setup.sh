@@ -3,8 +3,6 @@ set -e
 
 # This script will set up a full opa environment on your local CanDIGv2 cluster
 
-#mkdir -p ${PWD}/lib/authz/opa/data
-
 # -- TEMP:
 mkdir -p ${PWD}/lib/candig_server/authz/opa
 $PROD_SUDO chown -R $USER ${PWD}/lib/candig_server/authz

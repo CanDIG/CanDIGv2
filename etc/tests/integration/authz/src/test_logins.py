@@ -30,7 +30,7 @@ def login(driver, username, password):
 @pytest.mark.usefixtures("setup")
 class TestLogins():
     
-    def test_login_bob(self):
+    def test_login_user1(self):
         self.driver.get(self.candig_url)
 
         # credentials
@@ -43,19 +43,6 @@ class TestLogins():
         # verify successful login
         assert "Dashboard" in self.driver.title
 
-
-    def test_login_alice(self):
-        self.driver.get(self.candig_url)
-
-        # credentials
-        u2 = os.environ["KC_TEST_USER_TWO"]
-        p2 = os.environ["KC_TEST_PW_TWO"]
-        login(self.driver, u2, p2)
-
-        time.sleep(self.debug_pause_time_seconds)
-
-        # verify denied login
-        assert "Access Denied" in self.driver.find_elements_by_tag_name("body")[0].text
 
 
     def test_login_bogus_user(self):

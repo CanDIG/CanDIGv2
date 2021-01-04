@@ -26,17 +26,6 @@ usage () {
   echo
 }
 
-# # Verify environment variables
-# if [[ $KC_ADMIN_USER -eq "" ]] || [[ $KC_ADMIN_PW -eq "" ]] || [[ $KC_TEST_USER -eq "" ]] || [[ $KC_TEST_PW -eq "" ]]; then
-#    usage
-#    exit 1
-# # elif [[ $# -eq 2 ]]; then
-# #   KEYCLOAK_SERVICE_PUBLIC_URL=$1
-# #   KEYCLOAK_SERVICE_PUBLIC_PORT=$2
-# # elif [[ $# -gt 2 ]]; then
-# #   usage
-# #   exit 1
-# fi
 
 # Load Keycloak template (.tpl) files, populate them 
 # with project .env variables, and then spit 
@@ -65,8 +54,6 @@ export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL
 # secrets.env
 echo "Working on secrets.env .."
 envsubst < ${PWD}/etc/setup/templates/configs/keycloak/configuration/secrets.env.tpl > ${PWD}/lib/authz/keycloak/data/secrets.env
-#temp
-#touch ${PWD}/lib/authz/keycloak/data/secrets.env
 
 # echo 
 mkdir -p ${PWD}/lib/authz/keycloak/data/keycloak-db
