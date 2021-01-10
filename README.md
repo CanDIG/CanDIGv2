@@ -161,7 +161,7 @@ The follwing table lists the details from the Data Flow Diagram in the "Overview
 | Federation Service     | links  | DFD: `federation_service`    |
 | Datasets Service       | links  | DFD: `datasets_service`      |
 | RNAGet                 | links  | DFD: `rnaget`                |
-| CanDIG Server          | links  | DFD: `candig_server`         |
+| CanDIGv1 Server        | links  | DFD: `candig_server`         |
 | HTSGet                 | links  | DFD: `htsget_app`            |
 | CHORD DRS              | links  | DFD: `chord_drs`             |
 | IGV JS                 | links  | DFD: `igv_js`                |
