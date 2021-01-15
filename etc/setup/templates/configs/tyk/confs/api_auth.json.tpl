@@ -1,5 +1,5 @@
 {
-    "api_id": "${AUTH_API_ID}",
+    "api_id": "${TYK_AUTH_API_ID}",
     "use_keyless": true,
     "active": true,
     "strip_auth_data": false,
@@ -21,8 +21,8 @@
 	"auth_header_name": ""
     },
 
-    "name": "${AUTH_API_NAME}",
-    "slug": "${AUTH_API_SLUG}",
+    "name": "${TYK_AUTH_API_NAME}",
+    "slug": "${TYK_AUTH_API_SLUG}",
 
     "proxy": {
 	"target_url": "${TYK_LOGIN_TARGET_URL}/auth/login",

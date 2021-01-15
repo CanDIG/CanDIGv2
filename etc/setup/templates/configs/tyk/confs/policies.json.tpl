@@ -1,10 +1,10 @@
 {
     "${TYK_POLICY_ID}": {
         "access_rights": {
-            "${CANDIG_API_ID}": {
+            "${TYK_CANDIG_API_ID}": {
                 "allowed_urls": [],
-                "api_id": "${CANDIG_API_ID}",
-                "api_name": "${CANDIG_API_NAME}",
+                "api_id": "${TYK_CANDIG_API_ID}",
+                "api_name": "${TYK_CANDIG_API_NAME}",
                 "versions": [
                     "Default"
                 ]

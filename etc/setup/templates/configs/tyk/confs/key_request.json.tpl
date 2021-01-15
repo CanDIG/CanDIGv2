@@ -9,9 +9,9 @@
     "quota_remaining": -1,
     "quota_renewal_rate": 60,
     "access_rights": {
-        "${CANDIG_API_ID}": {
-            "api_id": "${CANDIG_API_ID}",
-            "api_name": "${CANDIG_API_NAME}",
+        "${TYK_CANDIG_API_ID}": {
+            "api_id": "${TYK_CANDIG_API_ID}",
+            "api_name": "${TYK_CANDIG_API_NAME}",
             "Versions": ["Default"]
         }
     },

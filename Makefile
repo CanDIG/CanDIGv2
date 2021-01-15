@@ -317,16 +317,28 @@ clean-volumes:
 compose:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
 
-#-- Temp --
-compose-authz:
-	docker-compose -f $(DIR)/lib/authz/docker-compose.yml up -d 2>&1
 
+
+
+
+#>>>
+# close all authentication and authorization services
+
+#<<<
 compose-authz-down:
 	# closes primary authn and authz components
 	docker-compose -f $(DIR)/lib/authz/docker-compose.yml down
 	# closes the candig server along with its corresponding arbiter and opa 
 	docker-compose -f $(DIR)/lib/candig_server/docker-compose.yml down
 
+
+#>>>
+# dismantle and remove all data of 
+# candig-server prototype instances with authentication
+# and authorization services
+
+#	* requires sudo
+#<<<
 compose-authz-clean: compose-authz-down \
 	# needs sudo to run;
 	# for it to work, make sure your user does not need a password to use sudo
@@ -346,33 +358,58 @@ compose-authz-clean: compose-authz-down \
 	# TODO: refactor
 	sudo rm -r $(DIR)/lib/candig_server/authz/opa/* & 2>&1
 
-## TEMP
-compose-opa:
-	docker-compose -f $(DIR)/lib/authz/docker-compose.yml up opa 2>&1
-##
 
+#>>>
+# create instances of authentication and 
+# authorization services
+
+#<<<
 compose-authz-setup:
 	# sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authz
 	./etc/setup/scripts/setup.sh
 
+
+#>>>
+# create an instance of a candig-server prototype
+# with authentication and authorization services
+
+#<<<
 compose-authz-setup-candig-server: compose-authz-setup \
 	# intended to run candig server alongside the authz module
 	docker-compose -f $(DIR)/lib/candig_server/docker-compose.yml up -d candig-server 2>&1
 
+
+#>>>
+# run authentication and authorization 
+# tests with both chrome and firefox front-ends
+
+#<<<
 test-authz-prototype: test-authz-prototype-chrome test-authz-prototype-firefox \
 	# ...
 
+
+#>>>
+# run authentication and authorization 
+# tests with chrome front-end
+
+#<<<
 test-authz-prototype-chrome:
 	# run after starting the authz module and candig-server
 													# one (ish) process per test
 	$(DIR)/etc/tests/integration/authz/run_tests.sh 20 chrome True
 
+
+#>>>
+# run authentication and authorization 
+# tests with firefox front-end
+
+#<<<
 test-authz-prototype-firefox:
 	# run after starting the authz module and candig-server
 													# one (ish) process per test
 	$(DIR)/etc/tests/integration/authz/run_tests.sh 20 firefox True
 
-# --
+
 
 #>>>
 # deploy/test individual modules using docker-compose
