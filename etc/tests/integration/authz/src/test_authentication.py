@@ -93,15 +93,22 @@ class TestAuthentication():
         assert decoded_authN_header_json["alg"] == "HS256"        
         # {'alg': 'HS256', 'typ': 'JWT', 'kid': 'nlIsWC8XFbyaEKW-dH0onuGnDA-tOQfOINgIyFCzZV4'}
 
-        new_authN_header = base64.b64encode(bytes(json.dumps(decoded_authN_header_json), 'utf-8')).decode("utf-8").replace('=', '')
-        # 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCIsICJraWQiOiAibmxJc1dDOFhGYnlhRUtXLWRIMG9udUduREEtdE9RZk9JTmdJeUZDelpWNCJ9'
+        new_authN_header = base64.b64encode(
+            bytes(json.dumps(decoded_authN_header_json), 'utf-8')
+        ).decode("utf-8").replace('=', '')
+        # 'base64 jibberish'
 
         # Resign new token with public key
-        new_authN_signature = hmac.new(bytes(public_key,"utf-8"), msg=bytes(f"{new_authN_header}.{authN_payload}", "utf-8"), digestmod=hashlib.sha256).hexdigest()
-        # '46215c1759b1899ca56d225730c7bf99c30179a5b05e7df6d308f7526e8a0f53'
+        new_authN_signature = base64.b64encode(
+            hmac.new(
+                bytes(public_key,"utf-8"), 
+                msg=bytes(f"{new_authN_header}.{authN_payload}", "utf-8"),
+               digestmod=hashlib.sha256
+            ).digest())
+        # 'base64 jibberish'
 
         new_authN_token = f"{new_authN_header}.{authN_payload}.{new_authN_signature}"
-        # 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCIsICJraWQiOiAibmxJc1dDOFhGYnlhRUtXLWRIMG9udUduREEtdE9RZk9JTmdJeUZDelpWNCJ9.eyJleHAiOjE2MDMzOTIyNTQsImlhdCI6MTYwMzM5MTk1NCwiYXV0aF90aW1lIjoxNjAzMzkxOTU0LCJqdGkiOiI0NTgzMjlhNS1mODE1LTQ1NGItOTNmMC1mMjFhZDYyZDc2NzQiLCJpc3MiOiJodHRwOi8vY2FuZGlnYXV0aC5sb2NhbDo4MDgxL2F1dGgvcmVhbG1zL2NhbmRpZyIsImF1ZCI6ImNxX2NhbmRpZyIsInN1YiI6ImNlMWE5ODkxLTA0NzgtNGZjMS1iYjRjLTc3NjZhMGY4MzIxYyIsInR5cCI6IklEIiwiYXpwIjoiY3FfY2FuZGlnIiwic2Vzc2lvbl9zdGF0ZSI6IjYyZGNkOWVhLWE1ZTMtNGQ3OC1hOWMxLWIxMzcxMDQ4YWFkNyIsImFjciI6IjEiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsInByZWZlcnJlZF91c2VybmFtZSI6ImJvYiJ9.46215c1759b1899ca56d225730c7bf99c30179a5b05e7df6d308f7526e8a0f53'
+        # 'b64header.b64Payload.b64Signature'
 
 
         # verify access with old token
@@ -148,7 +155,10 @@ class TestAuthentication():
         assert decoded_authN_header_json["alg"] == "none"
         
 
-        new_authN_header = base64.b64encode(bytes(json.dumps(decoded_authN_header_json), 'utf-8')).decode("utf-8").replace('=', '')
+        new_authN_header = base64.b64encode(
+            bytes(json.dumps(decoded_authN_header_json), 'utf-8')
+        ).decode("utf-8").replace('=', '')
+
         new_authN_signature = "" # empty to accomodate 'none' alg
 
         new_authN_token = f"{new_authN_header}.{authN_payload}.{new_authN_signature}"

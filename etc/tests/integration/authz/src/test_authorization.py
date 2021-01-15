@@ -5,7 +5,7 @@ import requests
 import pytest
 import json
 import random
-
+import base64
 
 @pytest.mark.usefixtures("setup")
 class TestAuthorization():
@@ -46,27 +46,30 @@ class TestAuthorization():
         while elapsed < limit_sec : # only run for the limited number of seconds
 
             # create jibberish
-            j1hash1 = random.getrandbits(random.randint(256,512))
-            j1hash2 = random.getrandbits(random.randint(256,512))
-            j1hash3 = random.getrandbits(random.randint(256,512))
-            j2hash1 = random.getrandbits(random.randint(256,512))
-            j2hash2 = random.getrandbits(random.randint(256,512))
-            j2hash3 = random.getrandbits(random.randint(256,512))
+            j1hash1B64 = base64.b64encode(bytes("%032x" % random.getrandbits(random.randint(256,512)), 'utf-8')).decode("utf-8").replace('=', '')
+            j1hash2B64 = base64.b64encode(bytes("%032x" % random.getrandbits(random.randint(256,512)), 'utf-8')).decode("utf-8").replace('=', '')
+            j1hash3B64 = base64.b64encode(bytes("%032x" % random.getrandbits(random.randint(256,512)), 'utf-8')).decode("utf-8").replace('=', '')
+            j2hash1B64 = base64.b64encode(bytes("%032x" % random.getrandbits(random.randint(256,512)), 'utf-8')).decode("utf-8").replace('=', '')
+            j2hash2B64 = base64.b64encode(bytes("%032x" % random.getrandbits(random.randint(256,512)), 'utf-8')).decode("utf-8").replace('=', '')
+            j2hash3B64 = base64.b64encode(bytes("%032x" % random.getrandbits(random.randint(256,512)), 'utf-8')).decode("utf-8").replace('=', '')
 
 
-            jib1=("%032x" % j1hash1) + "." + ("%032x" % j1hash2) + "." + ("%032x" % j1hash3)
-            jib2=("%032x" % j2hash1) + "." + ("%032x" % j2hash2) + "." + ("%032x" % j2hash3)
+            jib_token_1=j1hash1B64 + "." + j1hash2B64 + "." + j1hash3B64
+            jib_token_2=j2hash1B64 + "." + j2hash2B64 + "." + j2hash3B64
+
             # generates things like :
             # 1efda8374250e[...]6aaff58d9f1c4f2.7f1913e3c0ea281fe6[...]06c123cb6133efb121f9e.45b916cbd5eca17[...]504ef991f00266ddeff
             # to immitate a jwt format         #                                            #
 
-            jib3 = ("%032x" % random.getrandbits(random.randint(256,512)))
+            jib_key = ("%032x" % random.getrandbits(random.randint(256,512)))
+
+
 
             body = { 
                 "input" : {
-                    "kcToken": jib1,
-                    "vaultToken": jib2,
-                    "authZjwks": jib3
+                    "kcToken": jib_token_1,
+                    "vaultToken": jib_token_2,
+                    "authZjwks": jib_key
                 }
             }
             response = requests.request('POST', self.candig_server_authz_url, json=body)
