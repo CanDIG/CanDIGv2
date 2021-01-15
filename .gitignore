@@ -24,7 +24,6 @@ lib/authz/vault/keys.txt
 
 # keycloak
 lib/authz/keycloak/data/*
-lib/authz/keycloak/data/secrets.env
 
 # tyk
 lib/authz/tyk/data/*
@@ -33,7 +32,6 @@ lib/authz/tyk/data/*
 # keep global policies
 #lib/opa/*
 lib/authz/opa/*
-lib/authz/opa/policy.rego
 
 lib/candig_server/authz/opa/*.rego
 
