@@ -410,7 +410,7 @@ images: toil-docker
 #<<<
 .PHONY: init-conda
 init-conda:
-	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip
+	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
 	@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
 	@echo "Activate conda env: conda activate $(VENV_NAME)"
 	@echo "Install requirements: pip install -U -r $(DIR)/etc/venv/requirements.txt"
