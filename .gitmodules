@@ -10,11 +10,8 @@
 [submodule "lib/federation-service/federation_service"]
 	path = lib/federation-service/federation_service
 	url = https://github.com/CanDIG/federation_service
-[submodule "lib/metadata_service/metadata_service_v2"]
-	path = lib/metadata_service/metadata_service_v2
-	url = https://github.com/CanDIG/metadata_service_v2
-[submodule "lib/cnv_service/candig_cnv_service"]
-	path = lib/cnv_service/candig_cnv_service
+[submodule "lib/cnv-service/candig_cnv_service"]
+	path = lib/cnv-service/candig_cnv_service
 	url = https://github.com/CanDIG/candig_cnv_service
 [submodule "lib/rnaget/rnaget_service"]
 	path = lib/rnaget/rnaget_service

@@ -8,7 +8,7 @@ USER root
 
 RUN apk update
 
-RUN apk add \
+RUN apk add --no-cache \
   autoconf \
   automake \
   make \
@@ -31,6 +31,6 @@ RUN apk add \
 COPY federation_service /app/federation_service
 WORKDIR /app/federation_service
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
- ENTRYPOINT ["python", "-m", "candig_federation"]
+ENTRYPOINT ["python", "-m", "candig_federation"]

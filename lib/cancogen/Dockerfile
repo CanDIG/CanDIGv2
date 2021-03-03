@@ -6,11 +6,6 @@ COPY cancogen_dashboard /app/cancogen_dashboard
 
 WORKDIR /app/cancogen_dashboard
 
-ENV PATH /cancogen_dashboard/node_modules/.bin:$PATH
+RUN apk add --no-cache git && yarn
 
-RUN apk add git
-RUN yarn import
-RUN yarn install
-
-
-ENTRYPOINT ["yarn", "run"]
+ENTRYPOINT ["yarn", "start"]

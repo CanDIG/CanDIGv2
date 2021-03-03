@@ -173,7 +173,6 @@ clean-bin:
 clean-certs:
 	rm -f $(DIR)/tmp/ssl/selfsigned-*
 
-#TODO: test/verify clean-compose works
 #>>>
 # stops and removes docker-compose instances
 # make clean-compose
@@ -181,8 +180,9 @@ clean-certs:
 #<<<
 .PHONY: clean-compose
 clean-compose:
-	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$(MODULE)/docker-compose.yml down --remove-orphans;)
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
+		$(foreach MODULE, $(CANDIG_MODULES), -f $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+		down
 
 #>>>
 # deactivate and remove conda env $VENV_NAME
@@ -315,7 +315,9 @@ clean-volumes:
 #<<<
 .PHONY: compose
 compose:
-	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
+		$(foreach MODULE, $(CANDIG_MODULES), -f $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+		up -d
 
 #>>>
 # deploy/test individual modules using docker-compose
@@ -325,7 +327,7 @@ compose:
 #<<<
 compose-%:
 	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml up -d
+		-f $(DIR)/lib/$*/docker-compose.yml up
 
 #>>>
 # create docker bridge networks
@@ -529,7 +531,7 @@ push-%:
 #<<<
 secret-%:
 	@dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | rev | cut -b 2- | rev > $(DIR)/tmp/secrets/$*
+		| base64 | rev | cut -b 2- | rev | tr -d '\n\r' > $(DIR)/tmp/secrets/$*
 
 #>>>
 # generate root-ca and site ssl certs using openssl
