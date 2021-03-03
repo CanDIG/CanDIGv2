@@ -1,13 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-
-Vagrant.configure("2") do |config|
-  config.vm.box = "debian/buster64"
+Vagrant.configure('2') do |config|
+  config.vm.box = 'debian/buster64'
   config.vm.hostname = 'candig.local'
-  config.vm.network "forwarded_port", guest: 80, host: 80
-  config.vm.network "forwarded_port", guest: 443, host: 443
-  config.vm.synced_folder ENV['cwd'], "/candig"
+  # config.vm.network "forwarded_port", guest: 80, host: 80
+  # config.vm.network "forwarded_port", guest: 443, host: 443
+  config.vm.synced_folder ENV['SHARED_DIR'], '/candig'
 
   config.vm.provider 'virtualbox' do |vb|
     vb.name = 'candig-dev'
@@ -17,7 +16,7 @@ Vagrant.configure("2") do |config|
   end
 
   # run custom shell on provision
-  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+  config.vm.provision 'shell', privileged: false, inline: <<-SHELL
     sudo apt-get update
     sudo apt-get upgrade -y
     sudo apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget curl git
@@ -34,6 +33,7 @@ Vagrant.configure("2") do |config|
     sudo systemctl start docker
     sudo usermod -aG docker $(whoami)
 
+    sudo chown -R $(whoami):$(whoami) /candig
+
   SHELL
 end
-
