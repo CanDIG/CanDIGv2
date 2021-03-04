@@ -6,7 +6,7 @@ Vagrant.configure('2') do |config|
   config.vm.hostname = 'candig.local'
   # config.vm.network "forwarded_port", guest: 80, host: 80
   # config.vm.network "forwarded_port", guest: 443, host: 443
-  config.vm.synced_folder ENV['SHARED_DIR'], '/candig'
+  # config.vm.synced_folder ENV['SHARED_DIR'], '/candig'
 
   config.vm.provider 'virtualbox' do |vb|
     vb.name = 'candig-dev'
@@ -32,8 +32,6 @@ Vagrant.configure('2') do |config|
     sudo systemctl enable docker
     sudo systemctl start docker
     sudo usermod -aG docker $(whoami)
-
-    sudo chown -R $(whoami):$(whoami) /candig
 
   SHELL
 end
