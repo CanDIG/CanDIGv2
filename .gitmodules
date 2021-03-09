@@ -25,6 +25,3 @@
 [submodule "lib/chord-metadata/chord_metadata_service"]
 	path = lib/chord-metadata/chord_metadata_service
 	url = https://github.com/c3g/chord_metadata_service.git
-[submodule "lib/cancogen-dashboard/cancogen_dashboard"]
-	path = lib/cancogen/cancogen_dashboard
-	url = https://github.com/CanDIG/cancogen_dashboard.git
