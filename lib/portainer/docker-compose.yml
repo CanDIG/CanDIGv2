@@ -48,6 +48,7 @@ services:
         - traefik.port=${PORTAINER_UI_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:portainer.${CANDIG_DOMAIN}
+    logging: "${DOCKER_LOG_DRIVER}"
     secrets:
       - source: portainer-user
         target: user_name

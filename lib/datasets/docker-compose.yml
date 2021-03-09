@@ -27,9 +27,5 @@ services:
         - traefik.port=${DATASETS_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:datasets.${CANDIG_DOMAIN}
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+    logging: "${DOCKER_LOG_DRIVER}"
     command: ["--host", "0.0.0.0", "--port", "8880", "--database", "datasets.db", "--logfile", "datasets.log"]

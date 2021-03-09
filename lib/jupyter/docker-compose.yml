@@ -28,6 +28,7 @@ services:
         - traefik.port=${JUPYTER_UI_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:jupyter.${CANDIG_DOMAIN}
+    logging: "${DOCKER_LOG_DRIVER}"
     environment:
       #- NOTEBOOK_DIR=${JUPYTER_NOTEBOOK_DIR}
       #- JPY_PORT=${JUPYTER_UI_PORT}

@@ -27,11 +27,7 @@ services:
         - traefik.port=${CHORD_METADATA_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:chord-metadata.${CANDIG_DOMAIN}
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+    logging: "${DOCKER_LOG_DRIVER}"
     environment:
       - CHORD_URL=${CHORD_METADATA_HOST}
       - CHORD_PERMISSIONS=${CHORD_METADATA_AUTH}
@@ -84,11 +80,7 @@ services:
       #   - traefik.port=${CHORD_METADATA_PORT}
       #   - traefik.docker.network=${DOCKER_NET}
       #   - traefik.frontend.rule=Host:metadata-db.${CANDIG_DOMAIN}
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+    logging: "${DOCKER_LOG_DRIVER}"
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_DB=metadata
