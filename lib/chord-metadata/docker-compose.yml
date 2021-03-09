@@ -7,10 +7,6 @@ services:
       args:
         venv_python: "${VENV_PYTHON}"
     image: ${DOCKER_REGISTRY}/chord-metadata:${CHORD_METADATA_VERSION:-latest}
-    #volumes:
-      #- chord-metadata-data:/data
-      #add volume name to lib/{compose,swarm,kubernetes}
-      #add volume name to docker-volumes in Makefile
     networks:
       - ${DOCKER_NET}
     ports:
