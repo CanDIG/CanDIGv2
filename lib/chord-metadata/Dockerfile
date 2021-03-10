@@ -8,8 +8,7 @@ ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   PYTHONHASHSEED=random \
   PIP_NO_CACHE_DIR=off \
-  PIP_DISABLE_PIP_VERSION_CHECK=on \
-  CRYPTOGRAPHY_DONT_BUILD_RUST=1
+  PIP_DISABLE_PIP_VERSION_CHECK=on
 
 RUN adduser -h /app -D user
 
@@ -30,6 +29,8 @@ RUN apk add --no-cache \
 	make \
 	musl-dev \
 	perl \
+	rust \
+	cargo \
 	postgresql-dev \
 	postgresql-libs \
 	xz-dev \
