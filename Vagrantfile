@@ -19,6 +19,7 @@ Vagrant.configure('2') do |config|
   config.vm.provision 'shell', privileged: false, inline: <<-SHELL
     sudo apt-get update
     sudo apt-get upgrade -y
+    sudo apt-get dist-upgrade -y
 
     sudo apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget curl git
     sudo apt-get install -y libsqlite3-dev libbz2-dev liblzma-dev lzma sqlite3
@@ -35,5 +36,7 @@ Vagrant.configure('2') do |config|
     sudo usermod -aG docker $(whoami)
 
     sudo chown -R $(whoami):$(whoami) /home/vagrant/candig
+    sudo apt-get autoclean
+    sudo apt-get autoremove -y
   SHELL
 end
