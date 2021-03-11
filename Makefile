@@ -510,9 +510,9 @@ minio-secrets:
 
 #<<<
 pull-%:
-	docker-compose \
-		-f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml pull
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+			$(DIR)/lib/$*/docker-compose.yml \
+			| docker-compose -f - pull
 
 #>>>
 # push docker image to $DOCKER_REGISTRY
@@ -521,9 +521,9 @@ pull-%:
 
 #<<<
 push-%:
-	docker-compose \
-		-f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml push
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+			$(DIR)/lib/$*/docker-compose.yml \
+			| docker-compose -f - push
 
 #>>>
 # create a random secret and add it to tmp/secrets/$secret_name

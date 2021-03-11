@@ -1,30 +1,30 @@
 [submodule "lib/toil/toil-docker"]
-	path = lib/toil/toil-docker
-	url = https://github.com/DataBiosphere/toil.git
+  path = lib/toil/toil-docker
+  url = https://github.com/DataBiosphere/toil.git
 [submodule "lib/htsget-server/htsget_app"]
-	path = lib/htsget-server/htsget_app
-	url = https://github.com/canDIG/htsget_app
+  path = lib/htsget-server/htsget_app
+  url = https://github.com/canDIG/htsget_app
 [submodule "lib/drs-server/chord_drs"]
-	path = lib/drs-server/chord_drs
-	url = https://github.com/c3g/chord_drs.git
+  path = lib/drs-server/chord_drs
+  url = https://github.com/c3g/chord_drs.git
 [submodule "lib/federation-service/federation_service"]
-	path = lib/federation-service/federation_service
-	url = https://github.com/CanDIG/federation_service
+  path = lib/federation-service/federation_service
+  url = https://github.com/CanDIG/federation_service
 [submodule "lib/cnv-service/candig_cnv_service"]
-	path = lib/cnv-service/candig_cnv_service
-	url = https://github.com/CanDIG/candig_cnv_service
+  path = lib/cnv-service/candig_cnv_service
+  url = https://github.com/CanDIG/candig_cnv_service
 [submodule "lib/rnaget/rnaget_service"]
-	path = lib/rnaget/rnaget_service
-	url = https://github.com/CanDIG/rnaget_service
+  path = lib/rnaget/rnaget_service
+  url = https://github.com/CanDIG/rnaget_service
 [submodule "lib/datasets/datasets_service"]
-	path = lib/datasets/datasets_service
-	url = https://github.com/CanDIG/datasets_service
+  path = lib/datasets/datasets_service
+  url = https://github.com/CanDIG/datasets_service
 [submodule "lib/authorization/candig_authz_service"]
-	path = lib/authorization/candig_authz_service
-	url = https://github.com/CanDIG/candig_authz_service
+  path = lib/authorization/candig_authz_service
+  url = https://github.com/CanDIG/candig_authz_service
 [submodule "lib/chord-metadata/chord_metadata_service"]
-	path = lib/chord-metadata/chord_metadata_service
-	url = https://github.com/c3g/chord_metadata_service.git
+  path = lib/chord-metadata/chord_metadata_service
+  url = https://github.com/c3g/chord_metadata_service.git
 [submodule "lib/cancogen-dashboard/cancogen_dashboard"]
-        path = lib/cancogen-dashboard/cancogen_dashboard
-        url = https://github.com/CanDIG/cancogen_dashboard.git
+  path = lib/cancogen-dashboard/cancogen_dashboard
+  url = https://github.com/CanDIG/cancogen_dashboard.git
