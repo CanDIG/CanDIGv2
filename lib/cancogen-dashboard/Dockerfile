@@ -6,6 +6,6 @@ COPY cancogen_dashboard /app/cancogen_dashboard
 
 WORKDIR /app/cancogen_dashboard
 
-RUN apk add --no-cache git && yarn
+RUN apk add --no-cache git && yarn set version berry
 
 ENTRYPOINT ["yarn", "start"]

@@ -13,29 +13,29 @@ ENV PYTHONUNBUFFERED=1 \
 RUN adduser -h /app -D user
 
 RUN apk add --no-cache \
-	autoconf \
-	automake \
-	bash \
-	build-base \
-	bzip2-dev \
-	curl \
-	curl-dev \
-	gcc \
-	git \
-	libcurl \
-	libffi-dev \
-	libressl-dev \
-	linux-headers \
-	make \
-	musl-dev \
-	perl \
-	rust \
-	cargo \
-	postgresql-dev \
-	postgresql-libs \
-	xz-dev \
-	yaml-dev \
-	zlib-dev
+  autoconf \
+  automake \
+  bash \
+  build-base \
+  bzip2-dev \
+  curl \
+  curl-dev \
+  gcc \
+  git \
+  libcurl \
+  libffi-dev \
+  libressl-dev \
+  linux-headers \
+  make \
+  musl-dev \
+  perl \
+  rust \
+  cargo \
+  postgresql-dev \
+  postgresql-libs \
+  xz-dev \
+  yaml-dev \
+  zlib-dev
 
 USER user
 WORKDIR /app

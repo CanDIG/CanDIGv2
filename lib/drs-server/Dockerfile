@@ -26,6 +26,8 @@ RUN apk add --no-cache \
 	yaml-dev \
 	libressl-dev \
 	git \
+	rust \
+	cargo \
 	postgresql-dev \
 	libffi-dev
 
