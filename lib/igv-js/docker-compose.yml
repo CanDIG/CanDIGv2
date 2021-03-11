@@ -23,4 +23,4 @@ services:
         - traefik.port=${IGVJS_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:igvjs.${CANDIG_DOMAIN}
-    logging: "${DOCKER_LOG_DRIVER}"
+    logging: *default-logging

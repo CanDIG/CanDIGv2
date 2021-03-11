@@ -26,5 +26,5 @@ services:
         - traefik.port=${AUTHORIZATION_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:authorization.${CANDIG_DOMAIN}
-    logging: "${DOCKER_LOG_DRIVER}"
+    logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "7000"]

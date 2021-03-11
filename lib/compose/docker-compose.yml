@@ -19,17 +19,6 @@ volumes:
   consul-data:
   grafana-data:
 
-x-default-logging:
-  &default
-  driver: json-file
-
-x-fluentd-logging:
-  &fluentd
-  driver: "fluentd"
-  options:
-    tag: docker.{{.Name}}
-    fluentd-async-connect: "true"
-
 secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials

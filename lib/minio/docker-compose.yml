@@ -24,7 +24,7 @@ services:
         - traefik.port=${MINIO_UI_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:minio.${CANDIG_DOMAIN}
-    logging: "${DOCKER_LOG_DRIVER}"
+    logging: *default-logging
     environment:
       - MINIO_REGION=${MINIO_REGION}
       - CANDIG_DOMAIN="${CANDIG_DOMAIN}"

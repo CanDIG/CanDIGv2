@@ -139,9 +139,9 @@ bin-traefik: mkdir
 
 #<<<
 build-%:
-	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose \
-		-f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml build $(BUILD_OPTS)
+	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml $(DIR)/lib/$*/docker-compose.yml \
+		| docker-compose -f - build $(BUILD_OPTS)
 
 #>>>
 # run all cleanup functions
@@ -315,9 +315,9 @@ clean-volumes:
 #<<<
 .PHONY: compose
 compose:
-	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(foreach MODULE, $(CANDIG_MODULES), -f $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-		up -d
+		| docker-compose -f - up -d
 
 #>>>
 # deploy/test individual modules using docker-compose
@@ -326,8 +326,9 @@ compose:
 
 #<<<
 compose-%:
-	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml up
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+		$(DIR)/lib/$*/docker-compose.yml \
+		| docker-compose -f - up
 
 #>>>
 # create docker bridge networks
@@ -575,6 +576,7 @@ stack:
 stack-%:
 	docker stack deploy \
 		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
+		--compose-file $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		--compose-file $(DIR)/lib/$*/docker-compose.yml $(DOCKER_NAMESPACE)
 
 #>>>

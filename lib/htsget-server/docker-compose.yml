@@ -25,5 +25,5 @@ services:
         - traefik.port=${HTSGET_APP_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:htsget-app.${CANDIG_DOMAIN}
-    logging: "${DOCKER_LOG_DRIVER}"
+    logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3000"]

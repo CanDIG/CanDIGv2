@@ -27,5 +27,5 @@ services:
         - traefik.port=${CANDIG_SERVER_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:candig-server.${CANDIG_DOMAIN}
-    logging: "${DOCKER_LOG_DRIVER}"
+    logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3000"]

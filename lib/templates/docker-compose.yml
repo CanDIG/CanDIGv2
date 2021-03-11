@@ -43,7 +43,7 @@ services:
         - traefik.port=${{{service_port}}}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:{{service_name}}.${CANDIG_DOMAIN}
-    logging: "${DOCKER_LOG_DRIVER}"
+    logging: *default-logging
     # WARNING: environment variables are world readable
     # DO NOT pass secrets through here
     environment:

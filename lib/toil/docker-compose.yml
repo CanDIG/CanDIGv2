@@ -35,7 +35,7 @@ services:
       #- AWS_SECRET_ACCESS_KEY=toilsecretkey
       - AWS_DEFAULT_REGION=${MINIO_REGION}
       - AWS_DEFAULT_OUTPUT=json
-    logging: "${DOCKER_LOG_DRIVER}"
+    logging: *default-logging
     secrets:
       - source: minio-access-key
         target: access_key
@@ -84,11 +84,7 @@ services:
         target: secret_key
       - source: aws-credentials
         target: ~/.aws/credentials
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+    logging: *default-logging
     entrypoint: ["mesos-slave"]
     command:
       - --work_dir=/var/lib/mesos

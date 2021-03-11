@@ -25,7 +25,7 @@ services:
         - traefik.port=${FEDERATION_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:federation-service.${CANDIG_DOMAIN}
-    logging: "${DOCKER_LOG_DRIVER}"
+    logging: *default-logging
     secrets:
       - source: federation-peers
         target: /app/federation_service/configs/peers.json

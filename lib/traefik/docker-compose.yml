@@ -33,7 +33,7 @@ services:
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:traefik.${CANDIG_DOMAIN}
         - traefik.http.routers.traefik.rule=Path(/traefik)
-    logging: "${DOCKER_LOG_DRIVER}"
+    logging: *default-logging
     secrets:
       - source: traefik-ssl-key
         target: site.key
