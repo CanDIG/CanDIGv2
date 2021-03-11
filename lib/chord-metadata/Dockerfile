@@ -29,6 +29,8 @@ RUN apk add --no-cache \
 	make \
 	musl-dev \
 	perl \
+	rust \
+	cargo \
 	postgresql-dev \
 	postgresql-libs \
 	xz-dev \
