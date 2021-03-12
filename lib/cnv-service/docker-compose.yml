@@ -3,10 +3,10 @@ version: '3.7'
 services:
   cnv-service:
     build:
-      context: $PWD/lib/cnv_service
+      context: $PWD/lib/cnv-service
       args:
         venv_python: "${VENV_PYTHON}"
-    image: ${DOCKER_REGISTRY}/cnv_service:${CNV_SERVICE_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/cnv-service:${CNV_SERVICE_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     ports:
@@ -25,9 +25,5 @@ services:
         - traefik.port=${CNV_SERVICE_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:cnv-service.${CANDIG_DOMAIN}
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+    logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "8870"]

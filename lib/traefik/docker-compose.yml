@@ -33,16 +33,12 @@ services:
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:traefik.${CANDIG_DOMAIN}
         - traefik.http.routers.traefik.rule=Path(/traefik)
+    logging: *default-logging
     secrets:
       - source: traefik-ssl-key
         target: site.key
       - source: traefik-ssl-crt
         target: site.crt
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
     command:
       - traefik
       - --api

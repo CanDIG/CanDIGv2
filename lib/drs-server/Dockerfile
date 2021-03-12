@@ -8,7 +8,7 @@ USER root
 
 RUN apk update
 
-RUN apk add \
+RUN apk add --no-cache \
 	autoconf \
 	automake \
 	make \
@@ -26,13 +26,15 @@ RUN apk add \
 	yaml-dev \
 	libressl-dev \
 	git \
+	rust \
+	cargo \
 	postgresql-dev \
 	libffi-dev
 
 COPY chord_drs /app/chord_drs
 WORKDIR /app/chord_drs
 
-RUN pip install -r requirements.txt && flask db upgrade
+RUN pip install --no-cache-dir -r requirements.txt && flask db upgrade
 
 # Run the model service server
 ENTRYPOINT ["flask", "run"]

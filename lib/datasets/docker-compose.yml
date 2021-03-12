@@ -6,13 +6,13 @@ services:
       context: $PWD/lib/datasets
       args:
         venv_python: "${VENV_PYTHON}"
-    image: ${DOCKER_REGISTRY}/datasets:${DATASETS_SERVICE_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/datasets:${DATASETS_VERSION:-latest}
     volumes:
       - datasets-data:/app/datasets_service/tmp
     networks:
       - ${DOCKER_NET}
     ports:
-      - "${DATASETS_SERVICE_PORT}:8880"
+      - "${DATASETS_PORT}:8880"
     deploy:
       placement:
         constraints:
@@ -24,12 +24,8 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${DATASETS_SERVICE_PORT}
+        - traefik.port=${DATASETS_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:datasets.${CANDIG_DOMAIN}
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+    logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "8880", "--database", "datasets.db", "--logfile", "datasets.log"]

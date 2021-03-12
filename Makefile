@@ -139,9 +139,9 @@ bin-traefik: mkdir
 
 #<<<
 build-%:
-	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose \
-		-f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml build $(BUILD_OPTS)
+	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml $(DIR)/lib/$*/docker-compose.yml \
+		| docker-compose -f - build $(BUILD_OPTS)
 
 #>>>
 # run all cleanup functions
@@ -173,7 +173,6 @@ clean-bin:
 clean-certs:
 	rm -f $(DIR)/tmp/ssl/selfsigned-*
 
-#TODO: test/verify clean-compose works
 #>>>
 # stops and removes docker-compose instances
 # make clean-compose
@@ -181,8 +180,9 @@ clean-certs:
 #<<<
 .PHONY: clean-compose
 clean-compose:
-	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$(MODULE)/docker-compose.yml down --remove-orphans;)
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
+		$(foreach MODULE, $(CANDIG_MODULES), -f $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+		down
 
 #>>>
 # deactivate and remove conda env $VENV_NAME
@@ -316,6 +316,9 @@ clean-volumes:
 .PHONY: compose
 compose:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
+	# cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+	# 	$(foreach MODULE, $(CANDIG_MODULES), $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+	# 	| docker-compose -f - up
 
 #>>>
 # deploy/test individual modules using docker-compose
@@ -324,8 +327,9 @@ compose:
 
 #<<<
 compose-%:
-	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml up -d
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+		$(DIR)/lib/$*/docker-compose.yml \
+		| docker-compose -f - up -d
 
 #>>>
 # create docker bridge networks
@@ -507,9 +511,9 @@ minio-secrets:
 
 #<<<
 pull-%:
-	docker-compose \
-		-f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml pull
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+			$(DIR)/lib/$*/docker-compose.yml \
+			| docker-compose -f - pull
 
 #>>>
 # push docker image to $DOCKER_REGISTRY
@@ -518,9 +522,9 @@ pull-%:
 
 #<<<
 push-%:
-	docker-compose \
-		-f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml push
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+			$(DIR)/lib/$*/docker-compose.yml \
+			| docker-compose -f - push
 
 #>>>
 # create a random secret and add it to tmp/secrets/$secret_name
@@ -529,7 +533,7 @@ push-%:
 #<<<
 secret-%:
 	@dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | rev | cut -b 2- | rev > $(DIR)/tmp/secrets/$*
+		| base64 | rev | cut -b 2- | rev | tr -d '\n\r' > $(DIR)/tmp/secrets/$*
 
 #>>>
 # generate root-ca and site ssl certs using openssl
@@ -573,6 +577,7 @@ stack:
 stack-%:
 	docker stack deploy \
 		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
+		--compose-file $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		--compose-file $(DIR)/lib/$*/docker-compose.yml $(DOCKER_NAMESPACE)
 
 #>>>

@@ -23,8 +23,4 @@ services:
         - traefik.port=${IGVJS_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:igvjs.${CANDIG_DOMAIN}
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+    logging: *default-logging

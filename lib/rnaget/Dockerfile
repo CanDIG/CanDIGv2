@@ -1,6 +1,6 @@
 ARG venv_python
 
-FROM python:${venv_python}-buster
+FROM python:${venv_python}-slim
 
 LABEL Maintainer="CanDIG Project"
 

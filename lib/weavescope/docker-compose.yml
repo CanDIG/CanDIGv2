@@ -22,6 +22,7 @@ services:
         - traefik.port=${WEAVE_UI_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:weave-app.${CANDIG_DOMAIN}
+    logging: *default-logging
     command:
       - /home/weave/scope
       - --mode=app
@@ -29,7 +30,7 @@ services:
   weave-probe:
     image: weaveworks/scope-swarm-launcher
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - agent-net
     deploy:

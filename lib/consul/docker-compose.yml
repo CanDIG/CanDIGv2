@@ -30,6 +30,7 @@ services:
         - traefik.port=${CONSUL_HTTP_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:consul.${CANDIG_DOMAIN}
+    logging: *default-logging
 
 # TODO: update consul config for server/agent mode
 # TODO: test consul DNS resolution

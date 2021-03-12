@@ -18,21 +18,21 @@ volumes:
   consul-data:
   grafana-data:
 
-configs:
-  chord-metadata-settings:
-    external: true
-  wes-dependency-resolver:
-    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
-
 secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials
+  federation-peers:
+    file: $PWD/tmp/secrets/federation-peers.json
+  federation-services:
+    file: $PWD/tmp/secrets/federation-services.json
   metadata-app-secret:
     file: $PWD/tmp/secrets/metadata-app-secret
   metadata-db-user:
     file: $PWD/tmp/secrets/metadata-db-user
   metadata-db-secret:
     file: $PWD/tmp/secrets/metadata-db-secret
+  metadata-settings:
+    file: $PWD/lib/chord-metadata/settings.py
   minio-access-key:
     file: $PWD/tmp/secrets/minio-access-key
   minio-secret-key:

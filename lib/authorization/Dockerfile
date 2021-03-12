@@ -8,7 +8,7 @@ USER root
 
 RUN apk update
 
-RUN apk add \
+RUN apk add --no-cache \
 	autoconf \
 	automake \
 	make \
@@ -34,7 +34,7 @@ COPY candig_authz_service /app/candig_authz_service
 
 WORKDIR /app/candig_authz_service
 
-RUN pip install -r requirements.txt && \
+RUN pip install --no-cache-dir -r requirements.txt && \
 	pip install git+https://github.com/candig/candig_authz_service.git
 
 COPY access_list.tsv .

@@ -4,7 +4,7 @@ services:
   portainer-agent:
     image: portainer/agent
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/volumes:/var/lib/docker/volumes
     networks:
       - agent-net
@@ -48,6 +48,7 @@ services:
         - traefik.port=${PORTAINER_UI_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:portainer.${CANDIG_DOMAIN}
+    logging: *default-logging
     secrets:
       - source: portainer-user
         target: user_name
