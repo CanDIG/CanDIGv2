@@ -1,11 +1,13 @@
-FROM node:13.12.0-alpine
+FROM node:14.16.0-alpine
 
 LABEL Maintainer="CanDIG Project"
+
+RUN apk add --no-cache git
 
 COPY cancogen_dashboard /app/cancogen_dashboard
 
 WORKDIR /app/cancogen_dashboard
 
-RUN apk add --no-cache git && yarn set version berry
+RUN yarn install && yarn run build
 
 ENTRYPOINT ["yarn", "start"]

@@ -315,9 +315,10 @@ clean-volumes:
 #<<<
 .PHONY: compose
 compose:
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		$(foreach MODULE, $(CANDIG_MODULES), -f $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-		| docker-compose -f - up -d
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
+	# cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+	# 	$(foreach MODULE, $(CANDIG_MODULES), $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+	# 	| docker-compose -f - up
 
 #>>>
 # deploy/test individual modules using docker-compose
@@ -328,7 +329,7 @@ compose:
 compose-%:
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(DIR)/lib/$*/docker-compose.yml \
-		| docker-compose -f - up
+		| docker-compose -f - up -d
 
 #>>>
 # create docker bridge networks
