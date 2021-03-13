@@ -18,7 +18,8 @@ volumes:
   prometheus-data:
   consul-data:
   grafana-data:
-
+  traefik-data:
+  
 secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials

@@ -21,9 +21,10 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${MINIO_UI_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:minio.${CANDIG_DOMAIN}
+        - traefik.http.routers.minio.rule=Host(`minio.${CANDIG_DOMAIN}`)
+        - traefik.http.services.minio.loadbalancer.server.port=${MINIO_UI_PORT}
+        - traefik.http.routers.minio.tls=true
+        - traefik.http.routers.minio.tls.certresolver=letsencrypt
     logging: *default-logging
     environment:
       - MINIO_REGION=${MINIO_REGION}

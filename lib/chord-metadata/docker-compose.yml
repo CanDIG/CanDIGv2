@@ -24,9 +24,10 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${CHORD_METADATA_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:chord-metadata.${CANDIG_DOMAIN}
+        - traefik.http.routers.chord-metadata.rule=Host(`chord-metadata.${CANDIG_DOMAIN}`)
+        - traefik.http.services.chord-metadata.loadbalancer.server.port=${CHORD_METADATA_PORT}
+        - traefik.http.routers.chord-metadata.tls=true
+        - traefik.http.routers.chord-metadata.tls.certresolver=letsencrypt
     logging: *default-logging
     environment:
       - CHORD_URL=${CHORD_METADATA_HOST}

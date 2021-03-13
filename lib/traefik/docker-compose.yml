@@ -7,17 +7,11 @@ services:
       - ${DOCKER_NET}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - traefik-data:/letsencrypt
     ports:
-      - target: 80
-        published: ${TRAEFIK_HTTP_PORT}
-        mode: host
-      - target: 443
-        published: ${TRAEFIK_HTTPS_PORT}
-        mode: host
-      - target: 8080
-        published: ${TRAEFIK_UI_PORT}
-        protocol: tcp
-        mode: ingress
+      - "${TRAEFIK_HTTP_PORT}80"
+      - "${TRAEFIK_HTTPS_PORT}:443"
+      - "${TRAEFIK_UI_PORT}:8080"
     deploy:
       placement:
         constraints:
@@ -27,12 +21,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      labels:
-        - traefik.enable=true
-        - traefik.port=${TRAEFIK_UI_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:traefik.${CANDIG_DOMAIN}
-        - traefik.http.routers.traefik.rule=Path(/traefik)
     logging: *default-logging
     secrets:
       - source: traefik-ssl-key
@@ -40,18 +28,24 @@ services:
       - source: traefik-ssl-crt
         target: site.crt
     command:
-      - traefik
-      - --api
-      - --consul
-      - --consul.endpoint=consul:${CONSUL_HTTP_PORT}
-      - --docker
-      - --docker.domain=${CANDIG_DOMAIN}
-      - --docker.network=${DOCKER_NET}
-      - --docker.swarmmode=${TRAEFIK_SWARM}
-      - --docker.watch
-      - --defaultEntrypoints='http, https'
-      - --entryPoints="Name:http Address::${TRAEFIK_HTTP_PORT} Redirect.EntryPoint:https"
-      - --entryPoints="Name:https Address::${TRAEFIK_HTTPS_PORT} TLS:/run/secrets/site.crt,/run/secrets/site.key"
-      - --kubernetes
-      - --metrics
-      - --metrics.prometheus.buckets=0.1,0.3,1.2,5.0
+      # - --log-level=DEBUG
+      # - --api=true
+      - --api.insecure=true
+      - --metrics=true
+      - --metrics.prometheus=true
+      - --entrypoints.web.address=:${TRAEFIK_HTTP_PORT}
+      # - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      # - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:${TRAEFIK_HTTPS_PORT}
+      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      #- "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - --certificatesresolvers.letsencrypt.acme.email=info@distributedgenomics.ca
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      # - --providers.consul=true
+      # - --providers.consul.endpoints=consul:${CONSUL_HTTP_PORT}
+      - --providers.docker=true
+      - --providers.docker.network=${DOCKER_NET}
+      - --providers.docker.swarmmode=${TRAEFIK_SWARM}
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.usebindportip=true
+      # - --providers.docker.defaultrule=Host(`{{.Name}}.${CANDIG_DOMAIN}`)

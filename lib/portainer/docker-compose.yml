@@ -45,9 +45,10 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${PORTAINER_UI_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:portainer.${CANDIG_DOMAIN}
+        - traefik.http.routers.portainer.rule=Host(`portainer.${CANDIG_DOMAIN}`)
+        - traefik.http.services.portainer.loadbalancer.server.port=${PORTAINER_UI_PORT}
+        - traefik.http.routers.portainer.tls=true
+        - traefik.http.routers.portainer.tls.certresolver=letsencrypt
     logging: *default-logging
     secrets:
       - source: portainer-user

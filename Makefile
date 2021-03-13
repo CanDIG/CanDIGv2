@@ -126,8 +126,9 @@ bin-prometheus:
 
 #<<<
 bin-traefik: mkdir
-	curl -Lo $(DIR)/bin/traefik \
-		https://github.com/containous/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik
+	curl -Lo $(DIR)/bin/traefik.tar.gz \
+		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_$(VENV_OS)_amd64.tar.gz
+	tar -xvzf $(DIR)/bin/traefik.tar.gz -C bin/
 	chmod 755 $(DIR)/bin/traefik
 
 #>>>
@@ -180,9 +181,9 @@ clean-certs:
 #<<<
 .PHONY: clean-compose
 clean-compose:
-	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
-		$(foreach MODULE, $(CANDIG_MODULES), -f $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-		down
+	$(foreach MODULE, $(CANDIG_MODULES), \
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml $(DIR)/lib/$(MODULE)/docker-compose.yml \
+		| docker-compose -f - down;)
 
 #>>>
 # deactivate and remove conda env $VENV_NAME
@@ -395,6 +396,7 @@ docker-volumes:
 	docker volume create portainer-data
 	docker volume create prometheus-data
 	docker volume create toil-jobstore
+	docker volume create traefik-data
 
 #>>>
 # (re)build service image for all modules

@@ -22,9 +22,10 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${FEDERATION_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:federation-service.${CANDIG_DOMAIN}
+        - traefik.http.routers.federation-service.rule=Host(`federation-service.${CANDIG_DOMAIN}`)
+        - traefik.http.services.federation-service.loadbalancer.server.port=${FEDERATION_PORT}
+        - traefik.http.routers.federation-service.tls=true
+        - traefik.http.routers.federation-service.tls.certresolver=letsencrypt
     logging: *default-logging
     secrets:
       - source: federation-peers

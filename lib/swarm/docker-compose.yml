@@ -31,6 +31,8 @@ volumes:
     external: true
   grafana-data:
     external: true
+  traefik-data:
+    external: true
 
 secrets:
   aws-credentials:
