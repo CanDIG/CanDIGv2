@@ -24,7 +24,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.chord-drs.rule=Host(`chord-drs.${CANDIG_DOMAIN}`)
         - traefik.http.services.chord-drs.loadbalancer.server.port=${CHORD_DRS_PORT}
-        - traefik.http.routers.chord-drs.tls=true
+        - traefik.http.routers.chord-drs.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.chord-drs.tls.certresolver=letsencrypt
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "5000"]

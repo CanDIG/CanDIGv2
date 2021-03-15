@@ -47,7 +47,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.portainer.rule=Host(`portainer.${CANDIG_DOMAIN}`)
         - traefik.http.services.portainer.loadbalancer.server.port=${PORTAINER_UI_PORT}
-        - traefik.http.routers.portainer.tls=true
+        - traefik.http.routers.portainer.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.portainer.tls.certresolver=letsencrypt
     logging: *default-logging
     secrets:

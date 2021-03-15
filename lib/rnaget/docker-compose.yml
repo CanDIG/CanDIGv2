@@ -24,7 +24,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.rnaget.rule=Host(`rnaget.${CANDIG_DOMAIN}`)
         - traefik.http.services.rnaget.loadbalancer.server.port=${RNAGET_PORT}
-        - traefik.http.routers.rnaget.tls=true
+        - traefik.http.routers.rnaget.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.rnaget.tls.certresolver=letsencrypt
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3005"]

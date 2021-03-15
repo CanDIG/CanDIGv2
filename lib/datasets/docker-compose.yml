@@ -26,7 +26,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.datasets.rule=Host(`datasets.${CANDIG_DOMAIN}`)
         - traefik.http.services.datasets.loadbalancer.server.port=${DATSETS_PORT}
-        - traefik.http.routers.datasets.tls=true
+        - traefik.http.routers.datasets.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.datasets.tls.certresolver=letsencrypt
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "8880", "--database", "datasets.db", "--logfile", "datasets.log"]

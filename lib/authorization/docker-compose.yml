@@ -25,7 +25,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.authorization.rule=Host(`authorization.${CANDIG_DOMAIN}`)
         - traefik.http.services.authorization.loadbalancer.server.port=${AUTHORIZATION_PORT}
-        - traefik.http.routers.authorization.tls=true
+        - traefik.http.routers.authorization.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.authorization.tls.certresolver=letsencrypt
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "7000"]

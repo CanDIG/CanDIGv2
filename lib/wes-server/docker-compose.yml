@@ -34,7 +34,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.wes-server.rule=Host(`wes-server.${CANDIG_DOMAIN}`)
         - traefik.http.services.wes-server.loadbalancer.server.port=${TOIL_UI_PORT}
-        - traefik.http.routers.wes-server.tls=true
+        - traefik.http.routers.wes-server.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.wes-server.tls.certresolver=letsencrypt
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false

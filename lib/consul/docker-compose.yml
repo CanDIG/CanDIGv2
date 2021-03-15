@@ -29,7 +29,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.consul.rule=Host(`consul.${CANDIG_DOMAIN}`)
         - traefik.http.services.consul.loadbalancer.server.port=${CONSUL_HTTP_PORT}
-        - traefik.http.routers.consul.tls=true
+        - traefik.http.routers.consul.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.consul.tls.certresolver=letsencrypt
     logging: *default-logging
 

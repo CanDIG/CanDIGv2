@@ -26,7 +26,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.candig-server.rule=Host(`candig-server.${CANDIG_DOMAIN}`)
         - traefik.http.services.candig-server.loadbalancer.server.port=${CANDIG_SERVER_PORT}
-        - traefik.http.routers.candig-server.tls=true
+        - traefik.http.routers.candig-server.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.candig-server.tls.certresolver=letsencrypt
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3000"]

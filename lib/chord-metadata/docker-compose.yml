@@ -26,7 +26,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.chord-metadata.rule=Host(`chord-metadata.${CANDIG_DOMAIN}`)
         - traefik.http.services.chord-metadata.loadbalancer.server.port=${CHORD_METADATA_PORT}
-        - traefik.http.routers.chord-metadata.tls=true
+        - traefik.http.routers.chord-metadata.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.chord-metadata.tls.certresolver=letsencrypt
     logging: *default-logging
     environment:

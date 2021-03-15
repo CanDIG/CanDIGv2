@@ -24,7 +24,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.htsget-app.rule=Host(`htsget-app.${CANDIG_DOMAIN}`)
         - traefik.http.services.htsget-app.loadbalancer.server.port=${HTSGET_APP_PORT}
-        - traefik.http.routers.htsget-app.tls=true
+        - traefik.http.routers.htsget-app.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.htsget-app.tls.certresolver=letsencrypt
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3000"]
