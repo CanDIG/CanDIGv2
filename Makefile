@@ -332,7 +332,7 @@ compose-authz-down:
 	# closes primary authn and authz components
 	docker-compose -f $(DIR)/lib/authz/docker-compose.yml down
 	# closes the candig server along with its corresponding arbiter and opa 
-	docker-compose -f $(DIR)/lib/candig_server/docker-compose.yml down
+	docker-compose -f $(DIR)/lib/candig-server/docker-compose.yml down
 
 
 #>>>
@@ -359,7 +359,7 @@ compose-authz-clean: compose-authz-down \
 	# clean opa
 	#sudo rm -r $(DIR)/lib/authz/opa/* & 2>&1
 	# TODO: refactor
-	sudo rm -r $(DIR)/lib/candig_server/authz/opa/* & 2>&1
+	sudo rm -r $(DIR)/lib/candig-server/authz/opa/* & 2>&1
 
 
 #>>>
@@ -379,7 +379,7 @@ compose-authz-setup:
 #<<<
 compose-authz-setup-candig-server: compose-authz-setup \
 	# intended to run candig server alongside the authz module
-	docker-compose -f $(DIR)/lib/candig_server/docker-compose.yml up -d candig-server 2>&1
+	docker-compose -f $(DIR)/lib/candig-server/docker-compose.yml up -d candig-server 2>&1
 
 
 #>>>

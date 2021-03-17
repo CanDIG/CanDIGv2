@@ -34,6 +34,7 @@ lib/authz/tyk/data/*
 lib/authz/opa/*
 
 lib/candig_server/authz/opa/*.rego
+lib/candig-server/authz/opa/*.rego
 
 
 # test metadata
