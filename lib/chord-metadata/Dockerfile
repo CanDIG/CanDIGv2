@@ -4,38 +4,45 @@ FROM python:${venv_python}-alpine
 
 LABEL Maintainer="CanDIG Project"
 
-USER root
+ENV PYTHONUNBUFFERED=1 \
+  PYTHONDONTWRITEBYTECODE=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=off \
+  PIP_DISABLE_PIP_VERSION_CHECK=on
 
-RUN apk update
+RUN adduser -h /app -D user
 
 RUN apk add --no-cache \
-	autoconf \
-	automake \
-	bash \
-	build-base \
-	bzip2-dev \
-	curl \
-	curl-dev \
-	gcc \
-	git \
-	libcurl \
-	libressl-dev \
-	linux-headers \
-	make \
-	musl-dev \
-	perl \
-	postgresql-dev \
-	postgresql-libs \
-	xz-dev \
-	yaml-dev \
-	zlib-dev
+  autoconf \
+  automake \
+  bash \
+  build-base \
+  bzip2-dev \
+  curl \
+  curl-dev \
+  gcc \
+  git \
+  libcurl \
+  libffi-dev \
+  libressl-dev \
+  linux-headers \
+  make \
+  musl-dev \
+  perl \
+  rust \
+  cargo \
+  postgresql-dev \
+  postgresql-libs \
+  xz-dev \
+  yaml-dev \
+  zlib-dev
 
-RUN mkdir /app
+USER user
 WORKDIR /app
 
 COPY chord_metadata_service /app/chord_metadata_service
 
 WORKDIR /app/chord_metadata_service
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 ENTRYPOINT ["python", "manage.py", "runserver"]

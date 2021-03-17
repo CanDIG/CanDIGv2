@@ -32,20 +32,20 @@ volumes:
   grafana-data:
     external: true
 
-configs:
-  chord-metadata-settings:
-    external: true
-  wes-dependency-resolver:
-    external: true
-
 secrets:
   aws-credentials:
+    external: true
+  federation-peers:
+    external: true
+  federation-services:
     external: true
   metadata-app-secret:
     external: true
   metadata-db-user:
     external: true
   metadata-db-secret:
+    external: true
+  metadata-settings:
     external: true
   minio-access-key:
     external: true
@@ -58,4 +58,6 @@ secrets:
   traefik-ssl-key:
     external: true
   traefik-ssl-crt:
+    external: true
+  wes-dependency-resolver:
     external: true

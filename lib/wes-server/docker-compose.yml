@@ -41,21 +41,16 @@ services:
       #- AWS_SECRET_ACCESS_KEY=toilsecretkey
       - AWS_DEFAULT_REGION=${MINIO_REGION}
       - AWS_DEFAULT_OUTPUT=json
-    configs:
+    logging: *default-logging
+    secrets:
       - source: wes-dependency-resolver
         target: /root/dependency_resolver.yml
-    secrets:
       - source: minio-access-key
         target: access_key
       - source: minio-secret-key
         target: secret_key
       - source: aws-credentials
         target: ~/.aws/credentials
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
     entrypoint:
       - ./mesos-wes.sh
       - --backend=${WES_BACKEND}
@@ -94,6 +89,7 @@ services:
       #- AWS_SECRET_ACCESS_KEY=toilsecretkey
       - AWS_DEFAULT_REGION=${MINIO_REGION}
       - AWS_DEFAULT_OUTPUT=json
+    logging: *default-logging
     secrets:
       - source: minio-access-key
         target: access_key
@@ -101,11 +97,6 @@ services:
         target: secret_key
       - source: aws-credentials
         target: ~/.aws/credentials
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
     entrypoint: ["mesos-slave"]
     command:
       - --work_dir=/var/lib/mesos

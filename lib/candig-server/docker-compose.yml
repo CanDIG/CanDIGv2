@@ -3,11 +3,12 @@ version: '3.7'
 services:
   candig-server:
     build:
-      context: . #$PWD/lib/candig_server
+      context: $PWD/lib/candig-server
       args:
         venv_python: '3.6'
-    image: ${DOCKER_REGISTRY}/candig_server:${CANDIG_SERVER_VERSION}
-    container_name: ${CANDIG_SERVER_CONTAINER_NAME}
+        candig_version: ${CANDIG_SERVER_VERSION}
+        candig_ingest: ${CANDIG_INGEST_VERSION}
+    image: ${DOCKER_REGISTRY}/candig-server:${CANDIG_SERVER_VERSION}
     networks:
       - ${DOCKER_NET}
     ports:
@@ -26,11 +27,7 @@ services:
         - traefik.port=${CANDIG_SERVER_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:candig-server.${CANDIG_DOMAIN}
-    # logging:
-    #   driver: "fluentd"
-    #   options:
-    #     tag: docker.{{.Name}}
-    #     fluentd-async-connect: "true"
+    logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3000"]
 
   candig-server-authorization:

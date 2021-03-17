@@ -24,6 +24,7 @@ services:
         - traefik.port=${MINIO_UI_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:minio.${CANDIG_DOMAIN}
+    logging: *default-logging
     environment:
       - MINIO_REGION=${MINIO_REGION}
       - CANDIG_DOMAIN="${CANDIG_DOMAIN}"
@@ -32,11 +33,6 @@ services:
         target: access_key
       - source: minio-secret-key
         target: secret_key
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
     command: ["server", "/data"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]

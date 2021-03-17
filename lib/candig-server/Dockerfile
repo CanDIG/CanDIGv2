@@ -1,6 +1,9 @@
 ARG venv_python
 
-FROM python:${venv_python}-buster
+FROM python:${venv_python}-slim
+
+ARG candig_version
+ARG candig_ingest
 
 LABEL Maintainer="CanDIG Project"
 
@@ -8,7 +11,12 @@ RUN mkdir -p /app/candig-server
 
 WORKDIR /app/candig-server
 
-RUN pip install candig-server==1.4.0 && pip install candig-ingest==1.5.0
+RUN apt-get update && \
+	apt-get install -y build-essential zlib1g-dev wget && \
+	apt-get autoclean && \
+	apt-get autoremove -y
+
+RUN pip install --no-cache-dir candig-server==${candig_version} candig-ingest==${candig_ingest}
 
 # Uncomment below lines if you want to ingest some mock data
 RUN mkdir candig-example-data && \

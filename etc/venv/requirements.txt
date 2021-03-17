@@ -1,4 +1,4 @@
-toil[all]==4.1.0
+toil[all]==5.2.0
 cwltool
 cwltool[deps]
 ga4gh-dos-schemas
