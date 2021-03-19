@@ -59,6 +59,6 @@ TYK_CONTAINERS=$(echo $(docker ps | grep tyk | wc -l))
 echo "Number of tyk containers running: ${TYK_CONTAINERS}"
 if [[ $TYK_CONTAINERS -eq 0 ]]; then
    echo "Booting tyk container!"
-   docker-compose -f ${PWD}/lib/authz/docker-compose.yml up -d tyk
+   docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authz/docker-compose.yml up -d tyk
    sleep 5
 fi

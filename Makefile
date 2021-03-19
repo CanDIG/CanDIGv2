@@ -330,9 +330,10 @@ compose:
 #<<<
 compose-authz-down:
 	# closes primary authn and authz components
-	docker-compose -f $(DIR)/lib/authz/docker-compose.yml down
+	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authz/docker-compose.yml down
 	# closes the candig server along with its corresponding arbiter and opa 
-	docker-compose -f $(DIR)/lib/candig-server/docker-compose.yml down
+	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml down
+	# docker rm candigauth.local --force
 
 
 #>>>
@@ -347,15 +348,15 @@ compose-authz-clean: compose-authz-down \
 	# for it to work, make sure your user does not need a password to use sudo
 
 	# clean keycloak
-	sudo rm -r $(DIR)/lib/authz/keycloak/data/* & 2>&1
+	docker volume rm keycloak-data
+
 	# clean tyk
-	sudo rm -r $(DIR)/lib/authz/tyk/data/* & 2>&1
+	docker volume rm tyk-data
+	docker volume rm tyk-redis-data
+
 	# clean vault
-	sudo rm -r $(DIR)/lib/authz/vault/config/vault-config.json & 2>&1
-	sudo rm -r $(DIR)/lib/authz/vault/data* & 2>&1 
-	sudo rm -r $(DIR)/lib/authz/vault/logs/ & 2>&1 
-	sudo rm -r $(DIR)/lib/authz/vault/policies/ & 2>&1
-	sudo rm -r $(DIR)/lib/authz/vault/keys.txt & 2>&1
+	docker volume rm vault-data
+
 	# clean opa
 	#sudo rm -r $(DIR)/lib/authz/opa/* & 2>&1
 	# TODO: refactor
@@ -379,7 +380,7 @@ compose-authz-setup:
 #<<<
 compose-authz-setup-candig-server: compose-authz-setup \
 	# intended to run candig server alongside the authz module
-	docker-compose -f $(DIR)/lib/candig-server/docker-compose.yml up -d candig-server 2>&1
+	docker-compose -f ${DIR}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml up -d candig-server 2>&1
 
 
 #>>>
@@ -479,6 +480,12 @@ docker-secrets: minio-secrets
 #<<<
 .PHONY: docker-volumes
 docker-volumes:
+	# AuthX --
+	docker volume create keycloak-data
+	docker volume create tyk-data
+	docker volume create tyk-redis-data
+	docker volume create vault-data
+	# --
 	docker volume create consul-data
 	docker volume create datasets-data
 	docker volume create grafana-data

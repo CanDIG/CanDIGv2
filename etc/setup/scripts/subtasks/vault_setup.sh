@@ -21,7 +21,7 @@ echo "Working on vault-config.json .."
 envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-config.json.tpl > ${PWD}/lib/authz/vault/config/vault-config.json
 
 # boot container
-docker-compose -f ${PWD}/lib/authz/docker-compose.yml up -d vault
+docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authz/docker-compose.yml up -d vault
 
 # -- todo: run only if not already initialized --
 # --- temp

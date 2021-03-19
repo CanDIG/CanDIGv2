@@ -8,14 +8,14 @@ services:
     container_name: ${CANDIG_AUTH_CONTAINER_NAME}
     command: ["-b", "${KEYCLOAK_SERVICE_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING"]
     ports:
-       - "${KEYCLOAK_SERVICE_CONTAINER_PORT}:8081"
-    env_file:
-       - ./keycloak/data/secrets.env
+       - "${KEYCLOAK_SERVICE_CONTAINER_PORT}:8080"
+    # env_file:
+    #    - ./keycloak/data/secrets.env
     networks:
       - ${DOCKER_NET}
     volumes:
-      - ./keycloak/data/keycloak-db:/opt/jboss/keycloak/standalone/data
-      - ./keycloak/data/standalone-ha.xml:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
+      - keycloak-data:/opt/jboss/keycloak/standalone
+      #- ./keycloak/data/keycloak-db:/opt/jboss/keycloak/standalone/data
     deploy:
       placement:
         constraints:
@@ -25,6 +25,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+    environment: 
+      - KEYCLOAK_USER=${KC_ADMIN_USER}
+      - KEYCLOAK_PASSWORD=${KC_ADMIN_PW}
 
   tyk:
     container_name: tyk
@@ -43,15 +46,16 @@ services:
         max_attempts: 3
         window: 120s
     volumes:
-      - ./tyk/data/authMiddleware.js:/opt/tyk-gateway/middleware/authMiddleware.js
-      - ./tyk/data/permissionsStoreMiddleware.js:/opt/tyk-gateway/middleware/permissionsStoreMiddleware.js
-      - ./tyk/data/tyk.conf:/opt/tyk-gateway/tyk.conf
-      - ./tyk/data/virtualLogin.js:/opt/tyk-gateway/middleware/virtualLogin.js
-      - ./tyk/data/virtualLogout.js:/opt/tyk-gateway/middleware/virtualLogout.js
-      - ./tyk/data/virtualToken.js:/opt/tyk-gateway/middleware/virtualToken.js
-      - ./tyk/data/api_candig.json:/opt/tyk-gateway/apps/api_candig.json
-      - ./tyk/data/api_auth.json:/opt/tyk-gateway/apps/api_auth.json
-      - ./tyk/data/policies.json:/opt/tyk-gateway/policies/policies.json
+      - tyk-data:/opt/tyk-gateway
+      # - ./tyk/data/authMiddleware.js:/opt/tyk-gateway/middleware/authMiddleware.js
+      # - ./tyk/data/permissionsStoreMiddleware.js:/opt/tyk-gateway/middleware/permissionsStoreMiddleware.js
+      # - ./tyk/data/tyk.conf:/opt/tyk-gateway/tyk.conf
+      # - ./tyk/data/virtualLogin.js:/opt/tyk-gateway/middleware/virtualLogin.js
+      # - ./tyk/data/virtualLogout.js:/opt/tyk-gateway/middleware/virtualLogout.js
+      # - ./tyk/data/virtualToken.js:/opt/tyk-gateway/middleware/virtualToken.js
+      # - ./tyk/data/api_candig.json:/opt/tyk-gateway/apps/api_candig.json
+      # - ./tyk/data/api_auth.json:/opt/tyk-gateway/apps/api_auth.json
+      # - ./tyk/data/policies.json:/opt/tyk-gateway/policies/policies.json
     depends_on:
       - tyk-redis
   tyk-redis:
@@ -60,7 +64,8 @@ services:
     networks:
      - ${DOCKER_NET}
     volumes:
-      - ./tyk/data/redis:/data
+      - tyk-redis-data:/data
+      # - ./tyk/data/redis:/data
     deploy:
       placement:
         constraints:
@@ -80,9 +85,10 @@ services:
     ports:
       - ${VAULT_SERVICE_PORT}:8200
     volumes:
-      - ./vault/policies:/vault/policies
-      - ./vault/data:/vault/data
-      - ./vault/logs:/vault/logs
+      - vault-data:/vault
+      # - ./vault/policies:/vault/policies
+      # - ./vault/data:/vault/data
+      # - ./vault/logs:/vault/logs
     environment:
       - VAULT_ADDR=http://127.0.0.1:8200
     command: server -config=/vault/config/vault-config.json

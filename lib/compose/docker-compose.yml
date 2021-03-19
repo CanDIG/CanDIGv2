@@ -4,6 +4,7 @@ networks:
   bridge:
     external: true
   bridge-net:
+    external: true
   ingress:
   traefik-net:
   agent-net:
@@ -18,6 +19,16 @@ volumes:
   prometheus-data:
   consul-data:
   grafana-data:
+  # AuthX --
+  keycloak-data:
+    external: true
+  tyk-data:
+    external: true
+  tyk-redis-data:
+    external: true
+  vault-data:
+    external: true
+  # --
 
 secrets:
   aws-credentials:
