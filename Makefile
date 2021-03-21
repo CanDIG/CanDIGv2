@@ -333,6 +333,7 @@ compose-authz-down:
 	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authz/docker-compose.yml down
 	# - remove intermittent docker images
 	docker rmi compose_tyk:latest --force
+	docker rmi compose_vault:latest --force
 	docker rmi compose_candig-server-authorization:latest --force
 	
 	# closes the candig server along with its corresponding arbiter and opa 
