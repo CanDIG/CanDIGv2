@@ -45,6 +45,10 @@ echo
 echo "Setting up Arbiters;"
 ${PWD}/etc/setup/scripts/subtasks/arbiter_setup.sh
 
+
+echo "TODO: move temporary authx-component directories (notably keycloak and tyk) to <project>/tmp"
+
+
 echo
 echo "-- AuthZ Setup Done! --"
 echo

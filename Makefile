@@ -331,6 +331,10 @@ compose:
 compose-authz-down:
 	# closes primary authn and authz components
 	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authz/docker-compose.yml down
+	# - remove intermittent docker images
+	docker rmi compose_tyk:latest --force
+	docker rmi compose_candig-server-authorization:latest --force
+	
 	# closes the candig server along with its corresponding arbiter and opa 
 	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml down
 	# docker rm candigauth.local --force
@@ -485,7 +489,10 @@ docker-volumes:
 	docker volume create tyk-data
 	docker volume create tyk-redis-data
 	docker volume create vault-data
+
+	#docker volume create candig-server-authorization-data
 	# --
+
 	docker volume create consul-data
 	docker volume create datasets-data
 	docker volume create grafana-data

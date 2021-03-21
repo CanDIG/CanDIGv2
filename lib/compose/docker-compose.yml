@@ -19,6 +19,7 @@ volumes:
   prometheus-data:
   consul-data:
   grafana-data:
+
   # AuthX --
   keycloak-data:
     external: true
@@ -28,6 +29,9 @@ volumes:
     external: true
   vault-data:
     external: true
+
+  # candig-server-authorization-data:
+  #   external: true
   # --
 
 secrets:

@@ -8,6 +8,7 @@ services:
         venv_python: '3.6'
         candig_version: ${CANDIG_SERVER_VERSION}
         candig_ingest: ${CANDIG_INGEST_VERSION}
+    container_name: ${CANDIG_SERVER_CONTAINER_NAME}
     image: ${DOCKER_REGISTRY}/candig-server:${CANDIG_SERVER_VERSION}
     networks:
       - ${DOCKER_NET}
@@ -31,10 +32,15 @@ services:
     command: ["--host", "0.0.0.0", "--port", "3000"]
 
   candig-server-authorization:
-    image: openpolicyagent/opa:${OPA_VERSION}
+    # image: openpolicyagent/opa:${OPA_VERSION}
+    build:
+      context: ${PWD}/lib/candig-server/authz
+      args: 
+        - BASE_IMAGE=openpolicyagent/opa:${OPA_VERSION}
     container_name: ${CANDIG_SERVER_AUTHORIZATION_CONTAINER_NAME}
-    volumes:
-      - ./authz/opa/policy.rego:/policy.rego
+    # volumes:
+    #   - candig-server-authorization-data:/etc/docker/policies
+    #   #- ./authz/opa/policy.rego:/policy.rego
     networks:
       - ${DOCKER_NET}
     ports:

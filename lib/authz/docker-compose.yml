@@ -31,7 +31,10 @@ services:
 
   tyk:
     container_name: tyk
-    image: tykio/tyk-gateway:${TYK_VERSION}
+    build:
+      context: ${PWD}/lib/authz/tyk
+      args: 
+        - BASE_IMAGE=tykio/tyk-gateway:${TYK_VERSION}
     networks:
       - ${DOCKER_NET}
     ports:
@@ -47,17 +50,9 @@ services:
         window: 120s
     volumes:
       - tyk-data:/opt/tyk-gateway
-      # - ./tyk/data/authMiddleware.js:/opt/tyk-gateway/middleware/authMiddleware.js
-      # - ./tyk/data/permissionsStoreMiddleware.js:/opt/tyk-gateway/middleware/permissionsStoreMiddleware.js
-      # - ./tyk/data/tyk.conf:/opt/tyk-gateway/tyk.conf
-      # - ./tyk/data/virtualLogin.js:/opt/tyk-gateway/middleware/virtualLogin.js
-      # - ./tyk/data/virtualLogout.js:/opt/tyk-gateway/middleware/virtualLogout.js
-      # - ./tyk/data/virtualToken.js:/opt/tyk-gateway/middleware/virtualToken.js
-      # - ./tyk/data/api_candig.json:/opt/tyk-gateway/apps/api_candig.json
-      # - ./tyk/data/api_auth.json:/opt/tyk-gateway/apps/api_auth.json
-      # - ./tyk/data/policies.json:/opt/tyk-gateway/policies/policies.json
     depends_on:
       - tyk-redis
+
   tyk-redis:
     container_name: tyk-redis
     image: redis:${TYK_REDIS_VERSION}
@@ -66,6 +61,8 @@ services:
     volumes:
       - tyk-redis-data:/data
       # - ./tyk/data/redis:/data
+    ports:
+      - "6379:6379"
     deploy:
       placement:
         constraints:

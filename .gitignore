@@ -13,7 +13,7 @@
 /bin
 /etc/ssl/selfsigned-*
 */miniconda3
-
+.vagrant
 
 # vault
 lib/authz/vault/data/*
