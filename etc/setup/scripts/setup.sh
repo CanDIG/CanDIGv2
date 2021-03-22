@@ -1,13 +1,6 @@
 #! /usr/bin/env bash
 set -e
 
-# checks for dev or prod
-if [ $MODE == "" ]
-  then
-    echo "Please check the MODE in your environment varibles!"
-    exit 1
-fi
-
 
 # -- Prerequisites --
 echo
