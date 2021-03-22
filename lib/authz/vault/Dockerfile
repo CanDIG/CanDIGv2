@@ -29,7 +29,7 @@ RUN wget --quiet --output-document=/tmp/vault.zip https://releases.hashicorp.com
 ENV PATH="PATH=$PATH:$PWD"
 
 # add the config file
-COPY ./config/vault-config.json /vault/config/vault-config.json
+COPY ./tmp/vault-config.json /vault/config/vault-config.json
 
 # expose port 8200
 EXPOSE 8200

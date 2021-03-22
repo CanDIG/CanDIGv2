@@ -15,26 +15,18 @@
 */miniconda3
 .vagrant
 
-# vault
-lib/authz/vault/data/*
-lib/authz/vault/logs/*
-lib/authz/vault/policies/*
-lib/authz/vault/config/*
-lib/authz/vault/keys.txt
-
 # keycloak
-lib/authz/keycloak/data/*
+lib/authz/keycloak/tmp/*
 
 # tyk
-lib/authz/tyk/data/*
+lib/authz/tyk/tmp/*
+
+# vault
+lib/authz/vault/tmp/*
 
 # opa 
-# keep global policies
-#lib/opa/*
-lib/authz/opa/*
-
-lib/candig_server/authz/opa/*.rego
-lib/candig-server/authz/opa/*.rego
+lib/candig_server/authz/tmp/*.rego
+lib/candig-server/authz/tmp/*.rego
 
 
 # test metadata

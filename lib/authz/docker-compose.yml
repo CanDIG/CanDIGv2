@@ -2,20 +2,18 @@ version: '3.7'
 
 services:
   keycloak:
-    # build:
-    #   context: ${PWD}/lib/authz/keycloak
-    image: jboss/keycloak:${KEYCLOAK_VERSION}
+    build:
+      context: ${PWD}/lib/authz/keycloak
+      args:
+        - BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
     container_name: ${CANDIG_AUTH_CONTAINER_NAME}
     command: ["-b", "${KEYCLOAK_SERVICE_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING"]
     ports:
        - "${KEYCLOAK_SERVICE_CONTAINER_PORT}:8080"
-    # env_file:
-    #    - ./keycloak/data/secrets.env
     networks:
       - ${DOCKER_NET}
     volumes:
       - keycloak-data:/opt/jboss/keycloak/standalone
-      #- ./keycloak/data/keycloak-db:/opt/jboss/keycloak/standalone/data
     deploy:
       placement:
         constraints:
@@ -60,7 +58,6 @@ services:
      - ${DOCKER_NET}
     volumes:
       - tyk-redis-data:/data
-      # - ./tyk/data/redis:/data
     ports:
       - "6379:6379"
     deploy:
@@ -83,9 +80,6 @@ services:
       - ${VAULT_SERVICE_PORT}:8200
     volumes:
       - vault-data:/vault
-      # - ./vault/policies:/vault/policies
-      # - ./vault/data:/vault/data
-      # - ./vault/logs:/vault/logs
     environment:
       - VAULT_ADDR=http://127.0.0.1:8200
     command: server -config=/vault/config/vault-config.json

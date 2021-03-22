@@ -28,19 +28,15 @@ services:
         - traefik.port=${CANDIG_SERVER_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:candig-server.${CANDIG_DOMAIN}
-    logging: *default-logging
+    #logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3000"]
 
   candig-server-authorization:
-    # image: openpolicyagent/opa:${OPA_VERSION}
     build:
       context: ${PWD}/lib/candig-server/authz
       args: 
         - BASE_IMAGE=openpolicyagent/opa:${OPA_VERSION}
     container_name: ${CANDIG_SERVER_AUTHORIZATION_CONTAINER_NAME}
-    # volumes:
-    #   - candig-server-authorization-data:/etc/docker/policies
-    #   #- ./authz/opa/policy.rego:/policy.rego
     networks:
       - ${DOCKER_NET}
     ports:

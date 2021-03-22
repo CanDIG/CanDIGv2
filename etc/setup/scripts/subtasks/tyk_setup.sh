@@ -7,30 +7,28 @@ set -e
 
 # Load Tyk template (.tpl) files, populate them 
 # with project .env variables, and then spit 
-# them out to ./lib/authz/tyk/data/*
+# them out to ./lib/authz/tyk/tmp/*
 
-mkdir -p ${PWD}/lib/authz/tyk/data
-$PROD_SUDO chown -R $USER ${PWD}/lib/authz/tyk
-$PROD_SUDO chgrp -R $USER ${PWD}/lib/authz/tyk
+mkdir -p ${PWD}/lib/authz/tyk/tmp
 
 # api_auth.json
 echo "Working on api_auth.json .."
-envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/api_auth.json.tpl > ${PWD}/lib/authz/tyk/data/api_auth.json
+envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/api_auth.json.tpl > ${PWD}/lib/authz/tyk/tmp/api_auth.json
 
 # api_candig.json
 echo "Working on api_candig.json .."
-envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/api_candig.json.tpl > ${PWD}/lib/authz/tyk/data/api_candig.json
+envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/api_candig.json.tpl > ${PWD}/lib/authz/tyk/tmp/api_candig.json
 
 # policies.json
 echo "Working on policies.json .."
-envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/policies.json.tpl > ${PWD}/lib/authz/tyk/data/policies.json
+envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/policies.json.tpl > ${PWD}/lib/authz/tyk/tmp/policies.json
 
 # tyk.conf
 echo "Working on tyk.conf .."
-envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/tyk.conf.tpl > ${PWD}/lib/authz/tyk/data/tyk.conf
+envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/tyk.conf.tpl > ${PWD}/lib/authz/tyk/tmp/tyk.conf
 
 echo "Working on authMiddleware.js .."
-envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/authMiddleware.js > ${PWD}/lib/authz/tyk/data/authMiddleware.js
+envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/authMiddleware.js > ${PWD}/lib/authz/tyk/tmp/authMiddleware.js
 
 ## TODO: tyk_analytics.conf , key_request.json.tpl
 
@@ -38,16 +36,16 @@ envsubst < ${PWD}/etc/setup/templates/configs/tyk/confs/authMiddleware.js > ${PW
 # Copy files from template configs
 
 echo "Copying permissionsStoreMiddleware.js .."
-cp ${PWD}/etc/setup/templates/configs/tyk/confs/permissionsStoreMiddleware.js ${PWD}/lib/authz/tyk/data/permissionsStoreMiddleware.js
+cp ${PWD}/etc/setup/templates/configs/tyk/confs/permissionsStoreMiddleware.js ${PWD}/lib/authz/tyk/tmp/permissionsStoreMiddleware.js
 
 echo "Copying virtualLogin.js .."
-cp ${PWD}/etc/setup/templates/configs/tyk/confs/virtualLogin.js ${PWD}/lib/authz/tyk/data/virtualLogin.js
+cp ${PWD}/etc/setup/templates/configs/tyk/confs/virtualLogin.js ${PWD}/lib/authz/tyk/tmp/virtualLogin.js
 
 echo "Copying virtualLogout.js .."
-cp ${PWD}/etc/setup/templates/configs/tyk/confs/virtualLogout.js ${PWD}/lib/authz/tyk/data/virtualLogout.js
+cp ${PWD}/etc/setup/templates/configs/tyk/confs/virtualLogout.js ${PWD}/lib/authz/tyk/tmp/virtualLogout.js
 
 echo "Copying virtualToken.js .."
-cp ${PWD}/etc/setup/templates/configs/tyk/confs/virtualToken.js ${PWD}/lib/authz/tyk/data/virtualToken.js
+cp ${PWD}/etc/setup/templates/configs/tyk/confs/virtualToken.js ${PWD}/lib/authz/tyk/tmp/virtualToken.js
 
 
 echo "-- Tyk Setup Done! --"

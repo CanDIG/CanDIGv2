@@ -29,13 +29,7 @@ usage () {
 
 # Load Keycloak template (.tpl) files, populate them 
 # with project .env variables, and then spit 
-# them out to ./lib/keyclaok/data/*
-
-# mkdir -p ${PWD}/lib/authz/keycloak/data
-# sudo chown $USER ${PWD}/lib/authz/keycloak
-# sudo chown $USER ${PWD}/lib/authz/keycloak/data
-# sudo chgrp $USER ${PWD}/lib/authz/keycloak
-# sudo chown $USER ${PWD}/lib/authz/keycloak/data
+# them out to ./lib/keycloak/tmp/*
 
 # temp: in prod mode, explicitly indicating port 443 breaks vaults internal oidc provider checks.
 # simply remove the ":443 from the authentication services public url for this purpose:
@@ -51,49 +45,25 @@ export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL
 
 
 
-# secrets.env
-# echo "Working on secrets.env .."
-# envsubst < ${PWD}/etc/setup/templates/configs/keycloak/configuration/secrets.env.tpl > ${PWD}/lib/authz/keycloak/data/secrets.env
+# echo 
+mkdir -p ${PWD}/lib/authz/keycloak/tmp
 
-# # echo 
-# mkdir -p ${PWD}/lib/authz/keycloak/data/keycloak-db
-# chmod 777 ${PWD}/lib/authz/keycloak/data/keycloak-db
+# Copy files from template configs
+echo "Copying application-users.properties .."
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-users.properties ${PWD}/lib/authz/keycloak/tmp/application-users.properties
 
+echo "Copying logging.properties .."
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/logging.properties ${PWD}/lib/authz/keycloak/tmp/logging.properties
 
-# # Copy files from template configs
-# echo "Copying application-users.properties .."
-# cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-users.properties ${PWD}/lib/authz/keycloak/data/application-users.properties
+echo "Copying mgmt-users.properties .."
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-users.properties ${PWD}/lib/authz/keycloak/tmp/mgmt-users.properties
 
-# echo "Copying logging.properties .."
-# cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/logging.properties ${PWD}/lib/authz/keycloak/data/logging.properties
+echo "Copying standalone.xml .."
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone.xml ${PWD}/lib/authz/keycloak/tmp/standalone.xml
 
-# echo "Copying mgmt-users.properties .."
-# cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-users.properties ${PWD}/lib/authz/keycloak/data/mgmt-users.properties
+echo "Copying standalone-ha.xml .."
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone-ha.xml ${PWD}/lib/authz/keycloak/tmp/standalone-ha.xml
 
-# echo "Copying standalone.xml .."
-# cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone.xml ${PWD}/lib/authz/keycloak/data/standalone.xml
-
-# echo "Copying standalone-ha.xml .."
-# cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone-ha.xml ${PWD}/lib/authz/keycloak/data/standalone-ha.xml
-
-
-# VOLUME_LOCAL_DIR=/var/lib/docker/volumes/compose_keycloak-data/_data
-# echo "Copying application-users.properties .."
-# sudo cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-users.properties ${VOLUME_LOCAL_DIR}/application-users.properties
-
-# echo "Copying logging.properties .."
-# sudo cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/logging.properties ${VOLUME_LOCAL_DIR}/logging.properties
-
-# echo "Copying mgmt-users.properties .."
-# sudo cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-users.properties ${VOLUME_LOCAL_DIR}/mgmt-users.properties
-
-# echo "Copying standalone.xml .."
-# sudo cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone.xml ${VOLUME_LOCAL_DIR}/standalone.xml
-
-# echo "Copying standalone-ha.xml .."
-# sudo cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone-ha.xml ${VOLUME_LOCAL_DIR}/standalone-ha.xml
-
-# sudo chmod -R 777 ${VOLUME_LOCAL_DIR}
 
 
 # Verify if keycloak container is running

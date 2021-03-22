@@ -332,13 +332,13 @@ compose-authz-down:
 	# closes primary authn and authz components
 	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authz/docker-compose.yml down
 	# - remove intermittent docker images
+	docker rmi compose_keycloak:latest --force
 	docker rmi compose_tyk:latest --force
-	docker rmi compose_vault:latest --force
+	#docker rmi compose_vault:latest --force
 	docker rmi compose_candig-server-authorization:latest --force
 	
 	# closes the candig server along with its corresponding arbiter and opa 
 	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml down
-	# docker rm candigauth.local --force
 
 
 #>>>
@@ -349,8 +349,6 @@ compose-authz-down:
 #	* requires sudo
 #<<<
 compose-authz-clean: compose-authz-down \
-	# needs sudo to run;
-	# for it to work, make sure your user does not need a password to use sudo
 
 	# clean keycloak
 	docker volume rm keycloak-data
@@ -361,11 +359,6 @@ compose-authz-clean: compose-authz-down \
 
 	# clean vault
 	docker volume rm vault-data
-
-	# clean opa
-	#sudo rm -r $(DIR)/lib/authz/opa/* & 2>&1
-	# TODO: refactor
-	sudo rm -r $(DIR)/lib/candig-server/authz/opa/* & 2>&1
 
 
 #>>>

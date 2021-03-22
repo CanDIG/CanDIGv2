@@ -46,7 +46,18 @@ echo "Setting up Arbiters;"
 ${PWD}/etc/setup/scripts/subtasks/arbiter_setup.sh
 
 
-echo "TODO: move temporary authx-component directories (notably keycloak and tyk) to <project>/tmp"
+echo
+echo "Moving temporary files to ./tmp/authz/*"
+mkdir -p ./tmp/authz
+
+cp -r ./lib/authz/keycloak/tmp ./tmp/authz/keycloak/
+cp -r ./lib/authz/tyk/tmp ./tmp/authz/tyk/
+cp -r ./lib/authz/vault/tmp ./tmp/authz/vault/
+
+cp -r ./lib/candig-server/authz/tmp ./tmp/authz/candig-server
+
+rm -rf ./lib/authz/*/tmp 
+rm -rf ./lib/candig-server/authz/tmp 
 
 
 echo
