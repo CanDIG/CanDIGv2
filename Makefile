@@ -469,6 +469,10 @@ docker-secrets: minio-secrets
 	@echo admin > $(DIR)/tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-db-secret
 
+	# AuthN Admin secrets
+	@echo ${KC_ADMIN_USER} > $(DIR)/tmp/secrets/keycloak-admin-user
+	@echo ${KC_ADMIN_PW} > $(DIR)/tmp/secrets/keycloak-admin-password
+
 #>>>
 # create persistant volumes for docker containers
 # make docker-volumes
@@ -734,6 +738,8 @@ swarm-secrets:
 	docker secret create metadata-app-secret $(DIR)/tmp/secrets/metadata-app-secret
 	docker secret create metadata-db-user $(DIR)/tmp/secrets/metadata-db-user
 	docker secret create metadata-db-secret $(DIR)/tmp/secrets/metadata-db-secret
+	docker secret create keycloak-admin-user $(DIR)/tmp/secrets/keycloak-admin-user
+	docker secret create keycloak-admin-password $(DIR)/tmp/secrets/keycloak-admin-password
 
 #>>>
 # create toil images using upstream CanDIG Toil repo

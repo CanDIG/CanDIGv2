@@ -37,6 +37,10 @@ volumes:
 secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials
+  keycloak-admin-user:
+    file: $PWD/tmp/secrets/keycloak-admin-user
+  keycloak-admin-password:
+    file: $PWD/tmp/secrets/keycloak-admin-password
   federation-peers:
     file: $PWD/tmp/secrets/federation-peers.json
   federation-services:

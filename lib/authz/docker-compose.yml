@@ -24,8 +24,14 @@ services:
         max_attempts: 3
         window: 120s
     environment: 
-      - KEYCLOAK_USER=${KC_ADMIN_USER}
-      - KEYCLOAK_PASSWORD=${KC_ADMIN_PW}
+      - KEYCLOAK_USER_FILE=/run/secrets/keycloak-admin-user
+      - KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak-admin-password
+    secrets:
+      - source: keycloak-admin-user
+        target: /run/secrets/keycloak-admin-user
+      - source: keycloak-admin-password
+        target: /run/secrets/keycloak-admin-password
+
 
   tyk:
     container_name: tyk
