@@ -345,8 +345,6 @@ compose-authz-down:
 # dismantle and remove all data of 
 # candig-server prototype instances with authentication
 # and authorization services
-
-#	* requires sudo
 #<<<
 compose-authz-clean: compose-authz-down \
 
