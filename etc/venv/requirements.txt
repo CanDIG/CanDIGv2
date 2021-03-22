@@ -15,3 +15,5 @@ docker>=4.2.1
 python-dotenv
 tox
 connexion
+aiohttp
+requests
