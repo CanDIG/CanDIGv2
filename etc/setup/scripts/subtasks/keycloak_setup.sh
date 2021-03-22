@@ -6,12 +6,12 @@ set -e
 usage () {
   echo "Make sure to set relevant environment variables!"
   echo "Current setup: "
-  echo "KC_ADMIN_USER: ${KC_ADMIN_USER}"
-  echo "KC_ADMIN_PW: ${KC_ADMIN_PW}"
-  echo "KC_TEST_USER: ${KC_TEST_USER}"
-  echo "KC_TEST_PW: ${KC_TEST_PW}"
-  echo "KC_TEST_USER: ${KC_TEST_USER_TWO}"
-  echo "KC_TEST_PW: ${KC_TEST_PW_TWO}"
+  echo "KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}"
+  echo "KEYCLOAK_ADMIN_PW: ${KEYCLOAK_ADMIN_PW}"
+  echo "KEYCLOAK_TEST_USER: ${KEYCLOAK_TEST_USER}"
+  echo "KEYCLOAK_TEST_PW: ${KEYCLOAK_TEST_PW}"
+  echo "KEYCLOAK_TEST_USER: ${KEYCLOAK_TEST_USER_TWO}"
+  echo "KEYCLOAK_TEST_PW: ${KEYCLOAK_TEST_PW_TWO}"
   echo "KEYCLOAK_SERVICE_PUBLIC_URL: ${KEYCLOAK_SERVICE_PUBLIC_URL}"
   echo "KEYCLOAK_SERVICE_PUBLIC_PORT: ${KEYCLOAK_SERVICE_PUBLIC_PORT}"
   echo "CANDIG_AUTH_CONTAINER_NAME: ${CANDIG_AUTH_CONTAINER_NAME}"
@@ -77,11 +77,11 @@ fi
 
 add_users() {
   # CANDIG_AUTH_CONTAINER_NAME is the name of the keycloak server inside the compose network
-  echo "Adding ${KC_TEST_USER}"
-  docker exec ${CANDIG_AUTH_CONTAINER_NAME} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER} -p ${KC_TEST_PW} -r ${KC_REALM}
+  echo "Adding ${KEYCLOAK_TEST_USER}"
+  docker exec ${CANDIG_AUTH_CONTAINER_NAME} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KEYCLOAK_TEST_USER} -p ${KEYCLOAK_TEST_PW} -r ${KEYCLOAK_REALM}
 
-  echo "Adding ${KC_TEST_USER_TWO}"
-  docker exec ${CANDIG_AUTH_CONTAINER_NAME} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KC_TEST_USER_TWO} -p ${KC_TEST_PW_TWO} -r ${KC_REALM}
+  echo "Adding ${KEYCLOAK_TEST_USER_TWO}"
+  docker exec ${CANDIG_AUTH_CONTAINER_NAME} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KEYCLOAK_TEST_USER_TWO} -p ${KEYCLOAK_TEST_PW_TWO} -r ${KEYCLOAK_REALM}
 
   echo "Restarting the keycloak container"
   docker restart ${CANDIG_AUTH_CONTAINER_NAME}
@@ -92,8 +92,8 @@ add_users() {
 get_token () {
   BID=$(curl \
     -d "client_id=admin-cli" \
-    -d "username=$KC_ADMIN_USER" \
-    -d "password=$KC_ADMIN_PW" \
+    -d "username=$KEYCLOAK_ADMIN_USER" \
+    -d "password=$KEYCLOAK_ADMIN_PW" \
     -d "grant_type=password" \
     "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/master/protocol/openid-connect/token" -k 2> /dev/null )
   echo ${BID} | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["access_token"])'
@@ -110,7 +110,7 @@ set_realm () {
   }'
 
   curl \
-    -H "Authorization: bearer ${KC_TOKEN}" \
+    -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X POST -H "Content-Type: application/json"  -d "${JSON}" \
     "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms" -k
 }
@@ -120,7 +120,7 @@ get_realm () {
   realm=$1
 
   curl \
-    -H "Authorization: bearer ${KC_TOKEN}" \
+    -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}" -k | jq .
 }
 
@@ -130,7 +130,7 @@ get_realm_clients () {
   realm=$1
 
   curl \
-    -H "Authorization: bearer ${KC_TOKEN}" \
+    -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients" -k | jq -S .
 }
 
@@ -169,25 +169,25 @@ set_client () {
   }'
   echo $JSON
   curl \
-    -H "Authorization: bearer ${KC_TOKEN}" \
+    -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X POST -H "Content-Type: application/json"  -d "${JSON}" \
     "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients" -k
 }
 
 get_secret () {
-  id=$(curl -H "Authorization: bearer ${KC_TOKEN}" \
-    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients -k 2> /dev/null \
+  id=$(curl -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/clients -k 2> /dev/null \
     | python3 -c 'import json,sys;obj=json.load(sys.stdin); print([l["id"] for l in obj if l["clientId"] ==
-    "'"$KC_CLIENT_ID"'" ][0])')
+    "'"$KEYCLOAK_CLIENT_ID"'" ][0])')
 
-  curl -H "Authorization: bearer ${KC_TOKEN}" \
-    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KC_REALM}/clients/$id/client-secret -k 2> /dev/null |\
+  curl -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/clients/$id/client-secret -k 2> /dev/null |\
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["value"])'
 }
 
 get_public_key () {
   curl \
-    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM} -k 2> /dev/null |\
+    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM} -k 2> /dev/null |\
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["public_key"])'
 }
 ##################################
@@ -195,32 +195,32 @@ get_public_key () {
 # SCRIPT START
 
 echo "-- Starting setup calls to keycloak --"
-echo "$KC_ADMIN_USER $KC_ADMIN_PW $KEYCLOAK_SERVICE_PUBLIC_URL"
+echo "$KEYCLOAK_ADMIN_USER $KEYCLOAK_ADMIN_PW $KEYCLOAK_SERVICE_PUBLIC_URL"
 
-echo ">> Getting KC_TOKEN .."
-KC_TOKEN=$(get_token)
-#echo ">> retrieved KC_TOKEN ${KC_TOKEN}"
+echo ">> Getting KEYCLOAK_TOKEN .."
+KEYCLOAK_TOKEN=$(get_token)
+#echo ">> retrieved KEYCLOAK_TOKEN ${KEYCLOAK_TOKEN}"
 echo ">> .. got it..."
 
-echo ">> Creating Realm ${KC_REALM} .."
-set_realm ${KC_REALM}
+echo ">> Creating Realm ${KEYCLOAK_REALM} .."
+set_realm ${KEYCLOAK_REALM}
 echo ">> .. created..."
 
 
-echo ">> Setting client KC_CLIENT_ID .."
-set_client ${KC_REALM} ${KC_CLIENT_ID} "${TYK_LISTEN_PATH}" ${KC_LOGIN_REDIRECT_PATH}
+echo ">> Setting client KEYCLOAK_CLIENT_ID .."
+set_client ${KEYCLOAK_REALM} ${KEYCLOAK_CLIENT_ID} "${TYK_LISTEN_PATH}" ${KEYCLOAK_LOGIN_REDIRECT_PATH}
 echo ">> .. set..."
 
-echo ">> Getting KC_SECRET .."
-export KC_SECRET=$(get_secret  ${KC_REALM})
-echo "** Retrieved KC_SECRET as ${KC_SECRET} **"
+echo ">> Getting KEYCLOAK_SECRET .."
+export KEYCLOAK_SECRET=$(get_secret  ${KEYCLOAK_REALM})
+echo "** Retrieved KEYCLOAK_SECRET as ${KEYCLOAK_SECRET} **"
 echo ">> .. got it..."
 echo
 
 
-echo ">> Getting KC_PUBLIC_KEY .."
-export KC_PUBLIC_KEY=$(get_public_key  ${KC_REALM})
-echo "** Retrieved KC_PUBLIC_KEY as ${KC_PUBLIC_KEY} **"
+echo ">> Getting KEYCLOAK_PUBLIC_KEY .."
+export KEYCLOAK_PUBLIC_KEY=$(get_public_key  ${KEYCLOAK_REALM})
+echo "** Retrieved KEYCLOAK_PUBLIC_KEY as ${KEYCLOAK_PUBLIC_KEY} **"
 echo ">> .. got it..."
 echo
 

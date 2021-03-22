@@ -85,7 +85,7 @@ docker exec vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [\
 # user claims
 echo
 echo ">> setting up user claims"
-docker exec vault sh -c "vault write auth/jwt/role/test-role user_claim=preferred_username bound_audiences=${KC_CLIENT_ID} role_type=jwt policies=tyk ttl=1h"
+docker exec vault sh -c "vault write auth/jwt/role/test-role user_claim=preferred_username bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=tyk ttl=1h"
 
 # configure jwt
 echo
@@ -96,26 +96,26 @@ docker exec vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${TEMP
 
 # create users
 echo
-echo ">> creating user $KC_TEST_USER"
+echo ">> creating user $KEYCLOAK_TEST_USER"
 
-export TEMPLATE_USER=$(echo $KC_TEST_USER)
+export TEMPLATE_USER=$(echo $KEYCLOAK_TEST_USER)
 export TEMPLATE_DATASET_PERMISSIONS=4
 TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-entity-entitlements.json.tpl)
 
-test_user_output=$(docker exec vault sh -c "echo '${TEST_USER_PERMISSIONS_DATASTRUCTURE}' > ${KC_TEST_USER}.json; vault write identity/entity @${KC_TEST_USER}.json; rm ${KC_TEST_USER}.json;")
+test_user_output=$(docker exec vault sh -c "echo '${TEST_USER_PERMISSIONS_DATASTRUCTURE}' > ${KEYCLOAK_TEST_USER}.json; vault write identity/entity @${KEYCLOAK_TEST_USER}.json; rm ${KEYCLOAK_TEST_USER}.json;")
 
 ENTITY_ID=$(echo "${test_user_output}" | grep id | awk '{print $2}')
 echo ">>> found entity id : ${ENTITY_ID}"
 
 
 echo
-echo ">> creating user $KC_TEST_USER_TWO"
+echo ">> creating user $KEYCLOAK_TEST_USER_TWO"
 
-export TEMPLATE_USER=$(echo $KC_TEST_USER_TWO)
+export TEMPLATE_USER=$(echo $KEYCLOAK_TEST_USER_TWO)
 export TEMPLATE_DATASET_PERMISSIONS=1
 TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-entity-entitlements.json.tpl)
 
-test_user_output_two=$(docker exec vault sh -c "echo '${TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE}' > ${KC_TEST_USER_TWO}.json; vault write identity/entity @${KC_TEST_USER_TWO}.json; rm ${KC_TEST_USER_TWO}.json;")
+test_user_output_two=$(docker exec vault sh -c "echo '${TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE}' > ${KEYCLOAK_TEST_USER_TWO}.json; vault write identity/entity @${KEYCLOAK_TEST_USER_TWO}.json; rm ${KEYCLOAK_TEST_USER_TWO}.json;")
 
 ENTITY_ID_TWO=$(echo "${test_user_output_two}" | grep id | awk '{print $2}')
 echo ">>> found entity id 2: ${ENTITY_ID_TWO}"
@@ -124,7 +124,7 @@ echo ">>> found entity id 2: ${ENTITY_ID_TWO}"
 
 # setup aliases
 echo
-echo ">> setting up alias for $KC_TEST_USER"
+echo ">> setting up alias for $KEYCLOAK_TEST_USER"
 AUTH_LIST_OUTPUT=$(docker exec vault sh -c "vault auth list -format=json")
 
 JWT_ACCESSOR_VALUE=$(echo "${AUTH_LIST_OUTPUT}" | grep accessor | head -1 | awk '{print $2}' | tr -d '"' | tr -d ',' | tr -d '[:space:]')
@@ -132,20 +132,20 @@ echo ">>> found jwt accessor : ${JWT_ACCESSOR_VALUE}"
 
 echo
 echo ">> writing alias"
-# echo "using ${KC_TEST_USER}"
+# echo "using ${KEYCLOAK_TEST_USER}"
 # echo "using ${JWT_ACCESSOR_VALUE}"
 # echo "using ${ENTITY_ID}"
-STRUCTURE="{\\\"name\\\":\\\"${KC_TEST_USER}\\\",\\\"mount_accessor\\\":\\\"${JWT_ACCESSOR_VALUE}\\\",\\\"canonical_id\\\":\\\"${ENTITY_ID}\\\"}"
+STRUCTURE="{\\\"name\\\":\\\"${KEYCLOAK_TEST_USER}\\\",\\\"mount_accessor\\\":\\\"${JWT_ACCESSOR_VALUE}\\\",\\\"canonical_id\\\":\\\"${ENTITY_ID}\\\"}"
 docker exec vault sh -c "echo ${STRUCTURE} | tr -d '[:space:]' > alias.json; echo 'catting alias.json'; cat alias.json ; vault write identity/entity-alias @alias.json;" # rm alias.json;"
 
-STRUCTURE="{\\\"name\\\":\\\"${KC_TEST_USER_TWO}\\\",\\\"mount_accessor\\\":\\\"${JWT_ACCESSOR_VALUE}\\\",\\\"canonical_id\\\":\\\"${ENTITY_ID_TWO}\\\"}"
+STRUCTURE="{\\\"name\\\":\\\"${KEYCLOAK_TEST_USER_TWO}\\\",\\\"mount_accessor\\\":\\\"${JWT_ACCESSOR_VALUE}\\\",\\\"canonical_id\\\":\\\"${ENTITY_ID_TWO}\\\"}"
 docker exec vault sh -c "echo ${STRUCTURE} | tr -d '[:space:]' > alias.json; echo 'catting alias.json'; cat alias.json ; vault write identity/entity-alias @alias.json;" # rm alias.json;"
 
 
 # enable identity tokens
 echo
 echo ">> enabling identity tokens"
-docker exec vault sh -c "echo '{\"rotation_period\":\"24h\",\"allowed_client_ids\":[\"${KC_CLIENT_ID}\"]}' > test-key.json; vault write identity/oidc/key/test-key @test-key.json; rm test-key.json;"
+docker exec vault sh -c "echo '{\"rotation_period\":\"24h\",\"allowed_client_ids\":[\"${KEYCLOAK_CLIENT_ID}\"]}' > test-key.json; vault write identity/oidc/key/test-key @test-key.json; rm test-key.json;"
 echo
 
 

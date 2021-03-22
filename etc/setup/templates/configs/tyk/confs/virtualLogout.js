@@ -14,8 +14,8 @@ logoutHelper = {
     },
 
     logoutUrl: function(spec) {
-        var url = spec.config_data.KC_SERVER
-        url += '/auth/realms/' + spec.config_data.KC_REALM
+        var url = spec.config_data.KEYCLOAK_SERVER
+        url += '/auth/realms/' + spec.config_data.KEYCLOAK_REALM
         url += '/protocol/openid-connect/logout?redirect_uri=' + spec.config_data.TYK_SERVER + '/auth/login'
         return url
     }

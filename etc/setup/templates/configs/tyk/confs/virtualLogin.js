@@ -13,12 +13,12 @@ var loginHelper = {
     },
 
     loginRedirect: function(spec, app) {
-        var url = spec.config_data.KC_SERVER
-        url += '/auth/realms/' + spec.config_data.KC_REALM
-        url += '/protocol/openid-connect/auth?scope=' + spec.config_data.KC_SCOPE
-        url += '&response_type=' + spec.config_data.KC_RTYPE
-        url += '&client_id=' + spec.config_data.KC_CLIENT_ID
-        url += '&response_mode=' + spec.config_data.KC_RMODE
+        var url = spec.config_data.KEYCLOAK_SERVER
+        url += '/auth/realms/' + spec.config_data.KEYCLOAK_REALM
+        url += '/protocol/openid-connect/auth?scope=' + spec.config_data.KEYCLOAK_SCOPE
+        url += '&response_type=' + spec.config_data.KEYCLOAK_RTYPE
+        url += '&client_id=' + spec.config_data.KEYCLOAK_CLIENT_ID
+        url += '&response_mode=' + spec.config_data.KEYCLOAK_RMODE
         url += '&redirect_uri=' + spec.config_data.TYK_SERVER + '/auth/login'
 
         redirectBody = {
@@ -65,8 +65,8 @@ var loginHelper = {
             "Headers": {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
-            "Domain": spec.config_data.KC_SERVER,
-            "Resource": "/auth/realms/" + spec.config_data.KC_REALM + "/protocol/openid-connect/token"
+            "Domain": spec.config_data.KEYCLOAK_SERVER,
+            "Resource": "/auth/realms/" + spec.config_data.KEYCLOAK_REALM + "/protocol/openid-connect/token"
         }
         return loginHelper.handleTykRequest(tokenRequest)
     }
@@ -82,8 +82,8 @@ function loginHandler(request, session, spec) {
         var responseObject = loginHelper.loginRedirect(spec, app)
     } else {
         body = {
-            "client_id": spec.config_data.KC_CLIENT_ID,
-            "client_secret": spec.config_data.KC_SECRET,
+            "client_id": spec.config_data.KEYCLOAK_CLIENT_ID,
+            "client_secret": spec.config_data.KEYCLOAK_SECRET,
             "grant_type": "authorization_code",
             "redirect_uri": spec.config_data.TYK_SERVER + '/auth/login',
             "code": code[0]

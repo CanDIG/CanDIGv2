@@ -40,7 +40,7 @@
         "extended_paths": {
             "ignored": [
                 {
-                    "path": "${KC_LOGIN_REDIRECT_PATH}",
+                    "path": "${KEYCLOAK_LOGIN_REDIRECT_PATH}",
                     "method_actions": {
                         "GET": {
                             "action": "no_action",
@@ -101,9 +101,9 @@
 	"segregate_by_client": false,
 	"providers": [
             {
-                "issuer": "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM}",
+                "issuer": "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}",
                 "client_ids": {
-                    "${KC_CLIENT_ID_64}": "${TYK_POLICY_ID}"
+                    "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
                 }
             }
         ]

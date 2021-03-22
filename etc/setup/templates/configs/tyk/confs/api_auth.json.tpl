@@ -5,14 +5,14 @@
     "strip_auth_data": false,
     
     "config_data": {
-      "KC_RTYPE": "code",
-      "KC_REALM": "${KC_REALM}",
-      "KC_CLIENT_ID": "${KC_CLIENT_ID}",
-      "KC_SERVER": "${KEYCLOAK_SERVICE_PUBLIC_URL}",
-      "KC_SCOPE": "openid+email",
-      "KC_RMODE": "query",
+      "KEYCLOAK_RTYPE": "code",
+      "KEYCLOAK_REALM": "${KEYCLOAK_REALM}",
+      "KEYCLOAK_CLIENT_ID": "${KEYCLOAK_CLIENT_ID}",
+      "KEYCLOAK_SERVER": "${KEYCLOAK_SERVICE_PUBLIC_URL}",
+      "KEYCLOAK_SCOPE": "openid+email",
+      "KEYCLOAK_RMODE": "query",
       "USE_SSL": false,
-      "KC_SECRET": "${KC_SECRET}",
+      "KEYCLOAK_SECRET": "${KEYCLOAK_SECRET}",
       "TYK_SERVER": "${CANDIG_PUBLIC_URL}",
       "MAX_TOKEN_AGE": 43200
     },

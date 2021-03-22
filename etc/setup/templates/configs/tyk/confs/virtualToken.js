@@ -19,8 +19,8 @@ tokenHelper = {
             "Headers": {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
-            "Domain": spec.config_data.KC_SERVER,
-            "Resource": "/auth/realms/" + spec.config_data.KC_REALM + "/protocol/openid-connect/token"
+            "Domain": spec.config_data.KEYCLOAK_SERVER,
+            "Resource": "/auth/realms/" + spec.config_data.KEYCLOAK_REALM + "/protocol/openid-connect/token"
         }
         return tokenHelper.handleTykRequest(tokenRequest)
     }
@@ -37,8 +37,8 @@ function tokenHandler(request, session, spec) {
             "password": password,
             "grant_type": "password",
             "scope": "openid",
-            "client_id": spec.config_data.KC_CLIENT_ID,
-            "client_secret": spec.config_data.KC_SECRET
+            "client_id": spec.config_data.KEYCLOAK_CLIENT_ID,
+            "client_secret": spec.config_data.KEYCLOAK_SECRET
         }
 
         var decodedBody = tokenHelper.getOIDCToken(body, spec)

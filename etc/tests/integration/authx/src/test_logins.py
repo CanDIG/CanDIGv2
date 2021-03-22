@@ -34,8 +34,8 @@ class TestLogins():
         self.driver.get(self.candig_url)
 
         # credentials
-        u1 = os.environ["KC_TEST_USER"]
-        p1 = os.environ["KC_TEST_PW"]
+        u1 = os.environ["KEYCLOAK_TEST_USER"]
+        p1 = os.environ["KEYCLOAK_TEST_PW"]
         login(self.driver, u1, p1)
         
         time.sleep(self.debug_pause_time_seconds)

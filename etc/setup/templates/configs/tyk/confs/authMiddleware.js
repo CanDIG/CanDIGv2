@@ -2,10 +2,10 @@
 
 var authMiddleware = new TykJS.TykMiddleware.NewMiddleware({});
 
-var iss = "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM}"
-var aud = "${KC_CLIENT_ID}"
+var iss = "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
+var aud = "${KEYCLOAK_CLIENT_ID}"
 
-var full_authn_pk="-----BEGIN PUBLIC KEY-----\n${KC_PUBLIC_KEY}\n-----END PUBLIC KEY-----"
+var full_authn_pk="-----BEGIN PUBLIC KEY-----\n${KEYCLOAK_PUBLIC_KEY}\n-----END PUBLIC KEY-----"
 
 
 

@@ -11,8 +11,8 @@ mkdir -p ${PWD}/lib/authentication/tyk
 
 mkdir -p ${PWD}/lib/authorization/vault
 
-export KC_CLIENT_ID_64=$(echo -n ${KC_CLIENT_ID} | base64)
-echo "Generated KC_CLIENT_ID_64 as ${KC_CLIENT_ID_64}"
+export KEYCLOAK_CLIENT_ID_64=$(echo -n ${KEYCLOAK_CLIENT_ID} | base64)
+echo "Generated KEYCLOAK_CLIENT_ID_64 as ${KEYCLOAK_CLIENT_ID_64}"
 
 echo "- Done with prereqs.. -"
 # --

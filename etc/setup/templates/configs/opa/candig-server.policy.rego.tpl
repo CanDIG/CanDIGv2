@@ -6,11 +6,11 @@ now := time.now_ns()/1000000000
 
 default allowed = false
 
-default iss = "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KC_REALM}"
-default aud = "${KC_CLIENT_ID}"
+default iss = "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
+default aud = "${KEYCLOAK_CLIENT_ID}"
 
 default full_authn_pk=`-----BEGIN PUBLIC KEY-----
-${KC_PUBLIC_KEY}
+${KEYCLOAK_PUBLIC_KEY}
 -----END PUBLIC KEY-----`
 
 #default full_authz_pk=`-----BEGIN PUBLIC KEY-----

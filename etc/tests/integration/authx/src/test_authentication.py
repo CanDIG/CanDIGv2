@@ -68,8 +68,8 @@ class TestAuthentication():
         self.driver.get(self.candig_url)
 
         # credentials
-        u1 = os.environ["KC_TEST_USER"]
-        p1 = os.environ["KC_TEST_PW"]
+        u1 = os.environ["KEYCLOAK_TEST_USER"]
+        p1 = os.environ["KEYCLOAK_TEST_PW"]
         login(self.driver, u1, p1)
 
         # get session_id, aka: authN token
@@ -136,8 +136,8 @@ class TestAuthentication():
         self.driver.get(self.candig_url)
 
         # credentials
-        u1 = os.environ["KC_TEST_USER"]
-        p1 = os.environ["KC_TEST_PW"]
+        u1 = os.environ["KEYCLOAK_TEST_USER"]
+        p1 = os.environ["KEYCLOAK_TEST_PW"]
         login(self.driver, u1, p1)
 
         # get session_id, aka: authN token
@@ -188,8 +188,8 @@ class TestAuthentication():
         self.driver.get(self.candig_url)
 
         # credentials
-        u1 = os.environ["KC_TEST_USER"]
-        p1 = os.environ["KC_TEST_PW"]
+        u1 = os.environ["KEYCLOAK_TEST_USER"]
+        p1 = os.environ["KEYCLOAK_TEST_PW"]
         login(self.driver, u1, p1)
 
         # get session_id, aka: authN token
@@ -233,8 +233,8 @@ class TestAuthentication():
         self.driver.get(self.candig_url)
 
         # credentials
-        u1 = os.environ["KC_TEST_USER"]
-        p1 = os.environ["KC_TEST_PW"]
+        u1 = os.environ["KEYCLOAK_TEST_USER"]
+        p1 = os.environ["KEYCLOAK_TEST_PW"]
         login(self.driver, u1, p1)
 
         # get session_id, aka: authN token

@@ -333,8 +333,10 @@ compose-authx-down:
 	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authentication/docker-compose.yml down
 	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authorization/docker-compose.yml down
 	# - remove intermittent docker images
+	# -- authentication
 	docker rmi compose_keycloak:latest --force
 	docker rmi compose_tyk:latest --force
+	# -- authorization
 	#docker rmi compose_vault:latest --force
 	docker rmi compose_candig-server-authorization:latest --force
 	
@@ -471,8 +473,8 @@ docker-secrets: minio-secrets
 	$(MAKE) secret-metadata-db-secret
 
 	# AuthN Admin secrets
-	@echo ${KC_ADMIN_USER} > $(DIR)/tmp/secrets/keycloak-admin-user
-	@echo ${KC_ADMIN_PW} > $(DIR)/tmp/secrets/keycloak-admin-password
+	@echo ${KEYCLOAK_ADMIN_USER} > $(DIR)/tmp/secrets/keycloak-admin-user
+	@echo ${KEYCLOAK_ADMIN_PW} > $(DIR)/tmp/secrets/keycloak-admin-password
 
 #>>>
 # create persistant volumes for docker containers
