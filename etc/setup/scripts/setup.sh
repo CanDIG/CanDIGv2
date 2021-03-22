@@ -48,13 +48,13 @@ ${PWD}/etc/setup/scripts/subtasks/arbiter_setup.sh
 
 echo
 echo "Moving temporary files to ./tmp/authz/*"
-mkdir -p ./tmp/authz
+mkdir -p ./tmp/configs/authz
 
-cp -r ./lib/authz/keycloak/tmp ./tmp/authz/keycloak/
-cp -r ./lib/authz/tyk/tmp ./tmp/authz/tyk/
-cp -r ./lib/authz/vault/tmp ./tmp/authz/vault/
+cp -r ./lib/authz/keycloak/tmp ./tmp/configs/authz/keycloak/
+cp -r ./lib/authz/tyk/tmp ./tmp/configs/authz/tyk/
+cp -r ./lib/authz/vault/tmp ./tmp/configs/authz/vault/
 
-cp -r ./lib/candig-server/authz/tmp ./tmp/authz/candig-server
+cp -r ./lib/candig-server/authz/tmp ./tmp/configs/authz/candig-server
 
 rm -rf ./lib/authz/*/tmp 
 rm -rf ./lib/candig-server/authz/tmp 
