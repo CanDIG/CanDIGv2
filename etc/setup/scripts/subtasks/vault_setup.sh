@@ -12,14 +12,14 @@ set -e
 # https://stackoverflow.com/questions/35703317/docker-exec-write-text-to-file-in-container
 # https://www.vaultproject.io/api-docs/secret/identity/entity#batch-delete-entities
 
-mkdir -p ${PWD}/lib/authz/vault/tmp
+mkdir -p ${PWD}/lib/authorization/vault/tmp
 
 # vault-config.json
 echo "Working on vault-config.json .."
-envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-config.json.tpl > ${PWD}/lib/authz/vault/tmp/vault-config.json
+envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-config.json.tpl > ${PWD}/lib/authorization/vault/tmp/vault-config.json
 
 # boot container
-docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authz/docker-compose.yml up -d vault
+docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authorization/docker-compose.yml up -d vault
 
 # -- todo: run only if not already initialized --
 # --- temp
@@ -46,13 +46,13 @@ echo "found key5: ${key_5}"
 echo "found root: ${key_root}"
 
 # save keys
-touch ${PWD}/lib/authz/vault/tmp/keys.txt
-echo -e "key1: ${key_1}" >> ${PWD}/lib/authz/vault/tmp/keys.txt
-echo -e "key2: ${key_2}" >> ${PWD}/lib/authz/vault/tmp/keys.txt
-echo -e "key3: ${key_3}" >> ${PWD}/lib/authz/vault/tmp/keys.txt
-echo -e "key4: ${key_4}" >> ${PWD}/lib/authz/vault/tmp/keys.txt
-echo -e "key5: ${key_5}" >> ${PWD}/lib/authz/vault/tmp/keys.txt
-echo -e "root: ${key_root}" >> ${PWD}/lib/authz/vault/tmp/keys.txt
+touch ${PWD}/lib/authorization/vault/tmp/keys.txt
+echo -e "key1: ${key_1}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
+echo -e "key2: ${key_2}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
+echo -e "key3: ${key_3}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
+echo -e "key4: ${key_4}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
+echo -e "key5: ${key_5}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
+echo -e "root: ${key_root}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
 
 
 echo ">> attempting to automatically unseal vault:"

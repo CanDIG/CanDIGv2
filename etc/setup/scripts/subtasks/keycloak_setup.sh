@@ -39,23 +39,23 @@ export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL
 
 
 # echo 
-mkdir -p ${PWD}/lib/authz/keycloak/tmp
+mkdir -p ${PWD}/lib/authentication/keycloak/tmp
 
 # Copy files from template configs
 echo "Copying application-users.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-users.properties ${PWD}/lib/authz/keycloak/tmp/application-users.properties
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-users.properties ${PWD}/lib/authentication/keycloak/tmp/application-users.properties
 
 echo "Copying logging.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/logging.properties ${PWD}/lib/authz/keycloak/tmp/logging.properties
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/logging.properties ${PWD}/lib/authentication/keycloak/tmp/logging.properties
 
 echo "Copying mgmt-users.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-users.properties ${PWD}/lib/authz/keycloak/tmp/mgmt-users.properties
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-users.properties ${PWD}/lib/authentication/keycloak/tmp/mgmt-users.properties
 
 echo "Copying standalone.xml .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone.xml ${PWD}/lib/authz/keycloak/tmp/standalone.xml
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone.xml ${PWD}/lib/authentication/keycloak/tmp/standalone.xml
 
 echo "Copying standalone-ha.xml .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone-ha.xml ${PWD}/lib/authz/keycloak/tmp/standalone-ha.xml
+cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone-ha.xml ${PWD}/lib/authentication/keycloak/tmp/standalone-ha.xml
 
 
 
@@ -64,7 +64,7 @@ KEYCLOAK_CONTAINERS=$(echo $(docker ps | grep keycloak | wc -l))
 echo "Number of keycloak containers running: ${KEYCLOAK_CONTAINERS}"
 if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
    echo "Booting keycloak container!"
-   docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authz/docker-compose.yml up -d keycloak
+   docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authentication/docker-compose.yml up -d keycloak
    sleep 5
  # ${CANDIG_AUTH_CONTAINER_NAME}
    echo ">> .. waiting for keycloak to start..."

@@ -21,7 +21,7 @@ def setup(request):
     
     if "login" in testname:
         driverenv = os.environ["DRIVER_ENV"]
-        common_path = f'{os.getcwd()}/etc/tests/integration/authz'
+        common_path = f'{os.getcwd()}/etc/tests/integration/authx'
 
         if driverenv=="firefox":
             # Firefox

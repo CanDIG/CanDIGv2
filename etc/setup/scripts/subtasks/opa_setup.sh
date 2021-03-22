@@ -3,11 +3,11 @@ set -e
 
 # This script will set up a full opa environment on your local CanDIGv2 cluster
 
-mkdir -p ${PWD}/lib/candig-server/authz/tmp
+mkdir -p ${PWD}/lib/candig-server/authorization/tmp
 
 # policy.rego
 echo "Working on candig-server.policy.rego .."
-envsubst < ${PWD}/etc/setup/templates/configs/opa/candig-server.policy.rego.tpl > ${PWD}/lib/candig-server/authz/tmp/policy.rego
+envsubst < ${PWD}/etc/setup/templates/configs/opa/candig-server.policy.rego.tpl > ${PWD}/lib/candig-server/authorization/tmp/policy.rego
 
 
 # Verify if opa container is running

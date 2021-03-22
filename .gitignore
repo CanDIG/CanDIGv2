@@ -16,17 +16,17 @@
 .vagrant
 
 # keycloak
-lib/authz/keycloak/tmp/*
+lib/authentication/keycloak/tmp/*
 
 # tyk
-lib/authz/tyk/tmp/*
+lib/authentication/tyk/tmp/*
 
 # vault
-lib/authz/vault/tmp/*
+lib/authorization/vault/tmp/*
 
 # opa 
-lib/candig_server/authz/tmp/*.rego
-lib/candig-server/authz/tmp/*.rego
+lib/candig_server/authorization/tmp/*.rego
+lib/candig-server/authorization/tmp/*.rego
 
 
 # test metadata

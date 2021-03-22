@@ -33,7 +33,7 @@ services:
 
   candig-server-authorization:
     build:
-      context: ${PWD}/lib/candig-server/authz
+      context: ${PWD}/lib/candig-server/authorization
       args: 
         - BASE_IMAGE=openpolicyagent/opa:${OPA_VERSION}
     container_name: ${CANDIG_SERVER_AUTHORIZATION_CONTAINER_NAME}

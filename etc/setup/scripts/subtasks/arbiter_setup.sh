@@ -7,7 +7,7 @@ set -e
 ARBITER_IMAGES=$(echo $(docker ps | grep arbiter | wc -l))
 if [[ $ARBITER_IMAGES -eq 0 ]]; then
    echo "Building Arbiter Image!"
-   docker build --tag ${DOCKER_REGISTRY}/arbiter:latest --build-arg venv_python=3.7 ${PWD}/lib/authz/arbiter
+   docker build --tag ${DOCKER_REGISTRY}/arbiter:latest --build-arg venv_python=3.7 ${PWD}/lib/authorization/arbiter
 fi
 
 

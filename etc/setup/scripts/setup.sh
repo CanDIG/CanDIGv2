@@ -6,9 +6,10 @@ set -e
 echo
 echo "- Generating prerequisites; -"
 
-mkdir -p ${PWD}/lib/authz/tyk
-mkdir -p ${PWD}/lib/authz/keycloak
-mkdir -p ${PWD}/lib/authz/vault
+mkdir -p ${PWD}/lib/authentication/keycloak
+mkdir -p ${PWD}/lib/authentication/tyk
+
+mkdir -p ${PWD}/lib/authorization/vault
 
 export KC_CLIENT_ID_64=$(echo -n ${KC_CLIENT_ID} | base64)
 echo "Generated KC_CLIENT_ID_64 as ${KC_CLIENT_ID_64}"
@@ -40,19 +41,21 @@ ${PWD}/etc/setup/scripts/subtasks/arbiter_setup.sh
 
 
 echo
-echo "Moving temporary files to ./tmp/authz/*"
-mkdir -p ./tmp/configs/authz
+echo "Moving temporary files to ./tmp/authorization/*"
+mkdir -p ./tmp/configs/authentication
+mkdir -p ./tmp/configs/authorization
 
-cp -r ./lib/authz/keycloak/tmp ./tmp/configs/authz/keycloak/
-cp -r ./lib/authz/tyk/tmp ./tmp/configs/authz/tyk/
-cp -r ./lib/authz/vault/tmp ./tmp/configs/authz/vault/
+cp -r ./lib/authentication/keycloak/tmp ./tmp/configs/authentication/keycloak/
+cp -r ./lib/authentication/tyk/tmp ./tmp/configs/authentication/tyk/
 
-cp -r ./lib/candig-server/authz/tmp ./tmp/configs/authz/candig-server
+cp -r ./lib/authorization/vault/tmp ./tmp/configs/authorization/vault/
+cp -r ./lib/candig-server/authorization/tmp ./tmp/configs/authorization/candig-server
 
-rm -rf ./lib/authz/*/tmp 
-rm -rf ./lib/candig-server/authz/tmp 
+rm -rf ./lib/authentication/*/tmp 
+rm -rf ./lib/authorization/*/tmp 
+rm -rf ./lib/candig-server/authorization/tmp 
 
 
 echo
-echo "-- AuthZ Setup Done! --"
+echo "-- authorization Setup Done! --"
 echo

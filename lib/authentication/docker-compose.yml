@@ -3,7 +3,7 @@ version: '3.7'
 services:
   keycloak:
     build:
-      context: ${PWD}/lib/authz/keycloak
+      context: ${PWD}/lib/authentication/keycloak
       args:
         - BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
     container_name: ${CANDIG_AUTH_CONTAINER_NAME}
@@ -36,7 +36,7 @@ services:
   tyk:
     container_name: tyk
     build:
-      context: ${PWD}/lib/authz/tyk
+      context: ${PWD}/lib/authentication/tyk
       args: 
         - BASE_IMAGE=tykio/tyk-gateway:${TYK_VERSION}
     networks:
@@ -76,29 +76,3 @@ services:
         max_attempts: 3
         window: 120s
 
-  vault:
-    container_name: vault
-    build:
-      context: ${PWD}/lib/authz/vault
-      args:
-        - VAULT_VERSION=1.5.0
-    ports:
-      - ${VAULT_SERVICE_PORT}:8200
-    volumes:
-      - vault-data:/vault
-    environment:
-      - VAULT_ADDR=http://127.0.0.1:8200
-    command: server -config=/vault/config/vault-config.json
-    cap_add:
-      - IPC_LOCK    
-    networks:
-      - ${DOCKER_NET}
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s

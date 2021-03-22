@@ -328,9 +328,10 @@ compose:
 # close all authentication and authorization services
 
 #<<<
-compose-authz-down:
-	# closes primary authn and authz components
-	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authz/docker-compose.yml down
+compose-authx-down:
+	# closes primary authn and authx components
+	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authentication/docker-compose.yml down
+	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authorization/docker-compose.yml down
 	# - remove intermittent docker images
 	docker rmi compose_keycloak:latest --force
 	docker rmi compose_tyk:latest --force
@@ -346,7 +347,7 @@ compose-authz-down:
 # candig-server prototype instances with authentication
 # and authorization services
 #<<<
-compose-authz-clean: compose-authz-down \
+compose-authx-clean: compose-authx-down \
 
 	# clean keycloak
 	docker volume rm keycloak-data
@@ -364,8 +365,8 @@ compose-authz-clean: compose-authz-down \
 # authorization services
 
 #<<<
-compose-authz-setup:
-	# sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authz
+compose-authx-setup:
+	# sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authorization
 	./etc/setup/scripts/setup.sh
 
 
@@ -374,8 +375,8 @@ compose-authz-setup:
 # with authentication and authorization services
 
 #<<<
-compose-authz-setup-candig-server: compose-authz-setup \
-	# intended to run candig server alongside the authz module
+compose-authx-setup-candig-server: compose-authx-setup \
+	# intended to run candig server alongside the authx modules
 	docker-compose -f ${DIR}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml up -d candig-server 2>&1
 
 
@@ -384,7 +385,7 @@ compose-authz-setup-candig-server: compose-authz-setup \
 # tests with both chrome and firefox front-ends
 
 #<<<
-test-authz-prototype: test-authz-prototype-chrome test-authz-prototype-firefox \
+test-authx-prototype: test-authx-prototype-chrome test-authx-prototype-firefox \
 	# ...
 
 
@@ -393,10 +394,10 @@ test-authz-prototype: test-authz-prototype-chrome test-authz-prototype-firefox \
 # tests with chrome front-end
 
 #<<<
-test-authz-prototype-chrome:
-	# run after starting the authz module and candig-server
+test-authx-prototype-chrome:
+	# run after starting the authx modules and candig-server
 													# one (ish) process per test
-	$(DIR)/etc/tests/integration/authz/run_tests.sh 20 chrome True
+	$(DIR)/etc/tests/integration/authx/run_tests.sh 20 chrome True
 
 
 #>>>
@@ -404,10 +405,10 @@ test-authz-prototype-chrome:
 # tests with firefox front-end
 
 #<<<
-test-authz-prototype-firefox:
-	# run after starting the authz module and candig-server
+test-authx-prototype-firefox:
+	# run after starting the authx module and candig-server
 													# one (ish) process per test
-	$(DIR)/etc/tests/integration/authz/run_tests.sh 20 firefox True
+	$(DIR)/etc/tests/integration/authx/run_tests.sh 20 firefox True
 
 
 
