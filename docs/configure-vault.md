@@ -1,8 +1,7 @@
 # Setup
 
-Disclaimer: These are the notes I took to build a PoC in a dev environment. We
-most certainly would take these steps and build a script to provision
-dynamically the user entitlements.
+Disclaimer: These are notes that were taken to build a PoC in a dev environment. To read the steps taken to provision
+the user entitlements dynamically, see the `Makefile`'s `compose-authx-setup` command, and `./etc/setup/scripts/subtasks/vault_setup.sh`
 
 ## In dev
 
