@@ -369,7 +369,6 @@ compose-authx-clean: compose-authx-down \
 #<<<
 compose-authx-setup:
 	# # sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authorization
-	# ./etc/setup/scripts/setup.sh
 	echo
 
 	mkdir -p ${PWD}/lib/authentication/keycloak
@@ -400,7 +399,7 @@ compose-authx-setup:
 	# variables properly get exported from each sub script
 	# and propogate to the next ones
 	export KEYCLOAK_CLIENT_ID_64=$(KEYCLOAK_CLIENT_ID_64); \
-	export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(KEYCLOAK_SERVICE_PUBLIC_URL); \
+	export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(TEMP_KEYCLOAK_SERVICE_PUBLIC_URL); \
 	\
 	echo ; \
 	echo "Setting up Keycloak;" ; \
