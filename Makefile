@@ -368,8 +368,78 @@ compose-authx-clean: compose-authx-down \
 
 #<<<
 compose-authx-setup:
-	# sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authorization
-	./etc/setup/scripts/setup.sh
+	# # sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authorization
+	# ./etc/setup/scripts/setup.sh
+	echo
+
+	mkdir -p ${PWD}/lib/authentication/keycloak
+	mkdir -p ${PWD}/lib/authentication/tyk
+
+	mkdir -p ${PWD}/lib/authorization/vault
+
+
+	# Generate dynamic environment variables
+	$(eval KEYCLOAK_CLIENT_ID_64=$(shell echo -n $(KEYCLOAK_CLIENT_ID) | base64))
+
+	# temp: in production, explicitly indicating port 443 breaks vaults internal oidc provider checks.
+	# simply remove the ":443 from the authentication services public url for this purpose:
+	if [ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":443"* ]; then \
+		echo "option 1"; \
+		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:443\)$//g')) \
+	elif [ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":80"* ]; then \
+		echo "option 2"; \
+		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:80\)$//g')) \
+	else \
+		echo "option 3"; \
+		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL})) \
+	fi
+
+
+	# inject dynamic variables in a "Makefile-ish" way
+	# by chaining these calls "all in one line" so that
+	# variables properly get exported from each sub script
+	# and propogate to the next ones
+	export KEYCLOAK_CLIENT_ID_64=$(KEYCLOAK_CLIENT_ID_64); \
+	export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(KEYCLOAK_SERVICE_PUBLIC_URL); \
+	\
+	echo ; \
+	echo "Setting up Keycloak;" ; \
+	source ${PWD}/etc/setup/scripts/subtasks/keycloak_setup.sh; \
+	echo ; \
+	echo "Setting up Tyk;" ; \
+	${PWD}/etc/setup/scripts/subtasks/tyk_setup.sh; \
+	echo ; \
+	echo "Setting up Vault;" ; \
+	source ${PWD}/etc/setup/scripts/subtasks/vault_setup.sh; \
+	echo ; \
+	echo "Setting up OPAs;" ; \
+	${PWD}/etc/setup/scripts/subtasks/opa_setup.sh; \
+	echo ; \
+	echo "Setting up Arbiters;" ; \
+	${PWD}/etc/setup/scripts/subtasks/arbiter_setup.sh
+
+
+	# clean up
+	echo
+	echo "Moving temporary files to ${PWD}/tmp/authorization/*"
+	mkdir -p ${PWD}/tmp/configs/authentication
+	mkdir -p ${PWD}/tmp/configs/authorization
+
+	cp -r ${PWD}/lib/authentication/keycloak/tmp ${PWD}/tmp/configs/authentication/keycloak/
+	cp -r ${PWD}/lib/authentication/tyk/tmp ${PWD}/tmp/configs/authentication/tyk/
+
+	cp -r ${PWD}/lib/authorization/vault/tmp ${PWD}/tmp/configs/authorization/vault/
+	cp -r ${PWD}/lib/candig-server/authorization/tmp ${PWD}/tmp/configs/authorization/candig-server
+
+	rm -rf ${PWD}/lib/authentication/*/tmp 
+	rm -rf ${PWD}/lib/authorization/*/tmp 
+	rm -rf ${PWD}/lib/candig-server/authorization/tmp 
+
+
+	echo
+	echo "-- authorization Setup Done! --"
+	echo
+
 
 
 #>>>

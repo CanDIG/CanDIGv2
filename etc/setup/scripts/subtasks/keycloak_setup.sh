@@ -24,19 +24,6 @@ usage () {
 # with project .env variables, and then spit 
 # them out to ./lib/keycloak/tmp/*
 
-# temp: in prod mode, explicitly indicating port 443 breaks vaults internal oidc provider checks.
-# simply remove the ":443 from the authentication services public url for this purpose:
-if [[ $KEYCLOAK_SERVICE_PUBLIC_URL == *":443"* ]]; then
-    TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(echo $KEYCLOAK_SERVICE_PUBLIC_URL | sed -e 's/\(:443\)$//g')
-elif [[ $KEYCLOAK_SERVICE_PUBLIC_URL == *":80"* ]]; then
-    TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(echo $KEYCLOAK_SERVICE_PUBLIC_URL | sed -e 's/\(:80\)$//g')
-else
-    TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(echo $KEYCLOAK_SERVICE_PUBLIC_URL)
-fi
-
-export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL
-
-
 
 # echo 
 mkdir -p ${PWD}/lib/authentication/keycloak/tmp
@@ -66,7 +53,6 @@ if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
    echo "Booting keycloak container!"
    docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authentication/docker-compose.yml up -d keycloak
    sleep 5
- # ${CANDIG_AUTH_CONTAINER_NAME}
    echo ">> .. waiting for keycloak to start..."
    while !  docker logs --tail 1000  ${CANDIG_AUTH_CONTAINER_NAME} | grep "Undertow HTTPS listener https listening on 0.0.0.0" ; do sleep 1 ; done
    echo ">> .. ready..."
