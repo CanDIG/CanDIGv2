@@ -4,7 +4,6 @@ JWTs that are sent by Vault contain permissions for OPA to act on. This
 document notes the details of the structure of the JWTs and other related
 information.
 
-- TODO: Vault: Name the auth mount backend better than "jwt". 
 - TODO: Ask Ksenia for the final CanDIG model
 
 ## JWT at a glance - the end goal?
