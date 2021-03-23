@@ -7,13 +7,7 @@ information.
 - TODO: Vault: Name the auth mount backend better than "jwt". 
 - TODO: Vault: Possibly, use to which client it is "Bound". See "Bound issuer".
 - TODO: Vault: give better name to "test-role"
-- TODO: Vault: Set Jwks URL in Vault JWT auth settings
-- TODO: Vault: Set Jwks CA PEM to fetch the Jwks URL in Vault JWT auth settings
-- TODO: Vault set proper client IDs `"allowed_client_ids": ["cq_candig"]`
-- TODO: Nested templates can be done, but not nested metadata in Vault
-- TODO: Vault: set proper `allowed_client_ids` list for downstream `aud`
 - TODO: Ask Ksenia for the final CanDIG model
-- TODO: Perform checks on Vault tokens (OPA)
 
 ## JWT at a glance - the end goal?
 
