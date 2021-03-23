@@ -92,7 +92,6 @@ echo
 echo ">> configuring jwt stuff"
 
 docker exec vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"test-role\""
-#http://${CANDIG_AUTH_CONTAINER_NAME}:8081/auth/realms/candig
 
 # create users
 echo

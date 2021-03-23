@@ -14,7 +14,7 @@ usage () {
   echo "KEYCLOAK_TEST_PW: ${KEYCLOAK_TEST_PW_TWO}"
   echo "KEYCLOAK_SERVICE_PUBLIC_URL: ${KEYCLOAK_SERVICE_PUBLIC_URL}"
   echo "KEYCLOAK_SERVICE_PUBLIC_PORT: ${KEYCLOAK_SERVICE_PUBLIC_PORT}"
-  echo "CANDIG_AUTH_CONTAINER_NAME: ${CANDIG_AUTH_CONTAINER_NAME}"
+  echo "CANDIG_AUTH_DOMAIN: ${CANDIG_AUTH_DOMAIN}"
 
   echo
 }
@@ -54,7 +54,7 @@ if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
    docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authentication/docker-compose.yml up -d keycloak
    sleep 5
    echo ">> .. waiting for keycloak to start..."
-   while !  docker logs --tail 1000  ${CANDIG_AUTH_CONTAINER_NAME} | grep "Undertow HTTPS listener https listening on 0.0.0.0" ; do sleep 1 ; done
+   while !  docker logs --tail 1000  ${CANDIG_AUTH_DOMAIN} | grep "Undertow HTTPS listener https listening on 0.0.0.0" ; do sleep 1 ; done
    echo ">> .. ready..."
 fi
 
@@ -62,15 +62,15 @@ fi
 ###############
 
 add_users() {
-  # CANDIG_AUTH_CONTAINER_NAME is the name of the keycloak server inside the compose network
+  # CANDIG_AUTH_DOMAIN is the name of the keycloak server inside the compose network
   echo "Adding ${KEYCLOAK_TEST_USER}"
-  docker exec ${CANDIG_AUTH_CONTAINER_NAME} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KEYCLOAK_TEST_USER} -p ${KEYCLOAK_TEST_PW} -r ${KEYCLOAK_REALM}
+  docker exec ${CANDIG_AUTH_DOMAIN} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KEYCLOAK_TEST_USER} -p ${KEYCLOAK_TEST_PW} -r ${KEYCLOAK_REALM}
 
   echo "Adding ${KEYCLOAK_TEST_USER_TWO}"
-  docker exec ${CANDIG_AUTH_CONTAINER_NAME} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KEYCLOAK_TEST_USER_TWO} -p ${KEYCLOAK_TEST_PW_TWO} -r ${KEYCLOAK_REALM}
+  docker exec ${CANDIG_AUTH_DOMAIN} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KEYCLOAK_TEST_USER_TWO} -p ${KEYCLOAK_TEST_PW_TWO} -r ${KEYCLOAK_REALM}
 
   echo "Restarting the keycloak container"
-  docker restart ${CANDIG_AUTH_CONTAINER_NAME}
+  docker restart ${CANDIG_AUTH_DOMAIN}
 }
 
 ###############
@@ -217,5 +217,5 @@ echo ">> .. added..."
 echo 
 
 echo ">> .. waiting for keycloak to restart..."
-while !  docker logs --tail 5  ${CANDIG_AUTH_CONTAINER_NAME} | grep "Admin console listening on http://127.0.0.1:9990" ; do sleep 1 ; done
+while !  docker logs --tail 5  ${CANDIG_AUTH_DOMAIN} | grep "Admin console listening on http://127.0.0.1:9990" ; do sleep 1 ; done
 echo ">> .. ready..."

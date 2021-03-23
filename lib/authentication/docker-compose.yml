@@ -6,7 +6,7 @@ services:
       context: ${PWD}/lib/authentication/keycloak
       args:
         - BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
-    container_name: ${CANDIG_AUTH_CONTAINER_NAME}
+    container_name: ${CANDIG_AUTH_DOMAIN}
     command: ["-b", "${KEYCLOAK_SERVICE_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING"]
     ports:
        - "${KEYCLOAK_SERVICE_CONTAINER_PORT}:8080"
