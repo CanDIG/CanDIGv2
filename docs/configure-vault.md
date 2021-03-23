@@ -56,7 +56,7 @@ some more info regarding these fields:
  - bound_audiences: Correspond to the OIDC client ID
 
 ```
-vault write auth/jwt/role/test-role \
+vault write auth/jwt/role/researcher \
     user_claim=preferred_username \
     bound_audiences=cq_candig \
     role_type=jwt \
@@ -74,7 +74,8 @@ URL without "/.well-known/openid-configuration/".
 ```
 vault write auth/jwt/config \
     oidc_discovery_url="http://$CANDIG_DOMAIN_NAME:8081/auth/realms/candig" \ 
-    default_role="test-role"
+    bound_issuer="http://$CANDIG_DOMAIN_NAME:8081/auth/realms/candig" \
+    default_role="researcher"
 ```
 
 Warning! It might happen, when writing and overwriting such configuration,
@@ -89,7 +90,8 @@ In which case you can also write config into vault with such a format:
 vault write auth/jwt/config -<<EOF
 {
     "oidc_discovery_url":"http://$CANDIG_DOMAIN_NAME:8081/auth/realms/candig",
-    "default_role":"test-role"
+    "bound_issuer":"http://$CANDIG_DOMAIN_NAME:8081/auth/realms/candig",
+    "default_role":"researcher"
 }
 EOF
 ```
@@ -151,7 +153,7 @@ Then we'll need a role to match the key and insert custom info in the JWT.
 We might not want to dump the entire metadata field in the token, TBD.
 
 ```
-vault write identity/oidc/role/test-role -<<EOF
+vault write identity/oidc/role/researcher -<<EOF
 {
     "key": "test-key",
     "client_id": "cq_candig",

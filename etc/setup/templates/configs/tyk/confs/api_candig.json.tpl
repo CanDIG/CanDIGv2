@@ -95,7 +95,7 @@
         "TYK_SERVER": "${CANDIG_PUBLIC_URL}",
         "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
         "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",
-        "VAULT_ROLE":"test-role"
+        "VAULT_ROLE":"researcher"
     },
     "openid_options": {
 	"segregate_by_client": false,

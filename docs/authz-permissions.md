@@ -5,8 +5,6 @@ document notes the details of the structure of the JWTs and other related
 information.
 
 - TODO: Vault: Name the auth mount backend better than "jwt". 
-- TODO: Vault: Possibly, use to which client it is "Bound". See "Bound issuer".
-- TODO: Vault: give better name to "test-role"
 - TODO: Ask Ksenia for the final CanDIG model
 
 ## JWT at a glance - the end goal?

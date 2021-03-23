@@ -85,13 +85,13 @@ docker exec vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [\
 # user claims
 echo
 echo ">> setting up user claims"
-docker exec vault sh -c "vault write auth/jwt/role/test-role user_claim=preferred_username bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=tyk ttl=1h"
+docker exec vault sh -c "vault write auth/jwt/role/researcher user_claim=preferred_username bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=tyk ttl=1h"
 
 # configure jwt
 echo
 echo ">> configuring jwt stuff"
 
-docker exec vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"test-role\""
+docker exec vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" bound_issuer=\"${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"researcher\""
 
 # create users
 echo
@@ -156,7 +156,7 @@ echo ">> matching key and inserting custom info into the jwt"
 # because templating code requres {{}} which when followed by another brace
 # messes up Vault and it complains that there is a mismatch in balance of braces
 VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-datastructure.json.tpl)
-docker exec vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > test-role.json; vault write identity/oidc/role/test-role @test-role.json; rm test-role.json;"
+docker exec vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > researcher.json; vault write identity/oidc/role/researcher @researcher.json; rm researcher.json;"
 echo
 
 # ---
