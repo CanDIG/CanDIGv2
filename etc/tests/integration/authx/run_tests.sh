@@ -8,4 +8,3 @@ export DRIVER_ENV=$2
 export HEADLESS_MODE=$3
 
 pytest --rootdir=$(pwd)/etc/tests/integration/authx -s -v -n=$1 --ignore=lib/ --ignore=bin/ --ignore=docs/ --ignore=tmp/ 
-#pytest --collect-only

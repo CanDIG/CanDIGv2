@@ -382,12 +382,12 @@ compose-authx-setup:
 
 	# temp: in production, explicitly indicating port 443 breaks vaults internal oidc provider checks.
 	# simply remove the ":443 from the authentication services public url for this purpose:
-	if [ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":443"* ]; then \
+	if [[ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":443"* ]]; then \
 		echo "option 1"; \
-		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:443\)$//g')) \
-	elif [ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":80"* ]; then \
+		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:443\)\$//g')) \
+	elif [[ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":80"* ]]; then \
 		echo "option 2"; \
-		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:80\)$//g')) \
+		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:80\)\$//g')) \
 	else \
 		echo "option 3"; \
 		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL})) \
@@ -456,31 +456,9 @@ compose-authx-setup-candig-server: compose-authx-setup \
 # tests with both chrome and firefox front-ends
 
 #<<<
-test-authx-prototype: test-authx-prototype-chrome test-authx-prototype-firefox \
-	# ...
-
-
-#>>>
-# run authentication and authorization 
-# tests with chrome front-end
-
-#<<<
-test-authx-prototype-chrome:
-	# run after starting the authx modules and candig-server
-													# one (ish) process per test
+test-authx-prototype:
 	$(DIR)/etc/tests/integration/authx/run_tests.sh 20 chrome True
-
-
-#>>>
-# run authentication and authorization 
-# tests with firefox front-end
-
-#<<<
-test-authx-prototype-firefox:
-	# run after starting the authx module and candig-server
-													# one (ish) process per test
 	$(DIR)/etc/tests/integration/authx/run_tests.sh 20 firefox True
-
 
 
 #>>>
