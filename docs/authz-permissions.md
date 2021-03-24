@@ -4,8 +4,6 @@ JWTs that are sent by Vault contain permissions for OPA to act on. This
 document notes the details of the structure of the JWTs and other related
 information.
 
-- TODO: Ask Ksenia for the final CanDIG model
-
 ## JWT at a glance - the end goal?
 
 We are not sure yet if our structure will be absolutely identical to ga4gh.
