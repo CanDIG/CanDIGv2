@@ -23,6 +23,12 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${KEYCLOAK_SERVICE_CONTAINER_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:keycloak.${CANDIG_DOMAIN}
+    #logging: *default-logging
     environment: 
       - KEYCLOAK_USER_FILE=/run/secrets/keycloak-admin-user
       - KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak-admin-password
@@ -31,6 +37,11 @@ services:
         target: /run/secrets/keycloak-admin-user
       - source: keycloak-admin-password
         target: /run/secrets/keycloak-admin-password
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:${KEYCLOAK_SERVICE_CONTAINER_PORT}"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
 
 
   tyk:
@@ -52,10 +63,21 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${TYK_SERVICE_PUBLIC_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:tyk.${CANDIG_DOMAIN}
+    #logging: *default-logging
     volumes:
       - tyk-data:/opt/tyk-gateway
     depends_on:
       - tyk-redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:${TYK_SERVICE_PUBLIC_PORT}"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
 
   tyk-redis:
     container_name: tyk-redis
@@ -75,4 +97,14 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-
+      labels:
+        - traefik.enable=true
+        - traefik.port=6379
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:tyk-redis.${CANDIG_DOMAIN}
+    #logging: *default-logging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:6379"]
+      interval: 30s
+      timeout: 20s
+      retries: 3

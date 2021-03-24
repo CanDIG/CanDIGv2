@@ -27,3 +27,14 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${VAULT_SERVICE_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:vault.${CANDIG_DOMAIN}
+    #logging: *default-logging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:${VAULT_SERVICE_PORT}/ui/"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
