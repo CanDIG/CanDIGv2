@@ -43,6 +43,7 @@ Vagrant.configure('2') do |config|
     os.image              = 'UbuntuServer-1804-2019Nov20'
     os.server_name        = 'candig-vagrant'
     override.vm.provision 'shell', privileged: false, path: "provision.sh"
+    override.vm.provision 'shell', privileged: false, path: "setup_containers.sh"
   end
 
 
