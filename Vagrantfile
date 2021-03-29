@@ -25,6 +25,7 @@ Vagrant.configure('2') do |config|
   end
 
   config.vm.provider :openstack do |os, override|
+    override.vm.synced_folder '.', '/home/vagrant/candig', type: 'virtualbox', disabled: true
     override.ssh.username = 'ubuntu'
     override.ssh.private_key_path = ENV["OS_PRIVATEKEY_PATH"]
     os.username = ENV["OS_USERNAME"]
