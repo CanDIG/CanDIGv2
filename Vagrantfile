@@ -7,20 +7,21 @@ unless Vagrant.has_plugin?("vagrant-disksize")
 end
 
 Vagrant.configure('2') do |config|
-  config.vm.box = 'generic/ubuntu1804'
   config.vm.hostname = 'candig-dev'
-  config.vm.synced_folder '.', '/home/vagrant/candig', type: 'virtualbox'
 
   config.vm.provider 'virtualbox' do |vb, override|
+    override.vm.synced_folder '.', '/home/vagrant/candig', type: 'virtualbox'
     override.vm.box = 'debian/contrib-buster64'
     override.vm.hostname = 'candig.local'
     override.disksize.size = '50GB'
-#     config.vm.network "forwarded_port", guest: 80, host: 80
-#     config.vm.network "forwarded_port", guest: 443, host: 443
+#     override.vm.network "forwarded_port", guest: 80, host: 80
+#     override.vm.network "forwarded_port", guest: 443, host: 443
     vb.name = 'candig-dev'
     vb.gui = false
     vb.customize ['modifyvm', :id, '--cpus', 4]
     vb.customize ['modifyvm', :id, '--memory', '4096']
+    # run custom shell on provision
+    override.vm.provision 'shell', privileged: false, path: "provision.sh", args: ["/home/vagrant/candig"]
   end
 
   config.vm.provider :openstack do |os, override|
@@ -40,9 +41,8 @@ Vagrant.configure('2') do |config|
     os.flavor             = 'm1.large'
     os.image              = 'UbuntuServer-1804-2019Nov20'
     os.server_name        = 'candig-vagrant'
+    override.vm.provision 'shell', privileged: false, path: "provision.sh"
   end
 
 
-  # run custom shell on provision
-  config.vm.provision 'shell', privileged: false, path: "provision.sh", args: ["/home/vagrant/candig"]
 end
