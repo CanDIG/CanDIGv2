@@ -33,11 +33,11 @@ Vagrant.configure('2') do |config|
     os.openstack_auth_url = ENV["OS_AUTH_URL"]
     os.interface_type = ENV["OS_INTERFACE"]
 
-    os.keypair_name       = 'daisieh'
+    os.keypair_name       = ENV["OS_KEYPAIR"]
     os.flavor             = 'm1.large'
     os.image              = 'UbuntuServer-1804-2019Nov20'
     os.floating_ip_pool   = 'OS DMZ External 205.189.58.128/27'
-    os.server_name        = 'daisieh'
+    os.server_name        = 'vagrant-dev'
   end
 
 
