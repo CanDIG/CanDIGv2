@@ -2,7 +2,7 @@
 # Optional args: CanDIGv2 repo path, CanDIGv2 repo branch
 
 sudo apt-get update
-# sudo apt-get upgrade -y
+sudo apt-get upgrade -y
 
 sudo rm /boot/grub/menu.lst
 sudo update-grub-legacy-ec2 -y
