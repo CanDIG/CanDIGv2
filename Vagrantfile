@@ -6,6 +6,11 @@ unless Vagrant.has_plugin?("vagrant-disksize")
     raise  Vagrant::Errors::VagrantError.new, "vagrant-disksize plugin is missing. Please install it using 'vagrant plugin install vagrant-disksize' and rerun 'vagrant up'"
 end
 
+# Install vagrant-reload to allow reloading during provisioning.
+unless Vagrant.has_plugin?("vagrant-reload")
+    raise  Vagrant::Errors::VagrantError.new, "vagrant-reload plugin is missing. Please install it using 'vagrant plugin install vagrant-reload' and rerun 'vagrant up'"
+end
+
 Vagrant.configure('2') do |config|
   config.vm.hostname = 'candig-dev'
 
@@ -22,6 +27,8 @@ Vagrant.configure('2') do |config|
     vb.customize ['modifyvm', :id, '--memory', '4096']
     # run custom shell on provision
     override.vm.provision 'shell', privileged: false, path: "provision.sh", args: ["/home/vagrant/candig"]
+    override.vm.provision :reload
+    override.vm.provision 'shell', privileged: false, path: "setup_containers.sh", args: ["/home/vagrant/candig"]
   end
 
   config.vm.provider :openstack do |os, override|
@@ -42,9 +49,8 @@ Vagrant.configure('2') do |config|
     os.flavor             = 'm1.large'
     os.image              = 'UbuntuServer-1804-2019Nov20'
     os.server_name        = 'candig-vagrant'
-    override.vm.provision 'shell', privileged: false, path: "provision.sh"
-    override.vm.provision 'shell', privileged: false, path: "setup_containers.sh"
+    override.vm.provision 'shell', privileged: false, path: "provision.sh", args: ["."]
+    override.vm.provision :reload
+    override.vm.provision 'shell', privileged: false, path: "setup_containers.sh", args: ["~/CanDIGv2"]
   end
-
-
 end
