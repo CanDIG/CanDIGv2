@@ -51,6 +51,6 @@ Vagrant.configure('2') do |config|
     os.server_name        = 'candig-vagrant'
     override.vm.provision 'shell', privileged: false, path: "provision.sh", args: ["."]
     override.vm.provision :reload
-    override.vm.provision 'shell', privileged: false, path: "setup_containers.sh", args: ["~/CanDIGv2"]
+    override.vm.provision 'shell', privileged: false, path: "setup_containers.sh", args: ["/home/ubuntu/CanDIGv2"]
   end
 end
