@@ -7,3 +7,4 @@ export PATH="$PWD/bin:$PATH"
 eval $(docker-machine env manager)
 make init-docker
 make images
+make compose
