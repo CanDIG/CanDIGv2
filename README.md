@@ -142,6 +142,7 @@ services:
 
 To deploy CanDIGv2, follow one of the available install guides in `docs/`:
 
+* [Vagrant Deployment Guide (with instructions for OpenStack)](./docs/install-vagrant.md)
 * [Docker Deployment Guide](./docs/install-docker.md)
 * [Kubernetes Deployment Guide](./docs/install-kubernetes.md)
 * [Tox Deployment Guide](./docs/install-tox.md)
