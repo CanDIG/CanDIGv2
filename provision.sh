@@ -13,7 +13,7 @@ sudo apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev l
 sudo apt-get install -y libsqlite3-dev libbz2-dev liblzma-dev lzma sqlite3
 sudo apt-get install -y apt-transport-https ca-certificates gnupg2 software-properties-common
 
-if [ -n $1 ]
+if [ -n "$1" ]
 then
     echo $1
     path=$1
@@ -21,9 +21,8 @@ else
     path=$PWD
 fi
 
-if [ -n $2 ]
+if [ -n "$2" ]
 then
-    echo $2
     branch="-b $2"
 else
     branch=""
