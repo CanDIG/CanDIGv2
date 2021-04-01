@@ -9,6 +9,7 @@ echo "  finished apt-get upgrade" | tee -a ~/progress.txt
 sudo rm /boot/grub/menu.lst
 sudo update-grub-legacy-ec2 -y
 sudo apt-get dist-upgrade -y
+sudo apt-get update
 echo "  finished apt-get dist-upgrade" | tee -a ~/progress.txt
 
 sudo apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget curl git make gcc
