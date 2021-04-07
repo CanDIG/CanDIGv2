@@ -148,3 +148,22 @@ To deploy CanDIGv2, follow one of the available install guides in `docs/`:
 * [Tox Deployment Guide](./docs/install-tox.md)
 
 View additional Makefile options with `make help`.
+
+
+## Services and Components
+
+The follwing table lists the details from the Data Flow Diagram in the "Overview" section.
+
+| Service/Component Name | Source | Notes                        |
+|------------------------|--------|------------------------------|
+| Katsu (CHORD Metadata) | links  | DFD: `chord_metadata`        |
+| CNV Service            | links  | DFD: `cnv_service`           |
+| Authorization Service  | links  | DFD: `authorization_service` |
+| Federation Service     | links  | DFD: `federation_service`    |
+| Datasets Service       | links  | DFD: `datasets_service`      |
+| RNAGet                 | links  | DFD: `rnaget`                |
+| CanDIGv1 Server        | links  | DFD: `candig_server`         |
+| HTSGet                 | links  | DFD: `htsget_app`            |
+| CHORD DRS              | links  | DFD: `chord_drs`             |
+| IGV JS                 | links  | DFD: `igv_js`                |
+| WES Server             | links  | DFD: `wes_server`            |
