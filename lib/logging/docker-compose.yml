@@ -61,5 +61,4 @@ services:
         - traefik.enable=true
         - traefik.http.routers.kibana.rule=Host(`kibana.${CANDIG_DOMAIN}`)
         - traefik.http.services.kibana.loadbalancer.server.port=${KIBANA_PORT}
-        - traefik.http.routers.kibana.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.kibana.tls.certresolver=letsencrypt

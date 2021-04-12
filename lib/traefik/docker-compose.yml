@@ -9,7 +9,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - traefik-data:/letsencrypt
     ports:
-      - "${TRAEFIK_HTTP_PORT}80"
+      - "${TRAEFIK_HTTP_PORT}:80"
       - "${TRAEFIK_HTTPS_PORT}:443"
       - "${TRAEFIK_UI_PORT}:8080"
     deploy:
@@ -21,6 +21,11 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.traefik.rule=Host(`traefik.${CANDIG_DOMAIN}`)
+        - traefik.http.services.traefik.loadbalancer.server.port=${TRAAEFIK_UI_PORT}
+        - traefik.http.routers.traefik.tls.certresolver=letsencrypt
     logging: *default-logging
     secrets:
       - source: traefik-ssl-key
@@ -28,19 +33,25 @@ services:
       - source: traefik-ssl-crt
         target: site.crt
     command:
-      # - --log-level=DEBUG
-      # - --api=true
+      # api and metrics
+      #- --api.debug=true
       - --api.insecure=true
       - --metrics=true
       - --metrics.prometheus=true
-      - --entrypoints.web.address=:${TRAEFIK_HTTP_PORT}
-      # - --entrypoints.web.http.redirections.entrypoint.to=websecure
-      # - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --entrypoints.websecure.address=:${TRAEFIK_HTTPS_PORT}
-      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
-      #- "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+
+      # entrypoints and certificate resolvers
+      - --entrypoints.http.address=:${TRAEFIK_HTTP_PORT}
+      # - --entrypoints.http.http.redirections.entrypoint.to=https
+      # - --entrypoints.http.http.redirections.entrypoint.scheme=https
+      - --entrypoints.https.address=:${TRAEFIK_HTTPS_PORT}
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      #- --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      #- --certificatesresolvers.letsencrypt.acme.dnschallenge=true
+      #- --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
       - --certificatesresolvers.letsencrypt.acme.email=info@distributedgenomics.ca
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+
+      # providers
       # - --providers.consul=true
       # - --providers.consul.endpoints=consul:${CONSUL_HTTP_PORT}
       - --providers.docker=true

@@ -21,7 +21,6 @@ services:
         - traefik.enable=true
         - traefik.http.routers.weave-app.rule=Host(`weave-app.${CANDIG_DOMAIN}`)
         - traefik.http.services.weave-app.loadbalancer.server.port=${WEAVE_UI_PORT}
-        - traefik.http.routers.weave-app.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.weave-app.tls.certresolver=letsencrypt
     logging: *default-logging
     command:

@@ -21,9 +21,11 @@ services:
       labels:
         - traefik.enable=true
         - traefik.http.routers.cancogen-dashboard.rule=Host(`cancogen-dashboard.${CANDIG_DOMAIN}`)
-        - traefik.http.services.cancogen-dashboard.loadbalancer.server.port=${CANCOGEN_DASHBOARD_PORT}
-        - traefik.http.routers.cancogen-dashboard.tls=${TRAEFIK_USE_TLS}
+        - traefik.http.routers.cancogen-dashboard.entrypoints=${TRAEFIK_ENTRYPOINT}
         - traefik.http.routers.cancogen-dashboard.tls.certresolver=letsencrypt
+        #- traefik.http.routers.cancogen-dashboard.tls.domains[0].main=*.${CANDIG_DOMAIN}
+        #- traefik.http.routers.cancogen-dashboard.tls.domains[0].sans=${CANDIG_DOMAIN}
+        - traefik.http.services.cancogen-dashboard.loadbalancer.server.port=${CANCOGEN_DASHBOARD_PORT}
     logging: *default-logging
     tty: true
     environment:

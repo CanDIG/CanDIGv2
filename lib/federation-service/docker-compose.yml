@@ -24,7 +24,6 @@ services:
         - traefik.enable=true
         - traefik.http.routers.federation-service.rule=Host(`federation-service.${CANDIG_DOMAIN}`)
         - traefik.http.services.federation-service.loadbalancer.server.port=${FEDERATION_PORT}
-        - traefik.http.routers.federation-service.tls=${TRAEFIK_USE_TLS}
         - traefik.http.routers.federation-service.tls.certresolver=letsencrypt
     logging: *default-logging
     secrets:
