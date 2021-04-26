@@ -24,7 +24,7 @@ lib/authentication/tyk/tmp/*
 # vault
 lib/authorization/vault/tmp/*
 
-# opa 
+# opa
 lib/candig_server/authorization/tmp/*.rego
 lib/candig-server/authorization/tmp/*.rego
 

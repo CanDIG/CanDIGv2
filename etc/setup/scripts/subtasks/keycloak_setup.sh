@@ -20,12 +20,12 @@ usage () {
 }
 
 
-# Load Keycloak template (.tpl) files, populate them 
-# with project .env variables, and then spit 
+# Load Keycloak template (.tpl) files, populate them
+# with project .env variables, and then spit
 # them out to ./lib/keycloak/tmp/*
 
 
-# echo 
+# echo
 mkdir -p ${PWD}/lib/authentication/keycloak/tmp
 
 # Copy files from template configs
@@ -54,7 +54,7 @@ if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
    docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authentication/docker-compose.yml up -d keycloak
    sleep 5
    echo ">> .. waiting for keycloak to start..."
-   while !  docker logs --tail 1000  ${CANDIG_AUTH_DOMAIN} | grep "Undertow HTTPS listener https listening on 0.0.0.0" ; do sleep 1 ; done
+   while !  docker logs --tail 1000  $(docker ps | grep keycloak | awk '{print $1}') | grep "Undertow HTTPS listener https listening on 0.0.0.0" ; do sleep 1 ; done
    echo ">> .. ready..."
 fi
 
@@ -76,6 +76,7 @@ add_users() {
 ###############
 
 get_token () {
+  KEYCLOAK_ADMIN_PW=$(cat tmp/secrets/keycloak-admin-password)
   BID=$(curl \
     -d "client_id=admin-cli" \
     -d "username=$KEYCLOAK_ADMIN_USER" \
@@ -214,7 +215,7 @@ echo
 echo ">> Adding user .."
 add_users
 echo ">> .. added..."
-echo 
+echo
 
 echo ">> .. waiting for keycloak to restart..."
 while !  docker logs --tail 5  ${CANDIG_AUTH_DOMAIN} | grep "Admin console listening on http://127.0.0.1:9990" ; do sleep 1 ; done

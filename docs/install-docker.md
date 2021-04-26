@@ -102,6 +102,7 @@ git submodule update --init --recursive
 # 2. copy and edit .env with your site's local configuration
 cp -i etc/env/example.env .env
 
+<!--TODO: add instructions for compose-authx-setup-->
 # 3. fetch binaries and initialize candig virtualenv
 make bin-all
 make init-conda
@@ -140,6 +141,7 @@ make images
 make docker-pull
 
 # deploy stack (if using docker-compose environment)
+make comopose-authx-setup
 make compose
 
 # push updated images to $DOCKER_REGISTRY (optional)

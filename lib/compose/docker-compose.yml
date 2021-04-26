@@ -4,7 +4,6 @@ networks:
   bridge:
     external: true
   bridge-net:
-    external: true
   ingress:
   traefik-net:
   agent-net:
@@ -19,28 +18,14 @@ volumes:
   prometheus-data:
   consul-data:
   grafana-data:
-
-  # AuthX --
   keycloak-data:
-    external: true
   tyk-data:
-    external: true
   tyk-redis-data:
-    external: true
   vault-data:
-    external: true
-
-  # candig-server-authorization-data:
-  #   external: true
-  # --
 
 secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials
-  keycloak-admin-user:
-    file: $PWD/tmp/secrets/keycloak-admin-user
-  keycloak-admin-password:
-    file: $PWD/tmp/secrets/keycloak-admin-password
   federation-peers:
     file: $PWD/tmp/secrets/federation-peers.json
   federation-services:
@@ -67,3 +52,7 @@ secrets:
     file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.crt
   wes-dependency-resolver:
     file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
+  keycloak-admin-user:
+    file: $PWD/tmp/secrets/keycloak-admin-user
+  keycloak-admin-password:
+    file: $PWD/tmp/secrets/keycloak-admin-password

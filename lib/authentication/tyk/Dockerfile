@@ -1,6 +1,8 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
+#TODO: add maintainer labels
+
 COPY ./tmp/authMiddleware.js /opt/tyk-gateway/middleware/authMiddleware.js
 COPY ./tmp/permissionsStoreMiddleware.js /opt/tyk-gateway/middleware/permissionsStoreMiddleware.js
 COPY ./tmp/tyk.conf /opt/tyk-gateway/tyk.conf

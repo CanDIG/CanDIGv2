@@ -1,5 +1,6 @@
 version: '3.7'
 
+#TODO: rewrite docker-compose for authentication so it conforms with spec in lib/templates/docker-compose.yml
 services:
   keycloak:
     build:
@@ -7,6 +8,7 @@ services:
       args:
         - BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
     container_name: ${CANDIG_AUTH_DOMAIN}
+      #TODO: define image: tag
     command: ["-b", "${KEYCLOAK_SERVICE_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING"]
     ports:
        - "${KEYCLOAK_SERVICE_CONTAINER_PORT}:8080"
@@ -28,8 +30,9 @@ services:
         - traefik.port=${KEYCLOAK_SERVICE_CONTAINER_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:keycloak.${CANDIG_DOMAIN}
+    #TODO: fix logging
     #logging: *default-logging
-    environment: 
+    environment:
       - KEYCLOAK_USER_FILE=/run/secrets/keycloak-admin-user
       - KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak-admin-password
     secrets:
@@ -43,12 +46,11 @@ services:
       timeout: 20s
       retries: 3
 
-
   tyk:
-    container_name: tyk
+    #container_name: tyk
     build:
       context: ${PWD}/lib/authentication/tyk
-      args: 
+      args:
         - BASE_IMAGE=tykio/tyk-gateway:${TYK_VERSION}
     networks:
       - ${DOCKER_NET}
@@ -80,7 +82,7 @@ services:
       retries: 3
 
   tyk-redis:
-    container_name: tyk-redis
+    #container_name: tyk-redis
     image: redis:${TYK_REDIS_VERSION}
     networks:
      - ${DOCKER_NET}

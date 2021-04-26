@@ -1,8 +1,9 @@
 version: '3.7'
 
+#TODO: rewrite docker-compose for authentication so it conforms with spec in lib/templates/docker-compose.yml
 services:
   vault:
-    container_name: vault
+    #container_name: vault
     build:
       context: ${PWD}/lib/authorization/vault
       args:
@@ -15,7 +16,7 @@ services:
       - VAULT_ADDR=http://127.0.0.1:8200
     command: server -config=/vault/config/vault-config.json
     cap_add:
-      - IPC_LOCK    
+      - IPC_LOCK
     networks:
       - ${DOCKER_NET}
     deploy:
@@ -32,6 +33,7 @@ services:
         - traefik.port=${VAULT_SERVICE_PORT}
         - traefik.docker.network=${DOCKER_NET}
         - traefik.frontend.rule=Host:vault.${CANDIG_DOMAIN}
+    #TODO: fix logging
     #logging: *default-logging
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:${VAULT_SERVICE_PORT}/ui/"]

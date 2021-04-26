@@ -29,6 +29,8 @@ mkdir:
 	mkdir -p $(DIR)/tmp/data
 	mkdir -p $(DIR)/tmp/secrets
 	mkdir -p $(DIR)/tmp/ssl
+	mkdir -p $(DIR)/tmp/authentication/{keycloak,tyk}
+	mkdir -p $(DIR)/tmp/authorization/vault
 
 #>>>
 # download all package binaries
@@ -326,10 +328,6 @@ clean-volumes:
 	-docker volume rm `docker volume ls -q`
 	rm -rf $(DIR)/tmp/data
 
-#>>>
-# deploy/test all modules in $CANDIG_MODULES using docker-compose
-# make compose
-
 #<<<
 .PHONY: compose
 compose:
@@ -339,9 +337,7 @@ compose:
 	# 	| docker-compose -f - up
 
 
-
-
-
+#TODO: deprecate compose-authx-down
 #>>>
 # close all authentication and authorization services
 
@@ -357,34 +353,44 @@ compose-authx-down:
 	# -- authorization
 	#docker rmi compose_vault:latest --force
 	docker rmi compose_candig-server-authorization:latest --force
-	
-	# closes the candig server along with its corresponding arbiter and opa 
+
+	# closes the candig server along with its corresponding arbiter and opa
 	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml down
 
 
+#TODO: deprecate compose-authx-clean
 #>>>
-# dismantle and remove all data of 
+# dismantle and remove all data of
 # candig-server prototype instances with authentication
 # and authorization services
 #<<<
-compose-authx-clean: compose-authx-down \
-
+compose-authx-clean: compose-authx-down
 	# clean keycloak
 	docker volume rm keycloak-data
-
 	# clean tyk
 	docker volume rm tyk-data
 	docker volume rm tyk-redis-data
-
 	# clean vault
 	docker volume rm vault-data
 
 
 #>>>
-# create instances of authentication and 
+# create instances of authentication and
+# authorization services
+
+#>>>
+# deploy/test all modules in $CANDIG_MODULES using docker-compose
+# make compose
+
+#>>>
+# create instances of authentication and
 # authorization services
 
 #<<<
+#TODO: deprecate this method
+#TODO: use init-auth to set up auth stack
+#TODO: move data directories to tmp/ instead of lib/
+
 compose-authx-setup:
 	# # sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authorization
 	echo
@@ -430,10 +436,10 @@ compose-authx-setup:
 	source ${PWD}/etc/setup/scripts/subtasks/vault_setup.sh; \
 	echo ; \
 	echo "Setting up OPAs;" ; \
-	${PWD}/etc/setup/scripts/subtasks/opa_setup.sh; \
-	echo ; \
-	echo "Setting up Arbiters;" ; \
-	${PWD}/etc/setup/scripts/subtasks/arbiter_setup.sh
+	${PWD}/etc/setup/scripts/subtasks/opa_setup.sh #; \
+	#echo ; \
+	#echo "Setting up Arbiters;" ; \
+	#${PWD}/etc/setup/scripts/subtasks/arbiter_setup.sh
 
 
 	# clean up
@@ -448,9 +454,9 @@ compose-authx-setup:
 	cp -r ${PWD}/lib/authorization/vault/tmp ${PWD}/tmp/configs/authorization/vault/
 	cp -r ${PWD}/lib/candig-server/authorization/tmp ${PWD}/tmp/configs/authorization/candig-server
 
-	rm -rf ${PWD}/lib/authentication/*/tmp 
-	rm -rf ${PWD}/lib/authorization/*/tmp 
-	rm -rf ${PWD}/lib/candig-server/authorization/tmp 
+	rm -rf ${PWD}/lib/authentication/*/tmp
+	rm -rf ${PWD}/lib/authorization/*/tmp
+	rm -rf ${PWD}/lib/candig-server/authorization/tmp
 
 
 	echo
@@ -458,19 +464,19 @@ compose-authx-setup:
 	echo
 
 
-
 #>>>
 # create an instance of a candig-server prototype
 # with authentication and authorization services
 
 #<<<
-compose-authx-setup-candig-server: compose-authx-setup \
+#TODO: deprecate compose-authx-setup-candig-server
+compose-authx-setup-candig-server: compose-authx-setup
 	# intended to run candig server alongside the authx modules
 	docker-compose -f ${DIR}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml up -d candig-server 2>&1
 
 
 #>>>
-# run authentication and authorization 
+# run authentication and authorization
 # tests with both chrome and firefox front-ends
 
 #<<<
@@ -538,10 +544,10 @@ docker-secrets: minio-secrets
 	$(MAKE) secret-metadata-app-secret
 	@echo admin > $(DIR)/tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-db-secret
-
-	# AuthN Admin secrets
 	@echo ${KEYCLOAK_ADMIN_USER} > $(DIR)/tmp/secrets/keycloak-admin-user
+	#TODO: use random generated pw instead of env-var
 	@echo ${KEYCLOAK_ADMIN_PW} > $(DIR)/tmp/secrets/keycloak-admin-password
+	#$(MAKE) secret-keycloak-admin-password
 
 #>>>
 # create persistant volumes for docker containers
@@ -550,15 +556,6 @@ docker-secrets: minio-secrets
 #<<<
 .PHONY: docker-volumes
 docker-volumes:
-	# AuthX --
-	docker volume create keycloak-data
-	docker volume create tyk-data
-	docker volume create tyk-redis-data
-	docker volume create vault-data
-
-	#docker volume create candig-server-authorization-data
-	# --
-
 	docker volume create consul-data
 	docker volume create datasets-data
 	docker volume create grafana-data
@@ -569,6 +566,10 @@ docker-volumes:
 	docker volume create portainer-data
 	docker volume create prometheus-data
 	docker volume create toil-jobstore
+	docker volume create keycloak-data
+	docker volume create tyk-data
+	docker volume create tyk-redis-data
+	docker volume create vault-data
 
 #>>>
 # (re)build service image for all modules

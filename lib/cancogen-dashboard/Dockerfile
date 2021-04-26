@@ -8,6 +8,7 @@ COPY cancogen_dashboard /app/cancogen_dashboard
 
 WORKDIR /app/cancogen_dashboard
 
-RUN yarn install && yarn run build
+RUN rm -rf package-lock.json .git \
+	&& yarn install && yarn run build
 
 ENTRYPOINT ["yarn", "start"]
