@@ -1,21 +1,28 @@
 version: '3.7'
 
+#TODO: rewrite docker-compose for authentication so it conforms with spec in lib/templates/docker-compose.yml
 services:
-  authorization:
+  vault:
+    #container_name: vault
     build:
-      context: $PWD/lib/authorization
+      context: ${PWD}/lib/authorization/vault
       args:
-        # authorization needs py3.6
-        venv_python: '3.6'
-    image: ${DOCKER_REGISTRY}/authorization:${AUTHORIZATION_VERSION:-latest}
+        - VAULT_VERSION=1.5.0
+    ports:
+      - ${VAULT_SERVICE_PORT}:8200
+    volumes:
+      - vault-data:/vault
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
+    command: server -config=/vault/config/vault-config.json
+    cap_add:
+      - IPC_LOCK
     networks:
       - ${DOCKER_NET}
-    ports:
-      - "${AUTHORIZATION_PORT}:7000"
     deploy:
       placement:
         constraints:
-          - node.role == worker
+          - node.role == manager
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -23,8 +30,13 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${AUTHORIZATION_PORT}
+        - traefik.port=${VAULT_SERVICE_PORT}
         - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:authorization.${CANDIG_DOMAIN}
-    logging: *default-logging
-    command: ["--host", "0.0.0.0", "--port", "7000"]
+        - traefik.frontend.rule=Host:vault.${CANDIG_DOMAIN}
+    #TODO: fix logging
+    #logging: *default-logging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:${VAULT_SERVICE_PORT}/ui/"]
+      interval: 30s
+      timeout: 20s
+      retries: 3

@@ -1,0 +1,112 @@
+version: '3.7'
+
+#TODO: rewrite docker-compose for authentication so it conforms with spec in lib/templates/docker-compose.yml
+services:
+  keycloak:
+    build:
+      context: ${PWD}/lib/authentication/keycloak
+      args:
+        - BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
+    container_name: ${CANDIG_AUTH_DOMAIN}
+      #TODO: define image: tag
+    command: ["-b", "${KEYCLOAK_SERVICE_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING"]
+    ports:
+       - "${KEYCLOAK_SERVICE_CONTAINER_PORT}:8080"
+    networks:
+      - ${DOCKER_NET}
+    volumes:
+      - keycloak-data:/opt/jboss/keycloak/standalone
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${KEYCLOAK_SERVICE_CONTAINER_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:keycloak.${CANDIG_DOMAIN}
+    #TODO: fix logging
+    #logging: *default-logging
+    environment:
+      - KEYCLOAK_USER_FILE=/run/secrets/keycloak-admin-user
+      - KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak-admin-password
+    secrets:
+      - source: keycloak-admin-user
+        target: /run/secrets/keycloak-admin-user
+      - source: keycloak-admin-password
+        target: /run/secrets/keycloak-admin-password
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:${KEYCLOAK_SERVICE_CONTAINER_PORT}"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  tyk:
+    #container_name: tyk
+    build:
+      context: ${PWD}/lib/authentication/tyk
+      args:
+        - BASE_IMAGE=tykio/tyk-gateway:${TYK_VERSION}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${TYK_SERVICE_PUBLIC_PORT}:8080"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=${TYK_SERVICE_PUBLIC_PORT}
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:tyk.${CANDIG_DOMAIN}
+    #logging: *default-logging
+    volumes:
+      - tyk-data:/opt/tyk-gateway
+    depends_on:
+      - tyk-redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:${TYK_SERVICE_PUBLIC_PORT}"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  tyk-redis:
+    #container_name: tyk-redis
+    image: redis:${TYK_REDIS_VERSION}
+    networks:
+     - ${DOCKER_NET}
+    volumes:
+      - tyk-redis-data:/data
+    ports:
+      - "6379:6379"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.port=6379
+        - traefik.docker.network=${DOCKER_NET}
+        - traefik.frontend.rule=Host:tyk-redis.${CANDIG_DOMAIN}
+    #logging: *default-logging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:6379"]
+      interval: 30s
+      timeout: 20s
+      retries: 3

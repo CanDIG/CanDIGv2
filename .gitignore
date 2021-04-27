@@ -1,3 +1,6 @@
+#edit related
+*~
+
 #data files/directories
 *.bam
 /data
@@ -10,3 +13,29 @@
 /bin
 /etc/ssl/selfsigned-*
 */miniconda3
+.vagrant
+
+# keycloak
+lib/authentication/keycloak/tmp/*
+
+# tyk
+lib/authentication/tyk/tmp/*
+
+# vault
+lib/authorization/vault/tmp/*
+
+# opa
+lib/candig_server/authorization/tmp/*.rego
+lib/candig-server/authorization/tmp/*.rego
+
+
+# test metadata
+etc/tests/integration/*/__pycache__/*
+etc/tests/integration/*/.pytest_cache/*
+etc/tests/integration/*/src/__pycache__/*
+etc/tests/integration/*/src/.pytest_cache/*
+
+etc/tests/integration/*/geckodriver
+etc/tests/integration/*/geckodriver.log
+etc/tests/integration/*/chromedriver
+geckodriver.log

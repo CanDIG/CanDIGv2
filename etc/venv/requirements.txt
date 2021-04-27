@@ -3,3 +3,5 @@ docker
 python-dotenv
 tox
 connexion
+aiohttp
+requests
