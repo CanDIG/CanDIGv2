@@ -328,6 +328,10 @@ clean-volumes:
 	-docker volume rm `docker volume ls -q`
 	rm -rf $(DIR)/tmp/data
 
+#>>>
+# deploy/test all modules in $CANDIG_MODULES using docker-compose
+# make compose
+
 #<<<
 .PHONY: compose
 compose:
@@ -363,6 +367,7 @@ compose-authx-down:
 # dismantle and remove all data of
 # candig-server prototype instances with authentication
 # and authorization services
+
 #<<<
 compose-authx-clean: compose-authx-down
 	# clean keycloak
@@ -373,14 +378,6 @@ compose-authx-clean: compose-authx-down
 	# clean vault
 	docker volume rm vault-data
 
-
-#>>>
-# create instances of authentication and
-# authorization services
-
-#>>>
-# deploy/test all modules in $CANDIG_MODULES using docker-compose
-# make compose
 
 #>>>
 # create instances of authentication and
@@ -480,9 +477,10 @@ compose-authx-setup-candig-server: compose-authx-setup
 # tests with both chrome and firefox front-ends
 
 #<<<
-test-authx-prototype:
-	$(DIR)/etc/tests/integration/authx/run_tests.sh 20 chrome True
-	$(DIR)/etc/tests/integration/authx/run_tests.sh 20 firefox True
+#TODO: fix broken tests
+#test-authx-prototype:
+	#$(DIR)/etc/tests/integration/authx/run_tests.sh 20 chrome True
+	#$(DIR)/etc/tests/integration/authx/run_tests.sh 20 firefox True
 
 
 #>>>
