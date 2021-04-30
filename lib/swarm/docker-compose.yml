@@ -33,6 +33,14 @@ volumes:
     external: true
   traefik-data:
     external: true
+  keycloak-data:
+    external: true
+  tyk-data:
+    external: true
+  tyk-redis-data:
+    external: true
+  vault-data:
+    external: true
 
 secrets:
   aws-credentials:
@@ -62,4 +70,8 @@ secrets:
   traefik-ssl-crt:
     external: true
   wes-dependency-resolver:
+    external: true
+  keycloak-admin-user:
+    external: true
+  keycloak-admin-password:
     external: true

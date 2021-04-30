@@ -89,7 +89,8 @@ services:
       - --storage.path=/alertmanager
 
   cadvisor:
-    image: google/cadvisor:${CADVISOR_VERSION:-latest}
+    #image: google/cadvisor:${CADVISOR_VERSION:-latest}
+    image: gcr.io/cadvisor/cadvisor:${CADVISOR_VERSION:-latest}
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -138,5 +139,5 @@ services:
         - traefik.http.routers.grafana.tls.certresolver=letsencrypt
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/admin_password
+      - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/admin_password
       # - GF_USERS_ALLOW_SIGN_UP=false

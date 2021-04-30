@@ -23,8 +23,8 @@ services:
       # LOG_LEVEL: debug
 
   portainer:
-    image: portainer/portainer
-    command: -H tcp://tasks.portainer-agent:9001 --tlsskipverify --admin-password-file /run/secrets/secret_key
+    image: portainer/portainer-ce
+    command: -H tcp://tasks.portainer-agent:9001 --tlsskipverify --admin-password-file /run/secrets/secret_key --no-analytics
     ports:
       - "${PORTAINER_UI_PORT}:9000"
     volumes:

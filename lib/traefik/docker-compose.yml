@@ -6,7 +6,7 @@ services:
     networks:
       - ${DOCKER_NET}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-data:/letsencrypt
     ports:
       - "${TRAEFIK_HTTP_PORT}:80"
@@ -26,28 +26,39 @@ services:
         - traefik.http.routers.traefik.rule=Host(`traefik.${CANDIG_DOMAIN}`)
         - traefik.http.services.traefik.loadbalancer.server.port=${TRAAEFIK_UI_PORT}
         - traefik.http.routers.traefik.tls.certresolver=letsencrypt
+        #- traefik.http.routers.traefik.tls.domains[0].main=${CANDIG_DOMAIN}
+        #- traefik.http.routers.traefik.tls.domains[0].sans=*.${CANDIG_DOMAIN}
     logging: *default-logging
+    #TODO: implement cloudflare dns-auth-01 for letsencrypt
+    environment:
+      #- CF_API_EMAIL=${CANDIG_EMAIL}
+      #- CF_API_KEY_FILE=/run/secrets/cf-api.key
     secrets:
       - source: traefik-ssl-key
         target: site.key
       - source: traefik-ssl-crt
         target: site.crt
+      #- source: cf-api-key
+        #target: cf-api.key
     command:
       # api and metrics
       #- --api.debug=true
       - --api.insecure=true
       - --metrics=true
       - --metrics.prometheus=true
+      - --log.level=DEBUG
 
       # entrypoints and certificate resolvers
       - --entrypoints.http.address=:${TRAEFIK_HTTP_PORT}
-      # - --entrypoints.http.http.redirections.entrypoint.to=https
-      # - --entrypoints.http.http.redirections.entrypoint.scheme=https
+      #- --entrypoints.http.http.redirections.entrypoint.to=https
+      #- --entrypoints.http.http.redirections.entrypoint.scheme=https
       - --entrypoints.https.address=:${TRAEFIK_HTTPS_PORT}
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=http
       #- --certificatesresolvers.letsencrypt.acme.tlschallenge=true
       #- --certificatesresolvers.letsencrypt.acme.dnschallenge=true
-      #- --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      #- --certificatesResolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare
+      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
       - --certificatesresolvers.letsencrypt.acme.email=info@distributedgenomics.ca
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
 
@@ -60,3 +71,6 @@ services:
       - --providers.docker.exposedbydefault=false
       - --providers.docker.usebindportip=true
       # - --providers.docker.defaultrule=Host(`{{.Name}}.${CANDIG_DOMAIN}`)
+      #- --ping=true
+      #- --providers.kubernetescrd=true
+      #- --providers.kubernetesingress=true

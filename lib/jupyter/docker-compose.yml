@@ -25,9 +25,12 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.port=${JUPYTER_UI_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:jupyter.${CANDIG_DOMAIN}
+        - traefik.http.routers.jupyter.rule=Host(`jupyter.${CANDIG_DOMAIN}`)
+        - traefik.http.services.jupyter.loadbalancer.server.port=${JUPYTER_UI_PORT}
+        - traefik.http.routers.jupyter.tls.certresolver=letsencrypt
+        # include these labels (but leave disabled)
+        #- traefik.http.routers.jupyter.tls.domains[0].main=${CANDIG_DOMAIN}
+        #- traefik.http.routers.jupyter.tls.domains[0].sans=*.${CANDIG_DOMAIN}
     logging: *default-logging
     environment:
       #- NOTEBOOK_DIR=${JUPYTER_NOTEBOOK_DIR}

@@ -50,12 +50,12 @@ dataflow for genomic data.
                                                            |
                                                            |
 +---------------------------------+    +--------------------------------------+   +----------------------------+
-|    +-----------------------+    |    | +----------------------------------+ |   | +------------------------+ |
-|    | chord_metadata:8008   |    |    | | authorization_service:7000 (tcp) | |   | | cnv_service:8870 (tcp) | |
-|    +-----------------------+    |    | +----------------------------------+ |   | +------------------------+ |
-| +-----------------------------+ +----+  +-------------------------------+   +---+                            |
-| | datasets_service:8880 (tcp) | |    |  | federation_service:4232 (tcp) |   |   |   +-------------------+    |
-| +-----------------------------+ |    |  +-------------------------------+   |   |   | rnaget:3005 (tcp) |    |
+|    +-----------------------+    |    |                                      |   | +------------------------+ |
+|    | chord_metadata:8008   |    |    |                                      |   | | cnv_service:8870 (tcp) | |
+|    +-----------------------+    |    |   +-------------------------------+  |   | +------------------------+ |
+| +-----------------------------+ +----+   | federation_service:4232 (tcp) |  +---+                            |
+| | datasets_service:8880 (tcp) | |    |   +-------------------------------+  |   |   +-------------------+    |
+| +-----------------------------+ |    |                                      |   |   | rnaget:3005 (tcp) |    |
 +---------------------------------+    +--------------------------------------+   |   +-------------------+    |
                                                            |                      +----------------------------+
                                                   +--------+-----------+
@@ -142,8 +142,28 @@ services:
 
 To deploy CanDIGv2, follow one of the available install guides in `docs/`:
 
+* [Vagrant Deployment Guide (with instructions for OpenStack)](./docs/install-vagrant.md)
 * [Docker Deployment Guide](./docs/install-docker.md)
 * [Kubernetes Deployment Guide](./docs/install-kubernetes.md)
 * [Tox Deployment Guide](./docs/install-tox.md)
 
 View additional Makefile options with `make help`.
+
+
+## Services and Components
+
+The follwing table lists the details from the Data Flow Diagram in the "Overview" section.
+
+| Service/Component Name | Source | Notes                        |
+|------------------------|--------|------------------------------|
+| Katsu (CHORD Metadata) | links  | DFD: `chord_metadata`        |
+| CNV Service            | links  | DFD: `cnv_service`           |
+| Authorization Service  | links  | DFD: `authorization_service` |
+| Federation Service     | links  | DFD: `federation_service`    |
+| Datasets Service       | links  | DFD: `datasets_service`      |
+| RNAGet                 | links  | DFD: `rnaget`                |
+| CanDIGv1 Server        | links  | DFD: `candig_server`         |
+| HTSGet                 | links  | DFD: `htsget_app`            |
+| CHORD DRS              | links  | DFD: `chord_drs`             |
+| IGV JS                 | links  | DFD: `igv_js`                |
+| WES Server             | links  | DFD: `wes_server`            |

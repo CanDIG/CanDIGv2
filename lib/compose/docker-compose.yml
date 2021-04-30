@@ -19,7 +19,11 @@ volumes:
   consul-data:
   grafana-data:
   traefik-data:
-  
+  keycloak-data:
+  tyk-data:
+  tyk-redis-data:
+  vault-data:
+
 secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials
@@ -49,3 +53,7 @@ secrets:
     file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.crt
   wes-dependency-resolver:
     file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
+  keycloak-admin-user:
+    file: $PWD/tmp/secrets/keycloak-admin-user
+  keycloak-admin-password:
+    file: $PWD/tmp/secrets/keycloak-admin-password

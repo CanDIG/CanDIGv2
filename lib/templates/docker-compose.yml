@@ -43,6 +43,9 @@ services:
         - traefik.http.routers.{{service_name}}.rule=Host(`{{service_name}}.${CANDIG_DOMAIN}`)
         - traefik.http.services.{{service_name}}.loadbalancer.server.port=${{{service_port}}}
         - traefik.http.routers.{{service_name}}.tls.certresolver=letsencrypt
+        # include these labels (but leave disabled)
+        #- traefik.http.routers.{{service_name}}.tls.domains[0].main=${CANDIG_DOMAIN}
+        #- traefik.http.routers.{{service_name}}.tls.domains[0].sans=*.${CANDIG_DOMAIN}
     logging: *default-logging
     # WARNING: environment variables are world readable
     # DO NOT pass secrets through here
