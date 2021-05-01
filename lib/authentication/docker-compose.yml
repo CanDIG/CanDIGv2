@@ -27,7 +27,7 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.http.routers.keycloak.rule=Host(`keycloak.${CANDIG_DOMAIN}`)
+        - traefik.http.routers.keycloak.rule=Host(`auth.${CANDIG_DOMAIN}`)
         - traefik.http.services.keycloak.loadbalancer.server.port=${KEYCLOAK_SERVICE_CONTAINER_PORT}
         - traefik.http.routers.keycloak.tls.certresolver=letsencrypt
         # include these labels (but leave disabled)
