@@ -30,7 +30,7 @@ services:
         #- traefik.http.routers.traefik.tls.domains[0].sans=*.${CANDIG_DOMAIN}
     logging: *default-logging
     #TODO: implement cloudflare dns-auth-01 for letsencrypt
-    environment:
+    #environment:
       #- CF_API_EMAIL=${CANDIG_EMAIL}
       #- CF_API_KEY_FILE=/run/secrets/cf-api.key
     secrets:
@@ -50,8 +50,8 @@ services:
 
       # entrypoints and certificate resolvers
       - --entrypoints.http.address=:${TRAEFIK_HTTP_PORT}
-      #- --entrypoints.http.http.redirections.entrypoint.to=https
-      #- --entrypoints.http.http.redirections.entrypoint.scheme=https
+      - --entrypoints.http.http.redirections.entrypoint.to=https
+      - --entrypoints.http.http.redirections.entrypoint.scheme=https
       - --entrypoints.https.address=:${TRAEFIK_HTTPS_PORT}
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
       - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=http

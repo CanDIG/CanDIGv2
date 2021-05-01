@@ -11,11 +11,11 @@ envsubst < ${PWD}/etc/setup/templates/configs/opa/candig-server.policy.rego.tpl 
 
 
 # Verify if opa container is running
-OPA_CONTAINERS=$(echo $(docker ps | grep candig-server-authorization | wc -l))
+OPA_CONTAINERS=$(echo $(docker ps | grep candig-server-opa | wc -l))
 echo "Number of candig-server_policy containers running: ${OPA_CONTAINERS}"
 if [[ $OPA_CONTAINERS -eq 0 ]]; then
    echo "Booting opa container!"
-   docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/candig-server/docker-compose.yml up -d candig-server-authorization
+   docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/candig-server/docker-compose.yml up -d candig-server-opa
    sleep 5
 fi
 
