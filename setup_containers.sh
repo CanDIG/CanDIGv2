@@ -19,10 +19,10 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "  started make images" | tee -a ~/progress.txt
-make images
+echo "  started make docker-pull" | tee -a ~/progress.txt
+make docker-pull
 if [ $? -ne 0 ]; then
-  echo "ERROR! make images failed" | tee -a ~/progress.txt
+  echo "ERROR! make docker-pull failed" | tee -a ~/progress.txt
   exit 1
 fi
 
