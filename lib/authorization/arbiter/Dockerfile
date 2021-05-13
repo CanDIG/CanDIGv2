@@ -13,6 +13,4 @@ WORKDIR /arbiter
 
 RUN pip install -r requirements.txt
 
-RUN ls 
-
 ENTRYPOINT ["python3", "-u", "/arbiter/server.py"]

@@ -11,14 +11,6 @@ networks:
     external: true
   agent-net:
     external: true
-  keycloak-data:
-    external: true
-  tyk-data:
-    external: true
-  tyk-redis-data:
-    external: true
-  vault-data:
-    external: true
 
 volumes:
   datasets-data:
@@ -38,6 +30,8 @@ volumes:
   consul-data:
     external: true
   grafana-data:
+    external: true
+  traefik-data:
     external: true
   keycloak-data:
     external: true

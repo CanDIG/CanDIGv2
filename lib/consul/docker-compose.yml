@@ -26,10 +26,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${CONSUL_HTTP_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:consul.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.consul.rule=Host(`consul.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.consul.loadbalancer.server.port=${CONSUL_HTTP_PORT}"
     logging: *default-logging
 
 # TODO: update consul config for server/agent mode

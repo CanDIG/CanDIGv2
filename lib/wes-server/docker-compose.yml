@@ -31,10 +31,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${WES_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:wes-server.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.wes-server.rule=Host(`wes-server.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.wes-server.loadbalancer.server.port=${TOIL_UI_PORT}"
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
       #- AWS_ACCESS_KEY_ID=toil
@@ -78,11 +78,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      labels:
-        - traefik.enable=true
-        - traefik.port=${TOIL_WORKER_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:wes-worker.${CANDIG_DOMAIN}
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
       #- AWS_ACCESS_KEY_ID=toil

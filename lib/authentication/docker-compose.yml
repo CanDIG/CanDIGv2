@@ -26,10 +26,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${KEYCLOAK_SERVICE_CONTAINER_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:keycloak.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.keycloak.rule=Host(`auth.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.keycloak.loadbalancer.server.port=${KEYCLOAK_SERVICE_CONTAINER_PORT}"
     #TODO: fix logging
     #logging: *default-logging
     environment:
@@ -66,10 +66,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${TYK_SERVICE_PUBLIC_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:tyk.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.tyk.rule=Host(`tyk.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.tyk.loadbalancer.server.port=${TYK_SERVICE_PUBLIC_PORT}"
     #logging: *default-logging
     volumes:
       - tyk-data:/opt/tyk-gateway
@@ -99,11 +99,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      labels:
-        - traefik.enable=true
-        - traefik.port=6379
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:tyk-redis.${CANDIG_DOMAIN}
     #logging: *default-logging
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:6379"]

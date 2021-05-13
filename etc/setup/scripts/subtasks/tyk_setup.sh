@@ -5,8 +5,8 @@ set -e
 
 # ** Be sure to invoke this from the Makefile at the project's root directory [CanDigV2] **
 
-# Load Tyk template (.tpl) files, populate them 
-# with project .env variables, and then spit 
+# Load Tyk template (.tpl) files, populate them
+# with project .env variables, and then spit
 # them out to ./lib/authentication/tyk/tmp/*
 
 mkdir -p ${PWD}/lib/authentication/tyk/tmp

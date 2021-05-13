@@ -16,27 +16,27 @@ services:
     deploy:
       placement:
         constraints:
-          - node.role == manager
+          - node.role == worker
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${CANDIG_SERVER_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:candig-server.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.candig-server.rule=Host(`candig-server.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.candig-server.loadbalancer.server.port=${CANDIG_SERVER_PORT}"
     #TODO: fix logging
     #logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3000"]
 
-  candig-server-authorization:
+  candig-server-opa:
     build:
       context: ${PWD}/lib/candig-server/authorization
       args:
         - BASE_IMAGE=openpolicyagent/opa:${OPA_VERSION}
-    image: ${DOCKER_REGISTRY}/opa-candig-server:${CANDIG_SERVER_VERSION}
+    image: ${DOCKER_REGISTRY}/candig-server-opa:${CANDIG_SERVER_VERSION}
     #container_name: ${CANDIG_SERVER_AUTHORIZATION_CONTAINER_NAME}
     networks:
       - ${DOCKER_NET}
@@ -52,10 +52,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${CANDIG_AUTHZ_SERVICE_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:opa.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.candig-server-opa.rule=Host(`candig-server-opa.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.candig-server-opa.loadbalancer.server.port=${CANDIG_SERVER_PORT}"
     #TODO: fix logging
     #logging: *default-logging
     command:
@@ -69,39 +69,36 @@ services:
       timeout: 20s
       retries: 3
 
-  #candig-server-arbiter:
-    #image: ${DOCKER_REGISTRY}/arbiter:latest
-    ##container_name: ${CANDIG_ARBITER_HOST}
-    #networks:
-      #- ${DOCKER_NET}
-    #ports:
-      #- "${CANDIG_ARBITER_SERVICE_PORT}:${CANDIG_ARBITER_SERVICE_PORT}"
-    #environment:
-      #- ARBITER_MODE=prod
-      #- ARBITER_INTERNAL_PORT=${CANDIG_ARBITER_SERVICE_PORT}
-      #- RESOURCE_AUTHZ_HOST=${CANDIG_SERVER_AUTHORIZATION_CONTAINER_NAME}
-      #- RESOURCE_AUTHZ_PORT=8181
-      #- RESOURCE_HOST=${CANDIG_SERVER_CONTAINER_NAME}
-      #- RESOURCE_PORT=${CANDIG_SERVER_PORT}
-      #- PERMISSIONS_STORE_URL=${VAULT_SERVICE_URL}
-    #deploy:
-      #placement:
-        #constraints:
-          #- node.role == manager
-      #restart_policy:
-        #condition: on-failure
-        #delay: 5s
-        #max_attempts: 3
-        #window: 120s
-      #labels:
-        #- traefik.enable=true
-        #- traefik.port=${CANDIG_ARBITER_SERVICE_PORT}
-        #- traefik.docker.network=${DOCKER_NET}
-        #- traefik.frontend.rule=Host:candig-server-arbiter.${CANDIG_DOMAIN}
-    ## logging:
-    ##   driver: "fluentd"
-    ##   options:
-    ##     tag: docker.{{.Name}}
-    ##     fluentd-async-connect: "true"
-    #command: ["--host", "0.0.0.0", "--port", "${CANDIG_ARBITER_SERVICE_PORT}"]
+  candig-server-arbiter:
+    image: ${DOCKER_REGISTRY}/arbiter:latest
+    #container_name: ${CANDIG_ARBITER_HOST}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${CANDIG_ARBITER_SERVICE_PORT}:${CANDIG_ARBITER_SERVICE_PORT}"
+    environment:
+      - ARBITER_MODE=prod
+      - ARBITER_INTERNAL_PORT=${CANDIG_ARBITER_SERVICE_PORT}
+      - RESOURCE_AUTHZ_HOST=${CANDIG_SERVER_AUTHORIZATION_CONTAINER_NAME}
+      - RESOURCE_AUTHZ_PORT=8181
+      - RESOURCE_HOST=${CANDIG_SERVER_CONTAINER_NAME}
+      - RESOURCE_PORT=${CANDIG_SERVER_PORT}
+      - PERMISSIONS_STORE_URL=${VAULT_SERVICE_URL}
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.candig-server-arbiter.rule=Host(`candig-server-arbiter.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.candig-server-arbiter.loadbalancer.server.port=${CANDIG_SERVER_PORT}"
+    #TODO: fix logging
+    #logging: *default-logging
+    command: ["--host", "0.0.0.0", "--port", "${CANDIG_ARBITER_SERVICE_PORT}"]
 

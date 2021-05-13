@@ -17,6 +17,7 @@ volumes:
   prometheus-data:
   consul-data:
   grafana-data:
+  traefik-data:
 
 secrets:
   aws-credentials:

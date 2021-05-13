@@ -23,10 +23,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${CHORD_METADATA_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:chord-metadata.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.chord-metadata.rule=Host(`chord-metadata.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.chord-metadata.loadbalancer.server.port=${CHORD_METADATA_PORT}"
     logging: *default-logging
     environment:
       - CHORD_URL=${CHORD_METADATA_HOST}
@@ -75,11 +75,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      # labels:
-      #   - traefik.enable=true
-      #   - traefik.port=${CHORD_METADATA_PORT}
-      #   - traefik.docker.network=${DOCKER_NET}
-      #   - traefik.frontend.rule=Host:metadata-db.${CANDIG_DOMAIN}
     logging: *default-logging
     environment:
       - POSTGRES_USER=admin

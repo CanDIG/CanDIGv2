@@ -21,9 +21,9 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${CNV_SERVICE_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:cnv-service.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.cnv-service.rule=Host(`cnv-service.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.cnv-service.loadbalancer.server.port=${CNV_SERVICE_PORT}"
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "8870"]

@@ -6,11 +6,11 @@ services:
       context: $PWD/lib/rnaget
       args:
         venv_python: '3.6'
-    image: ${DOCKER_REGISTRY}/rnaget:${RNA_GET_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/rnaget:${RNAGET_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     ports:
-      - "${RNA_GET_PORT}:3005"
+      - "${RNAGET_PORT}:3005"
     deploy:
       placement:
         constraints:
@@ -21,9 +21,9 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${RNA_GET_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:rnaget.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.rnaget.rule=Host(`rnaget.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.rnaget.loadbalancer.server.port=${RNAGET_PORT}"
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3005"]

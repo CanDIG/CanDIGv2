@@ -1,5 +1,6 @@
 #!make
 
+#TODO: make debug optional
 # import global variables
 env ?= .env
 
@@ -143,8 +144,9 @@ bin-prometheus:
 #<<<
 bin-traefik: mkdir
 	echo "    started bin-traefik" >> ~/progress.txt
-	curl -Lo $(DIR)/bin/traefik \
-		https://github.com/containous/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik
+	curl -Lo $(DIR)/bin/traefik.tar.gz \
+		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_$(VENV_OS)_amd64.tar.gz
+	tar -xvzf $(DIR)/bin/traefik.tar.gz -C bin/
 	chmod 755 $(DIR)/bin/traefik
 	echo "    finished bin-traefik" >> ~/progress.txt
 
@@ -200,9 +202,9 @@ clean-certs:
 #<<<
 .PHONY: clean-compose
 clean-compose:
-	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
-		$(foreach MODULE, $(CANDIG_MODULES), -f $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-		down
+	$(foreach MODULE, $(CANDIG_MODULES), \
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml $(DIR)/lib/$(MODULE)/docker-compose.yml \
+		| docker-compose -f - down;)
 
 #>>>
 # deactivate and remove conda env $VENV_NAME
@@ -433,10 +435,10 @@ compose-authx-setup:
 	source ${PWD}/etc/setup/scripts/subtasks/vault_setup.sh; \
 	echo ; \
 	echo "Setting up OPAs;" ; \
-	${PWD}/etc/setup/scripts/subtasks/opa_setup.sh #; \
-	#echo ; \
-	#echo "Setting up Arbiters;" ; \
-	#${PWD}/etc/setup/scripts/subtasks/arbiter_setup.sh
+	${PWD}/etc/setup/scripts/subtasks/opa_setup.sh ; \
+	echo ; \
+	echo "Setting up Arbiters;" ; \
+	${PWD}/etc/setup/scripts/subtasks/arbiter_setup.sh
 
 
 	# clean up
@@ -564,6 +566,7 @@ docker-volumes:
 	docker volume create portainer-data
 	docker volume create prometheus-data
 	docker volume create toil-jobstore
+	docker volume create traefik-data
 	docker volume create keycloak-data
 	docker volume create tyk-data
 	docker volume create tyk-redis-data
@@ -750,10 +753,10 @@ stack:
 
 #<<<
 stack-%:
-	docker stack deploy \
-		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
-		--compose-file $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		--compose-file $(DIR)/lib/$*/docker-compose.yml $(DOCKER_NAMESPACE)
+	cat $(DIR)/lib/swarm/docker-compose.yml \
+		$(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+		$(DIR)/lib/$*/docker-compose.yml > $(DIR)/tmp/data/docker-compose.yml
+	docker stack deploy --compose-file $(DIR)/tmp/data/docker-compose.yml $(DOCKER_NAMESPACE)
 
 #>>>
 # initialize primary docker-swarm master node
