@@ -753,10 +753,10 @@ stack:
 
 #<<<
 stack-%:
-	docker stack deploy \
-		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
-		--compose-file $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		--compose-file $(DIR)/lib/$*/docker-compose.yml $(DOCKER_NAMESPACE)
+	cat $(DIR)/lib/swarm/docker-compose.yml \
+		$(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+		$(DIR)/lib/$*/docker-compose.yml > $(DIR)/tmp/data/docker-compose.yml
+	docker stack deploy --compose-file $(DIR)/tmp/data/docker-compose.yml $(DOCKER_NAMESPACE)
 
 #>>>
 # initialize primary docker-swarm master node
