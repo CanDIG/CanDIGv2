@@ -18,10 +18,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
+        - "traefik.enable=true"
         - "traefik.docker.lbswarm=true"
-        - traefik.http.routers.weave-app.rule=Host(`weave-app.${CANDIG_DOMAIN}`)
-        - traefik.http.services.weave-app.loadbalancer.server.port=${WEAVE_UI_PORT}
+        - "traefik.http.routers.weave-app.rule=Host(`weave-app.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.weave-app.loadbalancer.server.port=${WEAVE_UI_PORT}"
     logging: *default-logging
     command:
       - /home/weave/scope

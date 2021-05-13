@@ -30,10 +30,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
+        - "traefik.enable=true"
         - "traefik.docker.lbswarm=true"
-        - traefik.http.routers.vault.rule=Host(`vault.${CANDIG_DOMAIN}`)
-        - traefik.http.services.vault.loadbalancer.server.port=${VAULT_SERVICE_PORT}
+        - "traefik.http.routers.vault.rule=Host(`vault.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.vault.loadbalancer.server.port=${VAULT_SERVICE_PORT}"
     #TODO: fix logging
     #logging: *default-logging
     command: server -config=/vault/config/vault-config.json

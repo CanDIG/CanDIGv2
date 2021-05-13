@@ -30,10 +30,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
+        - "traefik.enable=true"
         - "traefik.docker.lbswarm=true"
-        - traefik.http.routers.prometheus.rule=Host(`prometheus.${CANDIG_DOMAIN}`)
-        - traefik.http.services.prometheus.loadbalancer.server.port=${PROMETHEUS_PORT}
+        - "traefik.http.routers.prometheus.rule=Host(`prometheus.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.prometheus.loadbalancer.server.port=${PROMETHEUS_PORT}"
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -133,10 +133,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
+        - "traefik.enable=true"
         - "traefik.docker.lbswarm=true"
-        - traefik.http.routers.grafana.rule=Host(`grafana.${CANDIG_DOMAIN}`)
-        - traefik.http.services.grafana.loadbalancer.server.port=${GRAFANA_PORT}
+        - "traefik.http.routers.grafana.rule=Host(`grafana.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.grafana.loadbalancer.server.port=${GRAFANA_PORT}"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/admin_password

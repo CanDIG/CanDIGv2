@@ -58,7 +58,7 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
+        - "traefik.enable=true"
         - "traefik.docker.lbswarm=true"
-        - traefik.http.routers.kibana.rule=Host(`kibana.${CANDIG_DOMAIN}`)
-        - traefik.http.services.kibana.loadbalancer.server.port=${KIBANA_PORT}
+        - "traefik.http.routers.kibana.rule=Host(`kibana.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.kibana.loadbalancer.server.port=${KIBANA_PORT}"

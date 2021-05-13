@@ -23,10 +23,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
+        - "traefik.enable=true"
         - "traefik.docker.lbswarm=true"
-        - traefik.http.routers.candig-server.rule=Host(`candig-server.${CANDIG_DOMAIN}`)
-        - traefik.http.services.candig-server.loadbalancer.server.port=${CANDIG_SERVER_PORT}
+        - "traefik.http.routers.candig-server.rule=Host(`candig-server.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.candig-server.loadbalancer.server.port=${CANDIG_SERVER_PORT}"
     #TODO: fix logging
     #logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3000"]
@@ -52,10 +52,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
+        - "traefik.enable=true"
         - "traefik.docker.lbswarm=true"
-        - traefik.http.routers.candig-server-opa.rule=Host(`candig-server-opa.${CANDIG_DOMAIN}`)
-        - traefik.http.services.candig-server-opa.loadbalancer.server.port=${CANDIG_SERVER_PORT}
+        - "traefik.http.routers.candig-server-opa.rule=Host(`candig-server-opa.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.candig-server-opa.loadbalancer.server.port=${CANDIG_SERVER_PORT}"
     #TODO: fix logging
     #logging: *default-logging
     command:
@@ -94,10 +94,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
+        - "traefik.enable=true"
         - "traefik.docker.lbswarm=true"
-        - traefik.http.routers.candig-server-arbiter.rule=Host(`candig-server-arbiter.${CANDIG_DOMAIN}`)
-        - traefik.http.services.candig-server-arbiter.loadbalancer.server.port=${CANDIG_SERVER_PORT}
+        - "traefik.http.routers.candig-server-arbiter.rule=Host(`candig-server-arbiter.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.candig-server-arbiter.loadbalancer.server.port=${CANDIG_SERVER_PORT}"
     #TODO: fix logging
     #logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "${CANDIG_ARBITER_SERVICE_PORT}"]

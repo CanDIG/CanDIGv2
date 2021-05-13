@@ -24,10 +24,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
+        - "traefik.enable=true"
         - "traefik.docker.lbswarm=true"
-        - traefik.http.routers.jupyter.rule=Host(`jupyter.${CANDIG_DOMAIN}`)
-        - traefik.http.services.jupyter.loadbalancer.server.port=${JUPYTER_UI_PORT}
+        - "traefik.http.routers.jupyter.rule=Host(`jupyter.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.jupyter.loadbalancer.server.port=${JUPYTER_UI_PORT}"
     logging: *default-logging
     environment:
       #- NOTEBOOK_DIR=${JUPYTER_NOTEBOOK_DIR}

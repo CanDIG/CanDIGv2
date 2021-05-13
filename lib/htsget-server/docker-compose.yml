@@ -21,9 +21,9 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
+        - "traefik.enable=true"
         - "traefik.docker.lbswarm=true"
-        - traefik.http.routers.htsget-app.rule=Host(`htsget-app.${CANDIG_DOMAIN}`)
-        - traefik.http.services.htsget-app.loadbalancer.server.port=${HTSGET_APP_PORT}
+        - "traefik.http.routers.htsget-app.rule=Host(`htsget-app.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.htsget-app.loadbalancer.server.port=${HTSGET_APP_PORT}"
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3000"]

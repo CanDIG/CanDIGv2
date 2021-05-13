@@ -21,10 +21,10 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
+        - "traefik.enable=true"
         - "traefik.docker.lbswarm=true"
-        - traefik.http.routers.federation-service.rule=Host(`federation-service.${CANDIG_DOMAIN}`)
-        - traefik.http.services.federation-service.loadbalancer.server.port=${FEDERATION_PORT}
+        - "traefik.http.routers.federation-service.rule=Host(`federation-service.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.federation-service.loadbalancer.server.port=${FEDERATION_PORT}"
     logging: *default-logging
     secrets:
       - source: federation-peers
