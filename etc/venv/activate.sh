@@ -3,6 +3,4 @@ conda activate candig
 pip install -U -r $PWD/etc/venv/requirements.txt
 #pip install -U -r $PWD/etc/venv/requirements-dev.txt
 export PATH="$PWD/bin:$PATH"
-pip install -U -r $PWD/etc/venv/requirements.txt
-#pip install -U -r $PWD/etc/venv/requirements-dev.txt
 #eval $(docker-machine env manager)
