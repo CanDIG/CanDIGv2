@@ -24,16 +24,17 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${JUPYTER_UI_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:jupyter.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.jupyter.rule=Host(`jupyter.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.jupyter.loadbalancer.server.port=${JUPYTER_UI_PORT}"
+    logging: *default-logging
     environment:
       #- NOTEBOOK_DIR=${JUPYTER_NOTEBOOK_DIR}
       #- JPY_PORT=${JUPYTER_UI_PORT}
       #- JPY_USR=${JUPYTER_USER}
-       - JUPYTER_ENABLE_LAB=${JUPYTER_ENABLE_LAB}
-       - GRANT_SUDO=${JUPYTER_ENABLE_SUDO}
+      - JUPYTER_ENABLE_LAB=${JUPYTER_ENABLE_LAB}
+      - GRANT_SUDO=${JUPYTER_ENABLE_SUDO}
     entrypoint:
       - /usr/local/bin/start-notebook.sh
     command:

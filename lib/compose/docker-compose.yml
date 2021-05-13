@@ -4,49 +4,41 @@ networks:
   bridge:
     external: true
   bridge-net:
-    external: true
   ingress:
-    external: true
   traefik-net:
-    external: true
   agent-net:
-    external: true
 
 volumes:
   datasets-data:
-    external: true
   minio-data:
-    external: true
   minio-config:
-    external: true
   mc-config:
-    external: true
   toil-jobstore:
-    external: true
   portainer-data:
-    external: true
   prometheus-data:
-    external: true
   consul-data:
-    external: true
   grafana-data:
-    external: true
-
-configs:
-  chord-metadata-settings:
-    file: $PWD/lib/chord-metadata/settings.py
-  wes-dependency-resolver:
-    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
+  traefik-data:
+  keycloak-data:
+  tyk-data:
+  tyk-redis-data:
+  vault-data:
 
 secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials
+  federation-peers:
+    file: $PWD/lib/federation-service/federation_service/configs/federation-peers.json
+  federation-services:
+    file: $PWD/lib/federation-service/federation_service/configs/federation-services.json
   metadata-app-secret:
     file: $PWD/tmp/secrets/metadata-app-secret
   metadata-db-user:
     file: $PWD/tmp/secrets/metadata-db-user
   metadata-db-secret:
     file: $PWD/tmp/secrets/metadata-db-secret
+  metadata-settings:
+    file: $PWD/lib/chord-metadata/settings.py
   minio-access-key:
     file: $PWD/tmp/secrets/minio-access-key
   minio-secret-key:
@@ -59,3 +51,9 @@ secrets:
     file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.key
   traefik-ssl-crt:
     file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.crt
+  wes-dependency-resolver:
+    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
+  keycloak-admin-user:
+    file: $PWD/tmp/secrets/keycloak-admin-user
+  keycloak-admin-password:
+    file: $PWD/tmp/secrets/keycloak-admin-password

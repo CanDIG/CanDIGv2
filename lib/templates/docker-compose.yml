@@ -23,8 +23,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.role == {{service_role}}
-          # manager or worker
+          - node.role == {{service_role}} # manager or worker
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -39,15 +38,13 @@ services:
     #     max_attempts: 3
     #     window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${{{service_port}}}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:{{service_name}}.${CANDIG_DOMAIN}
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.{{service_name}}.rule=Host(`{{service_name}}.${CANDIG_DOMAIN}`)"
+        - "traefik.http.routers.{{service_name}}.entrypoints=${TRAEFIK_ENTRYPOINT}"
+        - "traefik.http.services.{{service_name}}.loadbalancer.server.port=${{{service_port}}}"
+        # include these labels (but leave disabled)
+    logging: *default-logging
     # WARNING: environment variables are world readable
     # DO NOT pass secrets through here
     environment:

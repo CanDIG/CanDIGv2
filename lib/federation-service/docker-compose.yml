@@ -6,11 +6,11 @@ services:
       context: $PWD/lib/federation-service
       args:
         venv_python: "${VENV_PYTHON}"
-    image: ${DOCKER_REGISTRY}/federation-service:${FEDERATION_SERVICE_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/federation-service:${FEDERATION_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
     ports:
-      - "${FEDERATION_SERVICE_PORT}:4232"
+      - "${FEDERATION_PORT}:4232"
     deploy:
       placement:
         constraints:
@@ -21,13 +21,14 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${FEDERATION_SERVICE_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:federation-service.${CANDIG_DOMAIN}
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
-    command: ["--host", "0.0.0.0", "--port", "4232"]
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.federation-service.rule=Host(`federation-service.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.federation-service.loadbalancer.server.port=${FEDERATION_PORT}"
+    logging: *default-logging
+    secrets:
+      - source: federation-peers
+        target: /app/federation_service/configs/peers.json
+      - source: federation-services
+        target: /app/federation_service/configs/services.json
+    entrypoint: ["uwsgi", "federation.ini", "--http", "0.0.0.0:4232"]

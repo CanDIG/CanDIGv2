@@ -21,13 +21,9 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${CHORD_DRS_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:chord-drs.${CANDIG_DOMAIN}
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.chord-drs.rule=Host(`chord-drs.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.chord-drs.loadbalancer.server.port=${CHORD_DRS_PORT}"
+    logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "5000"]

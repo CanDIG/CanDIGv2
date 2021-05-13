@@ -40,9 +40,9 @@ scrape_configs:
     static_configs:
       - targets: ['federation-service:4232']
 
-  - job_name: 'authorization'
-    static_configs:
-      - targets: ['authorization:7000']
+  #- job_name: 'authorization'
+    #static_configs:
+      #- targets: ['authorization:7000']
 
   - job_name: 'datasets'
     static_configs:

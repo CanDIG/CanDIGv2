@@ -1,5 +1,6 @@
 #!make
 
+#TODO: make debug optional
 # import global variables
 env ?= .env
 
@@ -29,6 +30,8 @@ mkdir:
 	mkdir -p $(DIR)/tmp/data
 	mkdir -p $(DIR)/tmp/secrets
 	mkdir -p $(DIR)/tmp/ssl
+	mkdir -p $(DIR)/tmp/authentication/{keycloak,tyk}
+	mkdir -p $(DIR)/tmp/authorization/vault
 
 #>>>
 # download all package binaries
@@ -45,6 +48,7 @@ bin-all: bin-conda bin-docker-machine bin-kompose bin-kubectl \
 
 #<<<
 bin-conda: mkdir
+	echo "    started bin-conda" >> ~/progress.txt
 ifeq ($(VENV_OS), linux)
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -54,6 +58,7 @@ ifeq ($(VENV_OS), darwin)
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
 endif
 	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
+	echo "    finished bin-conda" >> ~/progress.txt
 
 #>>>
 # download docker-machine (for swarm deployment)
@@ -61,9 +66,11 @@ endif
 
 #<<<
 bin-docker-machine: mkdir
+	echo "    started bin-docker-machine" >> ~/progress.txt
 	curl -Lo $(DIR)/bin/docker-machine \
 		https://github.com/docker/machine/releases/download/v0.16.2/docker-machine-`uname -s`-`uname -m`
 	chmod 755 $(DIR)/bin/docker-machine
+	echo "    finished bin-docker-machine" >> ~/progress.txt
 
 #>>>
 # download kompose (for kubernetes deployment)
@@ -71,9 +78,11 @@ bin-docker-machine: mkdir
 
 #<<<
 bin-kompose: mkdir
+	echo "    started bin-kompose" >> ~/progress.txt
 	curl -Lo $(DIR)/bin/kompose \
 		https://github.com/kubernetes/kompose/releases/download/v1.21.0/kompose-$(VENV_OS)-amd64
 	chmod 755 $(DIR)/bin/kompose
+	echo "    finished bin-kompose" >> ~/progress.txt
 
 #>>>
 # download latest kubectl (for kubernetes deployment)
@@ -81,9 +90,11 @@ bin-kompose: mkdir
 
 #<<<
 bin-kubectl: mkdir
+	echo "    started bin-kubectl" >> ~/progress.txt
 	curl -Lo $(DIR)/bin/kubectl \
 		https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/$(VENV_OS)/amd64/kubectl
 	chmod 755 $(DIR)/bin/kubectl
+	echo "    finished bin-kubectl" >> ~/progress.txt
 
 #>>>
 # download latest minikube binary from Google repo
@@ -91,9 +102,11 @@ bin-kubectl: mkdir
 
 #<<<
 bin-minikube: mkdir
+	echo "    started bin-minikube" >> ~/progress.txt
 	curl -Lo $(DIR)/bin/minikube \
 		https://storage.googleapis.com/minikube/releases/latest/minikube-$(VENV_OS)-amd64
 	chmod 755 $(DIR)/bin/minikube
+	echo "    finished bin-minikube" >> ~/progress.txt
 
 #>>>
 # download latest minio server/client from Minio repo
@@ -101,12 +114,14 @@ bin-minikube: mkdir
 
 #<<<
 bin-minio: mkdir
+	echo "    started bin-minio" >> ~/progress.txt
 	curl -Lo $(DIR)/bin/minio \
 		https://dl.minio.io/server/minio/release/$(VENV_OS)-amd64/minio
 	curl -Lo $(DIR)/bin/mc \
 		https://dl.minio.io/client/mc/release/$(VENV_OS)-amd64/mc
 	chmod 755 $(DIR)/bin/minio
 	chmod 755 $(DIR)/bin/mc
+	echo "    finished bin-minio" >> ~/progress.txt
 
 #>>>
 # download prometheus binaries from Github repo
@@ -114,11 +129,13 @@ bin-minio: mkdir
 
 #<<<
 bin-prometheus:
+	echo "    started bin-prometheus" >> ~/progress.txt
 	mkdir -p $(DIR)/bin/prometheus
 	curl -Lo $(DIR)/bin/prometheus/prometheus.tar.gz \
 		https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).$(VENV_OS)-amd64.tar.gz
 	tar --strip-components=1 -zxvf $(DIR)/bin/prometheus/prometheus.tar.gz -C $(DIR)/bin/prometheus
 	chmod 755 $(DIR)/bin/prometheus/prometheus
+	echo "    finished bin-prometheus" >> ~/progress.txt
 
 #>>>
 # download latest traefik binary from Github repo
@@ -126,9 +143,12 @@ bin-prometheus:
 
 #<<<
 bin-traefik: mkdir
-	curl -Lo $(DIR)/bin/traefik \
-		https://github.com/containous/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik
+	echo "    started bin-traefik" >> ~/progress.txt
+	curl -Lo $(DIR)/bin/traefik.tar.gz \
+		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_$(VENV_OS)_amd64.tar.gz
+	tar -xvzf $(DIR)/bin/traefik.tar.gz -C bin/
 	chmod 755 $(DIR)/bin/traefik
+	echo "    finished bin-traefik" >> ~/progress.txt
 
 #>>>
 # (re)build service image and deploy/test using docker-compose
@@ -139,9 +159,11 @@ bin-traefik: mkdir
 
 #<<<
 build-%:
-	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose \
-		-f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml build $(BUILD_OPTS)
+	echo "    started build-$*" >> ~/progress.txt
+	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml $(DIR)/lib/$*/docker-compose.yml \
+		| docker-compose -f - build $(BUILD_OPTS)
+	echo "    finished build-$*" >> ~/progress.txt
 
 #>>>
 # run all cleanup functions
@@ -173,7 +195,6 @@ clean-bin:
 clean-certs:
 	rm -f $(DIR)/tmp/ssl/selfsigned-*
 
-#TODO: test/verify clean-compose works
 #>>>
 # stops and removes docker-compose instances
 # make clean-compose
@@ -181,8 +202,9 @@ clean-certs:
 #<<<
 .PHONY: clean-compose
 clean-compose:
-	$(foreach MODULE, $(CANDIG_MODULES), docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$(MODULE)/docker-compose.yml down --remove-orphans;)
+	$(foreach MODULE, $(CANDIG_MODULES), \
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml $(DIR)/lib/$(MODULE)/docker-compose.yml \
+		| docker-compose -f - down;)
 
 #>>>
 # deactivate and remove conda env $VENV_NAME
@@ -316,6 +338,152 @@ clean-volumes:
 .PHONY: compose
 compose:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
+	# cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+	# 	$(foreach MODULE, $(CANDIG_MODULES), $(DIR)/lib/$(MODULE)/docker-compose.yml) \
+	# 	| docker-compose -f - up
+
+
+#TODO: deprecate compose-authx-down
+#>>>
+# close all authentication and authorization services
+
+#<<<
+compose-authx-down:
+	# closes primary authn and authx components
+	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authentication/docker-compose.yml down
+	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authorization/docker-compose.yml down
+	# - remove intermittent docker images
+	# -- authentication
+	docker rmi compose_keycloak:latest --force
+	docker rmi compose_tyk:latest --force
+	# -- authorization
+	#docker rmi compose_vault:latest --force
+	docker rmi compose_candig-server-authorization:latest --force
+
+	# closes the candig server along with its corresponding arbiter and opa
+	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml down
+
+
+#TODO: deprecate compose-authx-clean
+#>>>
+# dismantle and remove all data of
+# candig-server prototype instances with authentication
+# and authorization services
+
+#<<<
+compose-authx-clean: compose-authx-down
+	# clean keycloak
+	docker volume rm keycloak-data
+	# clean tyk
+	docker volume rm tyk-data
+	docker volume rm tyk-redis-data
+	# clean vault
+	docker volume rm vault-data
+
+
+#>>>
+# create instances of authentication and
+# authorization services
+
+#<<<
+#TODO: deprecate this method
+#TODO: use init-auth to set up auth stack
+#TODO: move data directories to tmp/ instead of lib/
+
+compose-authx-setup:
+	# # sets up keycloak, tyk, vault, a candig-server-arbiter, and a candig-server-authorization
+	echo
+
+	mkdir -p ${PWD}/lib/authentication/keycloak
+	mkdir -p ${PWD}/lib/authentication/tyk
+
+	mkdir -p ${PWD}/lib/authorization/vault
+
+
+	# Generate dynamic environment variables
+	$(eval KEYCLOAK_CLIENT_ID_64=$(shell echo -n $(KEYCLOAK_CLIENT_ID) | base64))
+
+	# temp: in production, explicitly indicating port 443 breaks vaults internal oidc provider checks.
+	# simply remove the ":443 from the authentication services public url for this purpose:
+	if [[ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":443"* ]]; then \
+		echo "option 1"; \
+		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:443\)\$//g')) \
+	elif [[ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":80"* ]]; then \
+		echo "option 2"; \
+		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:80\)\$//g')) \
+	else \
+		echo "option 3"; \
+		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL})) \
+	fi
+
+
+	# inject dynamic variables in a "Makefile-ish" way
+	# by chaining these calls "all in one line" so that
+	# variables properly get exported from each sub script
+	# and propogate to the next ones
+	export KEYCLOAK_CLIENT_ID_64=$(KEYCLOAK_CLIENT_ID_64); \
+	export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(TEMP_KEYCLOAK_SERVICE_PUBLIC_URL); \
+	\
+	echo ; \
+	echo "Setting up Keycloak;" ; \
+	source ${PWD}/etc/setup/scripts/subtasks/keycloak_setup.sh; \
+	echo ; \
+	echo "Setting up Tyk;" ; \
+	${PWD}/etc/setup/scripts/subtasks/tyk_setup.sh; \
+	echo ; \
+	echo "Setting up Vault;" ; \
+	source ${PWD}/etc/setup/scripts/subtasks/vault_setup.sh; \
+	echo ; \
+	echo "Setting up OPAs;" ; \
+	${PWD}/etc/setup/scripts/subtasks/opa_setup.sh ; \
+	echo ; \
+	echo "Setting up Arbiters;" ; \
+	${PWD}/etc/setup/scripts/subtasks/arbiter_setup.sh
+
+
+	# clean up
+	echo
+	echo "Moving temporary files to ${PWD}/tmp/authorization/*"
+	mkdir -p ${PWD}/tmp/configs/authentication
+	mkdir -p ${PWD}/tmp/configs/authorization
+
+	cp -r ${PWD}/lib/authentication/keycloak/tmp ${PWD}/tmp/configs/authentication/keycloak/
+	cp -r ${PWD}/lib/authentication/tyk/tmp ${PWD}/tmp/configs/authentication/tyk/
+
+	cp -r ${PWD}/lib/authorization/vault/tmp ${PWD}/tmp/configs/authorization/vault/
+	cp -r ${PWD}/lib/candig-server/authorization/tmp ${PWD}/tmp/configs/authorization/candig-server
+
+	rm -rf ${PWD}/lib/authentication/*/tmp
+	rm -rf ${PWD}/lib/authorization/*/tmp
+	rm -rf ${PWD}/lib/candig-server/authorization/tmp
+
+
+	echo
+	echo "-- authorization Setup Done! --"
+	echo
+
+
+#>>>
+# create an instance of a candig-server prototype
+# with authentication and authorization services
+
+#<<<
+#TODO: deprecate compose-authx-setup-candig-server
+compose-authx-setup-candig-server: compose-authx-setup
+	# intended to run candig server alongside the authx modules
+	docker-compose -f ${DIR}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml up -d candig-server 2>&1
+
+
+#>>>
+# run authentication and authorization
+# tests with both chrome and firefox front-ends
+
+#<<<
+#TODO: fix broken tests
+#test-authx-prototype:
+	#$(DIR)/etc/tests/integration/authx/run_tests.sh 20 chrome True
+	#$(DIR)/etc/tests/integration/authx/run_tests.sh 20 firefox True
+
 
 #>>>
 # deploy/test individual modules using docker-compose
@@ -324,8 +492,11 @@ compose:
 
 #<<<
 compose-%:
-	docker-compose -f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml up -d
+	echo "    started compose-$*" >> ~/progress.txt
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+		$(DIR)/lib/$*/docker-compose.yml \
+		| docker-compose -f - up -d
+	echo "    finished compose-$*" >> ~/progress.txt
 
 #>>>
 # create docker bridge networks
@@ -373,6 +544,10 @@ docker-secrets: minio-secrets
 	$(MAKE) secret-metadata-app-secret
 	@echo admin > $(DIR)/tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-db-secret
+	@echo ${KEYCLOAK_ADMIN_USER} > $(DIR)/tmp/secrets/keycloak-admin-user
+	#TODO: use random generated pw instead of env-var
+	@echo ${KEYCLOAK_ADMIN_PW} > $(DIR)/tmp/secrets/keycloak-admin-password
+	#$(MAKE) secret-keycloak-admin-password
 
 #>>>
 # create persistant volumes for docker containers
@@ -391,6 +566,11 @@ docker-volumes:
 	docker volume create portainer-data
 	docker volume create prometheus-data
 	docker volume create toil-jobstore
+	docker volume create traefik-data
+	docker volume create keycloak-data
+	docker volume create tyk-data
+	docker volume create tyk-redis-data
+	docker volume create vault-data
 
 #>>>
 # (re)build service image for all modules
@@ -410,10 +590,12 @@ images: toil-docker
 #<<<
 .PHONY: init-conda
 init-conda:
-	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip
+	echo "    started init-conda" >> ~/progress.txt
+	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
 	@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
 	@echo "Activate conda env: conda activate $(VENV_NAME)"
 	@echo "Install requirements: pip install -U -r $(DIR)/etc/venv/requirements.txt"
+	echo "    finished init-conda" >> ~/progress.txt
 
 #>>>
 # initialize docker and create required docker networks, volumes, certs, secrets, and conda env
@@ -421,7 +603,7 @@ init-conda:
 
 #<<<
 .PHONY: init-docker
-init-docker:docker-networks docker-volumes ssl-cert docker-secrets
+init-docker: docker-networks docker-volumes ssl-cert docker-secrets
 
 #>>>
 # initialize kubernetes environment
@@ -507,9 +689,9 @@ minio-secrets:
 
 #<<<
 pull-%:
-	docker-compose \
-		-f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml pull
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+			$(DIR)/lib/$*/docker-compose.yml \
+			| docker-compose -f - pull
 
 #>>>
 # push docker image to $DOCKER_REGISTRY
@@ -518,9 +700,9 @@ pull-%:
 
 #<<<
 push-%:
-	docker-compose \
-		-f $(DIR)/lib/compose/docker-compose.yml \
-		-f $(DIR)/lib/$*/docker-compose.yml push
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+			$(DIR)/lib/$*/docker-compose.yml \
+			| docker-compose -f - push
 
 #>>>
 # create a random secret and add it to tmp/secrets/$secret_name
@@ -529,7 +711,7 @@ push-%:
 #<<<
 secret-%:
 	@dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | rev | cut -b 2- | rev > $(DIR)/tmp/secrets/$*
+		| base64 | rev | cut -b 2- | rev | tr -d '\n\r' > $(DIR)/tmp/secrets/$*
 
 #>>>
 # generate root-ca and site ssl certs using openssl
@@ -571,9 +753,10 @@ stack:
 
 #<<<
 stack-%:
-	docker stack deploy \
-		--compose-file $(DIR)/lib/swarm/docker-compose.yml \
-		--compose-file $(DIR)/lib/$*/docker-compose.yml $(DOCKER_NAMESPACE)
+	cat $(DIR)/lib/swarm/docker-compose.yml \
+		$(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+		$(DIR)/lib/$*/docker-compose.yml > $(DIR)/tmp/data/docker-compose.yml
+	docker stack deploy --compose-file $(DIR)/tmp/data/docker-compose.yml $(DOCKER_NAMESPACE)
 
 #>>>
 # initialize primary docker-swarm master node
@@ -629,6 +812,8 @@ swarm-secrets:
 	docker secret create metadata-app-secret $(DIR)/tmp/secrets/metadata-app-secret
 	docker secret create metadata-db-user $(DIR)/tmp/secrets/metadata-db-user
 	docker secret create metadata-db-secret $(DIR)/tmp/secrets/metadata-db-secret
+	docker secret create keycloak-admin-user $(DIR)/tmp/secrets/keycloak-admin-user
+	docker secret create keycloak-admin-password $(DIR)/tmp/secrets/keycloak-admin-password
 
 #>>>
 # create toil images using upstream CanDIG Toil repo
@@ -637,6 +822,7 @@ swarm-secrets:
 #<<<
 .PHONY: toil-docker
 toil-docker:
+	echo "    started toil-docker" >> ~/progress.txt
 	VIRTUAL_ENV=1 DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 TOIL_DOCKER_REGISTRY=$(DOCKER_REGISTRY) $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
 	$(foreach MODULE,$(TOIL_MODULES), \
 		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION)-$(TOIL_BUILD_HASH) \
@@ -644,6 +830,7 @@ toil-docker:
 	$(foreach MODULE,$(TOIL_MODULES), \
 		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION) \
 		$(DOCKER_REGISTRY)/$(MODULE):latest;)
+	echo "    finished toil-docker" >> ~/progress.txt
 
 #>>>
 # deploys all modules using Tox

@@ -15,8 +15,11 @@ import sys
 import logging
 
 from urllib.parse import urlparse
+from dotenv import load_dotenv
 
 from .. import __version__
+
+load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,8 +27,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
-
-metadata_app_secret = open('/run/secrets/metadata_app_secret', 'r')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", metadata_app_secret.read())
@@ -59,6 +60,10 @@ if DEBUG:
 
 APPEND_SLASH = False
 
+# Candig-specific settings
+
+INSIDE_CANDIG = os.environ.get("INSIDE_CANDIG", "false").lower() == "true"
+CANDIG_OPA_URL = os.environ.get("CANDIG_OPA_URL")
 
 # Application definition
 
@@ -78,6 +83,8 @@ INSTALLED_APPS = [
     'chord_metadata_service.resources.apps.ResourcesConfig',
     'chord_metadata_service.restapi.apps.RestapiConfig',
 
+    'corsheaders',
+    'django_filters',
     'rest_framework',
     'django_nose',
     'rest_framework_swagger',
@@ -86,13 +93,17 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'chord_metadata_service.restapi.middleware.CandigAuthzMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = []
 
 ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
 
@@ -180,7 +191,8 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
     'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
 # Password validation

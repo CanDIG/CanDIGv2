@@ -4,33 +4,37 @@ FROM python:${venv_python}-alpine
 
 LABEL Maintainer="CanDIG Project"
 
-USER root
+ENV PYTHONUNBUFFERED=1 \
+  PYTHONDONTWRITEBYTECODE=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=off \
+  PIP_DISABLE_PIP_VERSION_CHECK=on
 
-RUN apk update
+RUN adduser -h /app -D user
 
 RUN apk add --no-cache \
-	autoconf \
-	automake \
-	bash \
-	build-base \
-	bzip2-dev \
-	curl \
-	curl-dev \
-	gcc \
-	git \
-	libcurl \
-	libressl-dev \
-	linux-headers \
-	make \
-	musl-dev \
-	perl \
-	postgresql-dev \
-	postgresql-libs \
-	xz-dev \
-	yaml-dev \
-	zlib-dev
+  autoconf \
+  automake \
+  build-base \
+  bzip2-dev \
+  curl \
+  curl-dev \
+  gcc \
+  git \
+  libcurl \
+  libffi-dev \
+  libressl-dev \
+  linux-headers \
+  make \
+  musl-dev \
+  perl \
+  postgresql-dev \
+  postgresql-libs \
+  xz-dev \
+  yaml-dev \
+  zlib-dev
 
-RUN mkdir /app
+USER user
 WORKDIR /app
 
 # clone or COPY module repo as needed
@@ -41,7 +45,7 @@ WORKDIR /app
 # run necessary steps to implement module
 # example:
 # WORKDIR /app/chord_drs
-# RUN pip install -r requirements.txt && flask db upgrade
+# RUN pip install --no-cache-dir -r requirements.txt && flask db upgrade
 
 # Run the model service server
 # example:

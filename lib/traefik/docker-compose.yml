@@ -6,18 +6,12 @@ services:
     networks:
       - ${DOCKER_NET}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-data:/letsencrypt
     ports:
-      - target: 80
-        published: ${TRAEFIK_HTTP_PORT}
-        mode: host
-      - target: 443
-        published: ${TRAEFIK_HTTPS_PORT}
-        mode: host
-      - target: 8080
-        published: ${TRAEFIK_UI_PORT}
-        protocol: tcp
-        mode: ingress
+      - "${TRAEFIK_HTTP_PORT}:80"
+      - "${TRAEFIK_HTTPS_PORT}:443"
+      - "${TRAEFIK_UI_PORT}:8080"
     deploy:
       placement:
         constraints:
@@ -28,34 +22,71 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${TRAEFIK_UI_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:traefik.${CANDIG_DOMAIN}
-        - traefik.http.routers.traefik.rule=Path(/traefik)
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.${CANDIG_DOMAIN}`)"
+        - "traefik.http.routers.traefik.entrypoints=${TRAEFIK_ENTRYPOINT}"
+        - "traefik.http.services.traefik.loadbalancer.server.port=${TRAEFIK_UI_PORT}"
+    logging: *default-logging
+    #TODO: implement cloudflare dns-auth-01 for letsencrypt
+    #environment:
+      #- CF_API_EMAIL=${CANDIG_EMAIL}
+      #- CF_API_KEY_FILE=/run/secrets/cf-api.key
     secrets:
       - source: traefik-ssl-key
         target: site.key
       - source: traefik-ssl-crt
         target: site.crt
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+      #- source: cf-api-key
+        #target: cf-api.key
     command:
-      - traefik
-      - --api
-      - --consul
-      - --consul.endpoint=consul:${CONSUL_HTTP_PORT}
-      - --docker
-      - --docker.domain=${CANDIG_DOMAIN}
-      - --docker.network=${DOCKER_NET}
-      - --docker.swarmmode=${TRAEFIK_SWARM}
-      - --docker.watch
-      - --defaultEntrypoints='http, https'
-      - --entryPoints="Name:http Address::${TRAEFIK_HTTP_PORT} Redirect.EntryPoint:https"
-      - --entryPoints="Name:https Address::${TRAEFIK_HTTPS_PORT} TLS:/run/secrets/site.crt,/run/secrets/site.key"
-      - --kubernetes
-      - --metrics
-      - --metrics.prometheus.buckets=0.1,0.3,1.2,5.0
+      # api and metrics
+      - "--api=true"
+      - "--api.dashboard=true"
+      #- "--api.debug=${TRAEFIK_EXPOSE}"
+      - "--api.insecure=${TRAEFIK_EXPOSE}"
+      - "--metrics=true"
+      - "--metrics.prometheus=true"
+      - "--global.sendanonymoususage=false"
+      #TODO: enable distributed tracing
+      #- "--tracing=true"
+      #- "--log.level=DEBUG"
+      #- "--accesslog=true"
+
+      # entrypoints, routers, services
+      #TODO: enable mTLS to all services
+      - "--entrypoints.http.address=:${TRAEFIK_HTTP_PORT}"
+      #- "--entrypoints.http.http.redirections.entrypoint.to=https"
+      #- "--entrypoints.http.http.redirections.entrypoint.scheme=https"
+      #- "--entrypoints.http.http.redirections.entrypoint.permanent=true"
+      #- "--entrypoints.https.address=:${TRAEFIK_HTTPS_PORT}"
+      #- "--entrypoints.https.http.tls.certresolver=letsencrypt"
+      #- "--entrypoints.https.http.tls.domains[0].main=${CANDIG_DOMAIN}"
+      #- "--entrypoints.https.http.tls.domains[0].sans=*.${CANDIG_DOMAIN}"
+      #- "--providers.http.tls.cert=/run/secrets/site.crt"
+      #- "--providers.http.tls.key=/run/secrets/site.key"
+      #- "--providers.http.tls.insecureskipverify=true"
+
+      # certificate resolvers
+      #- "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      #- "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=http"
+      #- "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      #- "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
+      #- "--certificatesResolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare"
+      #- "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      #- "--certificatesresolvers.letsencrypt.acme.email=info@distributedgenomics.ca"
+      #- "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+
+      # providers
+      #- "--providers.consul=true"
+      #- "--providers.consul.endpoints=consul:${CONSUL_HTTP_PORT}"
+      - "--providers.docker=true"
+      - "--providers.docker.network=${DOCKER_NET}"
+      - "--providers.docker.endpoint=${TRAEFIK_SOCKET}"
+      - "--providers.docker.swarmmode=${TRAEFIK_SWARM}"
+      - "--providers.docker.exposedbydefault=${TRAEFIK_EXPOSE}"
+      #- "--providers.docker.usebindportip=${TRAEFIK_EXPOSE}"
+      - "--providers.docker.defaultrule=Host(`{{index .Labels \"com.docker.compose.service\"}}.${CANDIG_DOMAIN}`)"
+      #- "--ping=true"
+      #- "--providers.kubernetescrd=true"
+      #- "--providers.kubernetesingress=true"

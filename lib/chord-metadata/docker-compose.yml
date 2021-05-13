@@ -7,10 +7,6 @@ services:
       args:
         venv_python: "${VENV_PYTHON}"
     image: ${DOCKER_REGISTRY}/chord-metadata:${CHORD_METADATA_VERSION:-latest}
-    #volumes:
-      #- chord-metadata-data:/data
-      #add volume name to lib/{compose,swarm,kubernetes}
-      #add volume name to docker-volumes in Makefile
     networks:
       - ${DOCKER_NET}
     ports:
@@ -27,26 +23,20 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${CHORD_METADATA_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:chord-metadata.${CANDIG_DOMAIN}
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.chord-metadata.rule=Host(`chord-metadata.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.chord-metadata.loadbalancer.server.port=${CHORD_METADATA_PORT}"
+    logging: *default-logging
     environment:
-      - CHORD_URL="${CHORD_METADATA_HOST}"
-      - CHORD_PERMISSIONS="${CHORD_METADATA_AUTH}"
-      - CHORD_DEBUG="${CHORD_METADATA_DEBUG}"
-      - POSTGRES_HOST="metadata-db"
-      - POSTGRES_USER="admin"
-    configs:
-      - source: chord-metadata-settings
-        target: /app/chord_metadata_service/metadata/settings.py
-        mode: 0644
+      - CHORD_URL=${CHORD_METADATA_HOST}
+      - CHORD_PERMISSIONS=${CHORD_METADATA_AUTH}
+      - CHORD_DEBUG=${CHORD_METADATA_DEBUG}
+      - POSTGRES_HOST=metadata-db
+      - POSTGRES_USER=admin
     secrets:
+      - source: metadata-settings
+        target: /app/chord_metadata_service/metadata/settings.py
       - source: metadata-app-secret
         target: metadata_app_secret
       - source: metadata-db-user
@@ -54,12 +44,12 @@ services:
       - source: metadata-db-secret
         target: metadata_db_secret
     entrypoint:
-      - /bin/sh
+      - /bin/bash
       - -c
       - |
         python manage.py makemigrations
         python manage.py migrate
-        python manage.py runserver
+        python manage.py runserver 0.0.0.0:8000
     #healthcheck:
       #test: ["CMD", "curl", "-f", "http://localhost:8000/metrics"]
       #interval: 30s
@@ -85,19 +75,11 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      # labels:
-      #   - traefik.enable=true
-      #   - traefik.port=${CHORD_METADATA_PORT}
-      #   - traefik.docker.network=${DOCKER_NET}
-      #   - traefik.frontend.rule=Host:metadata-db.${CANDIG_DOMAIN}
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+    logging: *default-logging
     environment:
-      - POSTGRES_USER="admin"
-      - POSTGRES_PASSWORD_FILE="/run/secrets/metadata_db_secret"
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=metadata
+      - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
     secrets:
       - source: metadata-db-user
         target: metadata_db_user

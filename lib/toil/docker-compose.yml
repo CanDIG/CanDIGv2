@@ -25,16 +25,18 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${TOIL_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:toil-server.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.toil-server.rule=Host(`toil-server.${CANDIG_DOMAIN}`)"
+        - "traefik.http.routers.toil-server.entrypoints=${TRAEFIK_ENTRYPOINT}"
+        - "traefik.http.services.toil-server.loadbalancer.server.port=${TOIL_UI_PORT}"
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
       #- AWS_ACCESS_KEY_ID=toil
       #- AWS_SECRET_ACCESS_KEY=toilsecretkey
       - AWS_DEFAULT_REGION=${MINIO_REGION}
       - AWS_DEFAULT_OUTPUT=json
+    logging: *default-logging
     secrets:
       - source: minio-access-key
         target: access_key
@@ -42,11 +44,6 @@ services:
         target: secret_key
       - source: aws-credentials
         target: ~/.aws/credentials
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
     entrypoint: ["mesos-master"]
     command:
       - --registry=in_memory
@@ -70,11 +67,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      labels:
-        - traefik.enable=true
-        - traefik.port=${TOIL_WORKER_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:toil-worker.${CANDIG_DOMAIN}
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
       #- AWS_ACCESS_KEY_ID=toil
@@ -88,11 +80,7 @@ services:
         target: secret_key
       - source: aws-credentials
         target: ~/.aws/credentials
-    logging:
-      driver: "fluentd"
-      options:
-        tag: docker.{{.Name}}
-        fluentd-async-connect: "true"
+    logging: *default-logging
     entrypoint: ["mesos-slave"]
     command:
       - --work_dir=/var/lib/mesos
