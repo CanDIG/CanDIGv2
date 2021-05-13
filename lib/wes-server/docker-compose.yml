@@ -32,9 +32,9 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
+        - "traefik.docker.lbswarm=true"
         - traefik.http.routers.wes-server.rule=Host(`wes-server.${CANDIG_DOMAIN}`)
         - traefik.http.services.wes-server.loadbalancer.server.port=${TOIL_UI_PORT}
-        - traefik.http.routers.wes-server.tls.certresolver=letsencrypt
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
       #- AWS_ACCESS_KEY_ID=toil

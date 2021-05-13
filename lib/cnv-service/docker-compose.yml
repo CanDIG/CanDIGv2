@@ -22,8 +22,8 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
+        - "traefik.docker.lbswarm=true"
         - traefik.http.routers.cnv-service.rule=Host(`cnv-service.${CANDIG_DOMAIN}`)
         - traefik.http.services.cnv-service.loadbalancer.server.port=${CNV_SERVICE_PORT}
-        - traefik.http.routers.cnv-service.tls.certresolver=letsencrypt
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "8870"]

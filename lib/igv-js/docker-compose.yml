@@ -19,8 +19,9 @@ services:
         max_attempts: 3
         window: 120s
       labels:
-        - traefik.enable=true
-        - traefik.port=${IGVJS_PORT}
-        - traefik.docker.network=${DOCKER_NET}
-        - traefik.frontend.rule=Host:igvjs.${CANDIG_DOMAIN}
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.igv.rule=Host(`igv.${CANDIG_DOMAIN}`)"
+        - "traefik.http.routers.igv.entrypoints=${TRAEFIK_ENTRYPOINT}"
+        - "traefik.http.services.igv.loadbalancer.server.port=${IGVJS_PORT}"
     logging: *default-logging

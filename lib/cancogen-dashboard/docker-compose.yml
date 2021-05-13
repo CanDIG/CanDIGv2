@@ -20,9 +20,9 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
+        - "traefik.docker.lbswarm=true"
         - traefik.http.routers.cancogen-dashboard.rule=Host(`cancogen-dashboard.${CANDIG_DOMAIN}`)
         - traefik.http.services.cancogen-dashboard.loadbalancer.server.port=${CANCOGEN_DASHBOARD_PORT}
-        - traefik.http.routers.cancogen-dashboard.tls.certresolver=letsencrypt
     logging: *default-logging
     tty: true
     environment:

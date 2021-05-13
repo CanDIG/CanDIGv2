@@ -23,7 +23,6 @@ services:
         - traefik.enable=true
         - traefik.http.routers.minio.rule=Host(`minio.${CANDIG_DOMAIN}`)
         - traefik.http.services.minio.loadbalancer.server.port=${MINIO_UI_PORT}
-        - traefik.http.routers.minio.tls.certresolver=letsencrypt
     logging: *default-logging
     environment:
       - MINIO_REGION=${MINIO_REGION}

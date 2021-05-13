@@ -27,12 +27,9 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
+        - "traefik.docker.lbswarm=true"
         - traefik.http.routers.keycloak.rule=Host(`auth.${CANDIG_DOMAIN}`)
         - traefik.http.services.keycloak.loadbalancer.server.port=${KEYCLOAK_SERVICE_CONTAINER_PORT}
-        - traefik.http.routers.keycloak.tls.certresolver=letsencrypt
-        # include these labels (but leave disabled)
-        #- traefik.http.routers.keycloak.tls.domains[0].main=${CANDIG_DOMAIN}
-        #- traefik.http.routers.keycloak.tls.domains[0].sans=*.${CANDIG_DOMAIN}
     #TODO: fix logging
     #logging: *default-logging
     environment:
@@ -70,12 +67,9 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
+        - "traefik.docker.lbswarm=true"
         - traefik.http.routers.tyk.rule=Host(`tyk.${CANDIG_DOMAIN}`)
         - traefik.http.services.tyk.loadbalancer.server.port=${TYK_SERVICE_PUBLIC_PORT}
-        - traefik.http.routers.tyk.tls.certresolver=letsencrypt
-        # include these labels (but leave disabled)
-        #- traefik.http.routers.tyk.tls.domains[0].main=${CANDIG_DOMAIN}
-        #- traefik.http.routers.tyk.tls.domains[0].sans=*.${CANDIG_DOMAIN}
     #logging: *default-logging
     volumes:
       - tyk-data:/opt/tyk-gateway

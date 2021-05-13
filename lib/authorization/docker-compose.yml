@@ -31,12 +31,9 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
+        - "traefik.docker.lbswarm=true"
         - traefik.http.routers.vault.rule=Host(`vault.${CANDIG_DOMAIN}`)
         - traefik.http.services.vault.loadbalancer.server.port=${VAULT_SERVICE_PORT}
-        - traefik.http.routers.vault.tls.certresolver=letsencrypt
-        # include these labels (but leave disabled)
-        #- traefik.http.routers.vault.tls.domains[0].main=${CANDIG_DOMAIN}
-        #- traefik.http.routers.vault.tls.domains[0].sans=*.${CANDIG_DOMAIN}
     #TODO: fix logging
     #logging: *default-logging
     command: server -config=/vault/config/vault-config.json
