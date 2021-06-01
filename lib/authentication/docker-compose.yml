@@ -47,7 +47,6 @@ services:
       retries: 3
 
   tyk:
-    #container_name: tyk
     build:
       context: ${PWD}/lib/authentication/tyk
       args:
@@ -82,7 +81,6 @@ services:
       retries: 3
 
   tyk-redis:
-    #container_name: tyk-redis
     image: redis:${TYK_REDIS_VERSION}
     networks:
      - ${DOCKER_NET}

@@ -3,7 +3,6 @@ version: '3.7'
 #TODO: rewrite docker-compose for authentication so it conforms with spec in lib/templates/docker-compose.yml
 services:
   vault:
-    #container_name: vault
     build:
       context: ${PWD}/lib/authorization/vault
       args:
