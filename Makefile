@@ -350,8 +350,13 @@ compose:
 #<<<
 compose-authx-down:
 	# closes primary authn and authx components
-	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authentication/docker-compose.yml down
+	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml stop
+	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authorization/docker-compose.yml stop
+	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authentication/docker-compose.yml stop
+
 	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authorization/docker-compose.yml down
+	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/authentication/docker-compose.yml down
+
 	# - remove intermittent docker images
 	# -- authentication
 	docker rmi compose_keycloak:latest --force
@@ -373,12 +378,12 @@ compose-authx-down:
 #<<<
 compose-authx-clean: compose-authx-down
 	# clean keycloak
-	docker volume rm keycloak-data
+	docker volume rm compose_keycloak-data
 	# clean tyk
-	docker volume rm tyk-data
-	docker volume rm tyk-redis-data
+	docker volume rm compose_tyk-data
+	docker volume rm compose_tyk-redis-data
 	# clean vault
-	docker volume rm vault-data
+	docker volume rm compose_vault-data
 
 
 #>>>
