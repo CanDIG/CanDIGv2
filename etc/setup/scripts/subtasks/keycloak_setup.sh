@@ -30,19 +30,19 @@ mkdir -p ${PWD}/lib/authentication/keycloak/tmp
 
 # Copy files from template configs
 echo "Copying application-users.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/application-users.properties ${PWD}/lib/authentication/keycloak/tmp/application-users.properties
+cp ${PWD}/lib/authentication/keycloak/configuration_templates/application-users.properties ${PWD}/lib/authentication/keycloak/tmp/application-users.properties
 
 echo "Copying logging.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/logging.properties ${PWD}/lib/authentication/keycloak/tmp/logging.properties
+cp ${PWD}/lib/authentication/keycloak/configuration_templates/logging.properties ${PWD}/lib/authentication/keycloak/tmp/logging.properties
 
 echo "Copying mgmt-users.properties .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/mgmt-users.properties ${PWD}/lib/authentication/keycloak/tmp/mgmt-users.properties
+cp ${PWD}/lib/authentication/keycloak/configuration_templates/mgmt-users.properties ${PWD}/lib/authentication/keycloak/tmp/mgmt-users.properties
 
 echo "Copying standalone.xml .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone.xml ${PWD}/lib/authentication/keycloak/tmp/standalone.xml
+cp ${PWD}/lib/authentication/keycloak/configuration_templates/standalone.xml ${PWD}/lib/authentication/keycloak/tmp/standalone.xml
 
 echo "Copying standalone-ha.xml .."
-cp ${PWD}/etc/setup/templates/configs/keycloak/configuration/standalone-ha.xml ${PWD}/lib/authentication/keycloak/tmp/standalone-ha.xml
+cp ${PWD}/lib/authentication/keycloak/configuration_templates/standalone-ha.xml ${PWD}/lib/authentication/keycloak/tmp/standalone-ha.xml
 
 
 
