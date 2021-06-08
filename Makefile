@@ -547,12 +547,17 @@ docker-secrets: minio-secrets
 	@echo admin > $(DIR)/tmp/secrets/portainer-user
 	$(MAKE) secret-portainer-secret
 	$(MAKE) secret-metadata-app-secret
+
 	@echo admin > $(DIR)/tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-db-secret
+
 	@echo ${KEYCLOAK_ADMIN_USER} > $(DIR)/tmp/secrets/keycloak-admin-user
-	#TODO: use random generated pw instead of env-var
-	@echo ${KEYCLOAK_ADMIN_PW} > $(DIR)/tmp/secrets/keycloak-admin-password
-	#$(MAKE) secret-keycloak-admin-password
+	$(MAKE) secret-keycloak-admin-password
+
+	# TODO: review
+	@echo "Creating test-user 1 & 2 passwords"
+	$(MAKE) secret-keycloak-test-password-1
+	$(MAKE) secret-keycloak-test-password-2
 
 #>>>
 # create persistant volumes for docker containers
@@ -819,6 +824,11 @@ swarm-secrets:
 	docker secret create metadata-db-secret $(DIR)/tmp/secrets/metadata-db-secret
 	docker secret create keycloak-admin-user $(DIR)/tmp/secrets/keycloak-admin-user
 	docker secret create keycloak-admin-password $(DIR)/tmp/secrets/keycloak-admin-password
+
+	# TODO: review
+	docker secret create keycloak-test-password-1 $(DIR)/tmp/secrets/keycloak-test-password-1
+	docker secret create keycloak-test-password-2 $(DIR)/tmp/secrets/keycloak-test-password-2
+
 
 #>>>
 # create toil images using upstream CanDIG Toil repo

@@ -7,11 +7,8 @@ usage () {
   echo "Make sure to set relevant environment variables!"
   echo "Current setup: "
   echo "KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}"
-  echo "KEYCLOAK_ADMIN_PW: ${KEYCLOAK_ADMIN_PW}"
   echo "KEYCLOAK_TEST_USER: ${KEYCLOAK_TEST_USER}"
-  echo "KEYCLOAK_TEST_PW: ${KEYCLOAK_TEST_PW}"
-  echo "KEYCLOAK_TEST_USER: ${KEYCLOAK_TEST_USER_TWO}"
-  echo "KEYCLOAK_TEST_PW: ${KEYCLOAK_TEST_PW_TWO}"
+  echo "KEYCLOAK_TEST_USER_TWO: ${KEYCLOAK_TEST_USER_TWO}"
   echo "KEYCLOAK_SERVICE_PUBLIC_URL: ${KEYCLOAK_SERVICE_PUBLIC_URL}"
   echo "KEYCLOAK_SERVICE_PUBLIC_PORT: ${KEYCLOAK_SERVICE_PUBLIC_PORT}"
   echo "CANDIG_AUTH_DOMAIN: ${CANDIG_AUTH_DOMAIN}"
@@ -64,10 +61,12 @@ fi
 add_users() {
   # CANDIG_AUTH_DOMAIN is the name of the keycloak server inside the compose network
   echo "Adding ${KEYCLOAK_TEST_USER}"
-  docker exec ${CANDIG_AUTH_DOMAIN} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KEYCLOAK_TEST_USER} -p ${KEYCLOAK_TEST_PW} -r ${KEYCLOAK_REALM}
+  TEMP_TEST_PW_1=$(cat tmp/secrets/keycloak-test-password-1)
+  docker exec ${CANDIG_AUTH_DOMAIN} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KEYCLOAK_TEST_USER} -p ${TEMP_TEST_PW_1} -r ${KEYCLOAK_REALM}
 
   echo "Adding ${KEYCLOAK_TEST_USER_TWO}"
-  docker exec ${CANDIG_AUTH_DOMAIN} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KEYCLOAK_TEST_USER_TWO} -p ${KEYCLOAK_TEST_PW_TWO} -r ${KEYCLOAK_REALM}
+  TEMP_TEST_PW_2=$(cat tmp/secrets/keycloak-test-password-2)
+  docker exec ${CANDIG_AUTH_DOMAIN} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KEYCLOAK_TEST_USER_TWO} -p ${TEMP_TEST_PW_2} -r ${KEYCLOAK_REALM}
 
   echo "Restarting the keycloak container"
   docker restart ${CANDIG_AUTH_DOMAIN}
@@ -76,11 +75,11 @@ add_users() {
 ###############
 
 get_token () {
-  KEYCLOAK_ADMIN_PW=$(cat tmp/secrets/keycloak-admin-password)
+  TEMP_ADMIN_PW=$(cat tmp/secrets/keycloak-admin-password)
   BID=$(curl \
     -d "client_id=admin-cli" \
-    -d "username=$KEYCLOAK_ADMIN_USER" \
-    -d "password=$KEYCLOAK_ADMIN_PW" \
+    -d "username=${KEYCLOAK_ADMIN_USER}" \
+    -d "password=${TEMP_ADMIN_PW}" \
     -d "grant_type=password" \
     "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/master/protocol/openid-connect/token" -k 2> /dev/null )
   echo ${BID} | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["access_token"])'
