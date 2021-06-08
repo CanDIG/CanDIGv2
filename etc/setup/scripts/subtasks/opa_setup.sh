@@ -7,7 +7,7 @@ mkdir -p ${PWD}/lib/candig-server/authorization/tmp
 
 # policy.rego
 echo "Working on candig-server.policy.rego .."
-envsubst < ${PWD}/etc/setup/templates/configs/opa/candig-server.policy.rego.tpl > ${PWD}/lib/candig-server/authorization/tmp/policy.rego
+envsubst < ${PWD}/lib/candig-server/authorization/configuration_templates/candig-server.policy.rego.tpl > ${PWD}/lib/candig-server/authorization/tmp/policy.rego
 
 
 # Verify if opa container is running
