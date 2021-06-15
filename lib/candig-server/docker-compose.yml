@@ -37,7 +37,6 @@ services:
       args:
         - BASE_IMAGE=openpolicyagent/opa:${OPA_VERSION}
     image: ${DOCKER_REGISTRY}/candig-server-opa:${CANDIG_SERVER_VERSION}
-    #container_name: ${CANDIG_SERVER_AUTHORIZATION_CONTAINER_NAME}
     networks:
       - ${DOCKER_NET}
     ports:
@@ -71,7 +70,6 @@ services:
 
   candig-server-arbiter:
     image: ${DOCKER_REGISTRY}/arbiter:latest
-    #container_name: ${CANDIG_ARBITER_HOST}
     networks:
       - ${DOCKER_NET}
     ports:
