@@ -433,8 +433,10 @@ compose-authx-setup:
 	export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(TEMP_KEYCLOAK_SERVICE_PUBLIC_URL); \
 	\
 	echo ; \
-	echo "Setting up Keycloak;" ; \
-	source ${PWD}/etc/setup/scripts/subtasks/keycloak_setup.sh; \
+	if [[ ${AUTHN_USE_LOCAL_IDP} == 1 ]]; then \
+		echo "Setting up Keycloak;" ; \
+		source ${PWD}/etc/setup/scripts/subtasks/keycloak_setup.sh; \
+	fi ; \
 	echo ; \
 	echo "Setting up Tyk;" ; \
 	${PWD}/etc/setup/scripts/subtasks/tyk_setup.sh; \
