@@ -19,7 +19,7 @@ echo "Working on vault-config.json .."
 envsubst < ${PWD}/lib/authorization/vault/configuration_templates/vault-config.json.tpl > ${PWD}/lib/authorization/vault/tmp/vault-config.json
 
 # boot container
-docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authorization/docker-compose.yml up -d vault
+export SERVICE=vault && make compose-authorization
 
 # -- todo: run only if not already initialized --
 # --- temp

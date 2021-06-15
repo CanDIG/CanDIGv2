@@ -204,6 +204,9 @@ clean-certs:
 clean-compose:
 	$(foreach MODULE, $(CANDIG_MODULES), \
 		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml $(DIR)/lib/$(MODULE)/docker-compose.yml \
+		| docker-compose -f - stop;)
+	$(foreach MODULE, $(CANDIG_MODULES), \
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml $(DIR)/lib/$(MODULE)/docker-compose.yml \
 		| docker-compose -f - down;)
 
 #>>>
@@ -359,11 +362,11 @@ compose-authx-down:
 
 	# - remove intermittent docker images
 	# -- authentication
-	docker rmi compose_keycloak:latest --force
-	docker rmi compose_tyk:latest --force
+	docker rmi candigv2_keycloak:latest --force
+	docker rmi candigv2_tyk:latest --force
 	# -- authorization
-	#docker rmi compose_vault:latest --force
-	docker rmi compose_candig-server-authorization:latest --force
+	docker rmi candigv2_vault:latest --force
+	docker rmi candigv2_candig-server-authorization:latest --force
 
 	# closes the candig server along with its corresponding arbiter and opa
 	docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml down
@@ -378,12 +381,12 @@ compose-authx-down:
 #<<<
 compose-authx-clean: compose-authx-down
 	# clean keycloak
-	docker volume rm compose_keycloak-data
+	docker volume rm candigv2_keycloak-data
 	# clean tyk
-	docker volume rm compose_tyk-data
-	docker volume rm compose_tyk-redis-data
+	docker volume rm candigv2_tyk-data
+	docker volume rm candigv2_tyk-redis-data
 	# clean vault
-	docker volume rm compose_vault-data
+	docker volume rm candigv2_vault-data
 
 
 #>>>
@@ -476,8 +479,9 @@ compose-authx-setup:
 #TODO: deprecate compose-authx-setup-candig-server
 compose-authx-setup-candig-server: compose-authx-setup
 	# intended to run candig server alongside the authx modules
-	docker-compose -f ${DIR}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml up -d candig-server 2>&1
+	#docker-compose -f ${DIR}/lib/compose/docker-compose.yml -f $(DIR)/lib/candig-server/docker-compose.yml up -d candig-server 2>&1
 
+	export SERVICE=candig-server && $(MAKE) compose-candig-server
 
 #>>>
 # run authentication and authorization
@@ -500,7 +504,7 @@ compose-%:
 	echo "    started compose-$*" >> ~/progress.txt
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(DIR)/lib/$*/docker-compose.yml \
-		| docker-compose -f - up -d
+		| docker-compose -f - up -d ${SERVICE}
 	echo "    finished compose-$*" >> ~/progress.txt
 
 #>>>

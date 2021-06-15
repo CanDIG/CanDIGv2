@@ -48,7 +48,7 @@ KEYCLOAK_CONTAINERS=$(echo $(docker ps | grep keycloak | wc -l))
 echo "Number of keycloak containers running: ${KEYCLOAK_CONTAINERS}"
 if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
    echo "Booting keycloak container!"
-   docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authentication/docker-compose.yml up -d keycloak
+   export SERVICE=keycloak && make compose-authentication   
    sleep 5
    echo ">> .. waiting for keycloak to start..."
    while !  docker logs --tail 1000  $(docker ps | grep keycloak | awk '{print $1}') | grep "Undertow HTTPS listener https listening on 0.0.0.0" ; do sleep 1 ; done
