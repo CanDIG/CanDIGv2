@@ -3,7 +3,13 @@
 
 cp etc/env/example.env .env
 
-tail -n 2 $WORKING_DIR/progress.txt | grep -q "finished init-conda"; if [ $? -eq 0 ]; then echo "hi"; fi
+tail -n 2 $WORKING_DIR/progress.txt | grep -q "finished init-conda"
+if [ $? -eq 0 ]; then
+  echo "hi"
+else
+  echo "need to re-run setup"
+  rm $WORKING_DIR/progress.txt
+fi
 
 make bin-all
 make init-conda
