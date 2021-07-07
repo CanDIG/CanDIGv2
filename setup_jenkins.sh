@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-cp etc/env/example.env .env
+sed 's/DOCKER_REGISTRY=.+$/DOCKER_REGISTRY=ghcr.io\/candig/' etc/env/example.env > .env
+sed 's/WORKING_DIR=.*$//' etc/env/example.env > .env
 
 grep -q "finished init-conda" $WORKING_DIR/progress.txt
 if [ $? -ne 0 ]; then
