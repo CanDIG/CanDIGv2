@@ -530,7 +530,7 @@ docker-pull:
 .PHONY: docker-push
 docker-push:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) push-$(MODULE);)
-	$(foreach MODULE, $(TOIL_MODULES), docker push $(DOCKER_REGISTRY)/$(MODULE):latest;)
+	#$(foreach MODULE, $(TOIL_MODULES), docker push $(DOCKER_REGISTRY)/$(MODULE):latest;)
 
 #>>>
 # create secrets for CanDIG services
