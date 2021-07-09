@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
-sed 's/DOCKER_REGISTRY=.*/DOCKER_REGISTRY=ghcr.io\/candig/; s/WORKING_DIR=.*//' etc/env/example.env > .env
+LOGFILE=$PWD/tmp/logs/progress.txt
 
-grep -q "finished init-conda" $PWD/progress.txt
+sed 's/DOCKER_REGISTRY=.*/DOCKER_REGISTRY=ghcr.io\/candig/' etc/env/example.env > .env
+
+grep -q "finished init-conda" $LOGFILE
 if [ $? -ne 0 ]; then
   echo "need to re-run setup"
-  rm $PWD/progress.txt
+  rm $LOGFILE
   make bin-all
   make init-conda
   . $PWD/bin/miniconda3/etc/profile.d/conda.sh

@@ -10,6 +10,7 @@ export $(shell sed 's/=.*//' $(env))
 SHELL = bash
 DIR = $(PWD)
 CONDA = $(DIR)/bin/miniconda3/condabin/conda
+LOGFILE=$(DIR)/tmp/logs/progress.txt
 
 
 .PHONY: all
@@ -48,7 +49,7 @@ bin-all: bin-conda bin-docker-machine bin-kompose bin-kubectl \
 
 #<<<
 bin-conda: mkdir
-	echo "    started bin-conda" >> $(WORKING_DIR)/progress.txt
+	echo "    started bin-conda" >> $(LOGFILE)
 ifeq ($(VENV_OS), linux)
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -58,7 +59,7 @@ ifeq ($(VENV_OS), darwin)
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
 endif
 	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
-	echo "    finished bin-conda" >> $(WORKING_DIR)/progress.txt
+	echo "    finished bin-conda" >> $(LOGFILE)
 
 #>>>
 # download docker-machine (for swarm deployment)
@@ -66,11 +67,11 @@ endif
 
 #<<<
 bin-docker-machine: mkdir
-	echo "    started bin-docker-machine" >> $(WORKING_DIR)/progress.txt
+	echo "    started bin-docker-machine" >> $(LOGFILE)
 	curl -Lo $(DIR)/bin/docker-machine \
 		https://github.com/docker/machine/releases/download/v0.16.2/docker-machine-`uname -s`-`uname -m`
 	chmod 755 $(DIR)/bin/docker-machine
-	echo "    finished bin-docker-machine" >> $(WORKING_DIR)/progress.txt
+	echo "    finished bin-docker-machine" >> $(LOGFILE)
 
 #>>>
 # download kompose (for kubernetes deployment)
@@ -78,11 +79,11 @@ bin-docker-machine: mkdir
 
 #<<<
 bin-kompose: mkdir
-	echo "    started bin-kompose" >> $(WORKING_DIR)/progress.txt
+	echo "    started bin-kompose" >> $(LOGFILE)
 	curl -Lo $(DIR)/bin/kompose \
 		https://github.com/kubernetes/kompose/releases/download/v1.21.0/kompose-$(VENV_OS)-amd64
 	chmod 755 $(DIR)/bin/kompose
-	echo "    finished bin-kompose" >> $(WORKING_DIR)/progress.txt
+	echo "    finished bin-kompose" >> $(LOGFILE)
 
 #>>>
 # download latest kubectl (for kubernetes deployment)
@@ -90,11 +91,11 @@ bin-kompose: mkdir
 
 #<<<
 bin-kubectl: mkdir
-	echo "    started bin-kubectl" >> $(WORKING_DIR)/progress.txt
+	echo "    started bin-kubectl" >> $(LOGFILE)
 	curl -Lo $(DIR)/bin/kubectl \
 		https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/$(VENV_OS)/amd64/kubectl
 	chmod 755 $(DIR)/bin/kubectl
-	echo "    finished bin-kubectl" >> $(WORKING_DIR)/progress.txt
+	echo "    finished bin-kubectl" >> $(LOGFILE)
 
 #>>>
 # download latest minikube binary from Google repo
@@ -102,11 +103,11 @@ bin-kubectl: mkdir
 
 #<<<
 bin-minikube: mkdir
-	echo "    started bin-minikube" >> $(WORKING_DIR)/progress.txt
+	echo "    started bin-minikube" >> $(LOGFILE)
 	curl -Lo $(DIR)/bin/minikube \
 		https://storage.googleapis.com/minikube/releases/latest/minikube-$(VENV_OS)-amd64
 	chmod 755 $(DIR)/bin/minikube
-	echo "    finished bin-minikube" >> $(WORKING_DIR)/progress.txt
+	echo "    finished bin-minikube" >> $(LOGFILE)
 
 #>>>
 # download latest minio server/client from Minio repo
@@ -114,14 +115,14 @@ bin-minikube: mkdir
 
 #<<<
 bin-minio: mkdir
-	echo "    started bin-minio" >> $(WORKING_DIR)/progress.txt
+	echo "    started bin-minio" >> $(LOGFILE)
 	curl -Lo $(DIR)/bin/minio \
 		https://dl.minio.io/server/minio/release/$(VENV_OS)-amd64/minio
 	curl -Lo $(DIR)/bin/mc \
 		https://dl.minio.io/client/mc/release/$(VENV_OS)-amd64/mc
 	chmod 755 $(DIR)/bin/minio
 	chmod 755 $(DIR)/bin/mc
-	echo "    finished bin-minio" >> $(WORKING_DIR)/progress.txt
+	echo "    finished bin-minio" >> $(LOGFILE)
 
 #>>>
 # download prometheus binaries from Github repo
@@ -129,13 +130,13 @@ bin-minio: mkdir
 
 #<<<
 bin-prometheus:
-	echo "    started bin-prometheus" >> $(WORKING_DIR)/progress.txt
+	echo "    started bin-prometheus" >> $(LOGFILE)
 	mkdir -p $(DIR)/bin/prometheus
 	curl -Lo $(DIR)/bin/prometheus/prometheus.tar.gz \
 		https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).$(VENV_OS)-amd64.tar.gz
 	tar --strip-components=1 -zxvf $(DIR)/bin/prometheus/prometheus.tar.gz -C $(DIR)/bin/prometheus
 	chmod 755 $(DIR)/bin/prometheus/prometheus
-	echo "    finished bin-prometheus" >> $(WORKING_DIR)/progress.txt
+	echo "    finished bin-prometheus" >> $(LOGFILE)
 
 #>>>
 # download latest traefik binary from Github repo
@@ -143,12 +144,12 @@ bin-prometheus:
 
 #<<<
 bin-traefik: mkdir
-	echo "    started bin-traefik" >> $(WORKING_DIR)/progress.txt
+	echo "    started bin-traefik" >> $(LOGFILE)
 	curl -Lo $(DIR)/bin/traefik.tar.gz \
 		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_$(VENV_OS)_amd64.tar.gz
 	tar -xvzf $(DIR)/bin/traefik.tar.gz -C bin/
 	chmod 755 $(DIR)/bin/traefik
-	echo "    finished bin-traefik" >> $(WORKING_DIR)/progress.txt
+	echo "    finished bin-traefik" >> $(LOGFILE)
 
 #>>>
 # (re)build service image and deploy/test using docker-compose
@@ -159,11 +160,11 @@ bin-traefik: mkdir
 
 #<<<
 build-%:
-	echo "    started build-$*" >> $(WORKING_DIR)/progress.txt
+	echo "    started build-$*" >> $(LOGFILE)
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml $(DIR)/lib/$*/docker-compose.yml \
 		| docker-compose -f - build $(BUILD_OPTS)
-	echo "    finished build-$*" >> $(WORKING_DIR)/progress.txt
+	echo "    finished build-$*" >> $(LOGFILE)
 
 #>>>
 # run all cleanup functions
@@ -492,11 +493,11 @@ compose-authx-setup-candig-server: compose-authx-setup
 
 #<<<
 compose-%:
-	echo "    started compose-$*" >> $(WORKING_DIR)/progress.txt
+	echo "    started compose-$*" >> $(LOGFILE)
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(DIR)/lib/$*/docker-compose.yml \
 		| docker-compose -f - up -d
-	echo "    finished compose-$*" >> $(WORKING_DIR)/progress.txt
+	echo "    finished compose-$*" >> $(LOGFILE)
 
 #>>>
 # create docker bridge networks
@@ -530,7 +531,6 @@ docker-pull:
 .PHONY: docker-push
 docker-push:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) push-$(MODULE);)
-	#$(foreach MODULE, $(TOIL_MODULES), docker push $(DOCKER_REGISTRY)/$(MODULE):latest;)
 
 #>>>
 # create secrets for CanDIG services
@@ -590,12 +590,12 @@ images: #toil-docker
 #<<<
 .PHONY: init-conda
 init-conda:
-	echo "    started init-conda" >> $(WORKING_DIR)/progress.txt
+	echo "    started init-conda" >> $(LOGFILE)
 	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
 	@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
 	@echo "Activate conda env: conda activate $(VENV_NAME)"
 	@echo "Install requirements: pip install -U -r $(DIR)/etc/venv/requirements.txt"
-	echo "    finished init-conda" >> $(WORKING_DIR)/progress.txt
+	echo "    finished init-conda" >> $(LOGFILE)
 
 #>>>
 # initialize docker and create required docker networks, volumes, certs, secrets, and conda env
@@ -822,7 +822,7 @@ swarm-secrets:
 #<<<
 .PHONY: toil-docker
 toil-docker:
-	echo "    started toil-docker" >> $(WORKING_DIR)/progress.txt
+	echo "    started toil-docker" >> $(LOGFILE)
 	VIRTUAL_ENV=1 DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 TOIL_DOCKER_REGISTRY=$(DOCKER_REGISTRY) $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
 	$(foreach MODULE,$(TOIL_MODULES), \
 		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION)-$(TOIL_BUILD_HASH) \
@@ -830,7 +830,8 @@ toil-docker:
 	$(foreach MODULE,$(TOIL_MODULES), \
 		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION) \
 		$(DOCKER_REGISTRY)/$(MODULE):latest;)
-	echo "    finished toil-docker" >> $(WORKING_DIR)/progress.txt
+	$(foreach MODULE, $(TOIL_MODULES), docker push $(DOCKER_REGISTRY)/$(MODULE):latest;)
+	echo "    finished toil-docker" >> $(LOGFILE)
 
 #>>>
 # deploys all modules using Tox
