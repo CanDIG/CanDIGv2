@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Optional args: CanDIGv2 repo path, CanDIGv2 repo branch
 
-LOGFILE=$PWD/tmp/logs/progress.txt
+LOGFILE=$PWD/tmp/progress.txt
 
 echo "started provision.sh" | tee -a $LOGFILE
 # sudo apt-get update

@@ -10,7 +10,7 @@ export $(shell sed 's/=.*//' $(env))
 SHELL = bash
 DIR = $(PWD)
 CONDA = $(DIR)/bin/miniconda3/condabin/conda
-LOGFILE=$(DIR)/tmp/logs/progress.txt
+LOGFILE=$(DIR)/tmp/progress.txt
 
 
 .PHONY: all
