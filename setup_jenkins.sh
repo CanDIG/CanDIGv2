@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-LOGFILE=$PWD/tmp/logs/progress.txt
+LOGFILE=$PWD/CanDIGv2/tmp/logs/progress.txt
 
 sed 's/DOCKER_REGISTRY=.*/DOCKER_REGISTRY=ghcr.io\/candig/' etc/env/example.env > .env
 cd CanDIGv2
