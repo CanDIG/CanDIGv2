@@ -33,8 +33,7 @@ services:
         - "traefik.docker.lbswarm=true"
         - "traefik.http.routers.vault.rule=Host(`vault.${CANDIG_DOMAIN}`)"
         - "traefik.http.services.vault.loadbalancer.server.port=${VAULT_SERVICE_PORT}"
-    #TODO: fix logging
-    #logging: *default-logging
+    logging: *default-logging
     command: server -config=/vault/config/vault-config.json
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:${VAULT_SERVICE_PORT}/ui/"]

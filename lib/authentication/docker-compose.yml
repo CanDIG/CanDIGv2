@@ -30,8 +30,7 @@ services:
         - "traefik.docker.lbswarm=true"
         - "traefik.http.routers.keycloak.rule=Host(`auth.${CANDIG_DOMAIN}`)"
         - "traefik.http.services.keycloak.loadbalancer.server.port=${KEYCLOAK_SERVICE_CONTAINER_PORT}"
-    #TODO: fix logging
-    #logging: *default-logging
+    logging: *default-logging
     environment:
       - KEYCLOAK_USER_FILE=/run/secrets/keycloak-admin-user
       - KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak-admin-password
@@ -69,7 +68,7 @@ services:
         - "traefik.docker.lbswarm=true"
         - "traefik.http.routers.tyk.rule=Host(`tyk.${CANDIG_DOMAIN}`)"
         - "traefik.http.services.tyk.loadbalancer.server.port=${TYK_SERVICE_PUBLIC_PORT}"
-    #logging: *default-logging
+    logging: *default-logging
     volumes:
       - tyk-data:/opt/tyk-gateway
     depends_on:
@@ -97,7 +96,7 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-    #logging: *default-logging
+    logging: *default-logging
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:6379"]
       interval: 30s
