@@ -1,6 +1,6 @@
 ARG venv_python
 
-FROM python:${venv_python}-alpine
+FROM python:${venv_python}-alpine${alpine_version}
 
 LABEL Maintainer="CanDIG Project"
 
