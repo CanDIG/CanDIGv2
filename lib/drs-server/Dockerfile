@@ -4,7 +4,7 @@ ARG venv_python
 
 FROM python:${venv_python}-alpine${alpine_version}
 
-RUN echo ${alpine_version}
+RUN echo $venv_python
 
 LABEL Maintainer="CanDIG Project"
 
