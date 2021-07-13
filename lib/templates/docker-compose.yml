@@ -7,6 +7,7 @@ services:
       #context: $PWD/lib/{{service_name}}/{{submodule_name}}
       args:
         venv_python: "${VENV_PYTHON}"
+        alpine_version: "${ALPINE_VERSION}"
     image: ${DOCKER_REGISTRY}/{{service_name}}:${{{service_version}}:-latest}
     #volumes:
       #- {{service_name}}-data:/data
