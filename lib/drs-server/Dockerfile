@@ -1,5 +1,3 @@
-
-
 ARG venv_python
 ARG alpine_version
 FROM python:${venv_python}-alpine${alpine_version}
