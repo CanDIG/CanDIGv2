@@ -17,7 +17,9 @@ pipeline {
         }
         stage('Publish') {
             steps {
-                sh '''. $PWD/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; make docker-push'''
+                withCredentials([usernamePassword(credentialsId: '76fcbce2-568d-4fe9-b56e-b269473e7b7f', passwordVariable: 'GITHUB_TOKEN', usernameVariable: 'GITHUB_USER')]) {
+                    sh '''. $PWD/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin; make docker-push'''
+                }
             }
         }
     }
