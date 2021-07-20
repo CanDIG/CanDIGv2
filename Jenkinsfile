@@ -1,6 +1,8 @@
 pipeline {
     agent any
-
+    parameters {
+      string defaultValue: 'registry-1.docker.io', name: 'CONTAINER_REGISTRY', description: 'The URL of the registry to push images to'
+    }
     stages {
         stage('Setup') {
             steps {
@@ -11,14 +13,14 @@ pipeline {
         stage('Make') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh '''. $PWD/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; make images'''
+                    sh '''. $PWD/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; make images REGISTRY=${params.CONTAINER_REGISTRY}'''
                 }
             }
         }
         stage('Publish') {
             steps {
-                withCredentials([usernamePassword(credentialsId: '76fcbce2-568d-4fe9-b56e-b269473e7b7f', passwordVariable: 'GITHUB_TOKEN', usernameVariable: 'GITHUB_USER')]) {
-                    sh '''. $PWD/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin; make docker-push'''
+                withCredentials([usernamePassword(credentialsId: ${params.CONTAINER_REGISTRY}, passwordVariable: 'TOKEN', usernameVariable: 'USERNAME')]) {
+                    sh '''. $PWD/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $TOKEN | docker login -u $USERNAME --password-stdin; make docker-push '''
                 }
             }
         }

@@ -12,8 +12,11 @@ DIR = $(PWD)
 CONDA = $(DIR)/bin/miniconda3/condabin/conda
 LOGFILE=$(DIR)/tmp/progress.txt
 
-ifdef OVERRIDE_REGISTRY
-	export DOCKER_REGISTRY = $(OVERRIDE_REGISTRY)
+ifeq ($(OVERRIDE_REGISTRY), registry-1.docker.io)
+	export DOCKER_REGISTRY = candig
+endif
+ifeq ($(OVERRIDE_REGISTRY), ghcr.io)
+	export DOCKER_REGISTRY = ghcr.io/candig
 endif
 
 .PHONY: all
