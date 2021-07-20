@@ -12,6 +12,9 @@ DIR = $(PWD)
 CONDA = $(DIR)/bin/miniconda3/condabin/conda
 LOGFILE=$(DIR)/tmp/progress.txt
 
+ifdef OVERRIDE_REGISTRY
+	export DOCKER_REGISTRY = $(OVERRIDE_REGISTRY)
+endif
 
 .PHONY: all
 all:
