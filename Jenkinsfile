@@ -18,10 +18,12 @@ pipeline {
             }
         }
         stage('Publish') {
+             environment {
+                REGISTRY = credentials("${params.CONTAINER_REGISTRY}")
+            }
             steps {
-                withCredentials([usernamePassword(credentialsId: ${params.CONTAINER_REGISTRY}, passwordVariable: 'TOKEN', usernameVariable: 'USERNAME')]) {
-                    sh """. ${env.WORKSPACE}/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $TOKEN | docker login ${params.CONTAINER_REGISTRY} -u $USERNAME --password-stdin; make docker-push REGISTRY=${params.CONTAINER_REGISTRY}"""
-                }
+                sh 'echo "SSH private key is located at $REGISTRY_CREDS"'
+                sh """. ${env.WORKSPACE}/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $REGISTRY_PSW | docker login ${params.CONTAINER_REGISTRY} -u $REGISTRY_USR --password-stdin; make docker-push REGISTRY=${params.CONTAINER_REGISTRY}"""
             }
         }
     }
