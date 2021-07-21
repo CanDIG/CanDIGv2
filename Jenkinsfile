@@ -20,7 +20,9 @@ pipeline {
         }
         stage('Publish') {
             steps {
-                sh """. ${env.WORKSPACE}/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo ${params.REGISTRY_PSW} | docker login ${params.REGISTRY_URL} -u ${params.REGISTRY_USR} --password-stdin; make docker-push REGISTRY=${params.REGISTRY_URL}"""
+                withCredentials([usernamePassword(credentialsId: "${REGISTRY}", usernameVariable: 'REGISTRY_USR', passwordVariable: 'REGISTRY_PSW')]) {
+                    sh """. ${env.WORKSPACE}/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo ${REGISTRY_PSW} | docker login ${params.REGISTRY_URL} -u ${REGISTRY_USR} --password-stdin; make docker-push REGISTRY=${params.REGISTRY_URL}"""
+                }
             }
         }
     }
