@@ -2,7 +2,7 @@ pipeline {
     agent any
     parameters {
       choice choices: ['registry-1.docker.io', 'ghcr.io'], description: 'URL of registry', name: 'REGISTRY_URL'
-      credentials credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl', defaultValue: 'registry-1.docker.io', name: 'REGISTRY', required: false
+      credentials credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl', defaultValue: 'registry-1.docker.io', name: 'REGISTRY', required: true
     }
     stages {
         stage('Setup') {
@@ -20,7 +20,6 @@ pipeline {
         }
         stage('Publish') {
             steps {
-                sh 'echo "SSH private key is located at ${params.REGISTRY_CREDS}"'
                 sh """. ${env.WORKSPACE}/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo ${params.REGISTRY_PSW} | docker login ${params.REGISTRY_URL} -u ${params.REGISTRY_USR} --password-stdin; make docker-push REGISTRY=${params.REGISTRY_URL}"""
             }
         }
