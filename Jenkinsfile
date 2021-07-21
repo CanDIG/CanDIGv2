@@ -10,14 +10,14 @@ pipeline {
         stage('Make') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh """. ${env.WORKSPACE}/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; make images REGISTRY=registry-1.docker.io"""
+                    sh """. ${env.WORKSPACE}/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; make images"""
                 }
             }
         }
         stage('Publish') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'registry-1.docker.io', passwordVariable: 'GITHUB_TOKEN', usernameVariable: 'GITHUB_USER')]) {
-                    sh('. $WORKSPACE/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $GITHUB_TOKEN | docker login registry-1.docker.io -u $GITHUB_USER --password-stdin; make docker-push')
+                withCredentials([usernamePassword(credentialsId: 'registry-1.docker.io', passwordVariable: 'TOKEN', usernameVariable: 'USERNAME')]) {
+                    sh('. $WORKSPACE/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $TOKEN | docker login registry-1.docker.io -u $USERNAME --password-stdin; make docker-push')
                 }
             }
         }
