@@ -13,14 +13,14 @@ pipeline {
         stage('Make') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh """. $PWD/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; make images REGISTRY=${params.CONTAINER_REGISTRY}"""
+                    sh """. ${env.WORKSPACE}/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; make images REGISTRY=${params.CONTAINER_REGISTRY}"""
                 }
             }
         }
         stage('Publish') {
             steps {
                 withCredentials([usernamePassword(credentialsId: ${params.CONTAINER_REGISTRY}, passwordVariable: 'TOKEN', usernameVariable: 'USERNAME')]) {
-                    sh """. $PWD/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $TOKEN | docker login ${params.CONTAINER_REGISTRY} -u $USERNAME --password-stdin; make docker-push REGISTRY=${params.CONTAINER_REGISTRY}"""
+                    sh """. ${env.WORKSPACE}/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $TOKEN | docker login ${params.CONTAINER_REGISTRY} -u $USERNAME --password-stdin; make docker-push REGISTRY=${params.CONTAINER_REGISTRY}"""
                 }
             }
         }
