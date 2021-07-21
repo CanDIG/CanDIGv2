@@ -19,8 +19,8 @@ pipeline {
         }
         stage('Publish') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'registry-1.docker.io', passwordVariable: 'REGISTRY_PSW', usernameVariable: 'REGISTRY_USR')]) {
-                    sh '''. "${env.WORKSPACE}"/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $REGISTRY_PSW | docker login "${params.REGISTRY_URL}" -u $REGISTRY_USR --password-stdin; make docker-push REGISTRY="${params.REGISTRY_URL}"'''
+                withCredentials([usernamePassword(credentialsId: 'registry-1.docker.io', passwordVariable: 'GITHUB_TOKEN', usernameVariable: 'GITHUB_USER')]) {
+                -                    sh '''. $WORKSPACE/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $GITHUB_TOKEN | docker login "${params.REGISTRY_URL}" -u $GITHUB_USER --password-stdin; make docker-push'''
                 }
             }
         }
