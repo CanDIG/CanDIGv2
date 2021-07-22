@@ -1,24 +1,23 @@
 pipeline {
     agent any
-
     stages {
         stage('Setup') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: 'develop']], extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: false, recursiveSubmodules: true, reference: '', trackingSubmodules: false]], userRemoteConfigs: [[url: 'https://github.com/CanDIG/CanDIGv2']]])
+                checkout([$class: 'GitSCM', branches: [[name: "$GIT_BRANCH"]], extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: false, recursiveSubmodules: true, reference: '', trackingSubmodules: false]], userRemoteConfigs: [[url: 'https://github.com/CanDIG/CanDIGv2']]])
                 sh '''bash setup_jenkins.sh'''
             }
         }
         stage('Make') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh '''. $PWD/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; make images'''
+                    sh('. $WORKSPACE/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; make images')
                 }
             }
         }
         stage('Publish') {
             steps {
-                withCredentials([usernamePassword(credentialsId: '76fcbce2-568d-4fe9-b56e-b269473e7b7f', passwordVariable: 'GITHUB_TOKEN', usernameVariable: 'GITHUB_USER')]) {
-                    sh '''. $PWD/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin; make docker-push'''
+                withCredentials([usernamePassword(credentialsId: 'registry-1.docker.io', passwordVariable: 'TOKEN', usernameVariable: 'USERNAME')]) {
+                    sh('. $WORKSPACE/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $TOKEN | docker login registry-1.docker.io -u $USERNAME --password-stdin; make docker-push')
                 }
             }
         }
