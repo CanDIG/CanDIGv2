@@ -13,14 +13,14 @@ pipeline {
         stage('Make') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh('. $WORKSPACE/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; make images OVERRIDE_REGISTRY=$REGISTRY_URL')
+                    sh('. $WORKSPACE/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; make images OVERRIDE_REGISTRY=${REGISTRY_URL}')
                 }
             }
         }
         stage('Publish') {
             steps {
-                withCredentials([usernamePassword(credentialsId: $REGISTRY_URL, passwordVariable: 'TOKEN', usernameVariable: 'USERNAME')]) {
-                    sh('. $WORKSPACE/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo $TOKEN | docker login $REGISTRY_URL -u $USERNAME --password-stdin; make docker-push OVERRIDE_REGISTRY=$REGISTRY_URL')
+                withCredentials([usernamePassword(credentialsId: params.REGISTRY_URL, passwordVariable: 'TOKEN', usernameVariable: 'USERNAME')]) {
+                    sh('. $WORKSPACE/bin/miniconda3/etc/profile.d/conda.sh; conda activate candig; echo ${TOKEN} | docker login ${REGISTRY_URL} -u ${USERNAME} --password-stdin; make docker-push OVERRIDE_REGISTRY=${REGISTRY_URL}')
                 }
             }
         }
