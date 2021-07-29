@@ -1,6 +1,7 @@
 pipeline {
     agent any
     parameters {
+      // the choice that the automated system uses is whichever value was last chosen in "Build with Parameters"
       choice choices: ['registry-1.docker.io', 'ghcr.io'], description: 'URL of container registry', name: 'REGISTRY_URL'
     }
     stages {
