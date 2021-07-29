@@ -8,6 +8,7 @@ pipeline {
         stage('Setup') {
             steps {
                 checkout([$class: 'GitSCM', branches: [[name: "$GIT_BRANCH"]], extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: false, recursiveSubmodules: true, reference: '', trackingSubmodules: false]], userRemoteConfigs: [[url: 'https://github.com/CanDIG/CanDIGv2']]])
+                sh('echo "REGISTRY_URL is set to ${REGISTRY_URL}"')
                 sh '''bash setup_jenkins.sh'''
             }
         }
