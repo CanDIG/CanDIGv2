@@ -1,7 +1,7 @@
 pipeline {
     agent any
     parameters {
-      choice choices: ['ghcr.io', 'registry-1.docker.io'], description: 'URL of container registry', name: 'REGISTRY_URL', defaultValue: 'registry-1.docker.io'
+      choice choices: ['registry-1.docker.io', 'ghcr.io'], description: 'URL of container registry', name: 'REGISTRY_URL'
     }
     stages {
         stage('Setup') {
