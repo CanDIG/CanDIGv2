@@ -3,43 +3,57 @@ set -e
 
 # This script will set up a full keycloak environment on your local CanDIGv2 cluster
 
-usage () {
-  echo "Make sure to set relevant environment variables!"
-  echo "Current setup: "
-  echo "KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}"
-  echo "KEYCLOAK_TEST_USER: ${KEYCLOAK_TEST_USER}"
-  echo "KEYCLOAK_TEST_USER_TWO: ${KEYCLOAK_TEST_USER_TWO}"
+#usage () {
+  #echo "Make sure to set relevant environment variables!"
+  #echo "Current setup: "
+  #echo "KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}"
+  #echo "KEYCLOAK_TEST_USER: ${KEYCLOAK_TEST_USER}"
+  #echo "KEYCLOAK_TEST_USER_TWO: ${KEYCLOAK_TEST_USER_TWO}"
   echo "KEYCLOAK_SERVICE_PUBLIC_URL: ${KEYCLOAK_SERVICE_PUBLIC_URL}"
-  echo "KEYCLOAK_SERVICE_PUBLIC_PORT: ${KEYCLOAK_SERVICE_PUBLIC_PORT}"
+  #echo "KEYCLOAK_PORT: ${KEYCLOAK_PORT}"
   echo "CANDIG_AUTH_DOMAIN: ${CANDIG_AUTH_DOMAIN}"
+#}
 
-  echo
-}
-
+KEYCLOAK_ADMIN_USER=$(cat tmp/secrets/keycloak-admin-user)
+KEYCLOAK_TEST_USER="user1"
+KEYCLOAK_TEST_USER_TWO="user2"
 
 # Load Keycloak template (.tpl) files, populate them
 # with project .env variables, and then spit
 # them out to ./lib/keycloak/tmp/*
-
+KEYCLOAK_CLIENT_ID_64=$(shell echo -n $(KEYCLOAK_CLIENT_ID) | base64)
+  # temp: in production, explicitly indicating port 443 breaks vaults internal oidc provider checks.
+  # simply remove the ":443 from the authentication services public url for this purpose:
+  if [[ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":443"* ]]; then \
+    echo "option 1"; \
+    $(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:443\)\$//g')) \
+  elif [[ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":80"* ]]; then \
+    echo "option 2"; \
+    $(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:80\)\$//g')) \
+  else \
+    echo "option 3"; \
+    $(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL})) \
+  fi
 
 # echo
-mkdir -p ${PWD}/lib/authentication/keycloak/tmp
+CONFIG_DIR="${PWD}/tmp/configs/keycloak"
+mkdir -p $CONFIG_DIR
 
 # Copy files from template configs
-echo "Copying application-users.properties .."
-cp ${PWD}/lib/authentication/keycloak/configuration_templates/application-users.properties ${PWD}/lib/authentication/keycloak/tmp/application-users.properties
+#echo "Copying application-users.properties .."
+#cp ${PWD}/lib/authentication/keycloak/configuration_templates/application-users.properties ${CONFIG_DIR}/application-users.properties
 
-echo "Copying logging.properties .."
-cp ${PWD}/lib/authentication/keycloak/configuration_templates/logging.properties ${PWD}/lib/authentication/keycloak/tmp/logging.properties
+#echo "Copying logging.properties .."
+#cp ${PWD}/lib/authentication/keycloak/configuration_templates/logging.properties ${CONFIG_DIR}/logging.properties
 
-echo "Copying mgmt-users.properties .."
-cp ${PWD}/lib/authentication/keycloak/configuration_templates/mgmt-users.properties ${PWD}/lib/authentication/keycloak/tmp/mgmt-users.properties
+#echo "Copying mgmt-users.properties .."
+#cp ${PWD}/lib/authentication/keycloak/configuration_templates/mgmt-users.properties ${CONFIG_DIR}/mgmt-users.properties
 
-echo "Copying standalone.xml .."
-cp ${PWD}/lib/authentication/keycloak/configuration_templates/standalone.xml ${PWD}/lib/authentication/keycloak/tmp/standalone.xml
+#echo "Copying standalone.xml .."
+#cp ${PWD}/lib/authentication/keycloak/configuration_templates/standalone.xml ${CONFIG_DIR}/standalone.xml
 
-echo "Copying standalone-ha.xml .."
-cp ${PWD}/lib/authentication/keycloak/configuration_templates/standalone-ha.xml ${PWD}/lib/authentication/keycloak/tmp/standalone-ha.xml
+#echo "Copying standalone-ha.xml .."
+#cp ${PWD}/lib/authentication/keycloak/configuration_templates/standalone-ha.xml ${CONFIG_DIR}/standalone-ha.xml
 
 
 
@@ -48,7 +62,7 @@ KEYCLOAK_CONTAINERS=$(echo $(docker ps | grep keycloak | wc -l))
 echo "Number of keycloak containers running: ${KEYCLOAK_CONTAINERS}"
 if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
    echo "Booting keycloak container!"
-   export SERVICE=keycloak && make compose-authentication   
+   export SERVICE=keycloak && make compose-authentication
    sleep 5
    echo ">> .. waiting for keycloak to start..."
    while !  docker logs --tail 1000  $(docker ps | grep keycloak | awk '{print $1}') | grep "Undertow HTTPS listener https listening on 0.0.0.0" ; do sleep 1 ; done
@@ -61,7 +75,7 @@ fi
 add_users() {
   # CANDIG_AUTH_DOMAIN is the name of the keycloak server inside the compose network
   echo "Adding ${KEYCLOAK_TEST_USER}"
-  TEMP_TEST_PW_1=$(cat tmp/secrets/keycloak-test-password-1)
+  TEMP_TEST_PW_1=$(cat tmp/secrets/keycloak-user1-password)
   docker exec ${CANDIG_AUTH_DOMAIN} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${KEYCLOAK_TEST_USER} -p ${TEMP_TEST_PW_1} -r ${KEYCLOAK_REALM}
 
   echo "Adding ${KEYCLOAK_TEST_USER_TWO}"

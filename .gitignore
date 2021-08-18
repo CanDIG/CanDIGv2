@@ -15,20 +15,6 @@
 */miniconda3
 .vagrant
 
-# keycloak
-lib/authentication/keycloak/tmp/*
-
-# tyk
-lib/authentication/tyk/tmp/*
-
-# vault
-lib/authorization/vault/tmp/*
-
-# opa
-lib/candig_server/authorization/tmp/*.rego
-lib/candig-server/authorization/tmp/*.rego
-
-
 # test metadata
 etc/tests/integration/*/__pycache__/*
 etc/tests/integration/*/.pytest_cache/*

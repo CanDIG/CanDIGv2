@@ -4,6 +4,7 @@ networks:
   bridge:
     external: true
   bridge-net:
+    external: true
   ingress:
   traefik-net:
   agent-net:
