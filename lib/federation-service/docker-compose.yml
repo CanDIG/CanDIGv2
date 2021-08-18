@@ -3,7 +3,7 @@ version: '3.7'
 services:
   federation-service:
     build:
-      context: $PWD/lib/federation-service
+      context: $PWD/lib/federation-service/federation_service
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
