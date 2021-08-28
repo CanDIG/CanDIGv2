@@ -6,7 +6,7 @@
   url = https://github.com/canDIG/htsget_app
 [submodule "lib/drs-server/chord_drs"]
   path = lib/drs-server/chord_drs
-  url = https://github.com/c3g/chord_drs.git
+  url = https://github.com/CanDIG/chord_drs.git
 [submodule "lib/federation-service/federation_service"]
   path = lib/federation-service/federation_service
   url = https://github.com/CanDIG/federation_service
@@ -21,7 +21,7 @@
   url = https://github.com/CanDIG/datasets_service
 [submodule "lib/chord-metadata/chord_metadata_service"]
   path = lib/chord-metadata/chord_metadata_service
-  url = https://github.com/c3g/chord_metadata_service.git
+  url = https://github.com/CanDIG/katsu.git 
 [submodule "lib/cancogen-dashboard/cancogen_dashboard"]
   path = lib/cancogen-dashboard/cancogen_dashboard
   url = https://github.com/CanDIG/cancogen_dashboard.git
