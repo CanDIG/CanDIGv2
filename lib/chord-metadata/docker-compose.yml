@@ -3,7 +3,7 @@ version: '3.7'
 services:
   chord-metadata:
     build:
-      context: $PWD/lib/chord-metadata
+      context: $PWD/lib/chord-metadata/chord_metadata
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
