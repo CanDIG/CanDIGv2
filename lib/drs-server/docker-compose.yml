@@ -3,7 +3,7 @@ version: '3.7'
 services:
   chord-drs:
     build:
-      context: $PWD/lib/drs-server
+      context: $PWD/lib/drs-server/chord_drs
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
