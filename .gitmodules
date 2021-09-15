@@ -3,7 +3,7 @@
   url = https://github.com/DataBiosphere/toil.git
 [submodule "lib/htsget-server/htsget_app"]
   path = lib/htsget-server/htsget_app
-  url = https://github.com/canDIG/htsget_app
+  url = https://github.com/CanDIG/htsget_app.git
 [submodule "lib/drs-server/chord_drs"]
   path = lib/drs-server/chord_drs
   url = https://github.com/CanDIG/chord_drs.git
