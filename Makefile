@@ -8,7 +8,7 @@ export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
 DIR = $(PWD)
-CONDA = $(DIR)/bin/miniconda3/condabin/conda
+CONDA = $(DIR)/bin/miniconda3/bin/conda
 LOGFILE=$(DIR)/tmp/progress.txt
 
 .PHONY: all
@@ -60,6 +60,9 @@ ifeq ($(VENV_OS), darwin)
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
 endif
 	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
+	# init is needed to create bash aliases for conda but it won't work
+	# until you source the script that ships with conda
+	source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh && $(CONDA) init
 	echo "    finished bin-conda" >> $(LOGFILE)
 
 
@@ -493,8 +496,14 @@ images: #toil-docker
 .PHONY: init-conda
 init-conda:
 	echo "    started init-conda" >> $(LOGFILE)
-	$(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
-	$(CONDA) activate $(VENV_NAME) && pip install -U -r $(DIR)/etc/venv/requirements.txts
+	# source both bashrc and conda's script to be safe, so the conda command is found
+	source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh && source /home/vagrant/.bashrc \
+		&& conda create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
+
+	source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh && source /home/vagrant/.bashrc \
+		&& conda activate $(VENV_NAME) \
+		&& pip install -U -r $(DIR)/etc/venv/requirements.txt
+
 	#@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
 	#@echo "Activate conda env: conda activate $(VENV_NAME)"
 	#@echo "Install requirements: pip install -U -r $(DIR)/etc/venv/requirements.txt"
