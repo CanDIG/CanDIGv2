@@ -31,6 +31,20 @@ Vagrant.configure('2') do |config|
     override.vm.provision 'shell', privileged: false, path: "setup_containers.sh", args: ["/home/vagrant/candig"]
   end
 
+  config.vm.provider :libvirt do |libvirt, override|
+    override.vm.synced_folder '.', '/home/vagrant/candig', type: 'nfs'
+    override.vm.box = 'debian-sandbox/contrib-buster64'
+    override.vm.hostname = 'candig.local'
+    override.disksize.size = '50GB'
+    libvirt.memory = 4096
+    libvirt.nested = true
+    libvirt.cpus = 4
+    override.vm.provision 'shell', privileged: false, path: "provision.sh", args: ["/home/vagrant/candig"]
+    override.vm.provision :reload
+    override.vm.provision 'shell', privileged: false, path: "setup_containers.sh", args: ["/home/vagrant/candig"]
+  end
+
+
   config.vm.provider :openstack do |os, override|
     override.vm.synced_folder '.', '/home/vagrant/candig', type: 'virtualbox', disabled: true
     override.ssh.username = 'ubuntu'
