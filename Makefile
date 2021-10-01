@@ -4,6 +4,7 @@
 env ?= .env
 
 include $(env)
+include Makefile.authx
 export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
@@ -450,6 +451,9 @@ docker-secrets: minio-secrets
 
 	@echo admin > $(DIR)/tmp/secrets/keycloak-admin-user
 	$(MAKE) secret-keycloak-admin-password
+
+	@echo user > $(DIR)/tmp/secrets/keycloak-test-user
+	$(MAKE) secret-keycloak-test-user-password
 
 
 #>>>

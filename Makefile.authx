@@ -1,0 +1,53 @@
+#>>>
+# close all authentication and authorization services
+
+#<<<
+clean-auth:
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+		$(DIR)/lib/keycloak/docker-compose.yml | docker-compose -f - down
+
+
+	# - remove intermittent docker images
+	docker rmi candigv2_keycloak:latest --force
+
+
+#>>>
+# initialize authentication and authorization services
+# tyk, keycloak, vault
+#<<<
+.PHONY: init-auth
+init-auth: init-keycloak
+
+#>>>
+# initialize keycloak service - idp
+#<<<
+init-keycloak: mkdir
+	echo "    started init-auth" >> $(LOGFILE)
+
+	# Generate dynamic environment variables
+	$(eval KEYCLOAK_CLIENT_ID_64=$(shell echo -n ${KEYCLOAK_CLIENT_ID} | base64))
+
+	# temp: in production, explicitly indicating port 443 breaks vaults internal oidc provider checks.
+	# simply remove the ":443 from the authentication services public url for this purpose:
+	if [[ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":443"* ]]; then \
+		echo "option 1"; \
+		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:443\)\$//g')) \
+	elif [[ ${KEYCLOAK_SERVICE_PUBLIC_URL} == *":80"* ]]; then \
+		echo "option 2"; \
+		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL} | sed -e 's/\(:80\)\$//g')) \
+	else \
+		echo "option 3"; \
+		$(eval TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(shell echo ${KEYCLOAK_SERVICE_PUBLIC_URL})) \
+	fi ;\
+	export KEYCLOAK_CLIENT_ID_64=$(KEYCLOAK_CLIENT_ID_64); \
+	export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(TEMP_KEYCLOAK_SERVICE_PUBLIC_URL); \
+	export CONFIG_DIR=\
+	echo ; \
+	if [[ ${KEYCLOAK_USE_LOCAL_IDP} == 1 ]]; then \
+		echo "Setting up Keycloak;" ; \
+		source ${PWD}/lib/keycloak/keycloak_setup.sh; \
+	fi ;
+
+	echo
+	echo "-- authorization Setup Done! --"
+	echo
