@@ -13,6 +13,8 @@ end
 
 Vagrant.configure('2') do |config|
   config.vm.hostname = 'candig-dev'
+  ip_address = ENV['CUSTOM_IP'] || "192.168.33.33"
+  config.vm.network "private_network", ip: ip_address
 
   config.vm.provider 'virtualbox' do |vb, override|
     override.vm.synced_folder '.', '/home/vagrant/candig', type: 'virtualbox'
@@ -24,7 +26,7 @@ Vagrant.configure('2') do |config|
     vb.name = 'candig-dev'
     vb.gui = false
     vb.customize ['modifyvm', :id, '--cpus', 4]
-    vb.customize ['modifyvm', :id, '--memory', '4096']
+    vb.customize ['modifyvm', :id, '--memory', '8096']
     # run custom shell on provision
     override.vm.provision 'shell', privileged: false, path: "provision.sh", args: ["/home/vagrant/candig"]
     override.vm.provision :reload
