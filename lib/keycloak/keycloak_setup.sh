@@ -20,7 +20,7 @@ add_user() {
   local username=$1
   local password=$2
 
-  echo "    Adding ${username}"
+  echo "    Adding user ${username}"
   docker exec ${CANDIG_AUTH_DOMAIN} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${username} -p ${password} -r ${KEYCLOAK_REALM}
 
   echo "    Restarting the keycloak container"
@@ -28,12 +28,6 @@ add_user() {
 }
 
 get_token() {
-
-  echo "=========================="
-  echo $admin_password
-  echo $KEYCLOAK_ADMIN_USER
-  echo $KEYCLOAK_SERVICE_PUBLIC_URL
-
   local admin_password=$(cat tmp/secrets/keycloak-admin-password)
 
   BID=$(curl \
@@ -43,9 +37,7 @@ get_token() {
     -d "grant_type=password" \
     "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/master/protocol/openid-connect/token" -k 2>/dev/null)
 
-  echo "=============================----====================="
-  echo $BID
-  #echo ${BID} | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["access_token"])'
+  echo ${BID} | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["access_token"])'
 }
 
 set_realm() {
@@ -143,29 +135,24 @@ KEYCLOAK_TOKEN=$(get_token)
 echo "    Creating Realm ${KEYCLOAK_REALM}"
 set_realm ${KEYCLOAK_REALM}
 
-echo ">> Setting client KEYCLOAK_CLIENT_ID .."
+echo "    Setting client ${KEYCLOAK_CLIENT_ID}"
 set_client ${KEYCLOAK_REALM} ${KEYCLOAK_CLIENT_ID} "${TYK_LISTEN_PATH}" ${KEYCLOAK_LOGIN_REDIRECT_PATH}
-echo ">> .. set..."
 
-echo ">> Getting KEYCLOAK_SECRET .."
-export KEYCLOAK_SECRET=$(get_secret ${KEYCLOAK_REALM})
-echo "** Retrieved KEYCLOAK_SECRET as ${KEYCLOAK_SECRET} **"
-echo ">> .. got it..."
-echo
+echo "    Getting keycloak secret"
+KEYCLOAK_SECRET_RESPONSE=$(get_secret ${KEYCLOAK_REALM})
+export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_RESPONSE
 
-echo ">> Getting KEYCLOAK_PUBLIC_KEY .."
-export KEYCLOAK_PUBLIC_KEY=$(get_public_key ${KEYCLOAK_REALM})
-echo "** Retrieved KEYCLOAK_PUBLIC_KEY as ${KEYCLOAK_PUBLIC_KEY} **"
-echo ">> .. got it..."
-echo
+
+echo "    Getting keycloak public key"
+KEYCLOAK_PUBLIC_KEY_RESPONSE=$(get_public_key ${KEYCLOAK_REALM})
+export KEYCLOAK_PUBLIC_KEY=$KEYCLOAK_PUBLIC_KEY_RESPONSE
+echo "    Retrieved keycloak public key as ${KEYCLOAK_PUBLIC_KEY}"
 
 if [[ ${KEYCLOAK_GENERATE_TEST_USER} == 1 ]]; then
-  echo ">> Adding user"
+  echo "    Adding test user"
   add_user "$(cat tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)"
-  echo ">> Added test user"
-  echo
 fi
 
-echo ">> .. waiting for keycloak to restart..."
+echo "    Waiting for keycloak to restart"
 while ! docker logs --tail 5 ${CANDIG_AUTH_DOMAIN} | grep "Admin console listening on http://127.0.0.1:9990"; do sleep 1; done
-echo ">> .. ready..."
+echo "    Ready"
