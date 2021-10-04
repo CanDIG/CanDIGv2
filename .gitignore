@@ -1,5 +1,6 @@
 #edit related
 *~
+.idea
 
 #data files/directories
 *.bam
