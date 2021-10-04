@@ -4,7 +4,7 @@
 
 ## Overview
 
-The CanDIG v2 project is a collection of heterogeneos services designed to work together to facilitate end to end
+The CanDIG v2 project is a collection of heterogeneous services designed to work together to facilitate end to end
 dataflow for genomic data.
 
 ```plaintext
