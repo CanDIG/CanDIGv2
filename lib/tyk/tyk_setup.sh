@@ -9,7 +9,7 @@ set -e
 # with project .env variables, and then spit
 # them out to ./lib/tyk/tmp/*
 
-echo $PWD
+# TODO: this image uses temp dir inside the lib/tyk which breaks the convention of this repo
 CONFIG_DIR="$PWD/lib/tyk/tmp"
 
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware

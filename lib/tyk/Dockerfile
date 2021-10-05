@@ -3,7 +3,7 @@ FROM ${BASE_IMAGE}
 
 #TODO: add maintainer labels
 
-#TODO: fix this image build
+# TODO: this image uses temp dir inside the lib/tyk which breaks the convention of this repo
 COPY ./tmp/tyk.conf /opt/tyk-gateway/tyk.conf
 COPY ./tmp/middleware/authMiddleware.js /opt/tyk-gateway/middleware/authMiddleware.js
 COPY ./tmp/middleware/permissionsStoreMiddleware.js /opt/tyk-gateway/middleware/permissionsStoreMiddleware.js

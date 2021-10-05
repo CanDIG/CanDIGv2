@@ -6,10 +6,14 @@ clean-auth:
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(DIR)/lib/keycloak/docker-compose.yml | docker-compose -f - down
 
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+    		$(DIR)/lib/tyk/docker-compose.yml | docker-compose -f - down
 
 	# - remove intermittent docker images
 	docker rmi candigv2_keycloak:latest --force
+	docker rmi candigv2_tyk:latest --force
 
+	rm -r $(DIR)/lib/tyk/tmp/
 
 #>>>
 # initialize authentication and authorization services

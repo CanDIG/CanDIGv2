@@ -6,6 +6,7 @@
 *.bam
 /data
 /tmp
+/lib/*/tmp
 .tox
 
 #project files
