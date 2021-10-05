@@ -1,5 +1,6 @@
-#! /usr/bin/env bash
-set -e
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
 
 KEYCLOAK_ADMIN_USER=$(cat tmp/secrets/keycloak-admin-user)
 

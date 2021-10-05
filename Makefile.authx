@@ -46,8 +46,6 @@ init-keycloak: mkdir
 	if [[ ${KEYCLOAK_USE_LOCAL_IDP} == 1 ]]; then \
 		echo "Setting up Keycloak;" ; \
 		source ${PWD}/lib/keycloak/keycloak_setup.sh; \
-	fi ;
+	fi
 
-	echo
-	echo "-- authorization Setup Done! --"
-	echo
+
