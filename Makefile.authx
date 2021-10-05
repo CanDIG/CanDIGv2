@@ -19,11 +19,9 @@ clean-auth:
 init-auth: init-keycloak
 
 #>>>
-# initialize keycloak service - idp
+# authx, common settings
 #<<<
-init-keycloak: mkdir
-	echo "    started init-auth" >> $(LOGFILE)
-
+init-authx-common:
 	# Generate dynamic environment variables
 	$(eval KEYCLOAK_CLIENT_ID_64=$(shell echo -n ${KEYCLOAK_CLIENT_ID} | base64))
 
@@ -43,9 +41,29 @@ init-keycloak: mkdir
 	export TEMP_KEYCLOAK_SERVICE_PUBLIC_URL=$(TEMP_KEYCLOAK_SERVICE_PUBLIC_URL); \
 	export CONFIG_DIR=\
 	echo ; \
+
+#>>>
+# initialize keycloak service - idp
+#<<<
+init-keycloak: mkdir
+	echo "    started init-keycloak" >> $(LOGFILE)
+
+	$(MAKE) init-authx-common \
+
 	if [[ ${KEYCLOAK_USE_LOCAL_IDP} == 1 ]]; then \
 		echo "Setting up Keycloak;" ; \
 		source ${PWD}/lib/keycloak/keycloak_setup.sh; \
 	fi
 
 
+#>>>
+# initialize tyk service - api gateway
+#<<<
+init-tyk: mkdir
+	echo "    started init-tyk" >> $(LOGFILE)
+
+	$(MAKE) init-authx-common \
+
+	echo "Setting up Tyk;" ; \
+	${PWD}/lib/tyk/tyk_setup.sh; \
+	echo ; \
