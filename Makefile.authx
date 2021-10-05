@@ -67,3 +67,5 @@ init-tyk: mkdir
 	echo "Setting up Tyk;" ; \
 	${PWD}/lib/tyk/tyk_setup.sh; \
 	echo ; \
+
+	$(MAKE) compose-tyk

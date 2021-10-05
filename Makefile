@@ -27,12 +27,12 @@ all:
 .PHONY: mkdir
 mkdir:
 	mkdir -p $(DIR)/bin
+	mkdir -p $(DIR)/bin
 	mkdir -p $(DIR)/tmp/configs
 	mkdir -p $(DIR)/tmp/data
 	mkdir -p $(DIR)/tmp/secrets
 	mkdir -p $(DIR)/tmp/ssl
-	mkdir -p $(DIR)/tmp/authentication/{keycloak,tyk}
-	mkdir -p $(DIR)/tmp/authorization/vault
+	mkdir -p $(DIR)/tmp/{keycloak,tyk,vault}
 
 
 #>>>
