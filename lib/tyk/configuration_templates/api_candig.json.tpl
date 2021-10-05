@@ -101,7 +101,7 @@
 	"segregate_by_client": false,
 	"providers": [
             {
-                "issuer": "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}",
+                "issuer": "${TEMP_KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}",
                 "client_ids": {
                     "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
                 }

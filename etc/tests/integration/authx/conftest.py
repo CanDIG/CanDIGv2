@@ -56,7 +56,7 @@ def setup(request):
         driver=None
 
     candig_url= os.environ["CANDIG_PUBLIC_URL"]
-    candigauth_url= os.environ["KEYCLOAK_SERVICE_PUBLIC_URL"]
+    candigauth_url= os.environ["KEYCLOAK_PUBLIC_URL"]
     permissions_data_store_url=os.environ['VAULT_SERVICE_PUBLIC_URL']
     #temp
     candig_server_authz_url='http://0.0.0.0:8182/v1/data/permissions/allowed'

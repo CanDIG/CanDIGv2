@@ -36,7 +36,7 @@ get_token() {
     -d "username=${KEYCLOAK_ADMIN_USER}" \
     -d "password=${admin_password}" \
     -d "grant_type=password" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/master/protocol/openid-connect/token" -k 2>/dev/null)
+    "${KEYCLOAK_PUBLIC_URL}/auth/realms/master/protocol/openid-connect/token" -k 2>/dev/null)
 
   echo ${BID} | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["access_token"])'
 }
@@ -52,7 +52,7 @@ set_realm() {
   curl \
     -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X POST -H "Content-Type: application/json" -d "${JSON}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms" -k
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms" -k
 }
 
 get_realm() {
@@ -60,7 +60,7 @@ get_realm() {
 
   curl \
     -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}" -k | jq .
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}" -k | jq .
 }
 
 get_realm_clients() {
@@ -68,7 +68,7 @@ get_realm_clients() {
 
   curl \
     -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients" -k | jq -S .
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/clients" -k | jq -S .
 }
 
 set_client() {
@@ -106,23 +106,23 @@ set_client() {
   curl \
     -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X POST -H "Content-Type: application/json" -d "${JSON}" \
-    "${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${realm}/clients" -k
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/clients" -k
 }
 
 get_secret() {
   id=$(curl -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
-    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/clients -k 2>/dev/null |
+    ${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/clients -k 2>/dev/null |
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print([l["id"] for l in obj if l["clientId"] ==
     "'"$KEYCLOAK_CLIENT_ID"'" ][0])')
 
   curl -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
-    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/clients/$id/client-secret -k 2>/dev/null |
+    ${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/clients/$id/client-secret -k 2>/dev/null |
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["value"])'
 }
 
 get_public_key() {
   curl \
-    ${KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM} -k 2>/dev/null |
+    ${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM} -k 2>/dev/null |
     python3 -c 'import json,sys;obj=json.load(sys.stdin); print(obj["public_key"])'
 }
 
