@@ -15,7 +15,7 @@
     "base_identity_provided_by": "",
     
     "proxy": {
-	"target_url": "${TYK_TARGET_URL}",
+	"target_url": "${TYK_CANDIG_API_TARGET}",
 	"strip_listen_path": true,
         "disable_strip_slash": false,
 	"listen_path": "/${TYK_LISTEN_PATH}",

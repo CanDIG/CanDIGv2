@@ -1,13 +1,11 @@
-#! /usr/bin/env bash
-set -e
+#!/usr/bin/env bash
 
-# This script will set up a full tyk environment
-# on your local CanDIGv2 cluster
-# Be sure to invoke this from the Makefile at
-# the project's root directory [CanDIGv2]
-# Load Tyk template (.tpl) files, populate them
-# with project .env variables, and then spit
-# them out to ./lib/tyk/tmp/*
+set -Eeuo pipefail
+
+# This script will set up a full tyk environment on your local CanDIGv2 cluster.
+# Be sure to invoke this from the Makefile at the project's root directory [CanDIGv2].
+# Load Tyk template (.tpl) files, populate them with project .env variables, and then spit
+# them out to ./lib/tyk/tmp/*.
 
 # TODO: this image uses temp dir inside the lib/tyk which breaks the convention of this repo
 CONFIG_DIR="$PWD/lib/tyk/tmp"

@@ -2,12 +2,15 @@
 # close all authentication and authorization services
 
 #<<<
-clean-auth:
+clean-authx:
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(DIR)/lib/keycloak/docker-compose.yml | docker-compose -f - down
 
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-    		$(DIR)/lib/tyk/docker-compose.yml | docker-compose -f - down
+    	$(DIR)/lib/tyk/docker-compose.yml | docker-compose -f - down
+
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+    	$(DIR)/lib/candig-server/docker-compose.yml | docker-compose -f - down
 
 	# - remove intermittent docker images
 	docker rmi candigv2_keycloak:latest --force
@@ -19,8 +22,8 @@ clean-auth:
 # initialize authentication and authorization services
 # tyk, keycloak, vault
 #<<<
-.PHONY: init-auth
-init-auth: init-keycloak
+.PHONY: init-authx
+init-authx: init-keycloak init-tyk #compose-candig-serve  # TODO: check if candig-server should be launched here.
 
 #>>>
 # authx, common settings
@@ -59,6 +62,11 @@ init-keycloak: mkdir
 		source ${PWD}/lib/keycloak/keycloak_setup.sh; \
 	fi
 
+# TODO: tyk playbook - separate out the creation of apps/api definitions so new ones can be added and run `make tyk-apps`
+# TODO: tyk playbook - separate out the creation of policies so new ones can be added
+# TODO: tyk playbook - separate out the creation of middleware so new ones can be added and existing ones edited
+# TODO: tyk playbook - separate out the creation of key request AND generating new keys
+# TODO: tyk playbook - separate out the creation of tyk config
 
 #>>>
 # initialize tyk service - api gateway
