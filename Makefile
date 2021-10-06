@@ -8,8 +8,10 @@ export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
 DIR = $(PWD)
-CONDA = $(DIR)/bin/miniconda3/bin/conda
-LOGFILE=$(DIR)/tmp/progress.txt
+CONDA_BASE = $(DIR)/bin/miniconda3
+CONDA = $(CONDA_BASE)/bin/conda
+CONDA_INIT = $(CONDA_BASE)/etc/profile.d/conda.sh
+LOGFILE = $(DIR)/tmp/progress.txt
 
 .PHONY: all
 all:
@@ -497,8 +499,8 @@ images: #toil-docker
 init-conda:
 	echo "    started init-conda" >> $(LOGFILE)
 	# source both bashrc and conda's script to be safe, so the conda command is found
-	source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh && source /home/vagrant/.bashrc \
-		&& conda create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
+	source $(CONDA_INIT) \
+		&& $(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
 
 	source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh && source /home/vagrant/.bashrc \
 		&& conda activate $(VENV_NAME) \
