@@ -638,7 +638,7 @@ push-%:
 #<<<
 secret-%:
 	@dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | rev | cut -b 2- | rev | tr -d '\n\r' > $(DIR)/tmp/secrets/$*
+		| base64 | rev | cut -b 2- | rev | tr -d '\n\r+' > $(DIR)/tmp/secrets/$*
 
 
 #>>>
