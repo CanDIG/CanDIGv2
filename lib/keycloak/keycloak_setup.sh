@@ -87,7 +87,7 @@ set_client() {
     "standardFlowEnabled": true,
     "publicClient": false,
     "redirectUris": [
-      "'${CANDIG_PUBLIC_URL}${redirect}'"
+      "'${TYK_LOGIN_TARGET_URL}${redirect}'"
     ],
     "attributes": {
       "saml.assertion.signature": "false",
