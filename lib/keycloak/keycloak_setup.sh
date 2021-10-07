@@ -2,8 +2,6 @@
 
 set -Eeuo pipefail
 
-KEYCLOAK_ADMIN_USER=$(cat tmp/secrets/keycloak-admin-user)
-
 # Verify if keycloak container is running
 KEYCLOAK_CONTAINERS=$(echo "$(docker ps | grep keycloak | wc -l)")
 echo "Number of keycloak containers running: ${KEYCLOAK_CONTAINERS}"
@@ -29,14 +27,16 @@ add_user() {
 }
 
 get_token() {
-  local admin_password=$(cat tmp/secrets/keycloak-admin-password)
+  local keycloak_admin_user=$(cat tmp/secrets/keycloak-admin-user)
+  local keycloak_admin_password=$(cat tmp/secrets/keycloak-admin-password)
 
-  BID=$(curl \
+  local BID=$(curl \
     -d "client_id=admin-cli" \
-    -d "username=${KEYCLOAK_ADMIN_USER}" \
-    -d "password=${admin_password}" \
+    -d "username=${keycloak_admin_user}" \
+    -d "password=${keycloak_admin_password}" \
     -d "grant_type=password" \
     "${KEYCLOAK_PUBLIC_URL}/auth/realms/master/protocol/openid-connect/token" -k 2>/dev/null)
+    # TODO: security issue fix this, -k flag above ignores cert, even if the url is https
 
   echo ${BID} | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["access_token"])'
 }
