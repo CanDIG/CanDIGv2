@@ -102,11 +102,12 @@ set_client() {
       "saml_force_name_id_format": "false"
     }
   }'
-  echo $JSON
+
   curl \
     -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X POST -H "Content-Type: application/json" -d "${JSON}" \
     "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/clients" -k
+    # TODO: security issue fix this, -k flag above ignores cert, even if the url is https
 }
 
 get_secret() {
