@@ -1,7 +1,7 @@
 {
   "listen_port": 3000,
   "tyk_api_config": {
-    "Host": "${CANDIG_PUBLIC_URL}",
+    "Host": "${TYK_LOGIN_TARGET_URL}",
     "Port": "8080",
     "Secret": "${TYK_NODE_SECRET}"
   },

@@ -92,7 +92,7 @@
             "/api_info",
             "/serverinfo"
         ],
-        "TYK_SERVER": "${CANDIG_PUBLIC_URL}",
+        "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
         "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
         "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",
         "VAULT_ROLE":"researcher"
