@@ -46,7 +46,7 @@ init-authx: mkdir
 	export TEMP_KEYCLOAK_PUBLIC_URL=$(TEMP_KEYCLOAK_PUBLIC_URL); \
 	export CONFIG_DIR=\
 	echo ; \
-	if [[ ${KEYCLOAK_USE_LOCAL_IDP} == 1 ]]; then \
+	if [[ ${KEYCLOAK_USE_LOCAL_IDP} == 1 ]]; then \  # TODO: remove this check because it makes not sense to have tyk without keycloak
 		echo "Setting up Keycloak;" ; \
 		source ${PWD}/lib/keycloak/keycloak_setup.sh; \
 	fi ;\
