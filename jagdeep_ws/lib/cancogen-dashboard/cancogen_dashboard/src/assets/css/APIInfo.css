@@ -1,0 +1,9 @@
+/* Overwrite the default wrapper height to auto for APIInfo.js only */ 
+.wrapper {
+    height: auto;
+}
+
+/* Set the margin between the select and swagger-ui to 10 px */
+select {
+    margin-bottom: 10px;
+}

@@ -1,0 +1,1280 @@
+openapi: 3.0.0
+servers:
+  - url: /rnaget
+info:
+  title: rnaget API
+  description: RNA API for expression value retrieval
+  version: 1.0.0
+tags:
+  - name: projects
+    description: |
+      The project is the top level of the model hierarchy and contains a set of related studies.
+    externalDocs:
+      description: Find out more
+      url: https://github.com/ga4gh-rnaseq/schema
+  - name: studies
+    description: |
+      The study is a set of related RNA expression values.  It is assumed all samples in a study have been processed uniformly.
+    externalDocs:
+      description: Find out more
+      url: https://github.com/ga4gh-rnaseq/schema
+  - name: expressions
+    description: |
+      The expression is a matrix of calculated expression values.
+    externalDocs:
+      description: Find out more
+      url: https://github.com/ga4gh-rnaseq/schema
+  - name: continuous
+    description: Continuous is a matrix of coordinate range based signal data
+    externalDocs:
+      description: Find out more
+      url: https://github.com/ga4gh-rnaseq/schema
+  - name: projectModel
+    x-displayName: The Project Model
+    description: |
+      <SchemaDefinition schemaRef="#/components/schemas/project" />
+  - name: studyModel
+    x-displayName: The Study Model
+    description: |
+      <SchemaDefinition schemaRef="#/components/schemas/study" />
+  - name: filterModel
+    x-displayName: The Filter Model
+    description: |
+      <SchemaDefinition schemaRef="#/components/schemas/filter" />
+  - name: ticketModel
+    x-displayName: The Ticket Model
+    description: |
+      <SchemaDefinition schemaRef="#/components/schemas/ticket" />
+x-tagGroups:
+  - name: Interface
+    tags:
+      - projects
+      - studies
+      - expressions
+      - continuous
+  - name: Models
+    tags:
+      - projectModel
+      - studyModel
+      - filterModel
+      - ticketModel
+paths:
+  /projects/{projectId}:
+    get:
+      tags:
+        - projects
+      summary: Get a single project by ID
+      description: Returns the project matching the provided ID
+      operationId: candig_rnaget.api.operations.get_project_by_id
+      parameters:
+        - name: projectId
+          in: path
+          description: ID of project to return
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/project"
+        "400":
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /projects:
+    post:
+      tags:
+        - projects
+      operationId: candig_rnaget.api.operations.post_project
+      summary: Add a project to the database
+      description: Creates and returns a new project record
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/project"
+      responses:
+        "201":
+          description: New project created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: url
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/project"
+        "400":
+          description: Project provided in body does not pass schema validation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Authorisation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "405":
+          description: Forbidden to overwrite project in post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal error - project not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - api_key: []
+    get:
+      tags:
+        - projects
+      summary: Returns a list of projects matching filters
+      description: Get a list of projects matching filters
+      operationId: candig_rnaget.api.operations.search_projects
+      parameters:
+        - $ref: "#/components/parameters/versionParam"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/project"
+        "400":
+          description: The requested data format is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /projects/filters:
+    get:
+      tags:
+        - projects
+      summary: Returns filters for project searches
+      description: To support flexible search this provides a means of discovering the search filters supported by the data provider.
+      operationId: candig_rnaget.api.operations.search_project_filters
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/filter"
+        "400":
+          description: The requested data format is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  "/studies/{studyId}":
+    get:
+      tags:
+        - studies
+      summary: Get a single study by ID
+      description: Returns the study matching the provided ID
+      operationId: candig_rnaget.api.operations.get_study_by_id
+      parameters:
+        - name: studyId
+          in: path
+          description: ID of study to return
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/study"
+        "400":
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "404":
+          description: Study not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /studies:
+    post:
+      tags:
+        - studies
+      operationId: candig_rnaget.api.operations.post_study
+      summary: Add a study to the database
+      description: Creates and returns a new study record
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/study"
+      responses:
+        "201":
+          description: New study created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: url
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/study"
+        "400":
+          description: Project provided in body does not pass schema validation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Authorisation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "405":
+          description: Forbidden to overwrite project in post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal error - project not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      tags:
+        - studies
+      summary: Returns a list of studies matching filters
+      description: Get a list of studies matching filters
+      operationId: candig_rnaget.api.operations.search_studies
+      parameters:
+        - $ref: "#/components/parameters/versionParam"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/study"
+        "400":
+          description: The requested data format is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /studies/filters:
+    get:
+      tags:
+        - studies
+      summary: Returns filters for study searches
+      description: To support flexible search this provides a means of discovering the search filters supported by the data provider.
+      operationId: candig_rnaget.api.operations.search_study_filters
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/filter"
+        "400":
+          description: The requested data format is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /expressions:
+    post:
+      tags:
+        - expressions
+      operationId: candig_rnaget.api.operations.post_expression
+      summary: Create an expression database entry and map to quant file
+      description: Creates and returns a new expression record
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ticket"
+      responses:
+        "201":
+          description: New expression created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: url
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ticket"
+        "400":
+          description: Expression provided in body does not pass schema validation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Authorisation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "405":
+          description: Forbidden to overwrite expression in post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal error - expression not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  "/expressions/{expressionId}/ticket":
+    get:
+      tags:
+        - expressions
+      summary: Get specific expression data ticket
+      description: Returns a ticket to download a single specified expression matrix
+      operationId: candig_rnaget.api.operations.get_expression_tickets_by_id
+      parameters:
+        - name: expressionId
+          in: path
+          description: ID of expression to return
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/sampleIDListParam"
+        - $ref: "#/components/parameters/featureIDListParam"
+        - $ref: "#/components/parameters/featureNameListParam"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ticket"
+        "400":
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "404":
+          description: Expression not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  "/expressions/{expressionId}/bytes":
+    get:
+      tags:
+        - expressions
+      summary: Get specific expression data file
+      description: Returns a single specified expression matrix
+      operationId: candig_rnaget.api.operations.get_expression_bytes_by_id
+      parameters:
+        - name: expressionId
+          in: path
+          description: ID of expression to return
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/sampleIDListParam"
+        - $ref: "#/components/parameters/featureIDListParam"
+        - $ref: "#/components/parameters/featureNameListParam"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            application/vnd.loom:
+              schema:
+                type: string
+                format: binary
+            text/tab-separated-values:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "404":
+          description: Expression not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /expressions/ticket:
+    get:
+      tags:
+        - expressions
+      summary: Get a ticket to download expression data
+      description: Returns a download ticket for expression data matching filters
+      operationId: candig_rnaget.api.operations.get_search_expressions
+      parameters:
+        - name: format
+          in: query
+          description: Data format to return
+          required: true
+          schema:
+            type: string
+        - name: minExpression
+          in: query
+          description: array of feature id, min threshold tuples
+          schema:
+            type: array
+            items:
+              type: string
+        - name: maxExpression
+          in: query
+          description: array of feature id, max threshold tuples
+          schema:
+            type: array
+            items:
+              type: string
+        - $ref: "#/components/parameters/tagsParam"
+        - $ref: "#/components/parameters/projectIDParam"
+        - $ref: "#/components/parameters/studyIDParam"
+        - $ref: "#/components/parameters/versionParam"
+        - $ref: "#/components/parameters/sampleIDListParam"
+        - $ref: "#/components/parameters/featureIDListParam"
+        - $ref: "#/components/parameters/featureNameListParam"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ticket"
+        "400":
+          description: The requested data format is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /expressions/bytes:
+    get:
+      tags:
+        - expressions
+      summary: Download expression data matching filters
+      description: Returns an expression data file matching filters
+      operationId: candig_rnaget.api.operations.get_search_expressions_bytes
+      parameters:
+        - name: format
+          in: query
+          description: Data format to return
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/tagsParam"
+        - $ref: "#/components/parameters/projectIDParam"
+        - $ref: "#/components/parameters/studyIDParam"
+        - $ref: "#/components/parameters/versionParam"
+        - $ref: "#/components/parameters/sampleIDListParam"
+        - $ref: "#/components/parameters/featureIDListParam"
+        - $ref: "#/components/parameters/featureNameListParam"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            application/vnd.loom:
+              schema:
+                type: string
+                format: binary
+            text/tab-separated-values:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: The requested data format is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /expressions/formats:
+    get:
+      tags:
+        - expressions
+      summary: Get output formats
+      description: |
+        The response is a list of the supported data formats as a JSON formatted object unless an alternative formatting supported by the server is requested.  A data provider may use any internal storage format that they wish with no restrictions from this API.  To support development of interoperable clients, it is recommended that data providers MUST support at least 1 of the following common output formats:
+
+        * Tab delimited text (.tsv)
+        * [Loom](https://linnarssonlab.org/loompy/format/index.html) (.loom)
+
+        A Tab delimited file can have any number of comment lines beginning with `#` for storing metadata.  There should be one header row following the comments.  Feature (genes/transcripts) names and/or ID fields should be the first columns of the header row and have the `string` type.  All following columns are for the samples and will have 32-bit `float` values in each row.
+
+        ##### Example .tsv file
+
+        ```
+        # Example tsv file
+        geneID  geneName  sample1 sample2
+        ENSG00000000003 TSPAN6  12.4  15.6
+        ```
+
+        A Loom format file will have a 32-bit `float` matrix for the expression values with samples on the column axis and features on the row axis.  Associated metadata can be stored as row and column attributes as described by loom specification.
+      operationId: candig_rnaget.api.operations.get_expression_formats
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "404":
+          description: Format list not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /expressions/filters:
+    get:
+      tags:
+        - expressions
+      summary: Returns filters for expression searches
+      description: To support flexible search this provides a means of discovering the search filters supported by the data provider.
+      operationId: candig_rnaget.api.operations.search_expression_filters
+      parameters:
+        - name: type
+          in: query
+          description: one of `feature` or `sample` reflecting which axis to request
+            filters for.  If blank, both will be returned
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/filter"
+        "400":
+          description: The requested data format is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /continuous/{continuousId}/ticket:
+    get:
+      tags:
+        - continuous
+      summary: Get specific continuous data ticket
+      description: Returns a ticket to download a single specified continuous matrix
+      operationId: candig_rnaget.api.operations.get_search_continuousId_ticket
+      parameters:
+        - name: continuousId
+          in: path
+          description: ID of continuous matrix to return
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/chrParam"
+        - $ref: "#/components/parameters/startParam"
+        - $ref: "#/components/parameters/endParam"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ticket"
+        "400":
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "404":
+          description: Continuous matrix not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  "/continuous/{continuousId}/bytes":
+    get:
+      tags:
+        - continuous
+      summary: Get specific continuous data file
+      description: Returns a single specified continuous matrix
+      operationId: candig_rnaget.api.operations.get_search_continuousId_bytes
+      parameters:
+        - name: continuousId
+          in: path
+          description: ID of continuous matrix to return
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/chrParam"
+        - $ref: "#/components/parameters/startParam"
+        - $ref: "#/components/parameters/endParam"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            application/vnd.loom:
+              schema:
+                type: string
+                format: binary
+            text/tab-separated-values:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "404":
+          description: Continuous matrix not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /continuous/ticket:
+    get:
+      tags:
+        - continuous
+      summary: Get a ticket to download continuous data
+      description: Returns a download ticket for continuous data  matching filters
+      operationId: candig_rnaget.api.operations.search_continuous
+      parameters:
+        - name: format
+          in: query
+          description: Data format to return
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/projectIDParam"
+        - $ref: "#/components/parameters/studyIDParam"
+        - $ref: "#/components/parameters/versionParam"
+        - $ref: "#/components/parameters/sampleIDListParam"
+        - $ref: "#/components/parameters/chrParam"
+        - $ref: "#/components/parameters/startParam"
+        - $ref: "#/components/parameters/endParam"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ticket"
+        "400":
+          description: The requested data format is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /continuous/bytes:
+    get:
+      tags:
+        - continuous
+      summary: Download continuous data matching filters
+      description: Returns a continuous data file matching filters
+      operationId: candig_rnaget.api.operations.get_search_continuous_bytes
+      parameters:
+        - name: format
+          in: query
+          description: Data format to return
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/projectIDParam"
+        - $ref: "#/components/parameters/studyIDParam"
+        - $ref: "#/components/parameters/versionParam"
+        - $ref: "#/components/parameters/sampleIDListParam"
+        - $ref: "#/components/parameters/chrParam"
+        - $ref: "#/components/parameters/startParam"
+        - $ref: "#/components/parameters/endParam"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            application/vnd.loom:
+              schema:
+                type: string
+                format: binary
+            text/tab-separated-values:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: The requested data format is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /continuous/formats:
+    get:
+      tags:
+        - continuous
+      summary: Get output formats
+      description: |
+        The response is a list of the supported data formats as a JSON formatted object unless an alternative formatting supported by the server is requested.  A data provider may use any internal storage format that they wish with no restrictions from this API.  To support development of interoperable clients, it is recommended that data providers MUST support at least 1 of the following common output formats:
+
+        * Tab delimited text (.tsv)
+        * [Loom](https://linnarssonlab.org/loompy/format/index.html) (.loom)
+
+        A Tab delimited file can have any number of comment lines beginning with `#` for storing metadata.  The first line of the tsv file will be a tab-delimited list beginning with `#labels` and containing the labels for text fields in the main matrix.  The second line of the tsv file will be a tab-delimited list containing 2 items: `#range` and the range in the form chr?:start-stop where the start coordinate is zero-based, inclusive and the stop coordinate is zero-based, exclusive.  Any additional comments may follow these 2 lines.  The data matrix follows the comment block.  Sample names and/or ID fields should be the first columns of the header row, be in the same order as listed in the `#labels` comment and have the `string` type.  All coordinates in the continuous range described in the `#range` comment will be in the following columns with each base position in its own column.  The coordinate columns will contain 32-bit `float` values in each row corresponding to the measured signal value at that coordinante for the sample corresponding to that row.
+
+        ##### Example .tsv file
+
+        ```
+        #labels sampleID  sampleName
+        #range  chr1:1000000-1000002
+        # assembly  GRCh38-V29-male
+        12003-L1  12003-human-liver-4 12.4  15.6
+        ```
+
+        A Loom format file will have a 32-bit `float` matrix for the signal values with coordinates on the column axis and samples on the row axis.  Associated metadata can be stored as row and column attributes as described by the loom specification.
+      operationId: candig_rnaget.api.operations.get_continuous_formats
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "404":
+          description: Format list not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /continuous/filters:
+    get:
+      tags:
+        - continuous
+      summary: Returns filters for continuous searches
+      description: To support flexible search this provides a means of discovering the search filters supported by the data provider.
+      operationId: candig_rnaget.api.operations.search_continuous_filters
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/filter"
+        "400":
+          description: The requested data format is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-apikeyInfoFunc: candig_rnaget.auth.auth_key
+  schemas:
+    Error:
+      type: object
+      required:
+        - message
+        - code
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    project:
+      type: object
+      description: The project is the top level of the model hierarchy and contains one or more studies.
+      properties:
+        id:
+          type: string
+          description: A unique identifier assigned to this object
+          example: c2fe2aa6ad3043108bd88a30fc0303da
+        version:
+          type: string
+          description: Version number of the object
+          example: "1.0"
+        name:
+          type: string
+          description: Short, readable name
+          example: Demo Project
+        description:
+          type: string
+          description: Detailed description of the object
+          example: This is a small project to demo API funtions
+      required:
+      - id
+      externalDocs:
+        description: Find out more
+        url: https://github.com/ga4gh-rnaseq/schema
+    study:
+      type: object
+      description: The study is a container for one or more related RNA expression matrices.
+      properties:
+        id:
+          type: string
+          description: A unique identifier assigned to this object
+          example: c4cf910c9ae54832902c954cb439e30c
+        version:
+          type: string
+          description: Version number of the object
+          example: "1.0"
+        name:
+          type: string
+          description: Short, readable name
+          example: Demo Study
+        description:
+          type: string
+          description: Detailed description of the object
+          example: This study is part of the demo project
+        parentProjectID:
+          type: string
+          description: ID of the project containing the study
+          example: c2fe2aa6ad3043108bd88a30fc0303da
+        genome:
+          type: string
+          description: Name of the reference genome build used for aligning samples in the study
+          example: human GRCh38
+      required:
+      - id
+      externalDocs:
+        description: Find out more
+        url: https://github.com/ga4gh-rnaseq/schema
+    filter:
+      type: object
+      description: Implementation defined parameter to use for filtering collections
+      properties:
+        filter:
+          type: string
+          description: A unique name for the filter for use in query URLs
+          example: tissue
+        fieldType:
+          type: string
+          description: The dataType (string, float, etc.) of the filter
+          example: string
+        description:
+          type: string
+          description: Detailed description of the filter
+          example: tissue of origin
+        values:
+          type: array
+          items:
+            type: string
+            example: liver
+          description: List of supported values for the filter
+      required:
+      - filter
+      externalDocs:
+        description: Find out more
+        url: https://github.com/ga4gh-rnaseq/schema
+    ticket:
+      type: object
+      description: URL and type for data files
+      properties:
+        version:
+          type: string
+          description: Version number of the object
+          example: "1.0"
+        fileType:
+          type: string
+          description: "Type of file. Examples include: loom, tsv"
+          example: loom
+        studyID:
+          type: string
+          description: ID of containing study
+          example: c4cf910c9ae54832902c954cb439e30c
+        url:
+          type: string
+          description: An `https:` URL to download file
+        units:
+          type: string
+          description: "Units for the values. Examples include: TPM, FPKM, counts"
+        headers:
+          type: object
+          description: 'For HTTPS URLs, the server may supply a JSON object containing one or more string key-value pairs which the client MUST supply verbatim as headers with any request to the URL. For example, if headers is `{"Authorization": "Bearer xxxx"}`, then the client must supply the header `Authorization: Bearer xxxx` with the HTTPS request to the URL.'
+        md5:
+          type: string
+          description: MD5 digest of the file
+      required:
+      - url
+      - units
+      externalDocs:
+        description: Find out more
+        url: https://github.com/ga4gh-rnaseq/schema
+    error:
+      type: object
+      description: General API error model
+      properties:
+        message:
+          type: string
+          description: Error message details
+  parameters:
+    tagsParam:
+      name: tags
+      in: query
+      description: Comma separated tag list to filter by
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+    versionParam:
+      name: version
+      in: query
+      description: version to filter by
+      required: false
+      schema:
+        type: string
+      example:
+        1.0
+    projectIDParam:
+      name: projectID
+      in: query
+      description: project to filter by
+      required: false
+      schema:
+        type: string
+      example:
+        9c0eba51095d3939437e220db196e27b
+    studyIDParam:
+      name: studyID
+      in: query
+      description: study to filter by
+      required: false
+      schema:
+        type: string
+      example:
+        c4cf910c9ae54832902c954cb439e30c
+    sampleIDListParam:
+      name: sampleIDList
+      in: query
+      description: return only values for listed sampleIDs
+      required: false
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    featureIDListParam:
+      name: featureIDList
+      in: query
+      description: return only values for listed feature IDs
+      required: false
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    featureNameListParam:
+      name: featureNameList
+      in: query
+      description: return only values for listed features
+      required: false
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    chrParam:
+      name: chr
+      in: query
+      description: The refererence to which start and end apply in the form chr? where ? is the specific ID of the chromosome (ex. chr1, chrX).
+      required: false
+      schema:
+        type: string
+      example:
+        chr10
+    startParam:
+      name: start
+      in: query
+      description: The start position of the range on the sequence, 0-based, inclusive.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+    endParam:
+      name: end
+      in: query
+      description: The end position of the range on the sequence, 0-based, exclusive.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0

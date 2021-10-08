@@ -1,0 +1,8 @@
+pull_request_rules:
+  - name: Close pull requests to master from branches other than develop
+    conditions:
+      - base=master
+      - head!=develop
+    actions:
+      close:
+        message: Please merge into develop

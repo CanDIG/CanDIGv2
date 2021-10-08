@@ -1,0 +1,10 @@
+dist/
+htsget_app.egg-info/
+htsget_server/__pycache__/
+
+# IDE / Vim-related
+*.swp
+*.swo
+
+*.pyc
+__pycache__

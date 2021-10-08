@@ -1,0 +1,3 @@
+[submodule "chord_metadata_service/dats"]
+	path = chord_metadata_service/dats
+	url = https://github.com/datatagsuite/schema

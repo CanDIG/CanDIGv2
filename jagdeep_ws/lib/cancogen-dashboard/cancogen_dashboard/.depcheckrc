@@ -1,0 +1,2 @@
+ignores: ["depcheck"]
+skip-missing: true

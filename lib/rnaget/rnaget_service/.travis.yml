@@ -1,0 +1,33 @@
+# Config file for automatic testing at travis-ci.org
+
+dist: xenial   # required for Python >= 3.7
+language: python
+python:
+  - 3.7.2
+
+# packages for dredd
+addons:
+  apt:
+    packages:
+    - nodejs
+    - npm
+
+# cache the node stuff for dredd, otherwise everything takes forever:
+cache:
+  directories:
+    - ~/node_modules
+    - ~/.nvm
+
+# Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+install:
+  - python setup.py install
+  - pip install -r requirements_dev.txt
+  - pip install -U tox-travis
+  - npm install -g dredd
+
+# Command to run tests, e.g. python setup.py test
+script: tox
+
+# Code cov reports
+after_success:
+ - bash <(curl -s https://codecov.io/bash)

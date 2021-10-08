@@ -1,0 +1,16 @@
+# application specific
+.coverage
+*.log
+*_env
+*.db
+docs/_build
+
+# IDE stuff
+.idea
+*.swp
+*.swo
+
+# others
+*.pyc
+env
+__pycache__

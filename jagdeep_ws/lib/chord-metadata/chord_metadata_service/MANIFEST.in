@@ -1,0 +1,6 @@
+include chord_metadata_service/chord/workflows/*.wdl
+include chord_metadata_service/chord/tests/*.json
+include chord_metadata_service/dats/*
+include chord_metadata_service/mcode/tests/*.json
+include chord_metadata_service/package.cfg
+include chord_metadata_service/restapi/tests/*.json

@@ -1,0 +1,22 @@
+# tested on docker-engine 18.06.0
+version: '3.7'
+
+services:
+  htsget-app:
+    build:
+      context: .
+    image: candig/htsget-app:${HTSGET_APP_VERSION:-latest}
+    volumes:
+      - $PWD:/app
+    ports:
+      - "${HTSGET_APP_PORT:-3000}:3000"
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+

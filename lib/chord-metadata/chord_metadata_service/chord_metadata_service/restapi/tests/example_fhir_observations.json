@@ -1,0 +1,155 @@
+{
+  "entry": [
+    {
+      "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Observation/97684895-3a6e-4d46-9edd-31984bc7c3a6",
+      "resource": {
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "laboratory",
+                "display": "laboratory",
+                "system": "http://hl7.org/fhir/observation-category"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "code": "718-7",
+              "display": "Hemoglobin [Mass/volume] in Blood",
+              "system": "http://loinc.org"
+            }
+          ],
+          "text": "Hemoglobin [Mass/volume] in Blood"
+        },
+        "context": {
+          "reference": "Encounter/2a0e0f6c-493f-4c5b-bf89-5f98aee24f21"
+        },
+        "effectiveDateTime": "2014-03-02T10:12:53-05:00",
+        "id": "97684895-3a6e-4d46-9edd-31984bc7c3a6",
+        "issued": "2014-03-02T10:12:53.714-05:00",
+        "meta": {
+          "lastUpdated": "2019-04-09T12:25:36.531998+00:00",
+          "versionId": "MTU1NDgxMjczNjUzMTk5ODAwMA"
+        },
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+        },
+        "valueQuantity": {
+          "code": "g/dL",
+          "system": "http://unitsofmeasure.org",
+          "unit": "g/dL",
+          "value": 17.14301557752162
+        }
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Observation/1c8d2ee3-2a7e-47f9-be16-abe4e9fa306b",
+      "resource": {
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "laboratory",
+                "display": "laboratory",
+                "system": "http://hl7.org/fhir/observation-category"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "code": "785-6",
+              "display": "MCH [Entitic mass] by Automated count",
+              "system": "http://loinc.org"
+            }
+          ],
+          "text": "MCH [Entitic mass] by Automated count"
+        },
+        "context": {
+          "reference": "Encounter/2a0e0f6c-493f-4c5b-bf89-5f98aee24f21"
+        },
+        "effectiveDateTime": "2014-03-02T10:12:53-05:00",
+        "id": "1c8d2ee3-2a7e-47f9-be16-abe4e9fa306b",
+        "issued": "2014-03-02T10:12:53.714-05:00",
+        "meta": {
+          "lastUpdated": "2019-04-09T12:25:36.531997+00:00",
+          "versionId": "MTU1NDgxMjczNjUzMTk5NzAwMA"
+        },
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+        },
+        "valueQuantity": {
+          "code": "pg",
+          "system": "http://unitsofmeasure.org",
+          "unit": "pg",
+          "value": 27.035236044041877
+        }
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Observation/b0598af4-8ffe-43ba-84e5-b7fb49d3dcd7",
+      "resource": {
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "laboratory",
+                "display": "laboratory",
+                "system": "http://hl7.org/fhir/observation-category"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "code": "777-3",
+              "display": "Platelets [#/volume] in Blood by Automated count",
+              "system": "http://loinc.org"
+            }
+          ],
+          "text": "Platelets [#/volume] in Blood by Automated count"
+        },
+        "context": {
+          "reference": "Encounter/2a0e0f6c-493f-4c5b-bf89-5f98aee24f21"
+        },
+        "effectiveDateTime": "2014-03-02T10:12:53-05:00",
+        "id": "b0598af4-8ffe-43ba-84e5-b7fb49d3dcd7",
+        "issued": "2014-03-02T10:12:53.714-05:00",
+        "meta": {
+          "lastUpdated": "2019-04-09T12:25:36.530961+00:00",
+          "versionId": "MTU1NDgxMjczNjUzMDk2MTAwMA"
+        },
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/728b270d-d7de-4143-82fe-d3ccd92cebe4"
+        },
+        "valueQuantity": {
+          "code": "10*3/uL",
+          "system": "http://unitsofmeasure.org",
+          "unit": "10*3/uL",
+          "value": 306.49607523265786
+        }
+      },
+      "search": {
+        "mode": "match"
+      }
+    }
+  ],
+  "resourceType": "Bundle"
+}

@@ -1,0 +1,2 @@
+[MASTER]
+ignored-classes=scoped_session

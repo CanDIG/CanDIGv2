@@ -1,0 +1,612 @@
+openapi: 3.0.0
+info:
+  title: Dataset Service API
+  description: API for datasets retrieval and discovery
+  version: "0.1"
+tags:
+  - name: datasets
+    description: High level collection of datasets
+    externalDocs:
+      description: Find out more
+      url: https://github.com/candig
+paths:
+  /datasets:
+    post:
+      tags:
+        - datasets
+      operationId: candig_dataset_service.api.operations.post_dataset
+      summary: Add a dataset to the database
+      description: Creates and returns a new dataset record
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/dataset_ingest"
+
+      responses:
+        "201":
+          description: New dataset created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dataset"
+        "400":
+          description: dataset provided in body does not pass schema validation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Authorisation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "405":
+          description: Forbidden to overwrite dataset in post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal error - dataset not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - api_key: []
+
+  /datasets/{dataset_id}:
+    get:
+      tags:
+        - datasets
+      summary: Find dataset by ID
+      description: Returns a single specified dataset
+      operationId: candig_dataset_service.api.operations.get_dataset_by_id
+      parameters:
+        - name: dataset_id
+          in: path
+          description: ID of dataset to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: be2ba51c-8dfe-4619-b832-31c4a087a589
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/dataset"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dataset"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: dataset not found"
+        "406":
+          description: Requested formatting not supported
+        "501":
+          description: The specified request is not supported by the server
+      security:
+        - api_key: []
+    delete:
+      tags:
+        - datasets
+      summary: Delete dataset by ID
+      description: Returns a single specified dataset
+      operationId: candig_dataset_service.api.operations.delete_dataset_by_id
+      parameters:
+        - name: dataset_id
+          in: path
+          description: ID of dataset to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: be2ba51c-8dfe-4619-b832-31c4a087a589
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/dataset"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dataset"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: dataset not found"
+        "406":
+          description: Requested formatting not supported
+        "501":
+          description: The specified request is not supported by the server
+      security:
+        - api_key: []
+  /datasets/search:
+    get:
+      tags:
+        - datasets
+      summary: Search for datasets matching filters
+      description: Search for datasets matching filters
+      operationId: candig_dataset_service.api.operations.search_datasets
+      parameters:
+        - name: tags
+          in: query
+          description: Comma separated tag list to filter by
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: version
+          in: query
+          description: version to return
+          schema:
+            type: string
+        - name: ontologies
+          in: query
+          description: Comma seperated ontology terms to filter by
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/DUO_term'
+            example: ["DUO:0000018", "DUO:0000014"]
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/dataset"
+        "400":
+          description: Error
+        "403":
+          description: Authorisation error
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Error"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - api_key: []
+  /datasets/search/filters:
+    get:
+      tags:
+        - datasets
+      summary: Returns filters for dataset searches
+      description: Get filters for dataset searches
+      operationId: candig_dataset_service.api.operations.search_dataset_filters
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/searchFilter"
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/searchFilter"
+        "400":
+          description: Error
+        "403":
+          description: Authorisation error
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Error"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - api_key: []
+
+  /datasets/search/ontologies:
+    get:
+      tags:
+        - datasets
+      summary: Returns ontologies for dataset searches
+      description: Get ontologies for dataset searches
+      operationId: candig_dataset_service.api.operations.search_dataset_ontologies
+      responses:
+        "200":
+          description: successful operation
+
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Ontology terms
+              example: ["DUO:0000018", "DUO:0000014"]
+        "400":
+          description: Error
+        "403":
+          description: Authorisation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - api_key: []
+
+  /datasets/discover/search:
+    get:
+      tags:
+        - datasets
+      summary: Search for datasets matching filters
+      description: Search for datasets matching filters
+      operationId: candig_dataset_service.api.operations.search_dataset_discover
+      parameters:
+        - name: tags
+          in: query
+          description: Comma separated tag list to filter by
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: version
+          in: query
+          description: version to return
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/dataset"
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/dataset"
+        "400":
+          description: Error
+        "403":
+          description: Authorisation error
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Error"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - api_key: []
+  /datasets/discover/search/filters:
+    get:
+      tags:
+        - datasets
+      summary: Returns filters for dataset searches
+      description: Get filters for dataset searches
+      operationId: candig_dataset_service.api.operations.get_datasets_discover_filters
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/searchFilter"
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/searchFilter"
+        "400":
+          description: Error
+        "403":
+          description: Authorisation error
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Error"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - api_key: []
+  /datasets/changelog:
+    post:
+      tags:
+        - changelog
+      operationId: candig_dataset_service.api.operations.post_change_log
+      summary: Add a change log to the database
+      description: Creates and returns a new change log record
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/changeLog"
+      responses:
+        "201":
+          description: New change log created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/changeLog"
+        "400":
+          description: Change log provided in body does not pass schema validation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Authorisation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "405":
+          description: Forbidden to overwrite change log in post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal error - change log not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /datasets/getVersions:
+    get:
+      tags:
+        - getVersions
+      summary: Get release versions of database
+      operationId: candig_dataset_service.api.operations.get_versions
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  type: string
+                additionalProperties:
+                  type: string
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                additionalProperties:
+                  type: string
+        "400":
+          description: Invalid tag value
+        "403":
+          description: Authorisation error
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Error"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - api_key: []
+  /datasets/changelog/{version}:
+    get:
+      tags:
+        - changelog
+      summary: Get change log for a specific release version
+      description: Returns changes associated with specified database release version
+      operationId: candig_dataset_service.api.operations.get_change_log
+      parameters:
+        - name: version
+          in: path
+          description: release version
+          required: true
+          example: 0.1
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/changeLog"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/changeLog"
+        "400":
+          description: Invalid ID supplied
+        "403":
+          description: Authorisation error
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Error"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Change log not found
+      security:
+        - api_key: []
+servers:
+  - url: /v2
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-apikeyInfoFunc: candig_dataset_service.auth.auth_key
+  schemas:
+    Error:
+      type: object
+      required:
+        - message
+        - code
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+    dataset_ingest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        name:
+          type: string
+          example: test_dataset
+        description:
+          type: string
+        created:
+          type: string
+        ontologies:
+          type: array
+          items:
+              $ref: '#/components/schemas/ontology'
+
+      externalDocs:
+        description: Find out more
+        url: https://github.com/candig
+      xml:
+        name: dataset
+
+
+    dataset:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        name:
+          type: string
+          example: test_dataset
+        description:
+          type: string
+        created:
+          type: string
+        ontologies:
+          type: array
+          items:
+              $ref: '#/components/schemas/ontology_duo'
+
+      externalDocs:
+        description: Find out more
+        url: https://github.com/candig
+
+    ontology:
+      type: object
+      required:
+        - id
+        - terms
+      properties:
+        id:
+          type: string
+          description: Ontology name
+          example: duo
+          enum: [duo]
+        terms:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: string
+                example: DUO:0000018
+              modifier:
+                type: string
+                description: only needed for certain codes
+
+    ontology_duo:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/DUO_term'
+        name:
+          type: string
+          description: DUO code name
+          example: 'research use only'
+        definition:
+          type: string
+          description: DUO code detailed description
+          example: 'This secondary category consent code indicates that use is limited to research purposes (e.g., does not include its use in clinical care).'
+        shorthand:
+          type: string
+          description: DUO specific shorthand identifier
+          example: RU
+
+    DUO_term:
+      type: string
+      pattern: 'DUO:0+[0-9]+'
+      example: 'DUO:0000017'
+
+
+    searchFilter:
+      type: object
+      description: parameter name to use for filter when searching
+      properties:
+        fieldType:
+          type: string
+        filter:
+          type: string
+        description:
+          type: string
+      externalDocs:
+        description: Find out more
+        url: https://github.com/candig
+      xml:
+        name: filters
+    changeLog:
+      type: object
+      description: list of changes to the database associated with a version update
+      properties:
+        version:
+          type: string
+          example: 0.1
+        log:
+          type: array
+          items:
+            type: string
+            example: [dev, updated api]
+      externalDocs:
+        description: Find out more
+        url: https://github.com/candig
+      xml:
+        name: changeLog

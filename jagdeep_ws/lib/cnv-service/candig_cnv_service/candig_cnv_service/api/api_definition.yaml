@@ -1,0 +1,475 @@
+openapi: 3.0.0
+info:
+  description: | 
+    This is an implementation for a copy number variant service for CanDIG v2
+  version: "0.1.0-oas3"
+  title: Copy Number Variant API
+  contact:
+    email: dnaidoo@bcgsc.ca
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: admins
+    description: Secured Admin-only calls
+  - name: researchers
+    description: Operations available to regular users
+paths:
+  /cnvariant/patients:
+    get:
+      tags:
+        - researchers
+      summary: |
+        Lists all patients in the system
+      operationId: candig_cnv_service.api.operations.get_patients
+      responses:
+        '200':
+          description: List of known patient_ids 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/patient_id'
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 400
+                message: Invalid Parameter. Check Request
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 500
+                message: Internal Server Error
+    
+    post:
+      tags: 
+        - admins
+      summary: |
+        Create a new patient
+      operationId: candig_cnv_service.api.operations.add_patients
+      description: |
+        Adds a new patient to the database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Patient'
+      responses:
+        '201':
+          description: New patient created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+              example:
+                  code: 201
+                  message: Patient successfully created
+                  
+        '400':
+          description: Input provided in body does not pass schema validation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 400
+                message: Invalid Parameter. Check Request
+        '403':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 403
+                message: Authorization error
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 500
+                message: Internal Server Error
+
+  
+  /cnvariant/patients/samples:
+    get:
+      tags:
+        - researchers
+      summary: |
+        Lists all sample_ids tied to a patient
+      operationId: candig_cnv_service.api.operations.get_samples
+      description: |
+        Returns a list of known samples for a specific patientID
+      parameters:
+        - in: query
+          name: patient_id
+          description: Patient to be queried
+          required: true
+          schema:
+            $ref: '#/components/schemas/patient_id'
+      responses:
+        '200':
+          description: List of known sample_ids
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 400
+                message: Invalid Parameter. Check Request
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 500
+                message: Internal Server Error
+                
+    post:
+      tags:
+        - admins
+      summary: Create a new sample
+      operationId: candig_cnv_service.api.operations.add_samples
+      description: |
+        Adds a new sample to an existing patient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                patient_id:
+                  $ref: '#/components/schemas/patient_id'
+                sample_id:
+                  $ref: '#/components/schemas/sample_id'
+      responses:
+        '201':
+          description: New sample created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+              example:
+                  code: 201
+                  message: Sample successfully created
+                  
+        '400':
+          description: Input provided in body does not pass schema validation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 400
+                message: Invalid Parameter. Check Request
+        '403':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 403
+                message: Authorization error
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 500
+                message: Internal Server Error
+      
+                
+  /cnvariant/patients/samples/cnv:
+    get:
+      tags:
+        - researchers
+      summary: |
+        Searches for all segments within the specified region
+      operationId: candig_cnv_service.api.operations.get_segments
+      description: |
+        Passing in a patient ID, sample ID, chromosome number, start and end position will return
+        all known segments within the region.
+      parameters:
+        - in: query
+          name: patient_id
+          description: Patient to be queried
+          required: true
+          schema:
+            $ref: '#/components/schemas/patient_id'
+        - in: query
+          name: sample_id
+          description: Sample to be queried
+          required: true
+          schema:
+            $ref: '#/components/schemas/sample_id'
+        - in: query
+          name: chromosome_number
+          description: Chromosome to be queried
+          required: true
+          schema:
+            $ref: '#/components/schemas/chromosome_number'
+        - in: query
+          name: start_position
+          description: Starting position for query
+          required: true
+          schema:
+            $ref: '#/components/schemas/start_position'
+        - in: query
+          name: end_position
+          description: Ending Position for query
+          required: true
+          schema:
+            $ref: '#/components/schemas/end_position'
+      responses:
+        '200':
+          description: Segments within the specified region
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segment'
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 400
+                message: Invalid Parameter. Check Request
+        '403':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 403
+                message: Authorization error
+        '404':
+          description: PatientID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 404
+                message: PatientID not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 500
+                message: Internal Server Error
+                
+    post:
+      tags:
+        - admins
+      summary: Create a new CNV
+      operationId: candig_cnv_service.api.operations.add_segments
+      description: |
+        Adds a new CNV set to an existing sample
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CNV'
+      responses:
+        '201':
+          description: New CNV set created
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Success'
+              example:
+                code: 201
+                message: CNV successfully added
+                  
+        '400':
+          description: Input provided in body does not pass schema validation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 400
+                message: Invalid Parameter. Check Request
+        '403':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 403
+                message: Authorization error
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 500
+                message: Internal Server Error
+
+
+components:
+  schemas:
+    Segment:
+      type: object
+      required:
+        - chromosome_number
+        - start_position
+        - end_position
+        - copy_number
+        - copy_number_ploidy_corrected
+      properties:
+        chromosome_number:
+          $ref: '#/components/schemas/chromosome_number'
+        start_position:
+          $ref: '#/components/schemas/start_position'
+        end_position:
+          $ref: '#/components/schemas/end_position'
+        copy_number:
+          $ref: '#/components/schemas/copy_number'
+        copy_number_ploidy_corrected:
+          $ref: '#/components/schemas/copy_number_ploidy_corrected'
+    
+    Error:
+      type: object
+      required:
+        - message
+        - code
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+          
+    Success:
+      type: object
+      required:
+        - message
+        - code
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+                
+    
+    Patient:
+      type: object
+      required: 
+        - patient_id
+      properties:
+        patient_id:
+          $ref: '#/components/schemas/patient_id'
+        samples:
+          properties:
+            sample_id:
+              $ref: '#/components/schemas/sample_id'
+            tags:
+              $ref: '#/components/schemas/tags'
+            created:
+              $ref: '#/components/schemas/created'
+            description:
+              $ref: '#/components/schemas/description'
+
+    CNV:
+      type: object
+      required:
+        - patient_id
+        - sample_id
+        - segments
+      properties:
+        patient_id:
+          $ref: '#/components/schemas/patient_id'
+        sample_id:
+          $ref: '#/components/schemas/sample_id'
+        segments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Segment'
+          
+    patient_id:
+      type: string
+      format: uuid
+      example: d290f1ee-6c54-4b01-90e6-d701748f0851
+    
+    sample_id:
+      type: string
+      example: COV2202
+      
+    tags:
+      type: array
+      example: ['Canada', 'Ovarian']
+      
+    created:
+      type: string
+      example: '2020-01-16 08:09:21.347777'
+      
+    description:
+      type: string
+      example: Canadian Sample
+    
+    start_position:
+      type: integer
+      format: int32
+      example: 12523
+      minimum: 0
+
+    end_position:
+      type: integer
+      format: int32
+      example: 23425
+      minimum: 0
+    
+    copy_number:
+      type: number
+      format: float
+      example: -0.16
+    
+    copy_number_ploidy_corrected:
+      type: integer
+      format: int32
+      minimum: 0
+    
+    chromosome_number:
+      type: string
+      example: 5
+

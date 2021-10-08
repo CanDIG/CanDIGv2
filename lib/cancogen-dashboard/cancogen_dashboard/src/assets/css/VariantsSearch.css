@@ -1,0 +1,16 @@
+.form-group {
+    margin-right: 20px;
+}
+
+.form-group label {
+    margin-right: 10px;
+}
+
+.ag-theme-alpine {
+    height: 400px;
+    width: 100%;
+}
+
+.ag-popup {
+  height: 0;
+}

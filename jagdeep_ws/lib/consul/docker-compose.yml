@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  consul:
+    image: consul:${CONSUL_VERSION:-lateset}
+    volumes:
+      - consul-data:/consul/data
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      # RPC PORT 8400 in -server mode
+      - "${CONSUL_RPC_PORT}:8502"
+      - "${CONSUL_HTTP_PORT}:8500"
+      - "${CONSUL_DNS_PORT}:8600/udp"
+      - "${CONSUL_LAN_PORT}:8301/tcp"
+      - "${CONSUL_LAN_PORT}:8301/udp"
+      - "${CONSUL_WAN_PORT}:8302/tcp"
+      - "${CONSUL_WAN_PORT}:8302/udp"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.consul.rule=Host(`consul.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.consul.loadbalancer.server.port=${CONSUL_HTTP_PORT}"
+    logging: *default-logging
+
+# TODO: update consul config for server/agent mode
+# TODO: test consul DNS resolution

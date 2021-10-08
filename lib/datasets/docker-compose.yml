@@ -1,0 +1,31 @@
+version: '3.7'
+
+services:
+  datasets:
+    build:
+      context: $PWD/lib/datasets
+      args:
+        venv_python: "${VENV_PYTHON}"
+    image: ${DOCKER_REGISTRY}/datasets:${DATASETS_VERSION:-latest}
+    volumes:
+      - datasets-data:/app/datasets_service/tmp
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${DATASETS_PORT}:8880"
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.datasets.rule=Host(`datasets.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.datasets.loadbalancer.server.port=${DATSETS_PORT}"
+    logging: *default-logging
+    command: ["--host", "0.0.0.0", "--port", "8880", "--database", "datasets.db", "--logfile", "datasets.log"]

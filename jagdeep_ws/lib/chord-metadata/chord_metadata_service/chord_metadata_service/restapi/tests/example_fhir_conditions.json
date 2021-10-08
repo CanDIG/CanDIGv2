@@ -1,0 +1,73 @@
+{
+  "resourceType": "Bundle",
+  "entry": [
+    {
+      "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Condition/bab430ff-5b09-4e4a-8871-6e4fcb84fa17",
+      "resource": {
+        "assertedDate": "2009-04-05T11:12:53-04:00",
+        "clinicalStatus": "active",
+        "code": {
+          "coding": [
+            {
+              "code": "38341003",
+              "display": "Hypertension",
+              "system": "http://snomed.info/sct"
+            }
+          ],
+          "text": "Hypertension"
+        },
+        "context": {
+          "reference": "Encounter/630a642d-0402-454c-9426-c399cf9b2aab"
+        },
+        "id": "bab430ff-5b09-4e4a-8871-6e4fcb84fa17",
+        "meta": {
+          "lastUpdated": "2019-04-09T12:25:36.486194+00:00",
+          "versionId": "MTU1NDgxMjczNjQ4NjE5NDAwMA"
+        },
+        "onsetDateTime": "2009-04-05T11:12:53-04:00",
+        "resourceType": "Condition",
+        "subject": {
+          "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+        },
+        "verificationStatus": "confirmed"
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "fullUrl": "https://syntheticmass.mitre.org/v1/fhir/Condition/0e2a23c7-90ef-4e0a-b9da-c7869104f8f6",
+      "resource": {
+        "assertedDate": "1961-06-27T21:21:32-04:00",
+        "clinicalStatus": "active",
+        "code": {
+          "coding": [
+            {
+              "code": "38341003",
+              "display": "Hypertension",
+              "system": "http://snomed.info/sct"
+            }
+          ],
+          "text": "Hypertension"
+        },
+        "context": {
+          "reference": "Encounter/bdba928a-6a8a-4998-bdb9-4190029cfd56"
+        },
+        "id": "0e2a23c7-90ef-4e0a-b9da-c7869104f8f6",
+        "meta": {
+          "lastUpdated": "2019-04-09T12:25:35.399801+00:00",
+          "versionId": "MTU1NDgxMjczNTM5OTgwMTAwMA"
+        },
+        "onsetDateTime": "1961-06-27T21:21:32-04:00",
+        "resourceType": "Condition",
+        "subject": {
+          "reference": "Patient/728b270d-d7de-4143-82fe-d3ccd92cebe4"
+        },
+        "verificationStatus": "confirmed"
+      },
+      "search": {
+        "mode": "match"
+      }
+    }
+  ]
+}

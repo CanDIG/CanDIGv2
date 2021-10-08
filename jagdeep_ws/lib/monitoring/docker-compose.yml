@@ -1,0 +1,143 @@
+# references:
+# - https://github.com/Einsteinish/Docker-Compose-Prometheus-and-Grafana
+# - https://github.com/vegasbrianc/prometheus/blob/master/prometheus/prometheus.yml
+version: '3.7'
+
+services:
+
+  prometheus:
+    build:
+      context: $PWD/lib/monitoring/prometheus
+      args:
+        version: "v${PROMETHEUS_VERSION}"
+    image: ${DOCKER_REGISTRY}/prometheus:v${PROMETHEUS_VERSION:-latest}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - prometheus-data:/prometheus
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    depends_on:
+      - cadvisor
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.prometheus.rule=Host(`prometheus.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.prometheus.loadbalancer.server.port=${PROMETHEUS_PORT}"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=200h
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+      - --web.enable-lifecycle
+
+  node-exporter:
+    image: prom/node-exporter:${NODE_EXPORTER_VERSION:-latest}
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    ports:
+      - "${NODE_EXPORTER_PORT}:9100"
+    networks:
+      - ${DOCKER_NET}
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+
+  alertmanager:
+    build:
+      context: $PWD/lib/monitoring/alertmanager
+      args:
+        version: "${ALERT_MANAGER_VERSION}"
+    image: ${DOCKER_REGISTRY}/alertmanager:${ALERT_MANAGER_VERSION:-latest}
+    ports:
+      - "${ALERT_MANAGER_PORT}:9093"
+    networks:
+      - ${DOCKER_NET}
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    command:
+      - --config.file=/etc/alertmanager/config.yml
+      - --storage.path=/alertmanager
+
+  cadvisor:
+    #image: google/cadvisor:${CADVISOR_VERSION:-latest}
+    image: gcr.io/cadvisor/cadvisor:${CADVISOR_VERSION:-latest}
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "${CADVISOR_PORT}:8080"
+    networks:
+      - ${DOCKER_NET}
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  grafana:
+    build:
+      context: $PWD/lib/monitoring/grafana
+      args:
+        version: "${GRAFANA_VERSION}"
+    image: ${DOCKER_REGISTRY}/grafana:${GRAFANA_VERSION:-latest}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - ${DOCKER_NET}
+    user: "472"
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.grafana.rule=Host(`grafana.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.grafana.loadbalancer.server.port=${GRAFANA_PORT}"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/admin_password
+      # - GF_USERS_ALLOW_SIGN_UP=false

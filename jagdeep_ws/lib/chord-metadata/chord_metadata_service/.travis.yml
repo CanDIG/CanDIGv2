@@ -1,0 +1,22 @@
+dist: bionic
+language: python
+python:
+  - "3.6"
+  - "3.8"
+addons:
+  postgresql: "12"
+  apt:
+    packages:
+      - postgresql-12
+      - postgresql-contrib-12
+before_install:
+  - sudo -u postgres psql -U postgres -p 5433 -d postgres -c "alter user postgres with password 'hj38f3Ntr';"
+install:
+  - pip install -r requirements.txt
+  - pip install .
+script:
+  - export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="hj38f3Ntr" && export POSTGRES_PORT=5433
+  - python3 -m tox
+  - codecov
+  - rm -rf chord_metadata_service
+  - python3 -m coverage run ./manage.py test chord_metadata_service

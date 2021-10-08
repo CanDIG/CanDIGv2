@@ -1,0 +1,7 @@
+{
+    "project_title": "project_1",
+    "dataset_title": "dataset_1",
+    "table_name": "table_1",
+    "katsu_server_url": "http://example.com:4000",
+    "phenopackets_json_location": "/home/user/v2/CanCOGen_synthetic_data/cancogen_phenopackets.json"
+}

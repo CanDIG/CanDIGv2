@@ -1,0 +1,170 @@
+{
+  "resourceType": "Bundle",
+  "id": "a68bec03-639d-4ad3-b845-59436700bd17",
+  "meta": {
+    "lastUpdated": "2020-05-25T17:33:33.838+00:00"
+  },
+  "type": "searchset",
+  "link": [
+    {
+      "relation": "self",
+      "url": "http://hapi.fhir.org/baseR4/Specimen?_format=json&_pretty=true"
+    },
+    {
+      "relation": "next",
+      "url": "http://hapi.fhir.org/baseR4?_getpages=a68bec03-639d-4ad3-b845-59436700bd17&_getpagesoffset=20&_count=20&_format=json&_pretty=true&_bundletype=searchset"
+    }
+  ],
+  "entry": [
+    {
+      "fullUrl": "http://hapi.fhir.org/baseR4/Specimen/1171660",
+      "resource": {
+        "resourceType": "Specimen",
+        "id": "1171660",
+        "meta": {
+          "versionId": "1",
+          "lastUpdated": "2020-05-22T19:06:12.602+00:00"
+        },
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "urn:uuid:4d5ee81a-9c5f-11ea-9adf-acde48001122"
+          }
+        ],
+        "accessionIdentifier": {
+          "system": "http://mghpathology.org/identifiers/specimens",
+          "value": "urn:id:TEST20-0001_G1-5"
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "430856003",
+              "display": "Tissue section"
+            }
+          ]
+        },
+        "processing": [
+          {
+            "description": "Basal Cell Cocktail",
+            "procedure": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "433465004",
+                  "display": "Sampling of tissue specimen"
+                }
+              ]
+            }
+          }
+        ],
+        "container": [
+          {
+            "identifier": [
+              {
+                "system": "urn:ietf:rfc:3986",
+                "value": "urn:uuid:4d5eeb58-9c5f-11ea-9adf-acde48001122"
+              }
+            ],
+            "type": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "433466003",
+                  "display": "Microscope slide"
+                }
+              ]
+            }
+          }
+        ],
+        "subject": {
+          "reference": "Patient/6f7acde5-db81-4361-82cf-886893a3280c"
+        }
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "fullUrl": "http://hapi.fhir.org/baseR4/Specimen/1171659",
+      "resource": {
+        "resourceType": "Specimen",
+        "id": "1171659",
+        "meta": {
+          "versionId": "1",
+          "lastUpdated": "2020-05-22T19:06:12.461+00:00"
+        },
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "urn:uuid:4d5af908-9c5f-11ea-9adf-acde48001122"
+          }
+        ],
+        "accessionIdentifier": {
+          "system": "http://mghpathology.org/identifiers/specimens",
+          "value": "urn:id:TEST20-0001_G1"
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "430861001",
+              "display": "Gross tissue specimen"
+            }
+          ]
+        },
+        "processing": [
+          {
+            "description": "Partitioning",
+            "procedure": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "433465004",
+                  "display": "Sampling of tissue specimen"
+                }
+              ]
+            }
+          },
+          {
+            "description": "Embedding",
+            "procedure": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "433465004",
+                  "display": "Sampling of tissue specimen"
+                }
+              ]
+            }
+          }
+        ],
+        "container": [
+          {
+            "identifier": [
+              {
+                "system": "urn:ietf:rfc:3986",
+                "value": "urn:uuid:4d5afc1e-9c5f-11ea-9adf-acde48001122"
+              }
+            ],
+            "type": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "434464009",
+                  "display": "Tissue cassette"
+                }
+              ]
+            }
+          }
+        ],
+        "subject": {
+          "reference": "Patient/728b270d-d7de-4143-82fe-d3ccd92cebe4"
+        }
+      },
+      "search": {
+        "mode": "match"
+      }
+    }
+  ]
+}

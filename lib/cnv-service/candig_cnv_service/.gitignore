@@ -1,0 +1,10 @@
+*.pyc
+.coverage
+*.log
+.idea
+*_env
+*.db
+__pycache__
+_build
+_static
+_templates

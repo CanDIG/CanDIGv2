@@ -1,0 +1,34 @@
+version: '3.7'
+
+services:
+  cancogen-dashboard:
+    build:
+      context: $PWD/lib/cancogen-dashboard
+    image: ${DOCKER_REGISTRY}/cancogen-dashboard:${CANCOGEN_DASHBOARD_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${CANCOGEN_DASHBOARD_PORT}:3000"
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.cancogen-dashboard.rule=Host(`cancogen-dashboard.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.cancogen-dashboard.loadbalancer.server.port=${CANCOGEN_DASHBOARD_PORT}"
+    logging: *default-logging
+    tty: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_BASE_URL=${CANCOGEN_BASE_URL}
+      - REACT_APP_METADATA_URL=${CANCOGEN_METADATA_URL}
+      - REACT_APP_HTSGET_URL=${CANCOGEN_HTSGET_URL}
+      - REACT_APP_DRS_URL=${CANCOGEN_DRS_URL}
+      - REACT_APP_FEDERATION_URL=${CANCOGEN_FEDERATION_URL}

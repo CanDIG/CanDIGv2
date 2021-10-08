@@ -1,0 +1,20 @@
+{
+  "consent_code": {
+    "primary_category": {
+      "code": "GRU"
+    },
+    "secondary_categories": [
+      {
+        "code": "GSO"
+      }
+    ]
+  },
+  "data_use_requirements": [
+    {
+      "code": "COL"
+    },
+    {
+      "code": "PUB"
+    }
+  ]
+}

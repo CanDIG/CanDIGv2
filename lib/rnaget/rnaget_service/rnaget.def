@@ -1,0 +1,18 @@
+Bootstrap: docker
+From: python:3.7-slim-stretch
+
+%files
+    . /app
+
+%post
+    export HOME="/app"
+    cd /app
+    pip3 install --no-cache-dir -r requirements.txt
+    python3 setup.py install
+
+%startscript
+    exec candig_rnaget --port 3000 --logfile log/rnaget.log --database data/rnaget.sqlite --tmpdata data/tmp/
+
+%labels
+    Author CanDIG Project
+

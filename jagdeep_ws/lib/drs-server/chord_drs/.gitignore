@@ -1,0 +1,21 @@
+# chord_drs specific
+db.sqlite3
+.env
+
+# testing related
+.coverage*
+.tox
+htmlcov/
+
+# IDE stuff
+.idea/$CACHE_FILE$
+.idea/dataSources*
+.idea/rSettings.xml
+.idea/workspace.xml
+*.swp
+*.swo
+
+# others
+*.pyc
+env
+__pycache__

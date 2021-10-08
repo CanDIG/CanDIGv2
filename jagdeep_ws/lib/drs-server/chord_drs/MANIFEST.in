@@ -1,0 +1,2 @@
+recursive-include chord_drs/migrations *
+include chord_drs/package.cfg
