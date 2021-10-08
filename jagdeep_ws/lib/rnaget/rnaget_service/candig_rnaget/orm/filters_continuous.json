@@ -1,8 +1,0 @@
-{
-  "filter": "version",
-  "fieldType": "string",
-  "description": "version to search for",
-  "values": [
-      "1.0"
-  ]
-}

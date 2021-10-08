@@ -1,7 +1,0 @@
-[run]
-include=chord_metadata_service/*
-omit=
-    chord_metadata_service/*/migrations/*
-    chord_metadata_service/*/tests/*
-    chord_metadata_service/metadata/settings.py
-branch=True

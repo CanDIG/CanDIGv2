@@ -1,6 +1,0 @@
-{
-  "writeTsvWorkflow.in_tsv": [
-    ["one", "two", "three"],
-    ["un", "deux", "trois"]
-  ]
-}
