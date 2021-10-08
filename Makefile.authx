@@ -22,17 +22,11 @@ clean-authx:
  	# where the Dockerfile is for it to cp. We could use docker-compose mounts.
 	rm -r $(DIR)/lib/tyk/tmp/
 
-#>>>
-# initialize authentication and authorization services
-# tyk, keycloak, vault
-#<<<
-.PHONY: init-authx
-init-authx: init-keycloak init-tyk
 
 #>>>
 # authx, common settings
 #<<<
-init-authx-common:
+init-authx: mkdir
 	# Generate dynamic environment variables
 	$(eval KEYCLOAK_CLIENT_ID_64=$(shell echo -n ${KEYCLOAK_CLIENT_ID} | base64))
 	@echo $(KEYCLOAK_CLIENT_ID_64) > $(DIR)/tmp/secrets/keycloak-client-local-candig-id-64
@@ -52,36 +46,18 @@ init-authx-common:
 	export TEMP_KEYCLOAK_PUBLIC_URL=$(TEMP_KEYCLOAK_PUBLIC_URL); \
 	export CONFIG_DIR=\
 	echo ; \
-
-#>>>
-# initialize keycloak service - idp
-#<<<
-init-keycloak: mkdir
-	echo "    started init-keycloak" >> $(LOGFILE)
-
-	$(MAKE) init-authx-common \
-
 	if [[ ${KEYCLOAK_USE_LOCAL_IDP} == 1 ]]; then \
 		echo "Setting up Keycloak;" ; \
 		source ${PWD}/lib/keycloak/keycloak_setup.sh; \
-	fi
+	fi ;\
+	${PWD}/lib/tyk/tyk_setup.sh; \
+	echo ; \
+	$(MAKE) compose-tyk \
+	${PWD}/lib/tyk/tyk_key_generation.sh; \
+
 
 # TODO: tyk playbook - separate out the creation of apps/api definitions so new ones can be added and run `make tyk-apps`
 # TODO: tyk playbook - separate out the creation of policies so new ones can be added
 # TODO: tyk playbook - separate out the creation of middleware so new ones can be added and existing ones edited
 # TODO: tyk playbook - separate out the creation of key request AND generating new keys
 # TODO: tyk playbook - separate out the creation of tyk config
-
-#>>>
-# initialize tyk service - api gateway
-#<<<
-init-tyk: mkdir
-	echo "    started init-tyk" >> $(LOGFILE)
-
-	$(MAKE) init-authx-common \
-
-	echo "Setting up Tyk;" ; \
-	${PWD}/lib/tyk/tyk_setup.sh; \
-	echo ; \
-
-	$(MAKE) compose-tyk

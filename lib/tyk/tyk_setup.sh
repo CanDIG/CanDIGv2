@@ -59,11 +59,6 @@ cp ${PWD}/lib/tyk/configuration_templates/virtualToken.js ${CONFIG_DIR}/middlewa
 echo "Copying permissionsStoreMiddleware.js"
 cp ${PWD}/lib/tyk/configuration_templates/permissionsStoreMiddleware.js ${CONFIG_DIR}/middleware/permissionsStoreMiddleware.js
 
-TYK_KEY_REQUEST=$(cat "${CONFIG_DIR}/key_request.json")
-echo "=========================================="
-echo $TYK_KEY_REQUEST
-curl "${TYK_LOGIN_TARGET_URL}/tyk/keys/create" -H "x-tyk-authorization: ${TYK_SECRET_KEY}" -s -H "Content-Type: application/json" -X POST -d "${TYK_KEY_REQUEST}"
-curl -H "x-tyk-authorization: ${TYK_SECRET_KEY}" -s "${TYK_LOGIN_TARGET_URL}/tyk/reload/group"
 
 
-echo "Tyk Setup Done!"
+echo "Tyk configuration generated!"
