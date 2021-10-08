@@ -455,6 +455,9 @@ docker-secrets: minio-secrets
 	@echo user > $(DIR)/tmp/secrets/keycloak-test-user
 	$(MAKE) secret-keycloak-test-user-password
 
+	$(MAKE) secret-tyk-secret-key
+	$(MAKE) secret-tyk-node-secret-key
+
 
 #>>>
 # create persistant volumes for docker containers
@@ -757,6 +760,9 @@ swarm-secrets:
 
 	docker secret create keycloak-admin-user $(DIR)/tmp/secrets/keycloak-admin-user
 	docker secret create keycloak-admin-password $(DIR)/tmp/secrets/keycloak-admin-password
+
+	docker secret create tyk-secret-key $(DIR)/tmp/secrets/tyk-secret-key
+	docker secret create tyk-node-secret-key $(DIR)/tmp/secrets/tyk-node-secret-key
 
 	# TODO: review
 	#docker secret create keycloak-test-password-1 $(DIR)/tmp/secrets/keycloak-test-password-1

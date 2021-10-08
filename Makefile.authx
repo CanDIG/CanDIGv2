@@ -12,9 +12,14 @@ clean-authx:
 	# - remove intermittent docker images
 	docker rmi candigv2_keycloak:latest --force
 	docker rmi candig_keycloak:latest --force
+
 	docker rmi candigv2_tyk:latest --force
 	docker rmi candig_tyk:latest --force
 
+	# TODO: ask Shaikh if he has better ideas about tmp
+ 	# this tmp is created inside the tyk directory because the templates
+ 	# generated after envsubst-ing need to be available in the root or below
+ 	# where the Dockerfile is for it to cp. We could use docker-compose mounts.
 	rm -r $(DIR)/lib/tyk/tmp/
 
 #>>>
@@ -30,7 +35,7 @@ init-authx: init-keycloak init-tyk
 init-authx-common:
 	# Generate dynamic environment variables
 	$(eval KEYCLOAK_CLIENT_ID_64=$(shell echo -n ${KEYCLOAK_CLIENT_ID} | base64))
-
+	@echo $(KEYCLOAK_CLIENT_ID_64) > $(DIR)/tmp/secrets/keycloak-client-local-candig-id-64
 	# temp: in production, explicitly indicating port 443 breaks vaults internal oidc provider checks.
 	# simply remove the ":443 from the authentication services public url for this purpose:
 	if [[ ${KEYCLOAK_PUBLIC_URL} == *":443"* ]]; then \

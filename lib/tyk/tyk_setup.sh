@@ -10,6 +10,19 @@ set -Eeuo pipefail
 # TODO: this image uses temp dir inside the lib/tyk which breaks the convention of this repo
 CONFIG_DIR="$PWD/lib/tyk/tmp"
 
+KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/secrets/keycloak-client-local-candig-secret)
+export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_VAL
+
+KEYCLOAK_CLIENT_ID_64_VAL=$(cat $PWD/tmp/secrets/keycloak-client-local-candig-id-64)
+export KEYCLOAK_CLIENT_ID_64=$KEYCLOAK_CLIENT_ID_64_VAL
+
+TYK_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-secret-key)
+export TYK_SECRET_KEY=$TYK_SECRET_KEY_VAL
+
+TYK_NODE_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-node-secret-key)
+export TYK_NODE_SECRET_KEY=$TYK_NODE_SECRET_KEY_VAL
+
+
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
 
 echo "Working on tyk.conf"
@@ -27,7 +40,10 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/api_candig.json.tpl > ${CONFIG
 echo "Working on policies.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/policies.json.tpl > ${CONFIG_DIR}/policies/policies.json
 
-## TODO: tyk_analytics.conf , key_request.json.tpl
+echo "Working on key generation"
+envsubst < ${PWD}/lib/tyk/configuration_templates/key_request.json.tpl > ${CONFIG_DIR}/key_request.json
+
+## TODO: tyk_analytics.conf
 
 # Copy files from template configs
 
@@ -43,4 +59,11 @@ cp ${PWD}/lib/tyk/configuration_templates/virtualToken.js ${CONFIG_DIR}/middlewa
 echo "Copying permissionsStoreMiddleware.js"
 cp ${PWD}/lib/tyk/configuration_templates/permissionsStoreMiddleware.js ${CONFIG_DIR}/middleware/permissionsStoreMiddleware.js
 
-echo "-- Tyk Setup Done! --"
+TYK_KEY_REQUEST=$(cat "${CONFIG_DIR}/key_request.json")
+echo "=========================================="
+echo $TYK_KEY_REQUEST
+curl "${TYK_LOGIN_TARGET_URL}/tyk/keys/create" -H "x-tyk-authorization: ${TYK_SECRET_KEY}" -s -H "Content-Type: application/json" -X POST -d "${TYK_KEY_REQUEST}"
+curl -H "x-tyk-authorization: ${TYK_SECRET_KEY}" -s "${TYK_LOGIN_TARGET_URL}/tyk/reload/group"
+
+
+echo "Tyk Setup Done!"

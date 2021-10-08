@@ -101,7 +101,7 @@
   "logstash_transport": "",
   "max_idle_connections_per_host": 500,
   "middleware_path": "./middleware",
-  "node_secret": "${SECRET_KEY}",
+  "node_secret": "${TYK_NODE_SECRET_KEY}",
   "oauth_redirect_uri_separator": ";",
   "oauth_refresh_token_expire": 0,
   "oauth_token_expire": 0,
@@ -109,7 +109,7 @@
   "pid_file_location": "./tyk-gateway.pid",
   
   "public_key_path": "",
-  "secret": "${SECRET_KEY}",
+  "secret": "${TYK_SECRET_KEY}",
   "sentry_code": "",
   "service_discovery": {
     "default_cache_timeout": 0

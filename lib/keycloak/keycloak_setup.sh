@@ -11,7 +11,7 @@ if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
   sleep 5
   echo "Waiting for keycloak to start"
   while ! docker logs --tail 1000 "$(docker ps | grep keycloak | awk '{print $1}')" | grep "Undertow HTTPS listener https listening on 0.0.0.0"; do sleep 1; done
-  echo "Ready"
+  echo "Keycloak container started."
 fi
 
 add_user() {
@@ -143,6 +143,7 @@ set_client ${KEYCLOAK_REALM} ${KEYCLOAK_CLIENT_ID} "${TYK_LISTEN_PATH}" ${KEYCLO
 echo "Getting keycloak secret"
 KEYCLOAK_SECRET_RESPONSE=$(get_secret ${KEYCLOAK_REALM})
 export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_RESPONSE
+echo $KEYCLOAK_SECRET > tmp/secrets/keycloak-client-local-candig-secret
 
 echo "Getting keycloak public key"
 KEYCLOAK_PUBLIC_KEY_RESPONSE=$(get_public_key ${KEYCLOAK_REALM})
@@ -156,4 +157,4 @@ fi
 
 echo "Waiting for keycloak to restart"
 while ! docker logs --tail 5 ${CANDIG_AUTH_DOMAIN} | grep "Admin console listening on http://127.0.0.1:9990"; do sleep 1; done
-echo "Ready"
+echo "Keycloak setup done!"
