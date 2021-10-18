@@ -6,7 +6,7 @@ now := time.now_ns()/1000000000
 
 default allowed = false
 
-default iss = "${TEMP_KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
+default iss = "${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/${KEYCLOAK_REALM}"
 default aud = "${KEYCLOAK_CLIENT_ID}"
 
 default full_authn_pk=`-----BEGIN PUBLIC KEY-----

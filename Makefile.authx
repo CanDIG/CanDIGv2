@@ -16,12 +16,6 @@ clean-authx:
 	docker rmi candigv2_tyk:latest --force
 	docker rmi candig_tyk:latest --force
 
-	# TODO: ask Shaikh if he has better ideas about tmp
- 	# this tmp is created inside the tyk directory because the templates
- 	# generated after envsubst-ing need to be available in the root or below
- 	# where the Dockerfile is for it to cp. We could use docker-compose mounts.
-	rm -r $(DIR)/lib/tyk/tmp/
-
 
 #>>>
 # authx, common settings
@@ -34,16 +28,16 @@ init-authx: mkdir
 	# simply remove the ":443 from the authentication services public url for this purpose:
 	if [[ ${KEYCLOAK_PUBLIC_URL} == *":443"* ]]; then \
 		echo "option 1"; \
-		$(eval TEMP_KEYCLOAK_PUBLIC_URL=$(shell echo ${KEYCLOAK_PUBLIC_URL} | sed -e 's/\(:443\)\$//g')) \
+		$(eval KEYCLOAK_PUBLIC_URL_PROD=$(shell echo ${KEYCLOAK_PUBLIC_URL} | sed -e 's/\(:443\)\$//g')) \
 	elif [[ ${KEYCLOAK_PUBLIC_URL} == *":80"* ]]; then \
 		echo "option 2"; \
-		$(eval TEMP_KEYCLOAK_PUBLIC_URL=$(shell echo ${KEYCLOAK_PUBLIC_URL} | sed -e 's/\(:80\)\$//g')) \
+		$(eval KEYCLOAK_PUBLIC_URL_PROD=$(shell echo ${KEYCLOAK_PUBLIC_URL} | sed -e 's/\(:80\)\$//g')) \
 	else \
 		echo "option 3"; \
-		$(eval TEMP_KEYCLOAK_PUBLIC_URL=$(shell echo ${KEYCLOAK_PUBLIC_URL})) \
+		$(eval KEYCLOAK_PUBLIC_URL_PROD=$(shell echo ${KEYCLOAK_PUBLIC_URL})) \
 	fi ;\
 	export KEYCLOAK_CLIENT_ID_64=$(KEYCLOAK_CLIENT_ID_64); \
-	export TEMP_KEYCLOAK_PUBLIC_URL=$(TEMP_KEYCLOAK_PUBLIC_URL); \
+	export KEYCLOAK_PUBLIC_URL_PROD=$(TEMP_KEYCLOAK_PUBLIC_URL); \
 	export CONFIG_DIR=\
 	echo ; \
 	if [[ ${KEYCLOAK_USE_LOCAL_IDP} == 1 ]]; then \  # TODO: remove this check because it makes not sense to have tyk without keycloak
