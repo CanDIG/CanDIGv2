@@ -22,6 +22,11 @@ clean-authx:
 #<<<
 init-authx: mkdir
 	# Generate dynamic environment variables
+	# ==========  HACK ALERT ==============
+	# This setup with backslashes (\) is required because Make runs each command
+	# in its own shell.  So to pass the environment from previous commands, one has
+	# to do this backslash dance. This could have been resolved but we decided to
+	# move to a better solution so Aman made a decision to keep this hack as-is.
 	$(eval KEYCLOAK_CLIENT_ID_64=$(shell echo -n ${KEYCLOAK_CLIENT_ID} | base64))
 	@echo $(KEYCLOAK_CLIENT_ID_64) > $(DIR)/tmp/secrets/keycloak-client-local-candig-id-64
 	# temp: in production, explicitly indicating port 443 breaks vaults internal oidc provider checks.
@@ -37,21 +42,11 @@ init-authx: mkdir
 		$(eval KEYCLOAK_PUBLIC_URL_PROD=$(shell echo ${KEYCLOAK_PUBLIC_URL})) \
 	fi ;\
 	export KEYCLOAK_CLIENT_ID_64=$(KEYCLOAK_CLIENT_ID_64); \
-	export KEYCLOAK_PUBLIC_URL_PROD=$(TEMP_KEYCLOAK_PUBLIC_URL); \
-	export CONFIG_DIR=\
-	echo ; \
-	if [[ ${KEYCLOAK_USE_LOCAL_IDP} == 1 ]]; then \  # TODO: remove this check because it makes not sense to have tyk without keycloak
-		echo "Setting up Keycloak;" ; \
-		source ${PWD}/lib/keycloak/keycloak_setup.sh; \
-	fi ;\
+	export KEYCLOAK_PUBLIC_URL_PROD=$(KEYCLOAK_PUBLIC_URL_PROD); \
+	echo "Setting up Keycloak" ; \
+	source ${PWD}/lib/keycloak/keycloak_setup.sh; \
+	export SERVICE=tyk; \
 	${PWD}/lib/tyk/tyk_setup.sh; \
-	echo ; \
+	echo  ; \
 	$(MAKE) compose-tyk \
 	${PWD}/lib/tyk/tyk_key_generation.sh; \
-
-
-# TODO: tyk playbook - separate out the creation of apps/api definitions so new ones can be added and run `make tyk-apps`
-# TODO: tyk playbook - separate out the creation of policies so new ones can be added
-# TODO: tyk playbook - separate out the creation of middleware so new ones can be added and existing ones edited
-# TODO: tyk playbook - separate out the creation of key request AND generating new keys
-# TODO: tyk playbook - separate out the creation of tyk config
