@@ -16,6 +16,9 @@ clean-authx:
 	docker rmi candigv2_tyk:latest --force
 	docker rmi candig_tyk:latest --force
 
+	# - clean tmp dir inside lib/tyk
+	rm -r $(DIR)/lib/tyk/tmp
+
 
 #>>>
 # authx, common settings
