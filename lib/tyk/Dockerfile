@@ -1,9 +1,10 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-#TODO: add maintainer labels
+LABEL Maintainer="CanDIG Project"
 
-# TODO: this image uses temp dir inside the lib/tyk which breaks the convention of this repo
+# TODO: this image uses temp dir inside the lib/tyk which deviates from convention of this repo
+# See tyk_setup.sh for the same.
 COPY ./tmp/tyk.conf /opt/tyk-gateway/tyk.conf
 COPY ./tmp/middleware/authMiddleware.js /opt/tyk-gateway/middleware/authMiddleware.js
 COPY ./tmp/middleware/permissionsStoreMiddleware.js /opt/tyk-gateway/middleware/permissionsStoreMiddleware.js

@@ -7,7 +7,8 @@ set -Eeuo pipefail
 # Load Tyk template (.tpl) files, populate them with project .env variables, and then spit
 # them out to ./lib/tyk/tmp/*.
 
-# TODO: this image uses temp dir inside the lib/tyk which breaks the convention of this repo
+# TODO: this image uses temp dir inside the lib/tyk which deviates from convention of this repo
+# see Makefile.authx for other details.
 CONFIG_DIR="$PWD/lib/tyk/tmp"
 
 KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/secrets/keycloak-client-local-candig-secret)
