@@ -25,8 +25,8 @@
     "settings": {
       "ClientKey": ""
     },
-    "default_from_email": "${TYK_DASH_FROM_EMAIL}",
-    "default_from_name": "${TYK_DASH_FROM_NAME}"
+    "default_from_email": "${TYK_ANALYTICS_FROM_EMAIL}",
+    "default_from_name": "${TYK_ANALYTICS_FROM_NAME}"
   },
   "hide_listen_path": false,
   "sentry_code": "",

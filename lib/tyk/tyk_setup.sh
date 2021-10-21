@@ -22,6 +22,8 @@ export TYK_SECRET_KEY=$TYK_SECRET_KEY_VAL
 TYK_NODE_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-node-secret-key)
 export TYK_NODE_SECRET_KEY=$TYK_NODE_SECRET_KEY_VAL
 
+TYK_ANALYTIC_ADMIN_SECRET_VAL=$(cat $PWD/tmp/secrets/tyk-analytics-admin-key)
+export TYK_ANALYTIC_ADMIN_SECRET=$TYK_ANALYTIC_ADMIN_SECRET_VAL
 
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
 
@@ -40,10 +42,11 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/api_candig.json.tpl > ${CONFIG
 echo "Working on policies.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/policies.json.tpl > ${CONFIG_DIR}/policies/policies.json
 
-echo "Working on key generation"
+echo "Working on key_request.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/key_request.json.tpl > ${CONFIG_DIR}/key_request.json
 
-## TODO: tyk_analytics.conf
+echo "Working on tyk_analytics"
+envsubst < ${PWD}/lib/tyk/configuration_templates/tyk_analytics.conf.tpl > ${CONFIG_DIR}/tyk_analytics.conf
 
 # Copy files from template configs
 
