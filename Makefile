@@ -65,11 +65,7 @@ endif
 	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
-<<<<<<< HEAD
-	source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh && $(CONDA) init
-=======
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
->>>>>>> origin/hotfix/post-auth-merge-fixes
 	echo "    finished bin-conda" >> $(LOGFILE)
 
 
