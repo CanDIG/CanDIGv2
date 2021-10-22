@@ -9,8 +9,10 @@ export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
 DIR = $(PWD)
-CONDA = $(DIR)/bin/miniconda3/bin/conda
-LOGFILE=$(DIR)/tmp/progress.txt
+CONDA_BASE = $(DIR)/bin/miniconda3
+CONDA = $(CONDA_BASE)/bin/conda
+CONDA_ENV_SETTINGS = $(CONDA_BASE)/etc/profile.d/conda.sh
+LOGFILE = $(DIR)/tmp/progress.txt
 
 .PHONY: all
 all:
@@ -63,7 +65,11 @@ endif
 	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
+<<<<<<< HEAD
 	source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh && $(CONDA) init
+=======
+	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
+>>>>>>> origin/hotfix/post-auth-merge-fixes
 	echo "    finished bin-conda" >> $(LOGFILE)
 
 
@@ -504,11 +510,11 @@ images: #toil-docker
 .PHONY: init-conda
 init-conda:
 	echo "    started init-conda" >> $(LOGFILE)
-	# source both bashrc and conda's script to be safe, so the conda command is found
-	source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh && source /home/vagrant/.bashrc \
-		&& conda create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
+	# source conda's script to be safe, so the conda command is found
+	source $(CONDA_ENV_SETTINGS) \
+		&& $(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
 
-	source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh && source /home/vagrant/.bashrc \
+	source $(CONDA_ENV_SETTINGS) \
 		&& conda activate $(VENV_NAME) \
 		&& pip install -U -r $(DIR)/etc/venv/requirements.txt
 
