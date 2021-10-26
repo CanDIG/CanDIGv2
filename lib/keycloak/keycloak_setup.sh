@@ -2,16 +2,19 @@
 
 set -Eeuo pipefail
 
+LOGFILE=$PWD/tmp/progress.txt
+
+
 # Verify if keycloak container is running
 KEYCLOAK_CONTAINERS=$(echo "$(docker ps | grep keycloak | wc -l)")
-echo "Number of keycloak containers running: ${KEYCLOAK_CONTAINERS}"
+echo "Number of keycloak containers running: ${KEYCLOAK_CONTAINERS}" | tee -a $LOGFILE
 if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
-  echo "Booting keycloak container!"
+  echo "Booting keycloak container!" | tee -a $LOGFILE
   export SERVICE=keycloak && make compose-keycloak
   sleep 5
-  echo "Waiting for keycloak to start"
+  echo "Waiting for keycloak to start" | tee -a $LOGFILE
   while ! docker logs --tail 1000 "$(docker ps | grep keycloak | awk '{print $1}')" | grep "Undertow HTTPS listener https listening on 0.0.0.0"; do sleep 1; done
-  echo "Keycloak container started."
+  echo "Keycloak container started." | tee -a $LOGFILE
 fi
 
 add_user() {
@@ -19,10 +22,10 @@ add_user() {
   local username=$1
   local password=$2
 
-  echo "    Adding user ${username}"
+  echo "    Adding user ${username}" | tee -a $LOGFILE
   docker exec ${CANDIG_AUTH_DOMAIN} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${username} -p ${password} -r ${KEYCLOAK_REALM}
 
-  echo "    Restarting the keycloak container"
+  echo "    Restarting the keycloak container" | tee -a $LOGFILE
   docker restart ${CANDIG_AUTH_DOMAIN}
 }
 
@@ -129,32 +132,32 @@ get_public_key() {
 
 # SCRIPT START
 
-echo "    Starting setup calls to keycloak"
+echo "    Starting setup calls to keycloak" | tee -a $LOGFILE
 
-echo "Getting keycloak token"
+echo "Getting keycloak token" | tee -a $LOGFILE
 KEYCLOAK_TOKEN=$(get_token)
 
-echo "Creating Realm ${KEYCLOAK_REALM}"
+echo "Creating Realm ${KEYCLOAK_REALM}" | tee -a $LOGFILE
 set_realm ${KEYCLOAK_REALM}
 
-echo "Setting client ${KEYCLOAK_CLIENT_ID}"
+echo "Setting client ${KEYCLOAK_CLIENT_ID}" | tee -a $LOGFILE
 set_client ${KEYCLOAK_REALM} ${KEYCLOAK_CLIENT_ID} "${TYK_LISTEN_PATH}" ${KEYCLOAK_LOGIN_REDIRECT_PATH}
 
-echo "Getting keycloak secret"
+echo "Getting keycloak secret" | tee -a $LOGFILE
 KEYCLOAK_SECRET_RESPONSE=$(get_secret ${KEYCLOAK_REALM})
 export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_RESPONSE
-echo $KEYCLOAK_SECRET > tmp/secrets/keycloak-client-local-candig-secret
+echo $KEYCLOAK_SECRET > tmp/secrets/keycloak-client-local-candig-secret | tee -a $LOGFILE
 
-echo "Getting keycloak public key"
+echo "Getting keycloak public key" | tee -a $LOGFILE
 KEYCLOAK_PUBLIC_KEY_RESPONSE=$(get_public_key ${KEYCLOAK_REALM})
 export KEYCLOAK_PUBLIC_KEY=$KEYCLOAK_PUBLIC_KEY_RESPONSE
-echo "Retrieved keycloak public key as ${KEYCLOAK_PUBLIC_KEY}"
+echo "Retrieved keycloak public key as ${KEYCLOAK_PUBLIC_KEY}" | tee -a $LOGFILE
 
 if [[ ${KEYCLOAK_GENERATE_TEST_USER} == 1 ]]; then
-  echo "Adding test user"
+  echo "Adding test user" | tee -a $LOGFILE
   add_user "$(cat tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)"
 fi
 
-echo "Waiting for keycloak to restart"
+echo "Waiting for keycloak to restart" | tee -a $LOGFILE
 while ! docker logs --tail 5 ${CANDIG_AUTH_DOMAIN} | grep "Admin console listening on http://127.0.0.1:9990"; do sleep 1; done
-echo "Keycloak setup done!"
+echo "Keycloak setup done!" | tee -a $LOGFILE

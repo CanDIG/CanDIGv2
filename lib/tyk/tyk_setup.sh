@@ -2,6 +2,8 @@
 
 set -Eeuo pipefail
 
+LOGFILE=$PWD/tmp/progress.txt
+
 # This script will set up a full tyk environment on your local CanDIGv2 cluster.
 # Be sure to invoke this from the Makefile at the project's root directory [CanDIGv2].
 # Load Tyk template (.tpl) files, populate them with project .env variables, and then spit
@@ -28,41 +30,41 @@ export TYK_ANALYTIC_ADMIN_SECRET=$TYK_ANALYTIC_ADMIN_SECRET_VAL
 
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
 
-echo "Working on tyk.conf"
+echo "Working on tyk.conf"  | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/tyk.conf.tpl > ${CONFIG_DIR}/tyk.conf
 
-echo "Working on authMiddleware.js"
+echo "Working on authMiddleware.js" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/authMiddleware.js > ${CONFIG_DIR}/middleware/authMiddleware.js
 
-echo "Working on api_auth.json"
+echo "Working on api_auth.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_auth.json.tpl > ${CONFIG_DIR}/apps/api_auth.json
 
-echo "Working on api_candig.json"
+echo "Working on api_candig.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_candig.json.tpl > ${CONFIG_DIR}/apps/api_candig.json
 
-echo "Working on policies.json"
+echo "Working on policies.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/policies.json.tpl > ${CONFIG_DIR}/policies/policies.json
 
-echo "Working on key_request.json"
+echo "Working on key_request.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/key_request.json.tpl > ${CONFIG_DIR}/key_request.json
 
-echo "Working on tyk_analytics"
+echo "Working on tyk_analytics" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/tyk_analytics.conf.tpl > ${CONFIG_DIR}/tyk_analytics.conf
 
 # Copy files from template configs
 
-echo "Copying virtualLogin.js"
+echo "Copying virtualLogin.js" | tee -a $LOGFILE
 cp ${PWD}/lib/tyk/configuration_templates/virtualLogin.js ${CONFIG_DIR}/middleware/virtualLogin.js
 
-echo "Copying virtualLogout.js"
+echo "Copying virtualLogout.js" | tee -a $LOGFILE
 cp ${PWD}/lib/tyk/configuration_templates/virtualLogout.js ${CONFIG_DIR}/middleware/virtualLogout.js
 
-echo "Copying virtualToken.js"
+echo "Copying virtualToken.js" | tee -a $LOGFILE
 cp ${PWD}/lib/tyk/configuration_templates/virtualToken.js ${CONFIG_DIR}/middleware/virtualToken.js
 
-echo "Copying permissionsStoreMiddleware.js"
+echo "Copying permissionsStoreMiddleware.js" | tee -a $LOGFILE
 cp ${PWD}/lib/tyk/configuration_templates/permissionsStoreMiddleware.js ${CONFIG_DIR}/middleware/permissionsStoreMiddleware.js
 
 
 
-echo "Tyk configuration generated!"
+echo "Tyk configuration generated!" | tee -a $LOGFILE
