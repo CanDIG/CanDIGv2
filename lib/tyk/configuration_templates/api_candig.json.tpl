@@ -15,10 +15,10 @@
     "base_identity_provided_by": "",
     
     "proxy": {
-	"target_url": "${TYK_CANDIG_API_TARGET}",
-	"strip_listen_path": true,
+        "target_url": "${TYK_CANDIG_API_TARGET}",
+        "strip_listen_path": true,
         "disable_strip_slash": false,
-	"listen_path": "/${TYK_LISTEN_PATH}",
+        "listen_path": "/${TYK_CANDIG_API_LISTEN_PATH}",
         "transport": {
             "ssl_insecure_skip_verify": false,
             "ssl_ciphers": [],
@@ -30,13 +30,13 @@
     },
 
     "version_data": {
-	"not_versioned": true,
-	"versions": {
-	    "Default": {
-		"name": "Default",
-		"use_extended_paths": true
-	    }
-	},
+        "not_versioned": true,
+        "versions": {
+            "Default": {
+                "name": "Default",
+                "use_extended_paths": true
+            }
+        },
         "extended_paths": {
             "ignored": [
                 {
@@ -53,33 +53,33 @@
         }
     },
     "custom_middleware": {
-	"pre": [
+        "pre": [
+                {
+                "name": "authMiddleware",
+                "path": "/opt/tyk-gateway/middleware/authMiddleware.js",
+                "require_session": false
+            }
+            ],
+        "post": [
             {
-	        "name": "authMiddleware",
-	        "path": "/opt/tyk-gateway/middleware/authMiddleware.js",
-	        "require_session": false
-	    }
+                "name": "permissionsStoreMiddleware",
+                "path": "/opt/tyk-gateway/middleware/permissionsStoreMiddleware.js",
+                "require_session": false
+            }
         ],
-	"post": [
-        {
-	        "name": "permissionsStoreMiddleware",
-	        "path": "/opt/tyk-gateway/middleware/permissionsStoreMiddleware.js",
-	        "require_session": false
-	    }
-    ],
-	"id_extractor": {
-	    "extract_with": "",
-	    "extract_from": "",
-	    "extractor_config": {}
-	},
-	"driver": "",
-	"auth_check": {
-	    "path": "",
-	    "require_session": false,
-	    "name": ""
-	},
-	"post_key_auth": [],
-	"response": []
+        "id_extractor": {
+            "extract_with": "",
+            "extract_from": "",
+            "extractor_config": {}
+        },
+        "driver": "",
+        "auth_check": {
+            "path": "",
+            "require_session": false,
+            "name": ""
+        },
+        "post_key_auth": [],
+        "response": []
     },
     
     "config_data": {
@@ -98,8 +98,8 @@
         "VAULT_ROLE":"researcher"
     },
     "openid_options": {
-	"segregate_by_client": false,
-	"providers": [
+        "segregate_by_client": false,
+        "providers": [
             {
                 "issuer": "${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/${KEYCLOAK_REALM}",
                 "client_ids": {
@@ -111,8 +111,8 @@
 
 
     "definition": {
-	"location": "header",
-	"key": "x-api-version"
+        "location": "header",
+        "key": "x-api-version"
     },
 
 

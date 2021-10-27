@@ -1,29 +1,83 @@
 #>>>
-# close all authentication and authorization services
-
+# close keycloak services
 #<<<
-clean-authx:
+clean-keycloak:
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(DIR)/lib/keycloak/docker-compose.yml | docker-compose -f - down
-
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-    	$(DIR)/lib/tyk/docker-compose.yml | docker-compose -f - down
 
 	# - remove intermittent docker images
 	docker rmi candigv2_keycloak:latest --force
 	docker rmi candig_keycloak:latest --force
 
+
+#>>>
+# close tyk services
+#<<<
+clean-tyk:
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+		$(DIR)/lib/tyk/docker-compose.yml | docker-compose -f - down
+
+	# - remove intermittent docker images
 	docker rmi candigv2_tyk:latest --force
 	docker rmi candig_tyk:latest --force
+	docker rmi tykio/tyk-gateway:$(TYK_VERSION) --force
+	docker rmi redis:$(TYK_REDIS_VERSION) --force
 
 	# - clean tmp dir inside lib/tyk
-	rm -r $(DIR)/lib/tyk/tmp
+	rm -r $(DIR)/lib/tyk/tmp || true
+
+	docker volume rm tyk-data
+	docker volume rm tyk-redis-data
+
+
+#>>>
+# close all authentication and authorization services
+#<<<
+clean-authx: clean-keycloak clean-tyk
 
 
 #>>>
 # authx, common settings
 #<<<
 init-authx: mkdir
+	# Generate dynamic environment variables
+	# ==========  HACK ALERT ==============
+	# This setup with backslashes (\) is required because Make runs each command
+	# in its own shell.  So to pass the environment from previous commands, one has
+	# to do this backslash dance. This could have been resolved but we decided to
+	# move to a better solution so Aman made a decision to keep this hack as-is.
+	$(eval KEYCLOAK_CLIENT_ID_64=$(shell echo -n ${KEYCLOAK_CLIENT_ID} | base64))
+	@echo $(KEYCLOAK_CLIENT_ID_64) > $(DIR)/tmp/secrets/keycloak-client-local-candig-id-64
+	$(MAKE) docker-volumes
+	# temp: in production, explicitly indicating port 443 breaks vaults internal oidc provider checks.
+	# simply remove the ":443 from the authentication services public url for this purpose:
+	if [[ ${KEYCLOAK_PUBLIC_URL} == *":443"* ]]; then \
+		echo "option 1"; \
+		$(eval KEYCLOAK_PUBLIC_URL_PROD=$(shell echo ${KEYCLOAK_PUBLIC_URL} | sed -e 's/\(:443\)\$//g')) \
+	elif [[ ${KEYCLOAK_PUBLIC_URL} == *":80"* ]]; then \
+		echo "option 2"; \
+		$(eval KEYCLOAK_PUBLIC_URL_PROD=$(shell echo ${KEYCLOAK_PUBLIC_URL} | sed -e 's/\(:80\)\$//g')) \
+	else \
+		echo "option 3"; \
+		$(eval KEYCLOAK_PUBLIC_URL_PROD=$(shell echo ${KEYCLOAK_PUBLIC_URL})) \
+	fi ;\
+	export KEYCLOAK_CLIENT_ID_64=$(KEYCLOAK_CLIENT_ID_64); \
+	export KEYCLOAK_PUBLIC_URL_PROD=$(KEYCLOAK_PUBLIC_URL_PROD); \
+	echo "Setting up Keycloak" ; \
+	source ${PWD}/lib/keycloak/keycloak_setup.sh; \
+	export SERVICE=tyk; \
+	${PWD}/lib/tyk/tyk_setup.sh; \
+	echo ; \
+	$(MAKE) compose-tyk ;\
+	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
+	echo ;
+
+#>>>
+# authx, redeploy tyk
+#<<<
+redeploy-tyk: mkdir
+	$(MAKE) clean-tyk
+	$(MAKE) docker-volumes
 	# Generate dynamic environment variables
 	# ==========  HACK ALERT ==============
 	# This setup with backslashes (\) is required because Make runs each command
@@ -46,10 +100,9 @@ init-authx: mkdir
 	fi ;\
 	export KEYCLOAK_CLIENT_ID_64=$(KEYCLOAK_CLIENT_ID_64); \
 	export KEYCLOAK_PUBLIC_URL_PROD=$(KEYCLOAK_PUBLIC_URL_PROD); \
-	echo "Setting up Keycloak" ; \
-	source ${PWD}/lib/keycloak/keycloak_setup.sh; \
 	export SERVICE=tyk; \
-	${PWD}/lib/tyk/tyk_setup.sh; \
-	echo  ; \
-	$(MAKE) compose-tyk \
-	${PWD}/lib/tyk/tyk_key_generation.sh; \
+	source ${PWD}/lib/tyk/tyk_setup.sh; \
+	echo ; \
+	$(MAKE) compose-tyk ;\
+	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
+	echo ;

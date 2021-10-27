@@ -11,7 +11,7 @@ LOGFILE=$PWD/tmp/progress.txt
 
 # TODO: this image uses temp dir inside the lib/tyk which deviates from convention of this repo
 # see Makefile.authx for other details.
-CONFIG_DIR="$PWD/lib/tyk/tmp"
+export CONFIG_DIR="$PWD/lib/tyk/tmp"
 
 KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/secrets/keycloak-client-local-candig-secret)
 export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_VAL
@@ -27,6 +27,9 @@ export TYK_NODE_SECRET_KEY=$TYK_NODE_SECRET_KEY_VAL
 
 TYK_ANALYTIC_ADMIN_SECRET_VAL=$(cat $PWD/tmp/secrets/tyk-analytics-admin-key)
 export TYK_ANALYTIC_ADMIN_SECRET=$TYK_ANALYTIC_ADMIN_SECRET_VAL
+
+KEYCLOAK_PUBLIC_KEY_VAL=$(cat $PWD/tmp/secrets/keycloak-public-key)
+export KEYCLOAK_PUBLIC_KEY=$KEYCLOAK_PUBLIC_KEY_VAL
 
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
 
@@ -45,9 +48,6 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/api_candig.json.tpl > ${CONFIG
 echo "Working on policies.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/policies.json.tpl > ${CONFIG_DIR}/policies/policies.json
 
-echo "Working on key_request.json" | tee -a $LOGFILE
-envsubst < ${PWD}/lib/tyk/configuration_templates/key_request.json.tpl > ${CONFIG_DIR}/key_request.json
-
 echo "Working on tyk_analytics" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/tyk_analytics.conf.tpl > ${CONFIG_DIR}/tyk_analytics.conf
 
@@ -65,6 +65,10 @@ cp ${PWD}/lib/tyk/configuration_templates/virtualToken.js ${CONFIG_DIR}/middlewa
 echo "Copying permissionsStoreMiddleware.js" | tee -a $LOGFILE
 cp ${PWD}/lib/tyk/configuration_templates/permissionsStoreMiddleware.js ${CONFIG_DIR}/middleware/permissionsStoreMiddleware.js
 
+
+# Extra APIs can be added here
+#echo "Working on api_example.json"
+#envsubst < ${PWD}/lib/tyk/configuration_templates/api_example.json.tpl > ${CONFIG_DIR}/apps/api_example.json
 
 
 echo "Tyk configuration generated!" | tee -a $LOGFILE

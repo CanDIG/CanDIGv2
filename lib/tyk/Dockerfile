@@ -14,3 +14,6 @@ COPY ./tmp/middleware/virtualToken.js /opt/tyk-gateway/middleware/virtualToken.j
 COPY ./tmp/apps/api_candig.json /opt/tyk-gateway/apps/api_candig.json
 COPY ./tmp/apps/api_auth.json /opt/tyk-gateway/apps/api_auth.json
 COPY ./tmp/policies/policies.json /opt/tyk-gateway/policies/policies.json
+
+## Extra APIs can be added here
+#COPY ./tmp/apps/api_example.json /opt/tyk-gateway/apps/api_example.json
