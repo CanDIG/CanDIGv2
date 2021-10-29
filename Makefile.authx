@@ -52,4 +52,4 @@ init-authx: mkdir
 	${PWD}/lib/tyk/tyk_setup.sh; \
 	echo  ; \
 	$(MAKE) compose-tyk \
-	${PWD}/lib/tyk/tyk_key_generation.sh; \
+	${PWD}/lib/tyk/tyk_key_generation.sh;
