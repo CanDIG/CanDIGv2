@@ -23,7 +23,6 @@ volumes:
   tyk-data:
   tyk-redis-data:
   vault-data:
-  shared-data:
 
 secrets:
   aws-credentials:

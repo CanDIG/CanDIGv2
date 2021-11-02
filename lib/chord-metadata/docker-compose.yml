@@ -57,8 +57,6 @@ services:
       #interval: 30s
       #timeout: 20s
       #retries: 3
-    volumes:
-      - shared-data:/shared
 
   metadata-db:
     image: postgres:13-alpine

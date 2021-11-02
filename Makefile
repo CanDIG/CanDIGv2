@@ -577,7 +577,6 @@ docker-volumes:
 	docker volume create tyk-data
 	docker volume create tyk-redis-data
 	docker volume create vault-data
-	docker volume create shared-data
 
 #>>>
 # (re)build service image for all modules
