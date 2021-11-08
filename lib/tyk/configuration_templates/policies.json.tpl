@@ -8,14 +8,6 @@
                 "versions": [
                     "Default"
                 ]
-            },
-            "${TYK_EXAMPLE_API_ID}": {
-                "allowed_urls": [],
-                "api_id": "${TYK_EXAMPLE_API_ID}",
-                "api_name": "${TYK_EXAMPLE_API_NAME}",
-                "versions": [
-                    "Default"
-                ]
             }
         },
         "active": true,
