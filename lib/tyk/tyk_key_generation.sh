@@ -29,12 +29,14 @@ generate_key() {
               "api_id": "'"${TYK_CANDIG_API_ID}"'",
               "api_name": "'"${TYK_CANDIG_API_NAME}"'",
               "Versions": ["Default"]
+          },
+          "'"${TYK_KATSU_API_ID}"'": {
+              "api_id": "'"${TYK_KATSU_API_ID}"'",
+              "api_name": "'"${TYK_KATSU_API_NAME}"'",
+              "Versions": ["Default"]
           }
-      "meta_data": {}
+      }
   }'
-
-  echo "$tyk_key_request"
-  echo $TYK_SECRET_KEY
 
   curl "${TYK_LOGIN_TARGET_URL}/tyk/keys/create" -H "x-tyk-authorization: ${TYK_SECRET_KEY}" -s -H "Content-Type: application/json" -X POST -d "${tyk_key_request}"
 
