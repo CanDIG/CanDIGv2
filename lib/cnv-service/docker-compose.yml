@@ -3,7 +3,7 @@ version: '3.7'
 services:
   cnv-service:
     build:
-      context: $PWD/lib/cnv-service
+      context: $PWD/lib/cnv-service/candig_cnv_service
       args:
         venv_python: "${VENV_PYTHON}"
     image: ${DOCKER_REGISTRY}/cnv-service:${CNV_SERVICE_VERSION:-latest}

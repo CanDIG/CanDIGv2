@@ -3,7 +3,7 @@ version: '3.7'
 services:
   cancogen-dashboard:
     build:
-      context: $PWD/lib/cancogen-dashboard
+      context: $PWD/lib/cancogen-dashboard/cancogen_dashboard
     image: ${DOCKER_REGISTRY}/cancogen-dashboard:${CANCOGEN_DASHBOARD_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
