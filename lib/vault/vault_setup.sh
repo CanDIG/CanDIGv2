@@ -92,7 +92,7 @@ docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=prefer
 echo
 echo ">> configuring jwt stuff"
 
-docker exec $vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" bound_issuer=\"${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"researcher\""
+docker exec $vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/candig\" bound_issuer=\"${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/candig\" default_role=\"researcher\""
 
 # create users
 echo

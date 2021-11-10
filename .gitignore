@@ -1,10 +1,12 @@
 #edit related
 *~
+.idea
 
 #data files/directories
 *.bam
 /data
 /tmp
+/lib/*/tmp
 .tox
 
 #project files

@@ -15,7 +15,7 @@
     "base_identity_provided_by": "",
     
     "proxy": {
-	"target_url": "${TYK_TARGET_URL}",
+	"target_url": "${TYK_CANDIG_API_TARGET}",
 	"strip_listen_path": true,
         "disable_strip_slash": false,
 	"listen_path": "/${TYK_LISTEN_PATH}",
@@ -92,7 +92,7 @@
             "/api_info",
             "/serverinfo"
         ],
-        "TYK_SERVER": "${CANDIG_PUBLIC_URL}",
+        "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
         "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
         "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",
         "VAULT_ROLE":"researcher"
@@ -101,7 +101,7 @@
 	"segregate_by_client": false,
 	"providers": [
             {
-                "issuer": "${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}",
+                "issuer": "${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/${KEYCLOAK_REALM}",
                 "client_ids": {
                     "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
                 }

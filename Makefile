@@ -4,6 +4,7 @@
 env ?= .env
 
 include $(env)
+include Makefile.authx
 export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
@@ -32,8 +33,7 @@ mkdir:
 	mkdir -p $(DIR)/tmp/data
 	mkdir -p $(DIR)/tmp/secrets
 	mkdir -p $(DIR)/tmp/ssl
-	mkdir -p $(DIR)/tmp/authentication/{keycloak,tyk}
-	mkdir -p $(DIR)/tmp/authorization/vault
+	mkdir -p $(DIR)/tmp/{keycloak,tyk,vault}
 
 
 #>>>
@@ -453,6 +453,13 @@ docker-secrets: minio-secrets
 	@echo admin > $(DIR)/tmp/secrets/keycloak-admin-user
 	$(MAKE) secret-keycloak-admin-password
 
+	@echo user > $(DIR)/tmp/secrets/keycloak-test-user
+	$(MAKE) secret-keycloak-test-user-password
+
+	$(MAKE) secret-tyk-secret-key
+	$(MAKE) secret-tyk-node-secret-key
+	$(MAKE) secret-tyk-analytics-admin-key
+
 
 #>>>
 # create persistant volumes for docker containers
@@ -636,7 +643,7 @@ push-%:
 #<<<
 secret-%:
 	@dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | rev | cut -b 2- | rev | tr -d '\n\r' > $(DIR)/tmp/secrets/$*
+		| base64 | rev | cut -b 2- | rev | tr -d '\n\r+' > $(DIR)/tmp/secrets/$*
 
 
 #>>>
@@ -755,6 +762,9 @@ swarm-secrets:
 
 	docker secret create keycloak-admin-user $(DIR)/tmp/secrets/keycloak-admin-user
 	docker secret create keycloak-admin-password $(DIR)/tmp/secrets/keycloak-admin-password
+
+	docker secret create tyk-secret-key $(DIR)/tmp/secrets/tyk-secret-key
+	docker secret create tyk-node-secret-key $(DIR)/tmp/secrets/tyk-node-secret-key
 
 	# TODO: review
 	#docker secret create keycloak-test-password-1 $(DIR)/tmp/secrets/keycloak-test-password-1

@@ -4,7 +4,7 @@
 
 ## Overview
 
-The CanDIG v2 project is a collection of heterogeneos services designed to work together to facilitate end to end
+The CanDIG v2 project is a collection of heterogeneous services designed to work together to facilitate end to end
 dataflow for genomic data.
 
 ```plaintext
@@ -146,6 +146,7 @@ To deploy CanDIGv2, follow one of the available install guides in `docs/`:
 * [Docker Deployment Guide](./docs/install-docker.md)
 * [Kubernetes Deployment Guide](./docs/install-kubernetes.md)
 * [Tox Deployment Guide](./docs/install-tox.md)
+* [Authentication and Authorization Deployment Guide](./docs/authx-setup.md)
 
 View additional Makefile options with `make help`.
 
