@@ -22,6 +22,7 @@ clean-authx:
 
 #>>>
 # authx, common settings
+
 #<<<
 init-authx: mkdir
 	# Generate dynamic environment variables
