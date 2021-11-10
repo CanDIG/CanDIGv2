@@ -29,7 +29,6 @@ all:
 .PHONY: mkdir
 mkdir:
 	mkdir -p $(DIR)/bin
-	mkdir -p $(DIR)/bin
 	mkdir -p $(DIR)/tmp/configs
 	mkdir -p $(DIR)/tmp/data
 	mkdir -p $(DIR)/tmp/secrets
