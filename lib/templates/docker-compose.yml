@@ -3,8 +3,7 @@ version: '3.7'
 services:
   {{service_name}}:
     build:
-      context: $PWD/lib/{{service_name}}
-      #context: $PWD/lib/{{service_name}}/{{submodule_name}}
+      context: $PWD/lib/{{service_name}}/{{submodule_name}}
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
