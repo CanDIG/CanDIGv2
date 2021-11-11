@@ -1,9 +1,13 @@
 #>>>
 # close keycloak services
+
 #<<<
 clean-keycloak:
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(DIR)/lib/keycloak/docker-compose.yml | docker-compose -f - down
+
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+		$(DIR)/lib/tyk/docker-compose.yml | docker-compose -f - down
 
 	# - remove intermittent docker images
 	docker rmi candigv2_keycloak:latest --force
@@ -12,6 +16,7 @@ clean-keycloak:
 
 #>>>
 # close tyk services
+
 #<<<
 clean-tyk:
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
@@ -32,12 +37,14 @@ clean-tyk:
 
 #>>>
 # close all authentication and authorization services
+
 #<<<
 clean-authx: clean-keycloak clean-tyk
 
 
 #>>>
 # authx, common settings
+
 #<<<
 init-authx: mkdir
 	# Generate dynamic environment variables
@@ -74,6 +81,7 @@ init-authx: mkdir
 
 #>>>
 # authx, redeploy tyk
+
 #<<<
 redeploy-tyk: mkdir
 	$(MAKE) clean-tyk
