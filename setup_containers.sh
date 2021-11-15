@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-LOGFILE=$PWD/tmp/progress.txt
+LOGFILE=$PWD/candig/tmp/progress.txt
 
 grep -q "finished provision.sh" $LOGFILE
 if [ $? -ne 0 ]; then

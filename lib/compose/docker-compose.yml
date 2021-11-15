@@ -4,25 +4,40 @@ networks:
   bridge:
     external: true
   bridge-net:
+    external: true
   ingress:
   traefik-net:
   agent-net:
 
 volumes:
   datasets-data:
+    external: true
   minio-data:
+    external: true
   minio-config:
+    external: true
   mc-config:
+    external: true
   toil-jobstore:
+    external: true
   portainer-data:
+    external: true
   prometheus-data:
+    external: true
   consul-data:
+    external: true
   grafana-data:
+    external: true
   traefik-data:
+    external: true
   keycloak-data:
+    external: true
   tyk-data:
+    external: true
   tyk-redis-data:
+    external: true
   vault-data:
+    external: true
 
 secrets:
   aws-credentials:

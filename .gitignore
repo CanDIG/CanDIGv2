@@ -1,10 +1,12 @@
 #edit related
 *~
+.idea
 
 #data files/directories
 *.bam
 /data
 /tmp
+/lib/*/tmp
 .tox
 
 #project files
@@ -14,20 +16,6 @@
 /etc/ssl/selfsigned-*
 */miniconda3
 .vagrant
-
-# keycloak
-lib/authentication/keycloak/tmp/*
-
-# tyk
-lib/authentication/tyk/tmp/*
-
-# vault
-lib/authorization/vault/tmp/*
-
-# opa
-lib/candig_server/authorization/tmp/*.rego
-lib/candig-server/authorization/tmp/*.rego
-
 
 # test metadata
 etc/tests/integration/*/__pycache__/*
