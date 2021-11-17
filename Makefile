@@ -406,7 +406,8 @@ compose-%:
 #<<<
 .PHONY: docker-networks
 docker-networks:
-	docker network create --driver bridge --subnet=$(DOCKER_BRIDGE_IP) --attachable bridge-net
+	docker network create --driver bridge --subnet=$(DOCKER_BRIDGE_IP) --attachable \
+		bridge-net || echo "bridge-net already exists..."
 	docker network create --driver bridge --subnet=$(DOCKER_GWBRIDGE_IP) --attachable \
 		-o com.docker.network.bridge.enable_icc=false \
 		-o com.docker.network.bridge.name=docker_gwbridge \
