@@ -45,10 +45,10 @@ fi
 
 cd $path
 if grep -qs "CanDIGv2" .git/config; then
-    echo "Specified path is a CanDIGv2 repo"
+    echo "Specified path is a CanDIGv2 repo" | tee -a $LOGFILE
     git checkout $2
 else
-    echo "Cloning CanDIGv2..."
+    echo "Cloning CanDIGv2..." | tee -a $LOGFILE
     git clone $branch https://github.com/CanDIG/CanDIGv2.git
     cd CanDIGv2/
 fi

@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   portainer-agent:
-    image: portainer/agent
+    image: portainer/agent:${PORTAINER_VERSION:-latest}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/volumes:/var/lib/docker/volumes
@@ -23,7 +23,7 @@ services:
       # LOG_LEVEL: debug
 
   portainer:
-    image: portainer/portainer-ce
+    image: portainer/portainer-ce:${PORTAINER_VERSION:-latest}
     command: -H ${PORTAINER_SOCKET} --tlsskipverify --admin-password-file /run/secrets/secret_key
     ports:
       - "${PORTAINER_UI_PORT}:9000"

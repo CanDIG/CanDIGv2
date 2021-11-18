@@ -97,8 +97,8 @@ sudo usermod -aG docker $(whoami)
 ```bash
 # 1. initialize repo and submodules
 git clone -b develop https://github.com/CanDIG/CanDIGv2.git
-git submodule update --init --recursive
 cd CanDIGv2
+git submodule update --init --recursive
 
 # 2. copy and edit .env with your site's local configuration
 cp -i etc/env/example.env .env
@@ -135,6 +135,7 @@ make init-docker
 ```bash
 # create images (optional)
 make images
+
 # pull latest CanDIGv2 images (instead of make images)
 make docker-pull
 
