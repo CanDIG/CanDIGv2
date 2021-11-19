@@ -152,6 +152,7 @@ echo "Getting keycloak public key" | tee -a $LOGFILE
 KEYCLOAK_PUBLIC_KEY_RESPONSE=$(get_public_key ${KEYCLOAK_REALM})
 export KEYCLOAK_PUBLIC_KEY=$KEYCLOAK_PUBLIC_KEY_RESPONSE
 echo "Retrieved keycloak public key as ${KEYCLOAK_PUBLIC_KEY}" | tee -a $LOGFILE
+echo $KEYCLOAK_PUBLIC_KEY > tmp/secrets/keycloak-public-key | tee -a $LOGFILE
 
 if [[ ${KEYCLOAK_GENERATE_TEST_USER} == 1 ]]; then
   echo "Adding test user" | tee -a $LOGFILE
