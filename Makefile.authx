@@ -1,5 +1,6 @@
 #>>>
 # close keycloak services
+# make clean-keycloak
 
 #<<<
 clean-keycloak:
@@ -16,6 +17,7 @@ clean-keycloak:
 
 #>>>
 # close tyk services
+# make clean-tyk
 
 #<<<
 clean-tyk:
@@ -37,6 +39,7 @@ clean-tyk:
 
 #>>>
 # close all authentication and authorization services
+# make clean-authx
 
 #<<<
 clean-authx: clean-keycloak clean-tyk
@@ -44,6 +47,7 @@ clean-authx: clean-keycloak clean-tyk
 
 #>>>
 # authx, common settings
+# make init-authx
 
 #<<<
 init-authx: mkdir
@@ -79,8 +83,10 @@ init-authx: mkdir
 	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
 	echo ;
 
+
 #>>>
 # authx, redeploy tyk
+# make redeploy-tyk
 
 #<<<
 redeploy-tyk: mkdir
