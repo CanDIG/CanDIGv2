@@ -11,8 +11,7 @@ clean-keycloak:
 		$(DIR)/lib/tyk/docker-compose.yml | docker-compose -f - down
 
 	# - remove intermittent docker images
-	docker rmi candigv2_keycloak:latest --force
-	docker rmi candig_keycloak:latest --force
+	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'keycloak' | xargs -I{} docker rmi --force {}
 
 
 #>>>
@@ -25,10 +24,7 @@ clean-tyk:
 		$(DIR)/lib/tyk/docker-compose.yml | docker-compose -f - down
 
 	# - remove intermittent docker images
-	docker rmi candigv2_tyk:latest --force
-	docker rmi candig_tyk:latest --force
-	docker rmi tykio/tyk-gateway:$(TYK_VERSION) --force
-	docker rmi redis:$(TYK_REDIS_VERSION) --force
+	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'tyk|redis' |  xargs -I{} docker rmi --force {}
 
 	# - clean tmp dir inside lib/tyk
 	rm -r $(DIR)/lib/tyk/tmp || true
