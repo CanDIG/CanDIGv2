@@ -32,6 +32,8 @@ This section will help you figure out how to add the details to the setup.
   TYK_EXAMPLE_API_LISTEN_PATH=example
   ```
   See section `## Extra APIs can be added here`
+- Add the path in the `SESSION_ENDPOINTS` array.  If you fail to add proper paths, then your application
+  will not redirect to login page properly.
 - Add the new section of the API to `lib/tyk/configuration_templates/policies.json.tpl` under
   the key `access_rights`
 - Add the new section of the API to `lib/tyk/tyk_key_generation.sh` under 

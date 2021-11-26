@@ -77,8 +77,7 @@ get_realm_clients() {
 set_client() {
   local realm=$1
   local client=$2
-  local listen=$3
-  local redirect=$4
+  local redirect=$3
 
   # Will add / to listen only if it is present
 
@@ -141,7 +140,7 @@ echo "Creating Realm ${KEYCLOAK_REALM}" | tee -a $LOGFILE
 set_realm ${KEYCLOAK_REALM}
 
 echo "Setting client in base64" | tee -a $LOGFILE
-export KEYCLOAK_CLIENT_ID_64=$(shell echo -n ${KEYCLOAK_CLIENT_ID} | base64)
+export KEYCLOAK_CLIENT_ID_64=$(echo -n ${KEYCLOAK_CLIENT_ID} | base64)
 echo $KEYCLOAK_CLIENT_ID_64 > tmp/secrets/keycloak-client-local-candig-id-64
 
 echo "Remove ports on prod" | tee -a $LOGFILE
@@ -153,11 +152,12 @@ elif [[ ${KEYCLOAK_PUBLIC_URL} == *":80"* ]]; then
   export KEYCLOAK_PUBLIC_URL_PROD=$(echo ${KEYCLOAK_PUBLIC_URL} | sed -e 's/\(:80\)\$//g')
 else
   echo "option 3";
-  export KEYCLOAK_PUBLIC_URL_PROD=$(echo ${KEYCLOAK_PUBLIC_URL})
+  export KEYCLOAK_PUBLIC_URL_PROD=$KEYCLOAK_PUBLIC_URL
 fi ;
 
 echo "Setting client ${KEYCLOAK_CLIENT_ID}" | tee -a $LOGFILE
-set_client ${KEYCLOAK_REALM} ${KEYCLOAK_CLIENT_ID} "${TYK_LISTEN_PATH}" ${KEYCLOAK_LOGIN_REDIRECT_PATH}
+echo $KEYCLOAK_CLIENT_ID_64
+set_client "${KEYCLOAK_REALM}" "${KEYCLOAK_CLIENT_ID_64}" "${KEYCLOAK_LOGIN_REDIRECT_PATH}"
 
 echo "Getting keycloak secret" | tee -a $LOGFILE
 KEYCLOAK_SECRET_RESPONSE=$(get_secret ${KEYCLOAK_REALM})

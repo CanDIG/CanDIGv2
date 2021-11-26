@@ -84,7 +84,7 @@
     
     "config_data": {
         "SESSION_ENDPOINTS": [
-            "/example"
+            "/katsu"
         ],
         "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
         "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
