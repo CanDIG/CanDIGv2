@@ -1,9 +1,9 @@
 {
-    "api_id": "${TYK_CANDIG_API_ID}",
-    "name": "${TYK_CANDIG_API_NAME}",
+    "api_id": "${TYK_KATSU_API_ID}",
+    "name": "${TYK_KATSU_API_NAME}",
     "use_openid": true,
     "active": true,
-    "slug": "${TYK_CANDIG_API_SLUG}",
+    "slug": "${TYK_KATSU_API_SLUG}",
 
     "enable_signature_checking": false,
 
@@ -15,10 +15,10 @@
     "base_identity_provided_by": "",
     
     "proxy": {
-        "target_url": "${TYK_CANDIG_API_TARGET}",
+        "target_url": "${TYK_KATSU_API_TARGET}",
         "strip_listen_path": true,
         "disable_strip_slash": false,
-        "listen_path": "/${TYK_CANDIG_API_LISTEN_PATH}",
+        "listen_path": "/${TYK_KATSU_API_LISTEN_PATH}",
         "transport": {
             "ssl_insecure_skip_verify": false,
             "ssl_ciphers": [],
@@ -33,8 +33,8 @@
         "not_versioned": true,
         "versions": {
             "Default": {
-                "name": "Default",
-                "use_extended_paths": true
+            "name": "Default",
+            "use_extended_paths": true
             }
         },
         "extended_paths": {
@@ -84,13 +84,7 @@
     
     "config_data": {
         "SESSION_ENDPOINTS": [
-            "/candig",
-            "/candig/gene_search",
-            "/candig/patients_overview",
-            "/candig/sample_analysis",
-            "/candig/custom_visualization",
-            "/candig/api_info",
-            "/candig/serverinfo"
+            "/katsu"
         ],
         "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
         "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
@@ -98,8 +92,8 @@
         "VAULT_ROLE":"researcher"
     },
     "openid_options": {
-        "segregate_by_client": false,
-        "providers": [
+    "segregate_by_client": false,
+    "providers": [
             {
                 "issuer": "${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/${KEYCLOAK_REALM}",
                 "client_ids": {

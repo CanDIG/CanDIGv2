@@ -135,6 +135,7 @@ make init-docker
 ```bash
 # create images (optional)
 make images
+
 # pull latest CanDIGv2 images (instead of make images)
 make docker-pull
 

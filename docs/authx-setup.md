@@ -15,11 +15,10 @@ Make sure the relevant details in `.env` are correct.
 
 `make clean-authx`
 
-## Adding New API (WIP)
+## Adding New API
 
 Let's say the new API is called `example` and the route it redirects to us `http://example.org`. 
-This section will help you figure out how to add the details to the setup but is still a work in progress.
-The code to deploy a new API does not exist yet.
+This section will help you figure out how to add the details to the setup.
 
 - Copy an API template file like `lib/tyk/configuration_templates/api_candig.json.tpl` and give it a name.
   e.g. api_example.json.tpl
@@ -30,12 +29,14 @@ The code to deploy a new API does not exist yet.
   TYK_EXAMPLE_API_NAME=Example
   TYK_EXAMPLE_API_SLUG=example
   TYK_EXAMPLE_API_TARGET=http://example.org
-  TYK_EXAMPLE_API_LISTEN_PATH=/example
+  TYK_EXAMPLE_API_LISTEN_PATH=example
   ```
   See section `## Extra APIs can be added here`
+- Add the path in the `SESSION_ENDPOINTS` array.  If you fail to add proper paths, then your application
+  will not redirect to login page properly.
 - Add the new section of the API to `lib/tyk/configuration_templates/policies.json.tpl` under
   the key `access_rights`
-- Add the new section of the API tp `lib/tyk/configuration_templates/key_request.json.tpl` under 
+- Add the new section of the API to `lib/tyk/tyk_key_generation.sh` under 
   the key `access_rights`
 - Add the new line to copy the file to the image in the `lib/tyk/Dockerfile`
 - Add the new line to `envsubst` in `lib/tyk/tyk_setup.sh` (see section `# Extra APIs can be added here`)

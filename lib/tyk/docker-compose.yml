@@ -30,7 +30,7 @@ services:
     depends_on:
       - tyk-redis
     healthcheck:
-      test: [ "CMD", "curl", "-fI", "http://0.0.0.0:8080" ]
+      test: [ "CMD", "curl", "http://0.0.0.0:8080/hello" ]
       interval: 30s
       timeout: 20s
       retries: 3

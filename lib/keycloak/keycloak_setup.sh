@@ -10,7 +10,7 @@ KEYCLOAK_CONTAINERS=$(echo "$(docker ps | grep keycloak | wc -l)")
 echo "Number of keycloak containers running: ${KEYCLOAK_CONTAINERS}" | tee -a $LOGFILE
 if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
   echo "Booting keycloak container!" | tee -a $LOGFILE
-  export SERVICE=keycloak && make compose-keycloak
+  make compose-keycloak
   sleep 5
   echo "Waiting for keycloak to start" | tee -a $LOGFILE
   while ! docker logs --tail 1000 "$(docker ps | grep keycloak | awk '{print $1}')" | grep "Undertow HTTPS listener https listening on 0.0.0.0"; do sleep 1; done
@@ -77,8 +77,7 @@ get_realm_clients() {
 set_client() {
   local realm=$1
   local client=$2
-  local listen=$3
-  local redirect=$4
+  local redirect=$3
 
   # Will add / to listen only if it is present
 
@@ -140,8 +139,25 @@ KEYCLOAK_TOKEN=$(get_token)
 echo "Creating Realm ${KEYCLOAK_REALM}" | tee -a $LOGFILE
 set_realm ${KEYCLOAK_REALM}
 
+echo "Setting client in base64" | tee -a $LOGFILE
+export KEYCLOAK_CLIENT_ID_64=$(echo -n ${KEYCLOAK_CLIENT_ID} | base64)
+echo $KEYCLOAK_CLIENT_ID_64 > tmp/secrets/keycloak-client-local-candig-id-64
+
+echo "Remove ports on prod" | tee -a $LOGFILE
+if [[ ${KEYCLOAK_PUBLIC_URL} == *":443"* ]]; then
+  echo "option 1";
+  export KEYCLOAK_PUBLIC_URL_PROD=$(echo ${KEYCLOAK_PUBLIC_URL} | sed -e 's/\(:443\)\$//g')
+elif [[ ${KEYCLOAK_PUBLIC_URL} == *":80"* ]]; then
+  echo "option 2";
+  export KEYCLOAK_PUBLIC_URL_PROD=$(echo ${KEYCLOAK_PUBLIC_URL} | sed -e 's/\(:80\)\$//g')
+else
+  echo "option 3";
+  export KEYCLOAK_PUBLIC_URL_PROD=$KEYCLOAK_PUBLIC_URL
+fi ;
+
 echo "Setting client ${KEYCLOAK_CLIENT_ID}" | tee -a $LOGFILE
-set_client ${KEYCLOAK_REALM} ${KEYCLOAK_CLIENT_ID} "${TYK_LISTEN_PATH}" ${KEYCLOAK_LOGIN_REDIRECT_PATH}
+echo $KEYCLOAK_CLIENT_ID_64
+set_client "${KEYCLOAK_REALM}" "${KEYCLOAK_CLIENT_ID_64}" "${KEYCLOAK_LOGIN_REDIRECT_PATH}"
 
 echo "Getting keycloak secret" | tee -a $LOGFILE
 KEYCLOAK_SECRET_RESPONSE=$(get_secret ${KEYCLOAK_REALM})
@@ -152,6 +168,7 @@ echo "Getting keycloak public key" | tee -a $LOGFILE
 KEYCLOAK_PUBLIC_KEY_RESPONSE=$(get_public_key ${KEYCLOAK_REALM})
 export KEYCLOAK_PUBLIC_KEY=$KEYCLOAK_PUBLIC_KEY_RESPONSE
 echo "Retrieved keycloak public key as ${KEYCLOAK_PUBLIC_KEY}" | tee -a $LOGFILE
+echo $KEYCLOAK_PUBLIC_KEY > tmp/secrets/keycloak-public-key | tee -a $LOGFILE
 
 if [[ ${KEYCLOAK_GENERATE_TEST_USER} == 1 ]]; then
   echo "Adding test user" | tee -a $LOGFILE
