@@ -153,7 +153,14 @@ View additional Makefile options with `make help`.
 
 ## Services and Components
 
-The follwing table lists the details from the Data Flow Diagram in the "Overview" section.
+### Add new service
+
+New services can be added under `lib` directory.  Please refer to the
+[template for new services README](./lib/templates/README.md) for more details.
+
+### List of services
+
+The following table lists the details from the Data Flow Diagram in the "Overview" section.
 
 | Service/Component Name | Source | Notes                        |
 |------------------------|--------|------------------------------|
@@ -168,3 +175,4 @@ The follwing table lists the details from the Data Flow Diagram in the "Overview
 | CHORD DRS              | links  | DFD: `chord_drs`             |
 | IGV JS                 | links  | DFD: `igv_js`                |
 | WES Server             | links  | DFD: `wes_server`            |
+| CanDIG Data Portal     | links  | DFD:                         |
