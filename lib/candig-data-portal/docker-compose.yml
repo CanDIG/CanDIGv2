@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+  candig-data-portal:
+    build:
+      context: $PWD/lib/candig-data-portal
+      args:
+        alpine_version: "${ALPINE_VERSION}"
+    image: ${DOCKER_REGISTRY}/candig-data-portal:${CANDIG_DATA_PORTAL_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${CANDIG_DATA_PORTAL_PORT}:3000"
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.candig-data-portal.rule=Host(`candig-data-portal.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.candig-data-portal.loadbalancer.server.port=${CANDIG_DATA_PORTAL_PORT}"
+    logging: *default-logging
+    command: ["npm", "start"]
