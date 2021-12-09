@@ -26,4 +26,8 @@ services:
         - "traefik.http.routers.candig-data-portal.rule=Host(`candig-data-portal.${CANDIG_DOMAIN}`)"
         - "traefik.http.services.candig-data-portal.loadbalancer.server.port=${CANDIG_DATA_PORTAL_PORT}"
     logging: *default-logging
-    command: ["npm", "start"]
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:3000" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
