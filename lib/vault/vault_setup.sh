@@ -16,10 +16,10 @@ mkdir -p ${PWD}/lib/authorization/vault/tmp
 
 # vault-config.json
 echo "Working on vault-config.json .."
-envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-config.json.tpl > ${PWD}/lib/authorization/vault/tmp/vault-config.json
+envsubst < ${PWD}/lib/authorization/vault/configuration_templates/vault-config.json.tpl > ${PWD}/lib/authorization/vault/tmp/vault-config.json
 
 # boot container
-docker-compose -f ${PWD}/lib/compose/docker-compose.yml -f ${PWD}/lib/authorization/docker-compose.yml up -d vault
+export SERVICE=vault && make compose-authorization
 
 # -- todo: run only if not already initialized --
 # --- temp
@@ -92,7 +92,7 @@ docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=prefer
 echo
 echo ">> configuring jwt stuff"
 
-docker exec $vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" bound_issuer=\"${TEMP_KEYCLOAK_SERVICE_PUBLIC_URL}/auth/realms/candig\" default_role=\"researcher\""
+docker exec $vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/candig\" bound_issuer=\"${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/candig\" default_role=\"researcher\""
 
 # create users
 echo
@@ -100,7 +100,7 @@ echo ">> creating user $KEYCLOAK_TEST_USER"
 
 export TEMPLATE_USER=$(echo $KEYCLOAK_TEST_USER)
 export TEMPLATE_DATASET_PERMISSIONS=4
-TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-entity-entitlements.json.tpl)
+TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/lib/authorization/vault/configuration_templates/vault-entity-entitlements.json.tpl)
 
 test_user_output=$(docker exec $vault sh -c "echo '${TEST_USER_PERMISSIONS_DATASTRUCTURE}' > ${KEYCLOAK_TEST_USER}.json; vault write identity/entity @${KEYCLOAK_TEST_USER}.json; rm ${KEYCLOAK_TEST_USER}.json;")
 
@@ -113,7 +113,7 @@ echo ">> creating user $KEYCLOAK_TEST_USER_TWO"
 
 export TEMPLATE_USER=$(echo $KEYCLOAK_TEST_USER_TWO)
 export TEMPLATE_DATASET_PERMISSIONS=1
-TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-entity-entitlements.json.tpl)
+TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/lib/authorization/vault/configuration_templates/vault-entity-entitlements.json.tpl)
 
 test_user_output_two=$(docker exec $vault sh -c "echo '${TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE}' > ${KEYCLOAK_TEST_USER_TWO}.json; vault write identity/entity @${KEYCLOAK_TEST_USER_TWO}.json; rm ${KEYCLOAK_TEST_USER_TWO}.json;")
 
@@ -156,7 +156,7 @@ echo ">> matching key and inserting custom info into the jwt"
 # json escaped or base64 escaped string and the braces have to be spaced apart
 # because templating code requres {{}} which when followed by another brace
 # messes up Vault and it complains that there is a mismatch in balance of braces
-VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < ${PWD}/etc/setup/templates/configs/vault/vault-datastructure.json.tpl)
+VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < ${PWD}/lib/authorization/vault/configuration_templates/vault-datastructure.json.tpl)
 docker exec $vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > researcher.json; vault write identity/oidc/role/researcher @researcher.json; rm researcher.json;"
 echo
 

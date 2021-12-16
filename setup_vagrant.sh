@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# works for a Debian-based box: 
+# works for a Debian-based box:
 
 sudo apt-get update
 sudo apt-get install -y unzip bsdtar

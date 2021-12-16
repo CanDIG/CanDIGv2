@@ -35,6 +35,7 @@ services:
       - CHORD_DEBUG=${CHORD_METADATA_DEBUG}
       - POSTGRES_HOST=metadata-db
       - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
     secrets:
       - source: metadata-settings
         target: /app/chord_metadata_service/metadata/settings.py
@@ -83,6 +84,7 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_DB=metadata
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
+      - POSTGRES_HOST_AUTH_METHOD=password
     secrets:
       - source: metadata-db-user
         target: metadata_db_user

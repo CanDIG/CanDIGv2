@@ -25,3 +25,6 @@
 [submodule "lib/cancogen-dashboard/cancogen_dashboard"]
   path = lib/cancogen-dashboard/cancogen_dashboard
   url = https://github.com/CanDIG/cancogen_dashboard.git
+[submodule "lib/candig-data-portal/candig-data-portal"]
+  path = lib/candig-data-portal/candig-data-portal
+  url = https://github.com/CanDIG/candig-data-portal.git

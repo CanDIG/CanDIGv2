@@ -23,6 +23,8 @@ vagrant plugin install vagrant-reload
 
 By default, `vagrant up` will use the VirtualBox provider to create a VM on your local machine. 
 
+You can set the IP address of your virtual machine by setting the environment variable `CUSTOM_IP` (default: 192.168.33.33).
+
 You can also use Vagrant to deploy an instance on OpenStack:
 * Get your credentials from your OpenStack dashboard: go to Project > API Access on the sidebar, then click the "Download OpenStack RC File" button and download the OpenStack RC File (Identity API v3).
 * Either run the downloaded shell script to load the required environment variables, or export them into your shell directly.
