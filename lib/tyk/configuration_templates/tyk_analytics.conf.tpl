@@ -1,7 +1,7 @@
 {
   "listen_port": 3000,
   "tyk_api_config": {
-    "Host": "${CANDIG_PUBLIC_URL}",
+    "Host": "${TYK_LOGIN_TARGET_URL}",
     "Port": "8080",
     "Secret": "${TYK_NODE_SECRET}"
   },
@@ -25,8 +25,8 @@
     "settings": {
       "ClientKey": ""
     },
-    "default_from_email": "${TYK_DASH_FROM_EMAIL}",
-    "default_from_name": "${TYK_DASH_FROM_NAME}"
+    "default_from_email": "${TYK_ANALYTICS_FROM_EMAIL}",
+    "default_from_name": "${TYK_ANALYTICS_FROM_NAME}"
   },
   "hide_listen_path": false,
   "sentry_code": "",

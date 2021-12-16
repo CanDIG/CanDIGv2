@@ -1,0 +1,45 @@
+version: '3.7'
+
+services:
+  keycloak:
+    build:
+      context: ${PWD}/lib/keycloak
+      args:
+        - BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
+    container_name: ${CANDIG_AUTH_DOMAIN}
+    #TODO: define image: tag
+    command: [ "-b", "${KEYCLOAK_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING" ]
+    ports:
+      - "${KEYCLOAK_CONTAINER_PORT}:8080"
+    networks:
+      - ${DOCKER_NET}
+    volumes:
+      - keycloak-data:/opt/jboss/keycloak/standalone
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.keycloak.rule=Host(`auth.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.keycloak.loadbalancer.server.port=${KEYCLOAK_CONTAINER_PORT}"
+    logging: *default-logging
+    environment:
+      - KEYCLOAK_USER_FILE=/run/secrets/keycloak-admin-user
+      - KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak-admin-password
+    secrets:
+      - source: keycloak-admin-user
+        target: /run/secrets/keycloak-admin-user
+      - source: keycloak-admin-password
+        target: /run/secrets/keycloak-admin-password
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://0.0.0.0:${KEYCLOAK_CONTAINER_PORT}" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
