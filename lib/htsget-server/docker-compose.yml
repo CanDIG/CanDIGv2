@@ -28,3 +28,5 @@ services:
         - "traefik.http.services.htsget-app.loadbalancer.server.port=${HTSGET_APP_PORT}"
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3000"]
+    volumes:
+      - shared-data:/shared

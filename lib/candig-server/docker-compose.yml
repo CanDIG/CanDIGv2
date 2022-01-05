@@ -29,6 +29,8 @@ services:
         - "traefik.http.services.candig-server.loadbalancer.server.port=${CANDIG_SERVER_PORT}"
     logging: *default-logging
     command: ["--host", "0.0.0.0", "--port", "3000"]
+    volumes:
+      - shared-data:/shared
 
   candig-server-opa:
     build:
