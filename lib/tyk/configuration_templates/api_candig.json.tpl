@@ -83,15 +83,6 @@
     },
     
     "config_data": {
-        "SESSION_ENDPOINTS": [
-            "/candig",
-            "/candig/gene_search",
-            "/candig/patients_overview",
-            "/candig/sample_analysis",
-            "/candig/custom_visualization",
-            "/candig/api_info",
-            "/candig/serverinfo"
-        ],
         "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
         "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
         "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",

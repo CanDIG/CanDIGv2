@@ -1,9 +1,9 @@
 {
-    "api_id": "${TYK_KATSU_API_ID}",
-    "name": "${TYK_KATSU_API_NAME}",
+    "api_id": "${TYK_CANDIG_DATA_PORTAL_API_ID}",
+    "name": "${TYK_CANDIG_DATA_PORTAL_API_NAME}",
     "use_openid": true,
     "active": true,
-    "slug": "${TYK_KATSU_API_SLUG}",
+    "slug": "${TYK_CANDIG_DATA_PORTAL_API_SLUG}",
 
     "enable_signature_checking": false,
 
@@ -15,10 +15,10 @@
     "base_identity_provided_by": "",
     
     "proxy": {
-        "target_url": "${TYK_KATSU_API_TARGET}",
+        "target_url": "${TYK_CANDIG_DATA_PORTAL_API_TARGET}",
         "strip_listen_path": true,
         "disable_strip_slash": false,
-        "listen_path": "/${TYK_KATSU_API_LISTEN_PATH}",
+        "listen_path": "/${TYK_CANDIG_DATA_PORTAL_API_LISTEN_PATH}",
         "transport": {
             "ssl_insecure_skip_verify": false,
             "ssl_ciphers": [],
@@ -83,6 +83,9 @@
     },
     
     "config_data": {
+        "SESSION_ENDPOINTS": [
+            "/data-portal"
+        ],
         "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
         "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
         "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",

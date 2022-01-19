@@ -38,6 +38,11 @@ generate_key() {
               "api_id": "'"${TYK_KATSU_API_ID}"'",
               "api_name": "'"${TYK_KATSU_API_NAME}"'",
               "Versions": ["Default"]
+          },
+          "'"${TYK_CANDIG_DATA_PORTAL_API_ID}"'": {
+              "api_id": "'"${TYK_CANDIG_DATA_PORTAL_API_ID}"'",
+              "api_name": "'"${TYK_CANDIG_DATA_PORTAL_API_NAME}"'",
+              "Versions": ["Default"]
           }
       }
   }'
