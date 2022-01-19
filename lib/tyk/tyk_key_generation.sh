@@ -7,6 +7,10 @@ LOGFILE=$PWD/tmp/progress.txt
 
 echo "Starting Tyk key setup, post launch" | tee -a $LOGFILE
 
+echo "Lets wait for Redis and Tyk to get up" | tee -a $LOGFILE
+# if this fails in the future add a more robust test
+sleep 5;
+
 TYK_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-secret-key)
 export TYK_SECRET_KEY=$TYK_SECRET_KEY_VAL
 
