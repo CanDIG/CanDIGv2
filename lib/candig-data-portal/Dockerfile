@@ -19,10 +19,6 @@ ENV PATH /app/candig-data-portal/node_modules/.bin:$PATH
 RUN apk add --no-cache git curl
 
 COPY candig-data-portal .
-COPY configuration_templates .
-#RUN envsubst < package.json.tpl > package.json
-#RUN envsubst < .env.development.tpl > .env.development
-#RUN envsubst < .env.production.tpl > .env.production
 
 RUN npm install
 RUN npm run build

@@ -76,12 +76,6 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/api_katsu_chord.json.tpl > ${C
 
 echo "Working on api_candig_data_portal.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_mcode_candig_data_portal.json.tpl > ${CONFIG_DIR}/apps/api_candig_data_portal.json
-#echo "Working on candig-data-portal package.json"
-#envsubst < ${PWD}/lib/candig-data-portal/configuration_templates/package.json.tpl > ${PWD}/lib/candig-data-portal/candig-data-portal/package.json
-#echo "Working on candig-data-portal env production"
-#envsubst < ${PWD}/lib/candig-data-portal/configuration_templates/.env.production.tpl > ${PWD}/lib/candig-data-portal/candig-data-portal/.env.production
-#echo "Working on candig-data-portal env development"
-#envsubst < ${PWD}/lib/candig-data-portal/configuration_templates/.env.development.tpl > ${PWD}/lib/candig-data-portal/candig-data-portal/.env.development
 
 # Extra APIs can be added here
 #echo "Working on api_example.json"
