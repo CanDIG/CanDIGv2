@@ -7,6 +7,8 @@ LABEL Maintainer="CanDIG Project"
 # See tyk_setup.sh for the same.
 COPY ./tmp/tyk.conf /opt/tyk-gateway/tyk.conf
 COPY ./tmp/middleware/authMiddleware.js /opt/tyk-gateway/middleware/authMiddleware.js
+COPY ./tmp/middleware/backendAuthMiddleware.js /opt/tyk-gateway/middleware/backendAuthMiddleware.js
+COPY ./tmp/middleware/frontendAuthMiddleware.js /opt/tyk-gateway/middleware/frontendAuthMiddleware.js
 COPY ./tmp/middleware/permissionsStoreMiddleware.js /opt/tyk-gateway/middleware/permissionsStoreMiddleware.js
 COPY ./tmp/middleware/virtualLogin.js /opt/tyk-gateway/middleware/virtualLogin.js
 COPY ./tmp/middleware/virtualLogout.js /opt/tyk-gateway/middleware/virtualLogout.js

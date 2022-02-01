@@ -55,8 +55,8 @@
     "custom_middleware": {
         "pre": [
                 {
-                "name": "authMiddleware",
-                "path": "/opt/tyk-gateway/middleware/authMiddleware.js",
+                "name": "frontendAuthMiddleware",
+                "path": "/opt/tyk-gateway/middleware/frontendAuthMiddleware.js",
                 "require_session": false
             }
             ],
