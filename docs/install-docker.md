@@ -149,6 +149,15 @@ docker login
 make docker-push
 ```
 
+## Update hosts
+
+Get your local IP address and edit your /etc/hosts file to add:
+
+```bash
+<your ip>  docker.localhost
+<your ip>  auth.docker.localhost
+```
+
 ## Deploy CanDIGv2 Services (Swarm)
 > Note: swarm deployment requires minimum 2 nodes connected (1 manager, 1 worker)
 
