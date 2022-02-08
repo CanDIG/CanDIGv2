@@ -43,9 +43,9 @@ secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials
   federation-peers:
-    file: $PWD/lib/federation-service/federation_service/configs/federation-peers.json
+    file: $PWD/lib/federation-service/federation_service/configs/peers.json
   federation-services:
-    file: $PWD/lib/federation-service/federation_service/configs/federation-services.json
+    file: $PWD/lib/federation-service/federation_service/configs/services.json
   metadata-app-secret:
     file: $PWD/tmp/secrets/metadata-app-secret
   metadata-db-user:
