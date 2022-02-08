@@ -156,8 +156,8 @@ else
 fi ;
 
 echo "Setting client ${KEYCLOAK_CLIENT_ID}" | tee -a $LOGFILE
-echo $KEYCLOAK_CLIENT_ID_64
-set_client "${KEYCLOAK_REALM}" "${KEYCLOAK_CLIENT_ID_64}" "${KEYCLOAK_LOGIN_REDIRECT_PATH}"
+echo "${KEYCLOAK_CLIENT_ID} and base64 is ${KEYCLOAK_CLIENT_ID_64}" | tee -a $LOGFILE
+set_client "${KEYCLOAK_REALM}" "${KEYCLOAK_CLIENT_ID}" "${KEYCLOAK_LOGIN_REDIRECT_PATH}"
 
 echo "Getting keycloak secret" | tee -a $LOGFILE
 KEYCLOAK_SECRET_RESPONSE=$(get_secret ${KEYCLOAK_REALM})

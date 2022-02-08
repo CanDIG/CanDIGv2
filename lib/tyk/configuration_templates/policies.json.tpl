@@ -16,6 +16,14 @@
                 "versions": [
                     "Default"
                 ]
+            },
+            "${TYK_CANDIG_DATA_PORTAL_API_ID}": {
+                "allowed_urls": [],
+                "api_id": "${TYK_CANDIG_DATA_PORTAL_API_ID}",
+                "api_name": "${TYK_CANDIG_DATA_PORTAL_API_NAME}",
+                "versions": [
+                    "Default"
+                ]
             }
         },
         "active": true,

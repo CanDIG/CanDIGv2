@@ -39,6 +39,12 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/tyk.conf.tpl > ${CONFIG_DIR}/t
 echo "Working on authMiddleware.js" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/authMiddleware.js > ${CONFIG_DIR}/middleware/authMiddleware.js
 
+echo "Working on backendAuthMiddleware.js" | tee -a $LOGFILE
+envsubst < ${PWD}/lib/tyk/configuration_templates/backendAuthMiddleware.js > ${CONFIG_DIR}/middleware/backendAuthMiddleware.js
+
+echo "Working on frontendAuthMiddleware.js" | tee -a $LOGFILE
+envsubst < ${PWD}/lib/tyk/configuration_templates/frontendAuthMiddleware.js > ${CONFIG_DIR}/middleware/frontendAuthMiddleware.js
+
 echo "Working on api_auth.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_auth.json.tpl > ${CONFIG_DIR}/apps/api_auth.json
 
@@ -67,6 +73,9 @@ cp ${PWD}/lib/tyk/configuration_templates/permissionsStoreMiddleware.js ${CONFIG
 
 echo "Working on api_katsu_chord.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_katsu_chord.json.tpl > ${CONFIG_DIR}/apps/api_katsu.json
+
+echo "Working on api_candig_data_portal.json"
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_mcode_candig_data_portal.json.tpl > ${CONFIG_DIR}/apps/api_candig_data_portal.json
 
 # Extra APIs can be added here
 #echo "Working on api_example.json"

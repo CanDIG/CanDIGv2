@@ -140,7 +140,7 @@ make images
 make docker-pull
 
 # deploy stack (if using docker-compose environment)
-make init-auth
+make init-authx
 make compose
 # TODO: post deploy auth configuration
 

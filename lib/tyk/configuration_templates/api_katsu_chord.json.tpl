@@ -55,8 +55,8 @@
     "custom_middleware": {
         "pre": [
                 {
-                "name": "authMiddleware",
-                "path": "/opt/tyk-gateway/middleware/authMiddleware.js",
+                "name": "backendAuthMiddleware",
+                "path": "/opt/tyk-gateway/middleware/backendAuthMiddleware.js",
                 "require_session": false
             }
             ],
@@ -83,9 +83,6 @@
     },
     
     "config_data": {
-        "SESSION_ENDPOINTS": [
-            "/katsu"
-        ],
         "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
         "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
         "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",
