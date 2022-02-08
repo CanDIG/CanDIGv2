@@ -140,13 +140,22 @@ make images
 make docker-pull
 
 # deploy stack (if using docker-compose environment)
-make init-auth
+make init-authx
 make compose
 # TODO: post deploy auth configuration
 
 # push updated images to $DOCKER_REGISTRY (optional)
 docker login
 make docker-push
+```
+
+## Update hosts
+
+Get your local IP address and edit your /etc/hosts file to add:
+
+```bash
+<your ip>  docker.localhost
+<your ip>  auth.docker.localhost
 ```
 
 ## Deploy CanDIGv2 Services (Swarm)
