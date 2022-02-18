@@ -43,6 +43,11 @@ generate_key() {
               "api_id": "'"${TYK_CANDIG_DATA_PORTAL_API_ID}"'",
               "api_name": "'"${TYK_CANDIG_DATA_PORTAL_API_NAME}"'",
               "Versions": ["Default"]
+          },
+          "'"${TYK_GRAPHQL_API_ID}"'": {
+              "api_id": "'"${TYK_GRAPHQL_API_ID}"'",
+              "api_name": "'"${TYK_GRAPHQL_API_NAME}"'",
+              "Versions": ["Default"]
           }
       }
   }'
