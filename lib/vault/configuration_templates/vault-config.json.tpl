@@ -1,7 +1,7 @@
 {
   "backend": {
     "file": {
-      "path": ${VAULT_FILE_PATH}
+      "path": "${VAULT_FILE_PATH}"
     }
   },
   "listener": {

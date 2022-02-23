@@ -64,6 +64,13 @@ init-authx: mkdir
 	$(MAKE) compose-tyk; \
 	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
 	echo ;
+	source ${PWD}/lib/vault/vault_setup.sh; \
+	$(MAKE) build-vault; \
+	$(MAKE) compose-vault; \
+	echo ;
+	$(MAKE) build-opa; \
+	$(MAKE) compose-opa; \
+	echo ;
 
 
 #>>>

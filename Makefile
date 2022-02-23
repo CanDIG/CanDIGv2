@@ -443,7 +443,7 @@ docker-push:
 
 #<<<
 .PHONY: docker-secrets
-docker-secrets: minio-secrets
+docker-secrets: mkdir minio-secrets
 	@echo admin > $(DIR)/tmp/secrets/portainer-user
 	$(MAKE) secret-portainer-secret
 	$(MAKE) secret-metadata-app-secret
@@ -671,6 +671,18 @@ ssl-cert:
 		-CAcreateserial -out $(DIR)/tmp/ssl/selfsigned-site.crt \
 		-extfile $(DIR)/etc/ssl/site.cnf -extensions server
 
+# generate certs for opa
+	openssl genrsa -out $(DIR)/tmp/ssl/rootCA.key 4096
+	openssl req -x509 -new -nodes -key $(DIR)/tmp/ssl/rootCA.key \
+		-subj '/C=CA/ST=Ontario/O=Demo/CN=Beacon Self-signed Root' -sha256 \
+		-days 1024 -out $(DIR)/tmp/ssl/rootCA.crt
+	openssl genrsa -out $(DIR)/tmp/ssl/tls.key 2048
+	openssl req -new -sha256 -key $(DIR)/tmp/ssl/tls.key \
+		-subj '/C=CA/ST=Ontario/O=Demo/CN=opa' -out $(DIR)/tmp/ssl/tls.csr
+	openssl x509 -req -in $(DIR)/tmp/ssl/tls.csr -CA $(DIR)/tmp/ssl/rootCA.crt \
+		-CAkey $(DIR)/tmp/ssl/rootCA.key -CAcreateserial \
+		-out $(DIR)/tmp/ssl/tls.crt -days 500 -sha256 \
+		-extfile $(DIR)/etc/ssl/opa.v3.ext
 
 #>>>
 # deploy/test all modules in $CANDIG_MODULES using docker stack
