@@ -32,6 +32,7 @@ clean-tyk:
 	docker volume rm tyk-data
 	docker volume rm tyk-redis-data
 
+
 #>>>
 # close all authentication and authorization services
 # make clean-authx
