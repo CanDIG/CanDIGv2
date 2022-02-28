@@ -12,14 +12,14 @@ set -e
 # https://stackoverflow.com/questions/35703317/docker-exec-write-text-to-file-in-container
 # https://www.vaultproject.io/api-docs/secret/identity/entity#batch-delete-entities
 
-mkdir -p ${PWD}/lib/authorization/vault/tmp
+mkdir -p ${PWD}/lib/vault/tmp
 
 # vault-config.json
 echo "Working on vault-config.json .."
-envsubst < ${PWD}/lib/authorization/vault/configuration_templates/vault-config.json.tpl > ${PWD}/lib/authorization/vault/tmp/vault-config.json
+envsubst < ${PWD}/lib/vault/configuration_templates/vault-config.json.tpl > ${PWD}/lib/vault/tmp/vault-config.json
 
 # boot container
-export SERVICE=vault && make compose-authorization
+make compose-vault
 
 # -- todo: run only if not already initialized --
 # --- temp
@@ -47,13 +47,13 @@ echo "found key5: ${key_5}"
 echo "found root: ${key_root}"
 
 # save keys
-touch ${PWD}/lib/authorization/vault/tmp/keys.txt
-echo -e "key1: ${key_1}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
-echo -e "key2: ${key_2}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
-echo -e "key3: ${key_3}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
-echo -e "key4: ${key_4}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
-echo -e "key5: ${key_5}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
-echo -e "root: ${key_root}" >> ${PWD}/lib/authorization/vault/tmp/keys.txt
+touch ${PWD}/lib/vault/tmp/keys.txt
+echo -e "key1: ${key_1}" >> ${PWD}/lib/vault/tmp/keys.txt
+echo -e "key2: ${key_2}" >> ${PWD}/lib/vault/tmp/keys.txt
+echo -e "key3: ${key_3}" >> ${PWD}/lib/vault/tmp/keys.txt
+echo -e "key4: ${key_4}" >> ${PWD}/lib/vault/tmp/keys.txt
+echo -e "key5: ${key_5}" >> ${PWD}/lib/vault/tmp/keys.txt
+echo -e "root: ${key_root}" >> ${PWD}/lib/vault/tmp/keys.txt
 
 
 echo ">> attempting to automatically unseal vault:"
@@ -100,7 +100,7 @@ echo ">> creating user $KEYCLOAK_TEST_USER"
 
 export TEMPLATE_USER=$(echo $KEYCLOAK_TEST_USER)
 export TEMPLATE_DATASET_PERMISSIONS=4
-TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/lib/authorization/vault/configuration_templates/vault-entity-entitlements.json.tpl)
+TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/lib/vault/configuration_templates/vault-entity-entitlements.json.tpl)
 
 test_user_output=$(docker exec $vault sh -c "echo '${TEST_USER_PERMISSIONS_DATASTRUCTURE}' > ${KEYCLOAK_TEST_USER}.json; vault write identity/entity @${KEYCLOAK_TEST_USER}.json; rm ${KEYCLOAK_TEST_USER}.json;")
 
@@ -156,7 +156,7 @@ echo ">> matching key and inserting custom info into the jwt"
 # json escaped or base64 escaped string and the braces have to be spaced apart
 # because templating code requres {{}} which when followed by another brace
 # messes up Vault and it complains that there is a mismatch in balance of braces
-VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < ${PWD}/lib/authorization/vault/configuration_templates/vault-datastructure.json.tpl)
+VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < ${PWD}/lib/vault/configuration_templates/vault-datastructure.json.tpl)
 docker exec $vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > researcher.json; vault write identity/oidc/role/researcher @researcher.json; rm researcher.json;"
 echo
 
