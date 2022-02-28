@@ -32,22 +32,12 @@ clean-tyk:
 	docker volume rm tyk-data
 	docker volume rm tyk-redis-data
 
-clean-vault:
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		$(DIR)/lib/vault/docker-compose.yml | docker-compose -f - down
-
-	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'vault' |  xargs -I{} docker rmi --force {}
-
-	rm -rf $(DIR)/lib/vault/tmp || true
-
-	docker volume rm vault-data
-
 #>>>
 # close all authentication and authorization services
 # make clean-authx
 
 #<<<
-clean-authx: clean-keycloak clean-tyk clean-vault
+clean-authx: clean-keycloak clean-tyk
 
 
 #>>>
@@ -72,8 +62,6 @@ init-authx: mkdir
 	echo ; \
 	$(MAKE) compose-tyk; \
 	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
-	echo ; \
-	source $(PWD)/lib/vault/vault_setup.sh; \
 	echo ;
 
 
