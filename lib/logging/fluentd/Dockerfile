@@ -6,6 +6,8 @@ LABEL Maintainer="CanDIG Project"
 
 USER root
 
+RUN gem uninstall elasticsearch && gem install elasticsearch -v 7.14.2
+
 RUN apk add --no-cache --update --virtual .build-deps sudo build-base ruby-dev \
   && sudo gem install fluent-plugin-elasticsearch strptime \
   && sudo gem sources --clear-all \
