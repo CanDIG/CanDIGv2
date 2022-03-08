@@ -63,11 +63,12 @@ init-authx: mkdir
 	echo ; \
 	$(MAKE) compose-tyk; \
 	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
-	echo ;
-	source ${PWD}/lib/vault/vault_setup.sh; \
+	echo "Setting up Vault"; \
+	export SERVICE=vault; \
 	$(MAKE) build-vault; \
-	$(MAKE) compose-vault; \
-	echo ;
+	${PWD}/lib/vault/vault_setup.sh; \
+	echo "Setting up Opa"; \
+	export SERVICE=opa; \
 	$(MAKE) build-opa; \
 	$(MAKE) compose-opa; \
 	echo ;

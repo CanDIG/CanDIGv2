@@ -175,6 +175,11 @@ if [[ ${KEYCLOAK_GENERATE_TEST_USER} == 1 ]]; then
   add_user "$(cat tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)"
 fi
 
+# TODO:
+# need to add user credentials to test user: trusted_researcher
+# need to add mappers: audience mapper for KEYCLOAK_CLIENT_ID, user attribute mapper for trusted_researcher
+
+
 echo "Waiting for keycloak to restart" | tee -a $LOGFILE
 while ! docker logs --tail 5 ${CANDIG_AUTH_DOMAIN} | grep "Admin console listening on http://127.0.0.1:9990"; do sleep 1; done
 echo "Keycloak setup done!" | tee -a $LOGFILE
