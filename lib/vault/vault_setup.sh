@@ -1,5 +1,6 @@
-#! /usr/bin/env bash
-set -e
+#!/usr/bin/env bash
+
+set -Eexo pipefail
 
 # This script will set up a full vault environment on your local CanDIGv2 cluster
 
@@ -28,6 +29,7 @@ sleep 3
 # ---
 
 # gather keys and login token
+echo ">> gathering keys"
 vault=$(docker ps | grep vault | awk '{print $1}')
 stuff=$(docker exec $vault sh -c "vault operator init") # | head -7 | rev | cut -d " " -f1 | rev)
 echo "found stuff as ${stuff}"
@@ -86,18 +88,18 @@ docker exec $vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [
 # user claims
 echo
 echo ">> setting up user claims"
-docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=preferred_username bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=tyk ttl=1h"
+docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=preferred_username bound_audiences=local_candig role_type=jwt policies=tyk ttl=1h"
 
 # configure jwt
 echo
 echo ">> configuring jwt stuff"
-
-docker exec $vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/candig\" bound_issuer=\"${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/candig\" default_role=\"researcher\""
+export KEYCLOAK_PUBLIC_URL="http://auth.docker.localhost:8080"
+docker exec $vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_PUBLIC_URL}/auth/realms/candig\" bound_issuer=\"${KEYCLOAK_PUBLIC_URL}/auth/realms/candig\" default_role=\"researcher\""
 
 # create users
 echo
 echo ">> creating user $KEYCLOAK_TEST_USER"
-
+export KEYCLOAK_TEST_USER="user"
 export TEMPLATE_USER=$(echo $KEYCLOAK_TEST_USER)
 export TEMPLATE_DATASET_PERMISSIONS=4
 TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/lib/vault/configuration_templates/vault-entity-entitlements.json.tpl)
@@ -108,12 +110,13 @@ ENTITY_ID=$(echo "${test_user_output}" | grep id | awk '{print $2}')
 echo ">>> found entity id : ${ENTITY_ID}"
 
 
-echo
 echo ">> creating user $KEYCLOAK_TEST_USER_TWO"
+
+export KEYCLOAK_TEST_USER_TWO="user2"
 
 export TEMPLATE_USER=$(echo $KEYCLOAK_TEST_USER_TWO)
 export TEMPLATE_DATASET_PERMISSIONS=1
-TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/lib/authorization/vault/configuration_templates/vault-entity-entitlements.json.tpl)
+TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/lib/vault/configuration_templates/vault-entity-entitlements.json.tpl)
 
 test_user_output_two=$(docker exec $vault sh -c "echo '${TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE}' > ${KEYCLOAK_TEST_USER_TWO}.json; vault write identity/entity @${KEYCLOAK_TEST_USER_TWO}.json; rm ${KEYCLOAK_TEST_USER_TWO}.json;")
 
