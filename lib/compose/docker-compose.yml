@@ -32,6 +32,8 @@ volumes:
     external: true
   keycloak-data:
     external: true
+  opa-data:
+    external: true
   tyk-data:
     external: true
   tyk-redis-data:
@@ -62,12 +64,6 @@ secrets:
     file: $PWD/tmp/secrets/portainer-user
   portainer-secret:
     file: $PWD/tmp/secrets/portainer-secret
-  selfsigned-tls-key:
-    file: $PWD/tmp/ssl/tls.key
-  selfsigned-tls-cert:
-    file: $PWD/tmp/ssl/tls.crt
-  selfsigned-root-cert:
-    file: $PWD/tmp/ssl/rootCA.crt
   traefik-ssl-key:
     file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.key
   traefik-ssl-crt:
