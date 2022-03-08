@@ -28,3 +28,6 @@
 [submodule "lib/candig-data-portal/candig-data-portal"]
   path = lib/candig-data-portal/candig-data-portal
   url = https://github.com/CanDIG/candig-data-portal.git
+[submodule "lib/opa/opa"]
+  path = lib/opa/opa
+  url = https://github.com/CanDIG/rego_development_playground.git
