@@ -18,6 +18,7 @@ COPY ./tmp/apps/api_auth.json /opt/tyk-gateway/apps/api_auth.json
 COPY ./tmp/policies/policies.json /opt/tyk-gateway/policies/policies.json
 COPY ./tmp/apps/api_katsu.json /opt/tyk-gateway/apps/api_katsu.json
 COPY ./tmp/apps/api_candig_data_portal.json /opt/tyk-gateway/apps/api_candig_data_portal.json
+COPY ./tmp/apps/api_graphql.json /opt/tyk-gateway/apps/api_graphql.json
 
 ## Extra APIs can be added here
 #COPY ./tmp/apps/api_example.json /opt/tyk-gateway/apps/api_example.json
