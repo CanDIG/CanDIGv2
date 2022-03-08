@@ -30,6 +30,7 @@ services:
     environment:
       CLIENT_SECRET_ROOT: ${CANDIG_OPA_SECRET}
       CLIENT_SECRET_SERVICE: ${CANDIG_OPA_SECRET_SERVICE}
+      OPA_URL: ${OPA_URL}
   opa:
     image: openpolicyagent/opa:latest
     ports:
