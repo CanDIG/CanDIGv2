@@ -29,6 +29,5 @@
   path = lib/candig-data-portal/candig-data-portal
   url = https://github.com/CanDIG/candig-data-portal.git
 [submodule "lib/graphql/GraphQL-interface"]
-	path = lib/graphql/GraphQL-interface
-	url = https://github.com/CanDIG/GraphQL-interface
-	branch = AliRZ-02/DIG-770-GraphQL-Basic-Configuration
+  path = lib/graphql/GraphQL-interface
+  url = https://github.com/CanDIG/GraphQL-interface.git

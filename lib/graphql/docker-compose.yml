@@ -5,9 +5,7 @@ services:
     build:
       context: $PWD/lib/graphql/GraphQL-interface
       args:
-        GRAPHQL_CONDA_SOURCE: "${GRAPHQL_CONDA_SOURCE}"
-        GRAPHQL_CONDA_TYPE: "${GRAPHQL_CONDA_TYPE}"
-        GRAPHQL_CONDA_VERSION: "${GRAPHQL_CONDA_VERSION}"
+        GRAPHQL_PYTHON_VERSION: "${GRAPHQL_PYTHON_VERSION}"
     image: ${DOCKER_REGISTRY}/graphql:${GRAPHQL_INTERFACE_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
