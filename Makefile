@@ -457,6 +457,9 @@ docker-secrets: mkdir minio-secrets
 	@echo user > $(DIR)/tmp/secrets/keycloak-test-user
 	$(MAKE) secret-keycloak-test-user-password
 
+	@echo user2 > $(DIR)/tmp/secrets/keycloak-test-user2
+	$(MAKE) secret-keycloak-test-user2-password
+
 	$(MAKE) secret-tyk-secret-key
 	$(MAKE) secret-tyk-node-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
