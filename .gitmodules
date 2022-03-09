@@ -30,4 +30,4 @@
   url = https://github.com/CanDIG/candig-data-portal.git
 [submodule "lib/opa/opa"]
   path = lib/opa/opa
-  url = https://github.com/CanDIG/rego_development_playground.git
+  url = https://github.com/CanDIG/candig-opa.git
