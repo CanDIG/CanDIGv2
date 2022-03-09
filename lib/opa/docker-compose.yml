@@ -23,11 +23,10 @@ services:
     volumes:
       - opa-data:/app
     secrets:
-      - source: keycloak-test-user
-        target: idp_client_id
-      - source: keycloak-test-user-password
+      - source: keycloak-client-local-candig-secret
         target: idp_client_secret
     environment:
+      IDP_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
       CLIENT_SECRET_ROOT: ${CANDIG_OPA_SECRET}
       CLIENT_SECRET_SERVICE: ${CANDIG_OPA_SECRET_SERVICE}
       OPA_URL: ${OPA_URL}
