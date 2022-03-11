@@ -395,7 +395,7 @@ compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(DIR)/lib/$*/docker-compose.yml \
-		| docker-compose -f - up -d $(SERVICE)
+		| docker-compose -f - up -d
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
