@@ -88,19 +88,17 @@ docker exec $vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [
 # user claims
 echo
 echo ">> setting up user claims"
-docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=preferred_username bound_audiences=local_candig role_type=jwt policies=tyk ttl=1h"
+docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=preferred_username bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=tyk ttl=1h"
 
 # configure jwt
 echo
 echo ">> configuring jwt stuff"
-export KEYCLOAK_PUBLIC_URL="http://auth.docker.localhost:8080"
 docker exec $vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_PUBLIC_URL}/auth/realms/candig\" bound_issuer=\"${KEYCLOAK_PUBLIC_URL}/auth/realms/candig\" default_role=\"researcher\""
 
 # create users
 echo
+KEYCLOAK_TEST_USER="$(cat tmp/secrets/keycloak-test-user)"
 echo ">> creating user $KEYCLOAK_TEST_USER"
-export KEYCLOAK_TEST_USER="user"
-export TEMPLATE_USER=$(echo $KEYCLOAK_TEST_USER)
 export TEMPLATE_DATASET_PERMISSIONS=4
 TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/lib/vault/configuration_templates/vault-entity-entitlements.json.tpl)
 
@@ -110,11 +108,8 @@ ENTITY_ID=$(echo "${test_user_output}" | grep id | awk '{print $2}')
 echo ">>> found entity id : ${ENTITY_ID}"
 
 
+KEYCLOAK_TEST_USER_TWO="$(cat tmp/secrets/keycloak-test-user2)"
 echo ">> creating user $KEYCLOAK_TEST_USER_TWO"
-
-export KEYCLOAK_TEST_USER_TWO="user2"
-
-export TEMPLATE_USER=$(echo $KEYCLOAK_TEST_USER_TWO)
 export TEMPLATE_DATASET_PERMISSIONS=1
 TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/lib/vault/configuration_templates/vault-entity-entitlements.json.tpl)
 
