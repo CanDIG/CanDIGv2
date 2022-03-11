@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 services:
   opa-runner:
     build:
@@ -8,6 +8,7 @@ services:
         alpine_version: "${ALPINE_VERSION}"
         katsu_url: "${CHORD_METADATA_PUBLIC_URL}"
         idp: "${KEYCLOAK_REALM_URL}"
+        client_id: "${KEYCLOAK_CLIENT_ID}"
     networks:
       - ${DOCKER_NET}
     deploy:
@@ -69,5 +70,3 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
-volumes:
-    opa-data:
