@@ -31,3 +31,6 @@
 [submodule "lib/opa/opa"]
   path = lib/opa/opa
   url = https://github.com/CanDIG/candig-opa.git
+[submodule "lib/graphql/GraphQL-interface"]
+  path = lib/graphql/GraphQL-interface
+  url = https://github.com/CanDIG/GraphQL-interface.git

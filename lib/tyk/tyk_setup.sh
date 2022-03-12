@@ -77,6 +77,9 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/api_katsu_chord.json.tpl > ${C
 echo "Working on api_candig_data_portal.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_mcode_candig_data_portal.json.tpl > ${CONFIG_DIR}/apps/api_candig_data_portal.json
 
+echo "Working on api_graphql.json"
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_graphql.json.tpl > ${CONFIG_DIR}/apps/api_graphql.json
+
 # Extra APIs can be added here
 #echo "Working on api_example.json"
 #envsubst < ${PWD}/lib/tyk/configuration_templates/api_example.json.tpl > ${CONFIG_DIR}/apps/api_example.json

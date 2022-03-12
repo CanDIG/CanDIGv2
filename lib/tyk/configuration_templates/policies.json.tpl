@@ -24,6 +24,14 @@
                 "versions": [
                     "Default"
                 ]
+            },
+            "${TYK_GRAPHQL_API_ID}": {
+                "allowed_urls": [],
+                "api_id": "${TYK_GRAPHQL_API_ID}",
+                "api_name": "${TYK_GRAPHQL_API_NAME}",
+                "versions": [
+                    "Default"
+                ]
             }
         },
         "active": true,

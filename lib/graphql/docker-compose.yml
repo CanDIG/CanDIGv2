@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  graphql:
+    build:
+      context: $PWD/lib/graphql/GraphQL-interface
+      args:
+        GRAPHQL_PYTHON_VERSION: "${GRAPHQL_PYTHON_VERSION}"
+    image: ${DOCKER_REGISTRY}/graphql:${GRAPHQL_INTERFACE_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${GRAPHQL_INTERFACE_PORT}:7999"
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker 
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.graphql.rule=Host(`graphql.${CANDIG_DOMAIN}`)"
+        - "traefik.http.routers.graphql.entrypoints=${TRAEFIK_ENTRYPOINT}"
+        - "traefik.http.services.graphql.loadbalancer.server.port=${GRAPHQL_INTERFACE_PORT}"
+    logging: *default-logging
+    environment:
+      - GRAPHQL_KATSU_API=${GRAPHQL_KATSU_API}
+      - GRAPHQL_CANDIG_SERVER=${GRAPHQL_CANDIG_SERVER}
+      - GRAPHQL_BEACON_ID=${GRAPHQL_BEACON_ID}
+      - GRAPHQL_KATSU_TOKEN_KEY=${GRAPHQL_KATSU_TOKEN_KEY}
+      - GRAPHQL_CANDIG_TOKEN_KEY=${GRAPHQL_CANDIG_TOKEN_KEY}
