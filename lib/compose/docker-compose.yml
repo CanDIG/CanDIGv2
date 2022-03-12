@@ -79,4 +79,4 @@ secrets:
   keycloak-test-user-password:
     file: $PWD/tmp/secrets/keycloak-test-user-password
   keycloak-client-local-candig-secret:
-    file: $PWD/tmp/secrets/keycloak-client-local-candig-secret
+    file: $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret
