@@ -7,11 +7,40 @@ clean-keycloak:
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(DIR)/lib/keycloak/docker-compose.yml | docker-compose -f - down
 
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		$(DIR)/lib/tyk/docker-compose.yml | docker-compose -f - down
-
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'keycloak' | xargs -I{} docker rmi --force {}
+
+	docker volume rm keycloak-data
+
+#>>>
+# close vault services
+# make clean-vault
+
+#<<<
+clean-vault:
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+		$(DIR)/lib/vault/docker-compose.yml | docker-compose -f - down
+
+	# - remove intermittent docker images
+	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'vault' | xargs -I{} docker rmi --force {}
+
+	docker volume rm vault-data
+
+
+#>>>
+# close opa services
+# make clean-opa
+
+#<<<
+clean-opa:
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
+		$(DIR)/lib/opa/docker-compose.yml | docker-compose -f - down
+
+	# - remove intermittent docker images
+	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'openpolicyagent/opa' | xargs -I{} docker rmi --force {}
+	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'opa-runner' | xargs -I{} docker rmi --force {}
+
+	docker volume rm opa-data
 
 
 #>>>
@@ -38,7 +67,7 @@ clean-tyk:
 # make clean-authx
 
 #<<<
-clean-authx: clean-keycloak clean-tyk
+clean-authx: clean-keycloak clean-tyk clean-vault clean-opa
 
 
 #>>>
@@ -63,6 +92,15 @@ init-authx: mkdir
 	echo ; \
 	$(MAKE) compose-tyk; \
 	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
+	echo "Setting up Vault"; \
+	export SERVICE=vault; \
+	$(MAKE) build-vault; \
+	source ${PWD}/lib/vault/vault_setup.sh; \
+	echo "Setting up Opa"; \
+	export SERVICE=opa; \
+	$(MAKE) build-opa; \
+	$(MAKE) compose-opa; \
+	source ${PWD}/lib/opa/opa_setup.sh; \
 	echo ;
 
 

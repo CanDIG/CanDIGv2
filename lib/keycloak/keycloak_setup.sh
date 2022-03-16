@@ -21,12 +21,42 @@ add_user() {
   # CANDIG_AUTH_DOMAIN is the name of the keycloak server inside the compose network
   local username=$1
   local password=$2
+  local attribute=$3
 
-  echo "    Adding user ${username}" | tee -a $LOGFILE
-  docker exec ${CANDIG_AUTH_DOMAIN} /opt/jboss/keycloak/bin/add-user-keycloak.sh -u ${username} -p ${password} -r ${KEYCLOAK_REALM}
+  local JSON='  {
+    "username": "'${username}'",
+    "enabled": true,
+    "attributes": {
+      "'${attribute}'": [
+        "true"
+      ]
+    },
+    "access": {
+      "manageGroupMembership": true,
+      "view": true,
+      "mapRoles": true,
+      "impersonate": true,
+      "manage": true
+    }
+  }'
 
-  echo "    Restarting the keycloak container" | tee -a $LOGFILE
-  docker restart ${CANDIG_AUTH_DOMAIN}
+  user_id=`curl --stderr - \
+    -i -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+    -X POST -H "Content-Type: application/json" -d "${JSON}" \
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/users" -k | grep "Location:" \
+    | sed -E s/.*users.\([a-z0-9-]+\).*/\\\1/`
+
+  echo "Created user ${user_id}" | tee -a $LOGFILE
+
+  local password_json=' {
+    "type": "rawPassword",
+    "value": "'${password}'"
+  }'
+  echo "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/users/${user_id}"
+  curl \
+    -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+    -X PUT -H "Content-Type: application/json" -d "${password_json}" \
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/users/${user_id}/reset-password" -k
 }
 
 get_token() {
@@ -48,7 +78,7 @@ set_realm() {
   local realm=$1
 
   local JSON='{
-    "realm": "candig",
+    "realm": "'${realm}'",
     "enabled": true
   }'
 
@@ -79,9 +109,54 @@ set_client() {
   local client=$2
   local redirect=$3
 
+  # add client scope with protocol mappers
+  scope_json='{
+      "name": "'${realm}'",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "'${client}'-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "'${client}'",
+            "id.token.claim": "true",
+            "access.token.claim": "true"
+          }
+        },
+        {
+          "name": "trusted_researcher",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "trusted_researcher",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "trusted_researcher",
+            "jsonType.label": "boolean"
+          }
+        }
+      ]
+    }'
+
+  new_scope=`curl --stderr - \
+    -i -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+    -X POST -H "Content-Type: application/json" -d "${scope_json}" \
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/client-scopes" -k | grep "Location:" \
+    | sed -E s/.*client-scopes.\([a-z0-9-]+\).*/\\\\1/`
+
+  echo "Created client scope ${new_scope}" | tee -a $LOGFILE
+  
   # Will add / to listen only if it is present
 
-  local JSON='{
+  local client_json='{
     "clientId": "'"${client}"'",
     "enabled": true,
     "protocol": "openid-connect",
@@ -102,14 +177,24 @@ set_client() {
       "saml.server.signature": "false",
       "saml.server.signature.keyinfo.ext": "false",
       "saml_force_name_id_format": "false"
-    }
+    },
+    "defaultClientScopes": [
+      "web-origins",
+      "roles",
+      "profile",
+      "'${realm}'",
+      "email"
+    ]
   }'
 
-  curl \
-    -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
-    -X POST -H "Content-Type: application/json" -d "${JSON}" \
-    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/clients" -k
+  new_client=`curl --stderr - \
+    -i -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+    -X POST -H "Content-Type: application/json" -d "${client_json}" \
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/clients" -k | grep "Location:" \
+    | sed -E s/.*clients.\([a-z0-9-]+\).*/\\\\1/`
     # TODO: security issue fix this, -k flag above ignores cert, even if the url is https
+
+  echo "Created client ${new_client}" | tee -a $LOGFILE
 }
 
 get_secret() {
@@ -139,9 +224,9 @@ KEYCLOAK_TOKEN=$(get_token)
 echo "Creating Realm ${KEYCLOAK_REALM}" | tee -a $LOGFILE
 set_realm ${KEYCLOAK_REALM}
 
-echo "Setting client in base64" | tee -a $LOGFILE
+echo "Setting client ${KEYCLOAK_CLIENT_ID} in base64" | tee -a $LOGFILE
 export KEYCLOAK_CLIENT_ID_64=$(echo -n ${KEYCLOAK_CLIENT_ID} | base64)
-echo $KEYCLOAK_CLIENT_ID_64 > tmp/secrets/keycloak-client-local-candig-id-64
+echo $KEYCLOAK_CLIENT_ID_64 > tmp/secrets/keycloak-client-$KEYCLOAK_CLIENT_ID-id-64
 
 echo "Remove ports on prod" | tee -a $LOGFILE
 if [[ ${KEYCLOAK_PUBLIC_URL} == *":443"* ]]; then
@@ -156,13 +241,12 @@ else
 fi ;
 
 echo "Setting client ${KEYCLOAK_CLIENT_ID}" | tee -a $LOGFILE
-echo "${KEYCLOAK_CLIENT_ID} and base64 is ${KEYCLOAK_CLIENT_ID_64}" | tee -a $LOGFILE
 set_client "${KEYCLOAK_REALM}" "${KEYCLOAK_CLIENT_ID}" "${KEYCLOAK_LOGIN_REDIRECT_PATH}"
 
 echo "Getting keycloak secret" | tee -a $LOGFILE
 KEYCLOAK_SECRET_RESPONSE=$(get_secret ${KEYCLOAK_REALM})
 export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_RESPONSE
-echo $KEYCLOAK_SECRET > tmp/secrets/keycloak-client-local-candig-secret | tee -a $LOGFILE
+echo $KEYCLOAK_SECRET > tmp/secrets/keycloak-client-$KEYCLOAK_CLIENT_ID-secret | tee -a $LOGFILE
 
 echo "Getting keycloak public key" | tee -a $LOGFILE
 KEYCLOAK_PUBLIC_KEY_RESPONSE=$(get_public_key ${KEYCLOAK_REALM})
@@ -172,8 +256,11 @@ echo $KEYCLOAK_PUBLIC_KEY > tmp/secrets/keycloak-public-key | tee -a $LOGFILE
 
 if [[ ${KEYCLOAK_GENERATE_TEST_USER} == 1 ]]; then
   echo "Adding test user" | tee -a $LOGFILE
-  add_user "$(cat tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)"
+  add_user "$(cat tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)" "trusted_researcher"
+  add_user "$(cat tmp/secrets/keycloak-test-user2)" "$(cat tmp/secrets/keycloak-test-user2-password)" "stranger"
 fi
+
+#set_trusted_researcher "$(cat tmp/secrets/keycloak-test-user)"
 
 echo "Waiting for keycloak to restart" | tee -a $LOGFILE
 while ! docker logs --tail 5 ${CANDIG_AUTH_DOMAIN} | grep "Admin console listening on http://127.0.0.1:9990"; do sleep 1; done

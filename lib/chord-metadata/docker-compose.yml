@@ -36,6 +36,11 @@ services:
       - POSTGRES_HOST=metadata-db
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
+      - INSIDE_CANDIG=${INSIDE_CANDIG}
+      - CANDIG_OPA_URL=${OPA_URL}
+      - CANDIG_AUTHORIZATION=${CANDIG_AUTHORIZATION}
+      - CACHE_TIME=${CACHE_TIME}
+      - CANDIG_OPA_SECRET=${CANDIG_OPA_SECRET}
     secrets:
       - source: metadata-settings
         target: /app/chord_metadata_service/metadata/settings.py

@@ -1,0 +1,72 @@
+version: '3.7'
+services:
+  opa-runner:
+    build:
+      context: $PWD/lib/opa/opa
+      args:
+        venv_python: "${VENV_PYTHON}"
+        alpine_version: "${ALPINE_VERSION}"
+        katsu_url: "${CHORD_METADATA_PUBLIC_URL}"
+        idp: "${KEYCLOAK_REALM_URL}"
+        client_id: "${KEYCLOAK_CLIENT_ID}"
+    networks:
+      - ${DOCKER_NET}
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    logging: *default-logging
+    volumes:
+      - opa-data:/app
+    secrets:
+      - source: keycloak-client-local-candig-secret
+        target: idp_client_secret
+    environment:
+      IDP_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      CLIENT_SECRET_ROOT: ${CANDIG_OPA_SECRET}
+      CLIENT_SECRET_SERVICE: ${CANDIG_OPA_SECRET_SERVICE}
+      OPA_URL: ${OPA_URL}
+  opa:
+    image: openpolicyagent/opa:latest
+    ports:
+      - "${OPA_PORT}:8181"
+    volumes:
+      - opa-data:/app
+    environment:
+      CLIENT_SECRET_ROOT: ${CANDIG_OPA_SECRET}
+      CLIENT_SECRET_SERVICE: ${CANDIG_OPA_SECRET_SERVICE}
+      IDP: ${KEYCLOAK_REALM_URL}
+    command:
+      - "run"
+      - "--server"
+      - "--addr"
+      - "${OPA_URL}"
+      - "--log-level=debug"
+      - "--authentication=token"
+      - "--authorization=basic"
+      - "app/permissions_engine/authz.rego"
+      - "app/permissions_engine/permissions.rego"
+      - "app/permissions_engine/idp.rego"
+      - "app/data.json"
+    networks:
+      - bridge-net
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    logging: *default-logging
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "${OPA_URL}" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3

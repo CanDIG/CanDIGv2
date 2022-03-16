@@ -395,7 +395,7 @@ compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(DIR)/lib/$*/docker-compose.yml \
-		| docker-compose -f - up -d $(SERVICE)
+		| docker-compose -f - up -d
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
@@ -443,7 +443,7 @@ docker-push:
 
 #<<<
 .PHONY: docker-secrets
-docker-secrets: minio-secrets
+docker-secrets: mkdir minio-secrets
 	@echo admin > $(DIR)/tmp/secrets/portainer-user
 	$(MAKE) secret-portainer-secret
 	$(MAKE) secret-metadata-app-secret
@@ -454,8 +454,11 @@ docker-secrets: minio-secrets
 	@echo admin > $(DIR)/tmp/secrets/keycloak-admin-user
 	$(MAKE) secret-keycloak-admin-password
 
-	@echo user > $(DIR)/tmp/secrets/keycloak-test-user
+	@echo user1 > $(DIR)/tmp/secrets/keycloak-test-user
 	$(MAKE) secret-keycloak-test-user-password
+
+	@echo user2 > $(DIR)/tmp/secrets/keycloak-test-user2
+	$(MAKE) secret-keycloak-test-user2-password
 
 	$(MAKE) secret-tyk-secret-key
 	$(MAKE) secret-tyk-node-secret-key
@@ -484,6 +487,7 @@ docker-volumes:
 	docker volume create tyk-data
 	docker volume create tyk-redis-data
 	docker volume create vault-data
+	docker volume create opa-data
 
 
 #>>>
@@ -526,7 +530,7 @@ init-conda:
 
 #<<<
 .PHONY: init-docker
-init-docker: docker-networks docker-volumes ssl-cert docker-secrets
+init-docker: docker-networks docker-volumes docker-secrets
 
 
 #>>>
