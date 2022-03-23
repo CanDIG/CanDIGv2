@@ -84,20 +84,16 @@ init-authx: mkdir
 	# move to a better solution so Aman made a decision to keep this hack as-is.
 	$(MAKE) docker-volumes
 	echo "Setting up Keycloak"; \
-	export SERVICE=keycloak; \
 	source ${PWD}/lib/keycloak/keycloak_setup.sh; \
 	echo "Setting up Tyk"; \
-	export SERVICE=tyk; \
 	${PWD}/lib/tyk/tyk_setup.sh; \
 	echo ; \
 	$(MAKE) compose-tyk; \
 	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
 	echo "Setting up Vault"; \
-	export SERVICE=vault; \
 	$(MAKE) build-vault; \
 	source ${PWD}/lib/vault/vault_setup.sh; \
 	echo "Setting up Opa"; \
-	export SERVICE=opa; \
 	$(MAKE) build-opa; \
 	$(MAKE) compose-opa; \
 	source ${PWD}/lib/opa/opa_setup.sh; \
@@ -118,7 +114,6 @@ redeploy-tyk: mkdir
 	# in its own shell.  So to pass the environment from previous commands, one has
 	# to do this backslash dance. This could have been resolved but we decided to
 	# move to a better solution so Aman made a decision to keep this hack as-is.
-	export SERVICE=tyk; \
 	source ${PWD}/lib/tyk/tyk_setup.sh; \
 	echo ; \
 	$(MAKE) compose-tyk; \
