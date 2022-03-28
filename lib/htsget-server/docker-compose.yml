@@ -7,6 +7,8 @@ services:
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
+        opa_secret: "${CANDIG_OPA_SECRET}"
+        opa_url: "${OPA_URL}"
     image: ${DOCKER_REGISTRY}/htsget-app:${HTSGET_APP_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
