@@ -11,6 +11,8 @@ RUN mkdir -p /app/candig-server
 
 WORKDIR /app/candig-server
 
+COPY config.py /app/candig-server
+
 RUN apt-get update && \
 	apt-get install -y build-essential zlib1g-dev wget && \
 	apt-get autoclean && \
