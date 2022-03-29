@@ -33,4 +33,4 @@ services:
       - OPA_SERVER_TOKEN=${CANDIG_OPA_SECRET}
       - TYK_SERVER=${TYK_CANDIG_API_TARGET}
       - TYK_LISTEN_PATH=${TYK_CANDIG_API_LISTEN_PATH}
-    command: ["--host", "0.0.0.0", "--port", "3000", "--config-file", "config.py"]
+    command: ["--host", "0.0.0.0", "--port", "3000", "--config-file", "/app/candig-server/config.py"]
