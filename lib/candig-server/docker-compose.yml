@@ -28,4 +28,9 @@ services:
         - "traefik.http.routers.candig-server.rule=Host(`candig-server.${CANDIG_DOMAIN}`)"
         - "traefik.http.services.candig-server.loadbalancer.server.port=${CANDIG_SERVER_PORT}"
     logging: *default-logging
-    command: ["--host", "0.0.0.0", "--port", "3000"]
+    environment:
+      - OPA_SERVER=${OPA_URL}
+      - OPA_SERVER_TOKEN=${CANDIG_OPA_SECRET}
+      - TYK_SERVER=${TYK_CANDIG_API_TARGET}
+      - TYK_LISTEN_PATH=${TYK_CANDIG_API_LISTEN_PATH}
+    command: ["--host", "0.0.0.0", "--port", "3000", "--config-file", "/app/candig-server/config.py"]
