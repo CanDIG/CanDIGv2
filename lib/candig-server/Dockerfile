@@ -7,18 +7,20 @@ ARG candig_ingest
 
 LABEL Maintainer="CanDIG Project"
 
-RUN mkdir -p /app/candig-server
+COPY candig-server /app/candig-server
 
 WORKDIR /app/candig-server
 
 COPY config.py /app/candig-server
 
 RUN apt-get update && \
-	apt-get install -y build-essential zlib1g-dev wget && \
+	apt-get install -y build-essential zlib1g-dev wget git && \
 	apt-get autoclean && \
 	apt-get autoremove -y
 
-RUN pip install --no-cache-dir candig-server==${candig_version} candig-ingest==${candig_ingest}
+RUN pip install --no-cache-dir candig-ingest==${candig_ingest}
+RUN pip install -r requirements.txt
+RUN pip install /app/candig-server
 
 # Uncomment below lines if you want to ingest some mock data
 RUN mkdir candig-example-data && \
