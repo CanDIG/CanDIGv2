@@ -2,12 +2,12 @@ version: '3.7'
 
 services:
   candig-server:
-    build:
-      context: $PWD/lib/candig-server
-      args:
-        venv_python: '3.6'
-        candig_version: ${CANDIG_SERVER_VERSION}
-        candig_ingest: ${CANDIG_INGEST_VERSION}
+    #build:
+      #context: $PWD/lib/candig-server
+      #args:
+        #venv_python: '3.6'
+        #candig_version: ${CANDIG_SERVER_VERSION}
+        #candig_ingest: ${CANDIG_INGEST_VERSION}
     image: ${DOCKER_REGISTRY}/candig-server:${CANDIG_SERVER_VERSION}
     networks:
       - ${DOCKER_NET}
