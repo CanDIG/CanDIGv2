@@ -10,7 +10,7 @@ services:
     #TODO: define image: tag
     command: [ "-b", "${KEYCLOAK_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING" ]
     ports:
-      - "${KEYCLOAK_CONTAINER_PORT}:8080"
+      - "${KEYCLOAK_PORT}:${KEYCLOAK_CONTAINER_PORT}"
     networks:
       - ${DOCKER_NET}
     volumes:

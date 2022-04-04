@@ -7,7 +7,7 @@ services:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
         katsu_url: "${CHORD_METADATA_PUBLIC_URL}"
-        idp: "${KEYCLOAK_REALM_URL}"
+        idp: "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
         client_id: "${KEYCLOAK_CLIENT_ID}"
     networks:
       - ${DOCKER_NET}
