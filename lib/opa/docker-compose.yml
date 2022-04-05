@@ -44,8 +44,6 @@ services:
     command:
       - "run"
       - "--server"
-      - "--addr"
-      - "${OPA_URL}"
       - "--log-level=debug"
       - "--authentication=token"
       - "--authorization=basic"
