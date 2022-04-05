@@ -47,12 +47,8 @@ services:
       - "--log-level=debug"
       - "--authentication=token"
       - "--authorization=basic"
-      - "app/permissions_engine/authz.rego"
-      - "app/permissions_engine/permissions.rego"
-      - "app/permissions_engine/idp.rego"
       - "app/data.json"
-      - "app/permissions_engine/access.json"
-      - "app/permissions_engine/paths.json"
+      - "app/permissions_engine/"
     networks:
       - bridge-net
     deploy:
