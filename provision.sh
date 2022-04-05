@@ -62,10 +62,10 @@ dist=$(lsb_release -is)
 codename=$(lsb_release -cs)
 
 curl -fsSL https://download.docker.com/linux/${dist,,}/gpg | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/${dist,,} $(lsb_release -cs) stable"
+sudo add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/${dist,,} $(lsb_release -cs) stable"
 
 sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose
 echo "  finished installing docker components" | tee -a $LOGFILE
 
 sudo apt-get autoclean
