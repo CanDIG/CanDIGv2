@@ -52,6 +52,7 @@ services:
       - "app/permissions_engine/idp.rego"
       - "app/data.json"
       - "app/permissions_engine/access.json"
+      - "app/permissions_engine/paths.json"
     networks:
       - bridge-net
     deploy:

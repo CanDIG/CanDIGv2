@@ -29,7 +29,7 @@ services:
         - "traefik.http.services.candig-server.loadbalancer.server.port=${CANDIG_SERVER_PORT}"
     logging: *default-logging
     environment:
-      - OPA_SERVER=${OPA_URL}
+      - OPA_SERVER=http://opa:${OPA_PORT}
       - OPA_SERVER_TOKEN=${CANDIG_OPA_SECRET}
       - TYK_SERVER=${TYK_CANDIG_API_TARGET}
       - TYK_LISTEN_PATH=${TYK_CANDIG_API_LISTEN_PATH}
