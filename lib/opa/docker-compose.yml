@@ -44,8 +44,6 @@ services:
     command:
       - "run"
       - "--server"
-      - "--addr"
-      - "${OPA_URL}"
       - "--log-level=debug"
       - "--authentication=token"
       - "--authorization=basic"
@@ -54,6 +52,7 @@ services:
       - "app/permissions_engine/idp.rego"
       - "app/data.json"
       - "app/permissions_engine/access.json"
+      - "app/permissions_engine/paths.json"
     networks:
       - bridge-net
     deploy:
