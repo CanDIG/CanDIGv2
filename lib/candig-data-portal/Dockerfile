@@ -1,4 +1,3 @@
-ARG candig_data_portal_url
 ARG katsu_api_target_url
 
 FROM node:14.16.0-alpine as build
@@ -6,7 +5,6 @@ FROM node:14.16.0-alpine as build
 LABEL Maintainer="CanDIG Project"
 
 
-ENV CANDIG_DATA_PORTAL_URL=$candig_data_portal_url
 ENV TYK_KATSU_API_TARGET=$katsu_api_target_url
 
 
