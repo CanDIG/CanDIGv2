@@ -5,7 +5,6 @@ services:
     build:
       context: $PWD/lib/candig-data-portal
       args:
-        candig_data_portal_url: "${CANDIG_DATA_PORTAL_URL}"
         katsu_api_target_url: "${TYK_KATSU_API_TARGET}"
 #    image: ${DOCKER_REGISTRY}/candig-data-portal:${CANDIG_DATA_PORTAL_VERSION:-latest}
     networks:
