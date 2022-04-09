@@ -32,6 +32,8 @@ services:
       CLIENT_SECRET_SERVICE: ${CANDIG_OPA_SECRET_SERVICE}
       OPA_URL: ${OPA_URL}
       IDP: "${KEYCLOAK_PRIVATE_URL}/auth/realms/${KEYCLOAK_REALM}"
+      KATSU_URL: "${CHORD_METADATA_PUBLIC_URL}"
+
   opa:
     image: openpolicyagent/opa:latest
     ports:
