@@ -1,6 +1,6 @@
 {
     "api_id": "${TYK_KATSU_API_ID}",
-    "name": "${TYK_KATSU_API_NAME}",
+    "name": "${TYK_KATSU_API_SLUG}",
     "use_openid": true,
     "active": true,
     "slug": "${TYK_KATSU_API_SLUG}",

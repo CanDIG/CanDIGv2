@@ -4,7 +4,7 @@
             "${TYK_CANDIG_API_ID}": {
                 "allowed_urls": [],
                 "api_id": "${TYK_CANDIG_API_ID}",
-                "api_name": "${TYK_CANDIG_API_NAME}",
+                "api_name": "${TYK_CANDIG_API_SLUG}",
                 "versions": [
                     "Default"
                 ]
@@ -12,7 +12,7 @@
             "${TYK_KATSU_API_ID}": {
                 "allowed_urls": [],
                 "api_id": "${TYK_KATSU_API_ID}",
-                "api_name": "${TYK_KATSU_API_NAME}",
+                "api_name": "${TYK_KATSU_API_SLUG}",
                 "versions": [
                     "Default"
                 ]
@@ -20,7 +20,7 @@
             "${TYK_CANDIG_DATA_PORTAL_API_ID}": {
                 "allowed_urls": [],
                 "api_id": "${TYK_CANDIG_DATA_PORTAL_API_ID}",
-                "api_name": ${TYK_CANDIG_DATA_PORTAL_API_NAME},
+                "api_name": ${TYK_CANDIG_DATA_PORTAL_API_SLUG},
                 "versions": [
                     "Default"
                 ]
@@ -28,7 +28,7 @@
             "${TYK_GRAPHQL_API_ID}": {
                 "allowed_urls": [],
                 "api_id": "${TYK_GRAPHQL_API_ID}",
-                "api_name": "${TYK_GRAPHQL_API_NAME}",
+                "api_name": "${TYK_GRAPHQL_API_SLUG}",
                 "versions": [
                     "Default"
                 ]

@@ -1,6 +1,6 @@
 {
     "api_id": "${TYK_CANDIG_API_ID}",
-    "name": "${TYK_CANDIG_API_NAME}",
+    "name": "${TYK_CANDIG_API_SLUG}",
     "use_openid": true,
     "active": true,
     "slug": "${TYK_CANDIG_API_SLUG}",

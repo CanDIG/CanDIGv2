@@ -1,6 +1,6 @@
 {
     "api_id": "${TYK_GRAPHQL_API_ID}",
-    "name": "${TYK_GRAPHQL_API_NAME}",
+    "name": "${TYK_GRAPHQL_API_SLUG}",
     "use_openid": true,
     "active": true,
     "slug": "${TYK_GRAPHQL_API_SLUG}",
