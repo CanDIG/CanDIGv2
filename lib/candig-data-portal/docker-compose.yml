@@ -5,7 +5,6 @@ services:
     build:
       context: $PWD/lib/candig-data-portal
       args:
-        candig_data_portal_url: "${CANDIG_DATA_PORTAL_URL}"
         katsu_api_target_url: "${TYK_KATSU_API_TARGET}"
 #    image: ${DOCKER_REGISTRY}/candig-data-portal:${CANDIG_DATA_PORTAL_VERSION:-latest}
     networks:
@@ -27,6 +26,12 @@ services:
         - "traefik.http.routers.candig-data-portal.rule=Host(`candig-data-portal.${CANDIG_DOMAIN}`)"
         - "traefik.http.services.candig-data-portal.loadbalancer.server.port=${CANDIG_DATA_PORTAL_PORT}"
     logging: *default-logging
+    environment:
+      - REACT_APP_KATSU_API_SERVER=${TYK_KATSU_API_TARGET}
+      - REACT_APP_CANDIG_SERVER=${TYK_CANDIG_API_TARGET}
+        #- REACT_APP_FEDERATION_API_SERVER=http://${CANDIG_DOMAIN}:${FEDERATION_PORT}
+        #- REACT_APP_BASE_NAME='/'
+      - REACT_APP_SITE_LOCATION=${CANDIG_SITE_LOCATION}
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:3000" ]
       interval: 30s

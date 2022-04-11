@@ -21,7 +21,7 @@
     "auth_header_name": ""
     },
 
-    "name": "${TYK_AUTH_API_NAME}",
+    "name": "${TYK_AUTH_API_SLUG}",
     "slug": "${TYK_AUTH_API_SLUG}",
 
     "proxy": {

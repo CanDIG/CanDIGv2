@@ -1,6 +1,6 @@
 {
     "api_id": "${TYK_CANDIG_DATA_PORTAL_API_ID}",
-    "name": ${TYK_CANDIG_DATA_PORTAL_API_NAME},
+    "name": "${TYK_CANDIG_DATA_PORTAL_API_SLUG}",
     "use_openid": true,
     "active": true,
     "slug": "${TYK_CANDIG_DATA_PORTAL_API_SLUG}",
@@ -95,7 +95,7 @@
     "segregate_by_client": false,
     "providers": [
             {
-                "issuer": "${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/${KEYCLOAK_REALM}",
+                "issuer": "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}",
                 "client_ids": {
                     "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
                 }

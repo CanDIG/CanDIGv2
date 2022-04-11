@@ -11,7 +11,7 @@
     "access_rights": {
         "${TYK_CANDIG_API_ID}": {
             "api_id": "${TYK_CANDIG_API_ID}",
-            "api_name": "${TYK_CANDIG_API_NAME}",
+            "api_name": "${TYK_CANDIG_API_SLUG}",
             "Versions": ["Default"]
         }
     },
