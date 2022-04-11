@@ -31,7 +31,7 @@ services:
       - REACT_APP_CANDIG_SERVER=${TYK_CANDIG_API_TARGET}
         #- REACT_APP_FEDERATION_API_SERVER=http://${CANDIG_DOMAIN}:${FEDERATION_PORT}
         #- REACT_APP_BASE_NAME='/'
-      - REACT_APP_SITE_LOCATION=UHN
+      - REACT_APP_SITE_LOCATION=${CANDIG_SITE_LOCATION}
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:3000" ]
       interval: 30s
