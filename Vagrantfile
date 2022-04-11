@@ -18,7 +18,7 @@ Vagrant.configure('2') do |config|
 
   config.vm.provider 'virtualbox' do |vb, override|
     override.vm.synced_folder '.', '/home/vagrant/candig', type: 'virtualbox'
-    override.vm.box = 'debian/contrib-buster64'
+    override.vm.box = 'generic/ubuntu2010'
     override.vm.hostname = 'candig.local'
     override.disksize.size = '50GB'
 #     override.vm.network "forwarded_port", guest: 80, host: 80
@@ -35,7 +35,7 @@ Vagrant.configure('2') do |config|
 
   config.vm.provider :libvirt do |libvirt, override|
     override.vm.synced_folder '.', '/home/vagrant/candig', type: 'nfs'
-    override.vm.box = 'debian-sandbox/contrib-buster64'
+    override.vm.box = 'generic/ubuntu2010'
     override.vm.hostname = 'candig.local'
     override.disksize.size = '50GB'
     libvirt.memory = 4096
