@@ -19,6 +19,9 @@ mkdir -p ${PWD}/lib/vault/tmp
 echo "Working on vault-config.json .."
 envsubst < ${PWD}/lib/vault/configuration_templates/vault-config.json.tpl > ${PWD}/lib/vault/tmp/vault-config.json
 
+# build the container
+make build-vault
+
 # boot container
 make compose-vault
 

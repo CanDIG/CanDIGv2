@@ -91,7 +91,6 @@ init-authx: mkdir
 	$(MAKE) compose-tyk; \
 	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
 	echo "Setting up Vault"; \
-	$(MAKE) build-vault; \
 	source ${PWD}/lib/vault/vault_setup.sh; \
 	echo "Setting up Opa"; \
 	$(MAKE) build-opa; \
