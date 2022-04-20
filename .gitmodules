@@ -34,3 +34,6 @@
 [submodule "lib/graphql/GraphQL-interface"]
   path = lib/graphql/GraphQL-interface
   url = https://github.com/CanDIG/GraphQL-interface.git
+[submodule "Vault-Helper-Tool"]
+	path = Vault-Helper-Tool
+	url = https://github.com/CanDIG/Vault-Helper-Tool.git
