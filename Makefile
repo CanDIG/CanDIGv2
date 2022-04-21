@@ -530,7 +530,7 @@ init-conda:
 
 #<<<
 .PHONY: init-docker
-init-docker: docker-networks docker-volumes docker-secrets
+init-docker: ssl-cert docker-networks docker-volumes docker-secrets
 
 
 #>>>
@@ -539,7 +539,7 @@ init-docker: docker-networks docker-volumes docker-secrets
 
 #<<<
 .PHONY: init-kubernetes
-init-kubernetes:ssl-cert docker-secrets docker-pull
+init-kubernetes: ssl-cert docker-secrets docker-pull
 	$(DIR)/bin/kubectl create namespace $(DOCKER_NAMESPACE)
 
 
