@@ -31,6 +31,7 @@ Vagrant.configure('2') do |config|
     override.vm.provision 'shell', privileged: false, path: "provision.sh", args: ["/home/vagrant/candig"]
     override.vm.provision :reload
     override.vm.provision 'shell', privileged: false, path: "setup_containers.sh", args: ["/home/vagrant/candig"]
+    override.vm.provision 'shell', privileged: false, path: "setup_auth.sh", args: ["/home/vagrant/candig"]
   end
 
   config.vm.provider :libvirt do |libvirt, override|
