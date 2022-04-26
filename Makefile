@@ -612,12 +612,14 @@ minikube:
 # make minio-secrets
 
 #<<<
-minio-secrets:
+minio-secrets: ssl-cert
 	@echo admin > $(DIR)/tmp/secrets/minio-access-key
 	$(MAKE) secret-minio-secret-key
 	@echo '[default]' > $(DIR)/tmp/secrets/aws-credentials
 	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> $(DIR)/tmp/secrets/aws-credentials
 	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> $(DIR)/tmp/secrets/aws-credentials
+	cp $(DIR)/tmp/ssl/selfsigned-site.crt $(DIR)/tmp/secrets/selfsigned-site-crt
+	cp $(DIR)/tmp/ssl/selfsigned-site.key $(DIR)/tmp/secrets/selfsigned-site-key
 
 
 #>>>
@@ -672,11 +674,13 @@ ssl-cert:
 	openssl req -new -key $(DIR)/tmp/ssl/selfsigned-site.key \
 		-out $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
 		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed Cert'
+	sed -i .tmp s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/etc/ssl/site.cnf
 	openssl x509 -req -days 750 -in $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
 		-CA $(DIR)/tmp/ssl/selfsigned-root-ca.crt \
 		-CAkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
 		-CAcreateserial -out $(DIR)/tmp/ssl/selfsigned-site.crt \
-		-extfile $(DIR)/etc/ssl/site.cnf -extensions server
+		-extfile $(DIR)/etc/ssl/site.cnf.tmp -extensions server
+	mv $(DIR)/etc/ssl/site.cnf.tmp $(DIR)/etc/ssl/site.cnf
 
 
 #>>>
@@ -690,7 +694,7 @@ stack:
 
 
 #>>>
-# deploy/test indivudual modules using docker stack
+# deploy/test individual modules using docker stack
 # $module is the name of the sub-folder in lib/
 # make stack-$module
 
