@@ -460,16 +460,13 @@ docker-secrets: mkdir minio-secrets
 	@echo user2 > $(DIR)/tmp/secrets/keycloak-test-user2
 	$(MAKE) secret-keycloak-test-user2-password
 
-	@echo site_admin > $(DIR)/tmp/secrets/keycloak-site-admin-user
-	$(MAKE) secret-keycloak-site-admin-user-password
-
 	$(MAKE) secret-tyk-secret-key
 	$(MAKE) secret-tyk-node-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
 
 
 #>>>
-# create persistent volumes for docker containers
+# create persistant volumes for docker containers
 # make docker-volumes
 
 #<<<
