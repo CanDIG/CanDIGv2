@@ -618,8 +618,6 @@ minio-secrets: ssl-cert
 	@echo '[default]' > $(DIR)/tmp/secrets/aws-credentials
 	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> $(DIR)/tmp/secrets/aws-credentials
 	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> $(DIR)/tmp/secrets/aws-credentials
-	cp $(DIR)/tmp/ssl/selfsigned-site.crt $(DIR)/tmp/secrets/selfsigned-site-crt
-	cp $(DIR)/tmp/ssl/selfsigned-site.key $(DIR)/tmp/secrets/selfsigned-site-key
 
 
 #>>>
@@ -679,8 +677,15 @@ ssl-cert:
 		-CA $(DIR)/tmp/ssl/selfsigned-root-ca.crt \
 		-CAkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
 		-CAcreateserial -out $(DIR)/tmp/ssl/selfsigned-site.crt \
-		-extfile $(DIR)/etc/ssl/site.cnf.tmp -extensions server
+		-extfile $(DIR)/etc/ssl/site.cnf -extensions server
 	mv $(DIR)/etc/ssl/site.cnf.tmp $(DIR)/etc/ssl/site.cnf
+	sed -i .tmp s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/etc/ssl/alt_names.txt
+	openssl x509 -req -days 365 -in $(DIR)/tmp/ssl/selfsigned-root-ca.csr \
+	    -sha256 \
+	    -signkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
+		-extfile $(DIR)/etc/ssl/alt_names.txt \
+		-out $(DIR)/tmp/ssl/public.crt
+	mv $(DIR)/etc/ssl/alt_names.txt.tmp $(DIR)/etc/ssl/alt_names.txt
 
 
 #>>>

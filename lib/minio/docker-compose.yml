@@ -1,6 +1,35 @@
 version: '3.7'
 
 services:
+  minio-runner:
+    build:
+      context: $PWD/lib/minio/minio
+      args:
+        venv_python: "${VENV_PYTHON}"
+        alpine_version: "${ALPINE_VERSION}"
+        candig_domain: "${CANDIG_DOMAIN}"
+    networks:
+      - ${DOCKER_NET}
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    secrets:
+      - source: selfsigned-site-crt
+        target: public.crt
+      - source: selfsigned-site-key
+        target: private.key
+    environment:
+      - CANDIG_DOMAIN=${CANDIG_DOMAIN}
+    logging: *default-logging
+    volumes:
+      - minio-data:/data
+      - minio-config:/root/.minio
   minio:
     image: minio/minio:${MINIO_VERSION:-latest}
     volumes:
@@ -28,6 +57,7 @@ services:
     environment:
       - MINIO_REGION=${MINIO_REGION}
       - CANDIG_DOMAIN="${CANDIG_DOMAIN}"
+      - MINIO_SERVER_URL=${MINIO_PUBLIC_URL}
     secrets:
       - source: minio-access-key
         target: access_key

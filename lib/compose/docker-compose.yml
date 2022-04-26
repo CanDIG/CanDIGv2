@@ -80,3 +80,7 @@ secrets:
     file: $PWD/tmp/secrets/keycloak-test-user-password
   keycloak-client-local-candig-secret:
     file: $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret
+  selfsigned-site-crt:
+    file: $PWD/tmp/ssl/public.crt
+  selfsigned-site-key:
+    file: $PWD/tmp/ssl/selfsigned-root-ca.key
