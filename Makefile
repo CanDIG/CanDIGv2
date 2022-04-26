@@ -618,6 +618,8 @@ minio-secrets:
 	@echo '[default]' > $(DIR)/tmp/secrets/aws-credentials
 	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> $(DIR)/tmp/secrets/aws-credentials
 	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> $(DIR)/tmp/secrets/aws-credentials
+	cp $(DIR)/tmp/ssl/selfsigned-site.crt $(DIR)/tmp/secrets/selfsigned-site-crt
+	cp $(DIR)/tmp/ssl/selfsigned-site.key $(DIR)/tmp/secrets/selfsigned-site-key
 
 
 #>>>
