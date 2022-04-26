@@ -10,6 +10,7 @@ services:
       - ${DOCKER_NET}
     ports:
       - "${MINIO_UI_PORT}:9000"
+      - 43575:43575
     deploy:
       placement:
         constraints:
@@ -32,7 +33,7 @@ services:
         target: access_key
       - source: minio-secret-key
         target: secret_key
-    command: ["server", "/data"]
+    command: ["server", "/data","--console-address", ":43575"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
