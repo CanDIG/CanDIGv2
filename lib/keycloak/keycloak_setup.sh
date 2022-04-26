@@ -142,20 +142,6 @@ set_client() {
             "claim.name": "trusted_researcher",
             "jsonType.label": "boolean"
           }
-        },
-        {
-          "name": "site_administrator",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-attribute-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "user.attribute": "site_administrator",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "site_administrator",
-            "jsonType.label": "boolean"
-          }
         }
       ]
     }'
@@ -272,8 +258,9 @@ if [[ ${KEYCLOAK_GENERATE_TEST_USER} == 1 ]]; then
   echo "Adding test user" | tee -a $LOGFILE
   add_user "$(cat tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)" "trusted_researcher"
   add_user "$(cat tmp/secrets/keycloak-test-user2)" "$(cat tmp/secrets/keycloak-test-user2-password)" "stranger"
-  add_user "$(cat tmp/secrets/keycloak-site-admin-user)" "$(cat tmp/secrets/keycloak-site-admin-user-password)" "site_administrator"
 fi
+
+#set_trusted_researcher "$(cat tmp/secrets/keycloak-test-user)"
 
 echo "Waiting for keycloak to restart" | tee -a $LOGFILE
 while ! docker logs --tail 5 ${CANDIG_AUTH_DOMAIN} | grep "Admin console listening on http://127.0.0.1:9990"; do sleep 1; done
