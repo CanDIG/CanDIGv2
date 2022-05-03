@@ -48,6 +48,11 @@ generate_key() {
               "api_id": "'"${TYK_GRAPHQL_API_ID}"'",
               "api_name": "'"${TYK_GRAPHQL_API_SLUG}"'",
               "Versions": ["Default"]
+          },
+          "'"${TYK_HTSGET_API_ID}"'": {
+              "api_id": "'"${TYK_HTSGET_API_ID}"'",
+              "api_name": "'"${TYK_HTSGET_API_SLUG}"'",
+              "Versions": ["Default"]
           }
       }
   }'
