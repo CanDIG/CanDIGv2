@@ -32,6 +32,14 @@
                 "versions": [
                     "Default"
                 ]
+            },
+            "${TYK_HTSGET_API_ID}": {
+                "allowed_urls": [],
+                "api_id": "${TYK_HTSGET_API_ID}",
+                "api_name": "${TYK_HTSGET_API_SLUG}",
+                "versions": [
+                    "Default"
+                ]
             }
         },
         "active": true,
