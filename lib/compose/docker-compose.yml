@@ -84,3 +84,5 @@ secrets:
     file: $PWD/tmp/ssl/public.crt
   selfsigned-site-key:
     file: $PWD/tmp/ssl/selfsigned-root-ca.key
+  selfsigned-site-pem:
+    file: $PWD/tmp/ssl/cert.pem

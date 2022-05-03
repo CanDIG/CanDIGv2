@@ -682,6 +682,7 @@ ssl-cert:
 	    -signkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
 		-extfile $(DIR)/etc/ssl/alt_names.txt \
 		-out $(DIR)/tmp/ssl/public.crt
+	openssl x509 -in public.crt -out cert.pem
 	mv $(DIR)/etc/ssl/alt_names.txt.tmp $(DIR)/etc/ssl/alt_names.txt
 
 
