@@ -80,6 +80,9 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/api_mcode_candig_data_portal.j
 echo "Working on api_graphql.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_graphql.json.tpl > ${CONFIG_DIR}/apps/api_graphql.json
 
+echo "Working on api_htsget.json" | tee -a $LOGFILE
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_htsget.json.tpl > ${CONFIG_DIR}/apps/api_htsget.json
+
 # Extra APIs can be added here
 #echo "Working on api_example.json"
 #envsubst < ${PWD}/lib/tyk/configuration_templates/api_example.json.tpl > ${CONFIG_DIR}/apps/api_example.json
