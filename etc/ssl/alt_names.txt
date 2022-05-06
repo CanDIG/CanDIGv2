@@ -1,1 +1,1 @@
-subjectAltName = DNS:CANDIG_DOMAIN
+subjectAltName = DNS:docker.localhost

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 set -Euo pipefail
-
+rm /root/.minio/certs
+mkdir /root/.minio/certs
 cp /run/secrets/private.key /root/.minio/certs
 cp /run/secrets/public.crt /root/.minio/certs
 
