@@ -142,6 +142,20 @@ set_client() {
             "claim.name": "trusted_researcher",
             "jsonType.label": "boolean"
           }
+        },
+        {
+          "name": "'${OPA_SITE_ADMIN_KEY}'",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "'${OPA_SITE_ADMIN_KEY}'",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "'${OPA_SITE_ADMIN_KEY}'",
+            "jsonType.label": "boolean"
+          }
         }
       ]
     }'
