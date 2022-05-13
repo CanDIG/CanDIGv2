@@ -9,6 +9,7 @@ services:
         katsu_url: "${CHORD_METADATA_PUBLIC_URL}"
         idp: "${KEYCLOAK_PRIVATE_URL}/auth/realms/${KEYCLOAK_REALM}"
         client_id: "${KEYCLOAK_CLIENT_ID}"
+        opa_site_admin_key: "${OPA_SITE_ADMIN_KEY}"
     networks:
       - ${DOCKER_NET}
     deploy:
