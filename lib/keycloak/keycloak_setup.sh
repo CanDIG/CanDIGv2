@@ -140,7 +140,7 @@ set_client() {
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "trusted_researcher",
-            "jsonType.label": "boolean"
+            "jsonType.label": "String"
           }
         },
         {
@@ -154,7 +154,7 @@ set_client() {
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "'${OPA_SITE_ADMIN_KEY}'",
-            "jsonType.label": "boolean"
+            "jsonType.label": "String"
           }
         }
       ]
