@@ -86,3 +86,5 @@ secrets:
     file: $PWD/tmp/ssl/selfsigned-root-ca.key
   selfsigned-site-pem:
     file: $PWD/tmp/ssl/cert.pem
+  vault-s3-token:
+    file: $PWD/tmp/secrets/vault-s3-token

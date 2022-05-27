@@ -9,6 +9,7 @@ services:
         alpine_version: "${ALPINE_VERSION}"
         opa_secret: "${CANDIG_OPA_SECRET}"
         opa_url: "${OPA_URL}"
+        vault_url: "${VAULT_SERVICE_URL}"
         candig_auth: "${CANDIG_AUTHORIZATION}"
         minio_url: "${CANDIG_DOMAIN}:${MINIO_PORT}"
         minio_bucket_name: "${MINIO_BUCKET}"
@@ -38,6 +39,8 @@ services:
         target: secret
       - source: selfsigned-site-pem
         target: cert.pem
+      - source: vault-s3-token
+        target: vault-s3-token
     logging: *default-logging
     environment:
       HTSGET_TEST_KEY: "hoodlebug"
