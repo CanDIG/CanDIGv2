@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -Eexo pipefail
+set -Euo pipefail
 
 # This script will set up a full vault environment on your local CanDIGv2 cluster
 
@@ -165,6 +165,8 @@ VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < ${PWD}/lib/vault/configuration_templat
 docker exec $vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > researcher.json; vault write identity/oidc/role/researcher @researcher.json; rm researcher.json;"
 echo
 
-# ---
+echo ">> create token for s3"
+TOKEN="$(cat tmp/secrets/vault-s3-token)"
+docker exec $vault sh -c "echo '{\"id\": \"${TOKEN}\", \"policies\": [\"aws\"], \"ttl\": \"1h\", \"renewable\": true}' > token.json; vault write /auth/token/create @token.json;"
 
 
