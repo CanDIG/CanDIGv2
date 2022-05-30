@@ -6,6 +6,7 @@ set -Euo pipefail
 if [[ -f "initial_setup" ]]; then
     rm initial_setup
 else
+    sleep 10
     # unseal vault
     KEY=$(head -n 2 /vault/config/keys.txt | tail -n 1)
     echo '{ "key": "'$KEY'" }' > payload.json
