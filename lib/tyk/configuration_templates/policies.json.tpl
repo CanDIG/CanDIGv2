@@ -48,6 +48,14 @@
                 "versions": [
                     "Default"
                 ]
+            },
+            "${TYK_VAULT_API_ID}": {
+                "allowed_urls": [],
+                "api_id": "${TYK_VAULT_API_ID}",
+                "api_name": "${TYK_VAULT_API_SLUG}",
+                "versions": [
+                    "Default"
+                ]
             }
         },
         "active": true,
