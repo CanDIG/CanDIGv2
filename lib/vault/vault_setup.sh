@@ -20,6 +20,7 @@ echo "Working on vault-config.json .."
 envsubst < ${PWD}/lib/vault/configuration_templates/vault-config.json.tpl > ${PWD}/lib/vault/tmp/vault-config.json
 
 # boot container
+make build-vault
 make compose-vault
 
 # -- todo: run only if not already initialized --
@@ -93,7 +94,7 @@ docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=prefer
 # configure jwt
 echo
 echo ">> configuring jwt stuff"
-docker exec $vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_PRIVATE_URL}/auth/realms/candig\" bound_issuer=\"${KEYCLOAK_PRIVATE_URL}/auth/realms/candig\" default_role=\"researcher\""
+docker exec $vault sh -c "vault write auth/jwt/config oidc_discovery_url=\"${KEYCLOAK_PUBLIC_URL}/auth/realms/candig\" bound_issuer=\"${KEYCLOAK_PUBLIC_URL}/auth/realms/candig\" default_role=\"researcher\""
 
 # create users
 echo

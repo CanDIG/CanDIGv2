@@ -7,7 +7,7 @@ services:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
         katsu_url: "${CHORD_METADATA_PUBLIC_URL}"
-        idp: "${KEYCLOAK_PRIVATE_URL}/auth/realms/${KEYCLOAK_REALM}"
+        idp: "${KEYCLOAK_URL}/auth/realms/${KEYCLOAK_REALM}"
         client_id: "${KEYCLOAK_CLIENT_ID}"
         opa_site_admin_key: "${OPA_SITE_ADMIN_KEY}"
     networks:
@@ -32,7 +32,7 @@ services:
       CLIENT_SECRET_ROOT: ${CANDIG_OPA_SECRET}
       CLIENT_SECRET_SERVICE: ${CANDIG_OPA_SECRET_SERVICE}
       OPA_URL: ${OPA_URL}
-      IDP: "${KEYCLOAK_PRIVATE_URL}/auth/realms/${KEYCLOAK_REALM}"
+      IDP: "${KEYCLOAK_URL}/auth/realms/${KEYCLOAK_REALM}"
       KATSU_URL: "${CHORD_METADATA_PUBLIC_URL}"
 
   opa:
