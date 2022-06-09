@@ -7,20 +7,7 @@ services:
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
-        opa_secret: "${CANDIG_OPA_SECRET}"
-        opa_url: "${OPA_URL}"
-        vault_url: "${VAULT_SERVICE_URL}"
-        candig_auth: "${CANDIG_AUTHORIZATION}"
-        minio_url: "${CANDIG_DOMAIN}:${MINIO_PORT}"
-        minio_bucket_name: "${MINIO_BUCKET}"
     image: ${DOCKER_REGISTRY}/htsget-app:${HTSGET_APP_VERSION:-latest}
-    environment:
-      OPA_SECRET: "${CANDIG_OPA_SECRET}"
-      OPA_URL: "${OPA_URL}"
-      VAULT_URL: "${VAULT_URL}"
-      CANDIG_AUTH: "${CANDIG_AUTHORIZATION}"
-      MINIO_URL: "${CANDIG_DOMAIN}:${MINIO_PORT}"
-      MINIO_BUCKET_NAME: "${MINIO_BUCKET}"
     networks:
       - ${DOCKER_NET}
     ports:
