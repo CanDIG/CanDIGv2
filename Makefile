@@ -609,7 +609,7 @@ minikube:
 # make minio-secrets
 
 #<<<
-minio-secrets: ssl-cert
+minio-secrets:
 	@echo admin > $(DIR)/tmp/secrets/minio-access-key
 	$(MAKE) secret-minio-secret-key
 	@echo '[default]' > $(DIR)/tmp/secrets/aws-credentials
