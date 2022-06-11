@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  vault:
+    build:
+      context: ${PWD}/lib/vault
+      args:
+        - VAULT_VERSION=1.9.3
+        - venv_python=${VENV_PYTHON}
+    image: ${DOCKER_REGISTRY}/vault:${VAULT_VERSION:-latest}
+    ports:
+      - ${VAULT_SERVICE_PORT}:8200
+    volumes:
+      - vault-data:/vault
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
+      - VAULT_DISABLE_MLOCK=true
+    cap_add:
+      - IPC_LOCK
+    networks:
+      - ${DOCKER_NET}
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.vault.rule=Host(`vault.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.vault.loadbalancer.server.port=${VAULT_SERVICE_PORT}"
+    logging: *default-logging
+    command: server -config=/vault/config/vault-config.json
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://0.0.0.0:${VAULT_SERVICE_PORT}/ui/" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3

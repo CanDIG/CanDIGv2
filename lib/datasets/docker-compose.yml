@@ -3,7 +3,7 @@ version: '3.7'
 services:
   datasets:
     build:
-      context: $PWD/lib/datasets
+      context: $PWD/lib/datasets/datasets_service
       args:
         venv_python: "${VENV_PYTHON}"
     image: ${DOCKER_REGISTRY}/datasets:${DATASETS_VERSION:-latest}

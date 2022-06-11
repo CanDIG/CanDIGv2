@@ -96,17 +96,16 @@ sudo usermod -aG docker $(whoami)
 
 ```bash
 # 1. initialize repo and submodules
-git clone -b stable https://github.com/CanDIG/CanDIGv2.git
+git clone -b develop https://github.com/CanDIG/CanDIGv2.git
+cd CanDIGv2
 git submodule update --init --recursive
 
 # 2. copy and edit .env with your site's local configuration
 cp -i etc/env/example.env .env
 
-<!--TODO: add instructions for compose-authx-setup-->
 # 3. fetch binaries and initialize candig virtualenv
 make bin-all
 make init-conda
-source etc/venv/activate.sh
 ```
 
 ## Create CanDIGv2 Development VM
@@ -141,12 +140,22 @@ make images
 make docker-pull
 
 # deploy stack (if using docker-compose environment)
-make comopose-authx-setup
 make compose
+make init-authx
+# TODO: post deploy auth configuration
 
 # push updated images to $DOCKER_REGISTRY (optional)
 docker login
 make docker-push
+```
+
+## Update hosts
+
+Get your local IP address and edit your /etc/hosts file to add:
+
+```bash
+<your ip>  docker.localhost
+<your ip>  auth.docker.localhost
 ```
 
 ## Deploy CanDIGv2 Services (Swarm)

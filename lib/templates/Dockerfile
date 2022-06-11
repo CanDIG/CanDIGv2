@@ -1,52 +1,27 @@
-ARG venv_python
+# This Dockerfile should be located inside the root level of the submodule
 
-FROM python:${venv_python}-alpine
+# These arguments are picked up from the environment and passed in from the docker-compose file
+ARG venv_python
+ARG alpine_version
+FROM python:${venv_python}-alpine${alpine_version}
 
 LABEL Maintainer="CanDIG Project"
 
-ENV PYTHONUNBUFFERED=1 \
-  PYTHONDONTWRITEBYTECODE=1 \
-  PYTHONHASHSEED=random \
-  PIP_NO_CACHE_DIR=off \
-  PIP_DISABLE_PIP_VERSION_CHECK=on
+# Copy module repo as needed
+COPY . /app/<module_name>
 
-RUN adduser -h /app -D user
+# Alternatively, clone it:
+# RUN git clone https://github.com/candig/<module_name>.git
 
-RUN apk add --no-cache \
-  autoconf \
-  automake \
-  build-base \
-  bzip2-dev \
-  curl \
-  curl-dev \
-  gcc \
-  git \
-  libcurl \
-  libffi-dev \
-  libressl-dev \
-  linux-headers \
-  make \
-  musl-dev \
-  perl \
-  postgresql-dev \
-  postgresql-libs \
-  xz-dev \
-  yaml-dev \
-  zlib-dev
+# Set the working directory
+WORKDIR /app/<module_name>
 
-USER user
-WORKDIR /app
-
-# clone or COPY module repo as needed
-# example:
-# RUN git clone https://github.com/c3g/chord_drs.git
-# COPY chord_drs /app/chord_drs
-
-# run necessary steps to implement module
-# example:
-# WORKDIR /app/chord_drs
+# Run necessary steps to implement module
+# uncomment and add as needed:
+# RUN apt-get update
+# RUN apt-get -y install gcc libc-dev
 # RUN pip install --no-cache-dir -r requirements.txt && flask db upgrade
 
 # Run the model service server
-# example:
+# uncomment and add as needed:
 # ENTRYPOINT ["flask", "run"]

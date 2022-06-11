@@ -4,7 +4,7 @@
 
 ## Overview
 
-The CanDIG v2 project is a collection of heterogeneos services designed to work together to facilitate end to end
+The CanDIG v2 project is a collection of heterogeneous services designed to work together to facilitate end to end
 dataflow for genomic data.
 
 ```plaintext
@@ -146,13 +146,21 @@ To deploy CanDIGv2, follow one of the available install guides in `docs/`:
 * [Docker Deployment Guide](./docs/install-docker.md)
 * [Kubernetes Deployment Guide](./docs/install-kubernetes.md)
 * [Tox Deployment Guide](./docs/install-tox.md)
+* [Authentication and Authorization Deployment Guide](./docs/authx-setup.md)
 
 View additional Makefile options with `make help`.
 
 
 ## Services and Components
 
-The follwing table lists the details from the Data Flow Diagram in the "Overview" section.
+### Add new service
+
+New services can be added under `lib` directory.  Please refer to the
+[template for new services README](./lib/templates/README.md) for more details.
+
+### List of services
+
+The following table lists the details from the Data Flow Diagram in the "Overview" section.
 
 | Service/Component Name | Source | Notes                        |
 |------------------------|--------|------------------------------|
@@ -167,3 +175,4 @@ The follwing table lists the details from the Data Flow Diagram in the "Overview
 | CHORD DRS              | links  | DFD: `chord_drs`             |
 | IGV JS                 | links  | DFD: `igv_js`                |
 | WES Server             | links  | DFD: `wes_server`            |
+| CanDIG Data Portal     | links  | DFD:                         |

@@ -3,9 +3,10 @@ version: '3.7'
 services:
   chord-metadata:
     build:
-      context: $PWD/lib/chord-metadata
+      context: $PWD/lib/chord-metadata/chord_metadata_service
       args:
         venv_python: "${VENV_PYTHON}"
+        alpine_version: "${ALPINE_VERSION}"
     image: ${DOCKER_REGISTRY}/chord-metadata:${CHORD_METADATA_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
@@ -34,6 +35,12 @@ services:
       - CHORD_DEBUG=${CHORD_METADATA_DEBUG}
       - POSTGRES_HOST=metadata-db
       - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
+      - INSIDE_CANDIG=${INSIDE_CANDIG}
+      - CANDIG_OPA_URL=${OPA_PRIVATE_URL}
+      - CANDIG_AUTHORIZATION=${CANDIG_AUTHORIZATION}
+      - CACHE_TIME=${CACHE_TIME}
+      - CANDIG_OPA_SECRET=${CANDIG_OPA_SECRET}
     secrets:
       - source: metadata-settings
         target: /app/chord_metadata_service/metadata/settings.py
@@ -80,6 +87,7 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_DB=metadata
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
+      - POSTGRES_HOST_AUTH_METHOD=password
     secrets:
       - source: metadata-db-user
         target: metadata_db_user

@@ -6,6 +6,10 @@ services:
       context: $PWD/lib/htsget-server/htsget_app
       args:
         venv_python: "${VENV_PYTHON}"
+        alpine_version: "${ALPINE_VERSION}"
+        opa_secret: "${CANDIG_OPA_SECRET}"
+        opa_url: "${OPA_URL}"
+        candig_auth: "${CANDIG_AUTHORIZATION}"
     image: ${DOCKER_REGISTRY}/htsget-app:${HTSGET_APP_VERSION:-latest}
     networks:
       - ${DOCKER_NET}

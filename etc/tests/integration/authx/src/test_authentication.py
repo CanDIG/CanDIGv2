@@ -69,6 +69,7 @@ class TestAuthentication():
 
         # credentials
         u1 = os.environ["KEYCLOAK_TEST_USER"]
+        #TODO: fix , retrieve PW from secret file instead of env
         p1 = os.environ["KEYCLOAK_TEST_PW"]
         login(self.driver, u1, p1)
 
@@ -137,6 +138,7 @@ class TestAuthentication():
 
         # credentials
         u1 = os.environ["KEYCLOAK_TEST_USER"]
+        #TODO: fix , retrieve PW from secret file instead of env
         p1 = os.environ["KEYCLOAK_TEST_PW"]
         login(self.driver, u1, p1)
 
@@ -189,6 +191,7 @@ class TestAuthentication():
 
         # credentials
         u1 = os.environ["KEYCLOAK_TEST_USER"]
+        #TODO: fix , retrieve PW from secret file instead of env
         p1 = os.environ["KEYCLOAK_TEST_PW"]
         login(self.driver, u1, p1)
 
@@ -234,6 +237,7 @@ class TestAuthentication():
 
         # credentials
         u1 = os.environ["KEYCLOAK_TEST_USER"]
+        #TODO: fix , retrieve PW from secret file instead of env
         p1 = os.environ["KEYCLOAK_TEST_PW"]
         login(self.driver, u1, p1)
 
