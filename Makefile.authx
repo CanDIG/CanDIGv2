@@ -119,3 +119,15 @@ redeploy-tyk: mkdir
 	$(MAKE) compose-tyk; \
 	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
 	echo ;
+
+
+#>>>
+# run setup script for service (if available)
+# SERVICE=keycloak
+# make setup-$SERVICE
+
+#<<<
+setup-%:
+	echo "Setting up $*"
+	source ${PWD}/lib/$*/$*_setup.sh
+

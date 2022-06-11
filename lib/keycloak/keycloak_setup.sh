@@ -17,6 +17,7 @@ if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
   echo "Keycloak container started." | tee -a $LOGFILE
 fi
 
+KEYCLOAK_CONTAINER=$(docker ps | grep keycloak | awk '{print $1}')
 add_user() {
   # CANDIG_AUTH_DOMAIN is the name of the keycloak server inside the compose network
   local username=$1
@@ -43,7 +44,7 @@ add_user() {
   user_id=`curl --stderr - \
     -i -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X POST -H "Content-Type: application/json" -d "${JSON}" \
-    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/users" -k | grep "Location:" \
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/users" -k | grep -i "Location:" \
     | sed -E s/.*users.\([a-z0-9-]+\).*/\\\1/`
 
   echo "Created user ${user_id}" | tee -a $LOGFILE
@@ -163,7 +164,7 @@ set_client() {
   new_scope=`curl --stderr - \
     -i -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X POST -H "Content-Type: application/json" -d "${scope_json}" \
-    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/client-scopes" -k | grep "Location:" \
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/client-scopes" -k | grep -i "Location:" \
     | sed -E s/.*client-scopes.\([a-z0-9-]+\).*/\\\\1/`
 
   echo "Created client scope ${new_scope}" | tee -a $LOGFILE
@@ -204,7 +205,7 @@ set_client() {
   new_client=`curl --stderr - \
     -i -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X POST -H "Content-Type: application/json" -d "${client_json}" \
-    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/clients" -k | grep "Location:" \
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/clients" -k | grep -i "Location:" \
     | sed -E s/.*clients.\([a-z0-9-]+\).*/\\\\1/`
     # TODO: security issue fix this, -k flag above ignores cert, even if the url is https
 
@@ -277,5 +278,5 @@ fi
 #set_trusted_researcher "$(cat tmp/secrets/keycloak-test-user)"
 
 echo "Waiting for keycloak to restart" | tee -a $LOGFILE
-while ! docker logs --tail 5 ${CANDIG_AUTH_DOMAIN} | grep "Admin console listening on http://127.0.0.1:9990"; do sleep 1; done
+while ! docker logs --tail 5 ${KEYCLOAK_CONTAINER} | grep "Admin console listening on http://127.0.0.1:9990"; do sleep 1; done
 echo "Keycloak setup done!" | tee -a $LOGFILE
