@@ -45,6 +45,8 @@ services:
       - vault-data:/vault
     networks:
       - ${DOCKER_NET}
+    environment:
+      - VAULT_URL=${VAULT_SERVICE_URL}
     deploy:
       placement:
         constraints:
