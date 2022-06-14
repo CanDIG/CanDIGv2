@@ -13,13 +13,8 @@ COPY ./tmp/middleware/permissionsStoreMiddleware.js /opt/tyk-gateway/middleware/
 COPY ./tmp/middleware/virtualLogin.js /opt/tyk-gateway/middleware/virtualLogin.js
 COPY ./tmp/middleware/virtualLogout.js /opt/tyk-gateway/middleware/virtualLogout.js
 COPY ./tmp/middleware/virtualToken.js /opt/tyk-gateway/middleware/virtualToken.js
-COPY ./tmp/apps/api_candig.json /opt/tyk-gateway/apps/api_candig.json
-COPY ./tmp/apps/api_auth.json /opt/tyk-gateway/apps/api_auth.json
+COPY ./tmp/apps /opt/tyk-gateway/apps
 COPY ./tmp/policies/policies.json /opt/tyk-gateway/policies/policies.json
-COPY ./tmp/apps/api_katsu.json /opt/tyk-gateway/apps/api_katsu.json
-COPY ./tmp/apps/api_candig_data_portal.json /opt/tyk-gateway/apps/api_candig_data_portal.json
-COPY ./tmp/apps/api_graphql.json /opt/tyk-gateway/apps/api_graphql.json
-COPY ./tmp/apps/api_htsget.json /opt/tyk-gateway/apps/api_htsget.json
 
 ## Extra APIs can be added here
 #COPY ./tmp/apps/api_example.json /opt/tyk-gateway/apps/api_example.json

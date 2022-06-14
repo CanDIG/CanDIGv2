@@ -50,13 +50,13 @@ echo "found key5: ${key_5}"
 echo "found root: ${key_root}"
 
 # save keys
-touch ${PWD}/lib/vault/tmp/keys.txt
-echo -e "key1: ${key_1}" >> ${PWD}/lib/vault/tmp/keys.txt
-echo -e "key2: ${key_2}" >> ${PWD}/lib/vault/tmp/keys.txt
-echo -e "key3: ${key_3}" >> ${PWD}/lib/vault/tmp/keys.txt
-echo -e "key4: ${key_4}" >> ${PWD}/lib/vault/tmp/keys.txt
-echo -e "key5: ${key_5}" >> ${PWD}/lib/vault/tmp/keys.txt
-echo -e "root: ${key_root}" >> ${PWD}/lib/vault/tmp/keys.txt
+touch ${PWD}/tmp/vault/keys.txt
+echo -e "keys: \n${key_1}" > ${PWD}/tmp/vault/keys.txt
+echo -e "${key_2}" >> ${PWD}/tmp/vault/keys.txt
+echo -e "${key_3}" >> ${PWD}/tmp/vault/keys.txt
+echo -e "${key_4}" >> ${PWD}/tmp/vault/keys.txt
+echo -e "${key_5}" >> ${PWD}/tmp/vault/keys.txt
+echo -e "root: ${key_root}" >> ${PWD}/tmp/vault/keys.txt
 
 
 echo ">> attempting to automatically unseal vault:"

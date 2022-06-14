@@ -83,6 +83,10 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/api_graphql.json.tpl > ${CONFI
 echo "Working on api_htsget.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_htsget.json.tpl > ${CONFIG_DIR}/apps/api_htsget.json
 
+echo "Working on api_opa.json"
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_opa.json.tpl > ${CONFIG_DIR}/apps/api_opa.json
+
+
 # Extra APIs can be added here
 #echo "Working on api_example.json"
 #envsubst < ${PWD}/lib/tyk/configuration_templates/api_example.json.tpl > ${CONFIG_DIR}/apps/api_example.json
