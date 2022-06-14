@@ -1,18 +1,6 @@
 #!/usr/bin/env bash
 
 set -Euo pipefail
-<<<<<<< daisieh/opa-tyk
-rm /root/.minio/certs
-mkdir /root/.minio/certs
-cp /run/secrets/private.key /root/.minio/certs
-cp /run/secrets/public.crt /root/.minio/certs
-
-mkdir /root/.minio/certs/$CANDIG_DOMAIN
-cp /run/secrets/private.key /root/.minio/certs/$CANDIG_DOMAIN/
-cp /run/secrets/public.crt /root/.minio/certs/$CANDIG_DOMAIN/
-
-top -b
-=======
 
 if [ $MINIO_SELF_CERT -eq 1 ]; then
   rm /root/.minio/certs
@@ -26,4 +14,3 @@ if [ $MINIO_SELF_CERT -eq 1 ]; then
 fi
 
 top -b
->>>>>>> develop
