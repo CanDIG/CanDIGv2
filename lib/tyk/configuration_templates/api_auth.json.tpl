@@ -9,6 +9,7 @@
       "KEYCLOAK_REALM": "${KEYCLOAK_REALM}",
       "KEYCLOAK_CLIENT_ID": "${KEYCLOAK_CLIENT_ID}",
       "KEYCLOAK_SERVER": "${KEYCLOAK_PUBLIC_URL}",
+      "KEYCLOAK_PRIVATE_URL": "${KEYCLOAK_PRIVATE_URL}",
       "KEYCLOAK_SCOPE": "openid+email",
       "KEYCLOAK_RMODE": "query",
       "USE_SSL": false,
