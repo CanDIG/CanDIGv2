@@ -10,6 +10,8 @@ services:
         opa_secret: "${CANDIG_OPA_SECRET}"
         opa_url: "${OPA_URL}"
         candig_auth: "${CANDIG_AUTHORIZATION}"
+        minio_url: "${MINIO_PRIVATE_URL}"
+        minio_bucket_name: "${MINIO_BUCKET}"
     image: ${DOCKER_REGISTRY}/htsget-app:${HTSGET_APP_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
@@ -29,5 +31,14 @@ services:
         - "traefik.docker.lbswarm=true"
         - "traefik.http.routers.htsget-app.rule=Host(`htsget-app.${CANDIG_DOMAIN}`)"
         - "traefik.http.services.htsget-app.loadbalancer.server.port=${HTSGET_APP_PORT}"
+    secrets:
+      - source: minio-access-key
+        target: access
+      - source: minio-secret-key
+        target: secret
+      - source: selfsigned-site-pem
+        target: cert.pem
     logging: *default-logging
+    environment:
+      HTSGET_TEST_KEY: "hoodlebug"
     command: ["--host", "0.0.0.0", "--port", "3000"]
