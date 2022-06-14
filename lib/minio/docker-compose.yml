@@ -26,6 +26,7 @@ services:
         target: private.key
     environment:
       - CANDIG_DOMAIN=${CANDIG_DOMAIN}
+      - MINIO_SELF_CERT=${MINIO_SELF_CERT}
     logging: *default-logging
     volumes:
       - minio-data:/data
