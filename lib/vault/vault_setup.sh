@@ -23,11 +23,14 @@ envsubst < ${PWD}/lib/vault/configuration_templates/vault-config.json.tpl > ${PW
 make build-vault
 make compose-vault
 
-# -- todo: run only if not already initialized --
-# --- temp
-echo ">> waiting 3 seconds to let vault start"
-sleep 3
-# ---
+echo ">> waiting for vault to start"
+docker ps | grep vault
+while [ $? -ne 0 ]
+do
+  echo "..."
+  sleep 3
+  docker ps | grep vault
+done
 
 # gather keys and login token
 echo ">> gathering keys"
