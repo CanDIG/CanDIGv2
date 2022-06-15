@@ -28,9 +28,10 @@ docker ps | grep vault
 while [ $? -ne 0 ]
 do
   echo "..."
-  sleep 3
+  sleep 1
   docker ps | grep vault
 done
+sleep 5
 
 # gather keys and login token
 echo ">> gathering keys"
