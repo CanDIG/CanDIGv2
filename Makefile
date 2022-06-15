@@ -685,7 +685,7 @@ ssl-cert:
 	openssl x509 -req -days 365 -in $(DIR)/tmp/ssl/selfsigned-root-ca.csr \
 	    -sha256 \
 	    -signkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
-		-extfile  \
+		-extfile $(DIR)/tmp/ssl/alt_names.txt \
 		-out $(DIR)/tmp/ssl/public.crt
 	openssl x509 -in $(DIR)/tmp/ssl/public.crt -out $(DIR)/tmp/ssl/cert.pem
 
