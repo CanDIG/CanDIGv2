@@ -45,7 +45,7 @@ volumes:
 secrets:
   aws-credentials:
     external: true
-  federation-peers:
+  federation-servers:
     external: true
   federation-services:
     external: true
