@@ -174,4 +174,4 @@ echo "enable kv store for aws secrets"
 docker exec $vault vault secrets enable -path="aws" -description="AWS-style ID/secret pairs" kv
 
 vault_runner=$(docker ps | grep vault-runner | awk '{print $1}')
-docker exec $vault_runner /bin/bash /vault/create_token.sh
+docker restart candigv2_vault-runner_1
