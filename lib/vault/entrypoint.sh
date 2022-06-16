@@ -20,11 +20,14 @@ else
     
 fi
 
-bash create_token.sh
+bash /vault/create_token.sh
 # set up crontab
 crontab -l > cron_bkp
 echo "0 */5 * * * bash /vault/create_token.sh" >> cron_bkp
 crontab cron_bkp
 rm cron_bkp
 
-top
+while [ 0 -eq 0 ]
+do
+  sleep 60
+done
