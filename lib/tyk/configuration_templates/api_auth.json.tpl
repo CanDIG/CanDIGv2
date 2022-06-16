@@ -12,7 +12,7 @@
       "KEYCLOAK_PRIVATE_URL": "${KEYCLOAK_PRIVATE_URL}",
       "KEYCLOAK_SCOPE": "openid+email",
       "KEYCLOAK_RMODE": "query",
-      "USE_SSL": false,
+      "USE_SSL": ${TYK_USE_SSL},
       "KEYCLOAK_SECRET": "${KEYCLOAK_SECRET}",
       "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
       "MAX_TOKEN_AGE": 43200
