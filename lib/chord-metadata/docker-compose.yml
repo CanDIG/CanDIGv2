@@ -41,6 +41,7 @@ services:
       - CANDIG_AUTHORIZATION=${CANDIG_AUTHORIZATION}
       - CACHE_TIME=${CACHE_TIME}
       - CANDIG_OPA_SECRET=${CANDIG_OPA_SECRET}
+      - CANDIG_OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
     secrets:
       - source: metadata-app-secret
         target: metadata_app_secret
