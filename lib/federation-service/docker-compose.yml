@@ -28,8 +28,8 @@ services:
         - "traefik.http.services.federation-service.loadbalancer.server.port=${FEDERATION_PORT}"
     logging: *default-logging
     secrets:
-      - source: federation-peers
-        target: /app/federation_service/configs/peers.json
+      - source: federation-servers
+        target: /app/federation_service/configs/servers.json
       - source: federation-services
         target: /app/federation_service/configs/services.json
     entrypoint: ["uwsgi", "federation.ini", "--http", "0.0.0.0:4232"]
