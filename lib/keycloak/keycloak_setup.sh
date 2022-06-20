@@ -143,7 +143,6 @@ set_client() {
             "claim.name": "trusted_researcher",
             "jsonType.label": "String"
           }
-<<<<<<< HEAD
         },
         {
           "name": "'${OPA_SITE_ADMIN_KEY}'",
@@ -158,8 +157,6 @@ set_client() {
             "claim.name": "'${OPA_SITE_ADMIN_KEY}'",
             "jsonType.label": "String"
           }
-=======
->>>>>>> a3f8da7 (Revert "add a site_admin user with user attribute")
         }
       ]
     }'
