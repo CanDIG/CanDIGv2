@@ -42,8 +42,6 @@ services:
       - CACHE_TIME=${CACHE_TIME}
       - CANDIG_OPA_SECRET=${CANDIG_OPA_SECRET}
     secrets:
-      - source: metadata-settings
-        target: /app/chord_metadata_service/metadata/settings.py
       - source: metadata-app-secret
         target: metadata_app_secret
       - source: metadata-db-user

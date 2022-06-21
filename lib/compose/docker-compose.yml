@@ -44,10 +44,10 @@ volumes:
 secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials
-  federation-peers:
-    file: $PWD/lib/federation-service/federation_service/configs/peers.json
+  federation-servers:
+    file: $PWD/tmp/secrets/federation-servers.json
   federation-services:
-    file: $PWD/lib/federation-service/federation_service/configs/services.json
+    file: $PWD/tmp/secrets/federation-services.json
   metadata-app-secret:
     file: $PWD/tmp/secrets/metadata-app-secret
   metadata-db-user:
@@ -80,3 +80,9 @@ secrets:
     file: $PWD/tmp/secrets/keycloak-test-user-password
   keycloak-client-local-candig-secret:
     file: $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret
+  selfsigned-site-crt:
+    file: $PWD/tmp/ssl/public.crt
+  selfsigned-site-key:
+    file: $PWD/tmp/ssl/selfsigned-root-ca.key
+  selfsigned-site-pem:
+    file: $PWD/tmp/ssl/cert.pem

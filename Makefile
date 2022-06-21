@@ -669,11 +669,20 @@ ssl-cert:
 	openssl req -new -key $(DIR)/tmp/ssl/selfsigned-site.key \
 		-out $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
 		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed Cert'
+	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/etc/ssl/site.cnf
 	openssl x509 -req -days 750 -in $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
 		-CA $(DIR)/tmp/ssl/selfsigned-root-ca.crt \
 		-CAkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
 		-CAcreateserial -out $(DIR)/tmp/ssl/selfsigned-site.crt \
 		-extfile $(DIR)/etc/ssl/site.cnf -extensions server
+	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/etc/ssl/alt_names.txt
+	openssl x509 -req -days 365 -in $(DIR)/tmp/ssl/selfsigned-root-ca.csr \
+	    -sha256 \
+	    -signkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
+		-extfile $(DIR)/etc/ssl/alt_names.txt \
+		-out $(DIR)/tmp/ssl/public.crt
+	openssl x509 -in $(DIR)/tmp/ssl/public.crt -out $(DIR)/tmp/ssl/cert.pem
+
 
 
 #>>>
@@ -687,7 +696,7 @@ stack:
 
 
 #>>>
-# deploy/test indivudual modules using docker stack
+# deploy/test individual modules using docker stack
 # $module is the name of the sub-folder in lib/
 # make stack-$module
 
