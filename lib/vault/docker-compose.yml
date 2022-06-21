@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   vault:
-    image: library/vault:latest
+    image: library/vault:${VAULT_VERSION}
     ports:
       - ${VAULT_SERVICE_PORT}:8200
     volumes:
@@ -41,6 +41,8 @@ services:
   vault-runner:
     build:
       context: $PWD/lib/vault
+      args:
+        alpine_version: "${ALPINE_VERSION}"
     volumes:
       - vault-data:/vault
     networks:

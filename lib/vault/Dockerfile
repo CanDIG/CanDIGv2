@@ -1,6 +1,5 @@
-# From https://www.bogotobogo.com/DevOps/Docker/Docker-Vault-Consul.php
-# base image
-FROM alpine:3.7
+ARG alpine_version
+FROM alpine:${alpine_version}
 
 USER root
 
