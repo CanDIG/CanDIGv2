@@ -7,11 +7,6 @@ services:
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
-        opa_secret: "${CANDIG_OPA_SECRET}"
-        opa_url: "${OPA_URL}"
-        candig_auth: "${CANDIG_AUTHORIZATION}"
-        minio_url: "${MINIO_PRIVATE_URL}"
-        minio_bucket_name: "${MINIO_BUCKET}"
     image: ${DOCKER_REGISTRY}/htsget-app:${HTSGET_APP_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
@@ -38,7 +33,13 @@ services:
         target: secret
       - source: selfsigned-site-pem
         target: cert.pem
+      - source: vault-s3-token
+        target: vault-s3-token
     logging: *default-logging
     environment:
       HTSGET_TEST_KEY: "hoodlebug"
+      OPA_SECRET: ${CANDIG_OPA_SECRET}
+      OPA_URL: ${OPA_URL}
+      CANDIG_AUTH: ${CANDIG_AUTHORIZATION}
+      VAULT_URL: ${VAULT_SERVICE_URL}
     command: ["--host", "0.0.0.0", "--port", "3000"]
