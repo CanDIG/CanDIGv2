@@ -34,6 +34,7 @@ mkdir:
 	mkdir -p $(DIR)/tmp/secrets
 	mkdir -p $(DIR)/tmp/ssl
 	mkdir -p $(DIR)/tmp/{keycloak,tyk,vault}
+	mkdir -o ${DIR}/tmp/federation
 
 
 #>>>
