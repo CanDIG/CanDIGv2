@@ -463,7 +463,7 @@ docker-secrets: mkdir minio-secrets
 	$(MAKE) secret-tyk-secret-key
 	$(MAKE) secret-tyk-node-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
-	
+
 	$(MAKE) secret-vault-s3-token
 
 
@@ -673,6 +673,7 @@ ssl-cert:
 	openssl req -new -key $(DIR)/tmp/ssl/selfsigned-site.key \
 		-out $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
 		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed Cert'
+
 	cp $(DIR)/etc/ssl/site.cnf $(DIR)/tmp/ssl/site.cnf
 	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/site.cnf
 	openssl x509 -req -days 750 -in $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
@@ -680,6 +681,7 @@ ssl-cert:
 		-CAkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
 		-CAcreateserial -out $(DIR)/tmp/ssl/selfsigned-site.crt \
 		-extfile $(DIR)/tmp/ssl/site.cnf -extensions server
+
 	cp $(DIR)/etc/ssl/alt_names.txt $(DIR)/tmp/ssl/alt_names.txt
 	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/alt_names.txt
 	openssl x509 -req -days 365 -in $(DIR)/tmp/ssl/selfsigned-root-ca.csr \
