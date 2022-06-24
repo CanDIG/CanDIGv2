@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -Eexo pipefail
+set -Euo pipefail
 
 # This script will set up a full vault environment on your local CanDIGv2 cluster
 
@@ -23,15 +23,19 @@ envsubst < ${PWD}/lib/vault/configuration_templates/vault-config.json.tpl > ${PW
 make build-vault
 make compose-vault
 
-# -- todo: run only if not already initialized --
-# --- temp
-echo ">> waiting 3 seconds to let vault start"
-sleep 3
-# ---
+echo ">> waiting for vault to start"
+docker ps | grep vault
+while [ $? -ne 0 ]
+do
+  echo "..."
+  sleep 1
+  docker ps | grep vault
+done
+sleep 5
 
 # gather keys and login token
 echo ">> gathering keys"
-vault=$(docker ps | grep vault | awk '{print $1}')
+vault=$(docker ps | grep vault_1 | awk '{print $1}')
 stuff=$(docker exec $vault sh -c "vault operator init") # | head -7 | rev | cut -d " " -f1 | rev)
 echo "found stuff as ${stuff}"
 
@@ -56,8 +60,9 @@ echo -e "${key_2}" >> ${PWD}/tmp/vault/keys.txt
 echo -e "${key_3}" >> ${PWD}/tmp/vault/keys.txt
 echo -e "${key_4}" >> ${PWD}/tmp/vault/keys.txt
 echo -e "${key_5}" >> ${PWD}/tmp/vault/keys.txt
-echo -e "root: ${key_root}" >> ${PWD}/tmp/vault/keys.txt
+echo -e "root: \n${key_root}" >> ${PWD}/tmp/vault/keys.txt
 
+docker cp ${PWD}/tmp/vault/keys.txt $vault:/vault/config/
 
 echo ">> attempting to automatically unseal vault:"
 docker exec $vault sh -c "vault operator unseal ${key_1}"
@@ -86,10 +91,16 @@ echo
 echo ">> setting up tyk policy"
 docker exec $vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [\"create\", \"read\"]}' >> vault-policy.hcl; vault policy write tyk vault-policy.hcl"
 
+echo
+echo ">> setting up aws policy"
+docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"read\"]}' >> vault-policy.hcl; vault policy write aws vault-policy.hcl"
+
 # user claims
 echo
 echo ">> setting up user claims"
 docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=preferred_username bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=tyk ttl=1h"
+
+docker exec $vault sh -c "vault write auth/jwt/role/site_admin user_claim=site_admin bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=aws ttl=1h"
 
 # configure jwt
 echo
@@ -157,8 +168,10 @@ echo ">> matching key and inserting custom info into the jwt"
 # messes up Vault and it complains that there is a mismatch in balance of braces
 VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < ${PWD}/lib/vault/configuration_templates/vault-datastructure.json.tpl)
 docker exec $vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > researcher.json; vault write identity/oidc/role/researcher @researcher.json; rm researcher.json;"
+
 echo
+echo "enable kv store for aws secrets"
+docker exec $vault vault secrets enable -path="aws" -description="AWS-style ID/secret pairs" kv
 
-# ---
-
-
+vault_runner=$(docker ps | grep vault-runner | awk '{print $1}')
+docker restart candigv2_vault-runner_1

@@ -34,6 +34,7 @@ mkdir:
 	mkdir -p $(DIR)/tmp/secrets
 	mkdir -p $(DIR)/tmp/ssl
 	mkdir -p $(DIR)/tmp/{keycloak,tyk,vault}
+	mkdir -o ${DIR}/tmp/federation
 
 
 #>>>
@@ -423,7 +424,7 @@ docker-networks:
 .PHONY: docker-pull
 docker-pull:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) pull-$(MODULE);)
-	$(foreach MODULE, $(TOIL_MODULES), docker pull $(DOCKER_REGISTRY)/$(MODULE):latest;)
+	#$(foreach MODULE, $(TOIL_MODULES), docker pull $(DOCKER_REGISTRY)/$(MODULE):latest;)
 
 
 #>>>
@@ -463,6 +464,8 @@ docker-secrets: mkdir minio-secrets
 	$(MAKE) secret-tyk-secret-key
 	$(MAKE) secret-tyk-node-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
+
+	$(MAKE) secret-vault-s3-token
 
 
 #>>>
@@ -615,6 +618,8 @@ minio-secrets:
 	@echo '[default]' > $(DIR)/tmp/secrets/aws-credentials
 	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> $(DIR)/tmp/secrets/aws-credentials
 	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> $(DIR)/tmp/secrets/aws-credentials
+	cp $(DIR)/tmp/ssl/selfsigned-site.crt $(DIR)/tmp/secrets/selfsigned-site-crt
+	cp $(DIR)/tmp/ssl/selfsigned-site.key $(DIR)/tmp/secrets/selfsigned-site-key
 
 
 #>>>
@@ -669,17 +674,21 @@ ssl-cert:
 	openssl req -new -key $(DIR)/tmp/ssl/selfsigned-site.key \
 		-out $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
 		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed Cert'
-	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/etc/ssl/site.cnf
+
+	cp $(DIR)/etc/ssl/site.cnf $(DIR)/tmp/ssl/site.cnf
+	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/site.cnf
 	openssl x509 -req -days 750 -in $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
 		-CA $(DIR)/tmp/ssl/selfsigned-root-ca.crt \
 		-CAkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
 		-CAcreateserial -out $(DIR)/tmp/ssl/selfsigned-site.crt \
-		-extfile $(DIR)/etc/ssl/site.cnf -extensions server
-	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/etc/ssl/alt_names.txt
+		-extfile $(DIR)/tmp/ssl/site.cnf -extensions server
+
+	cp $(DIR)/etc/ssl/alt_names.txt $(DIR)/tmp/ssl/alt_names.txt
+	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/alt_names.txt
 	openssl x509 -req -days 365 -in $(DIR)/tmp/ssl/selfsigned-root-ca.csr \
 	    -sha256 \
 	    -signkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
-		-extfile $(DIR)/etc/ssl/alt_names.txt \
+		-extfile $(DIR)/tmp/ssl/alt_names.txt \
 		-out $(DIR)/tmp/ssl/public.crt
 	openssl x509 -in $(DIR)/tmp/ssl/public.crt -out $(DIR)/tmp/ssl/cert.pem
 

@@ -1,45 +1,28 @@
-# From https://www.bogotobogo.com/DevOps/Docker/Docker-Vault-Consul.php
-# base image
-FROM alpine:3.7
+ARG alpine_version
+FROM alpine:${alpine_version}
 
-# set vault version
-ARG VAULT_VERSION
+LABEL Maintainer="CanDIG Project"
 
-# maintainer
-LABEL maintainer="brennan.brouillette@c3g.ca"
+USER root
 
-# create a new directory
-RUN mkdir -p /vault/config
+RUN apk update
 
-WORKDIR /vault
+RUN apk add --no-cache \
+	bash \
+	expect \
+	jq \
+	curl
 
-# download dependencies
-RUN apk --no-cache add \
-      bash \
-      ca-certificates \
-      wget
-
-# download and set up vault
-RUN wget --quiet --output-document=/tmp/vault.zip https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip && \
-    unzip /tmp/vault.zip -d /vault && \
-    rm -f /tmp/vault.zip && \
-    chmod +x .
-
-# update PATH
-ENV PATH="PATH=$PATH:$PWD"
+WORKDIR /app
 
 # add the config file
 COPY ./tmp/vault-config.json /vault/config/vault-config.json
 
-# expose port 8200
-EXPOSE 8200
+# copy entrypoint
+COPY . /vault
+RUN mkdir /vault/data
+RUN chmod 777 /vault/data
 
-# debugging
-# RUN touch /tmp/run.sh
-# RUN chmod +x /tmp/run.sh
-# RUN echo "#!/bin/bash" >> /tmp/run.sh
-# RUN echo "while true; do echo \"looping..\"; sleep 2; done" >> /tmp/run.sh
-# ENTRYPOINT ["/tmp/run.sh"]
-
+RUN touch initial_setup
 # run vault
-ENTRYPOINT ["vault"]
+ENTRYPOINT ["bash", "/vault/entrypoint.sh"]

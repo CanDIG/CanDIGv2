@@ -86,6 +86,8 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/api_htsget.json.tpl > ${CONFIG
 echo "Working on api_opa.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_opa.json.tpl > ${CONFIG_DIR}/apps/api_opa.json
 
+echo "Working on api_vault.json"
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_vault.json.tpl > ${CONFIG_DIR}/apps/api_vault.json
 
 # Extra APIs can be added here
 #echo "Working on api_example.json"

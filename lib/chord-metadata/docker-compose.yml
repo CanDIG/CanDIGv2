@@ -5,8 +5,8 @@ services:
     build:
       context: $PWD/lib/chord-metadata/chord_metadata_service
       args:
-        venv_python: "${VENV_PYTHON}"
-        alpine_version: "${ALPINE_VERSION}"
+        venv_python: "3.10"
+        alpine_version: "3.16"
     image: ${DOCKER_REGISTRY}/chord-metadata:${CHORD_METADATA_VERSION:-latest}
     networks:
       - ${DOCKER_NET}
@@ -41,6 +41,7 @@ services:
       - CANDIG_AUTHORIZATION=${CANDIG_AUTHORIZATION}
       - CACHE_TIME=${CACHE_TIME}
       - CANDIG_OPA_SECRET=${CANDIG_OPA_SECRET}
+      - CANDIG_OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
     secrets:
       - source: metadata-app-secret
         target: metadata_app_secret

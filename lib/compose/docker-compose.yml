@@ -45,9 +45,9 @@ secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials
   federation-servers:
-    file: $PWD/tmp/secrets/federation-servers.json
+    file: $PWD/tmp/federation/servers.json
   federation-services:
-    file: $PWD/tmp/secrets/federation-services.json
+    file: $PWD/tmp/federation/services.json
   metadata-app-secret:
     file: $PWD/tmp/secrets/metadata-app-secret
   metadata-db-user:
@@ -86,3 +86,5 @@ secrets:
     file: $PWD/tmp/ssl/selfsigned-root-ca.key
   selfsigned-site-pem:
     file: $PWD/tmp/ssl/cert.pem
+  vault-s3-token:
+    file: $PWD/tmp/secrets/vault-s3-token
