@@ -148,12 +148,18 @@ docker exec $vault sh -c "echo 'path \"opa/access\" {capabilities = [\"update\",
 docker exec $vault sh -c "echo 'path \"opa/data\" {capabilities = [\"update\", \"read\", \"delete\"]}' >> federation-policy.hcl; vault policy write federation federation-policy.hcl"
 
 
+echo
+echo ">> setting up aws policy"
+docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"read\"]}' >> vault-policy.hcl; vault policy write aws vault-policy.hcl"
+
 # user claims
 echo
 echo ">> setting up user claims"
 docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=preferred_username bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=tyk-claims ttl=1h"
 
 # site admin should always be able to access aws secrets
+docker exec $vault sh -c "vault write auth/jwt/role/site_admin user_claim=site_admin bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=aws ttl=1h"
+
 docker exec $vault sh -c "vault write auth/jwt/role/site_admin user_claim=site_admin bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=aws ttl=1h"
 
 # configure jwt
