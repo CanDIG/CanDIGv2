@@ -8,6 +8,8 @@ services:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
     image: ${DOCKER_REGISTRY}/htsget-app:${HTSGET_APP_VERSION:-latest}
+    volumes:
+      - htsget-data:/data
     networks:
       - ${DOCKER_NET}
     ports:
