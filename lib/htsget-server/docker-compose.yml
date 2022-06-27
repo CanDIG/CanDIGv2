@@ -44,4 +44,5 @@ services:
       OPA_URL: ${OPA_PRIVATE_URL}
       CANDIG_AUTH: ${CANDIG_AUTHORIZATION}
       VAULT_URL: ${VAULT_SERVICE_URL}
+      DEBUG_MODE: ${CANDIG_DEBUG_MODE}
     command: ["--host", "0.0.0.0", "--port", "3000"]
