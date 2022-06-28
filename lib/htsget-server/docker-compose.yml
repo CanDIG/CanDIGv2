@@ -8,6 +8,8 @@ services:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
     image: ${DOCKER_REGISTRY}/htsget-app:${HTSGET_APP_VERSION:-latest}
+    volumes:
+      - htsget-data:/data
     networks:
       - ${DOCKER_NET}
     ports:
@@ -39,7 +41,9 @@ services:
     environment:
       HTSGET_TEST_KEY: "hoodlebug"
       OPA_SECRET: ${CANDIG_OPA_SECRET}
-      OPA_URL: ${OPA_URL}
+      OPA_URL: ${OPA_PRIVATE_URL}
       CANDIG_AUTH: ${CANDIG_AUTHORIZATION}
       VAULT_URL: ${VAULT_SERVICE_URL}
+      DEBUG_MODE: ${CANDIG_DEBUG_MODE}
+      DB_PATH: /data/files.sql
     command: ["--host", "0.0.0.0", "--port", "3000"]
