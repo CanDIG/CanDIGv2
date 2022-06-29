@@ -9,6 +9,8 @@ services:
         #candig_version: ${CANDIG_SERVER_VERSION}
         #candig_ingest: ${CANDIG_INGEST_VERSION}
     image: ${DOCKER_REGISTRY}/candig-server:${CANDIG_SERVER_VERSION}
+    volumes:
+      - minio-data:/data
     networks:
       - ${DOCKER_NET}
     ports:
