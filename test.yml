@@ -1,0 +1,233 @@
+version: '3.7'
+
+networks:
+  bridge:
+    external: true
+  bridge-net:
+    external: true
+  ingress:
+  traefik-net:
+  agent-net:
+
+volumes:
+  datasets-data:
+    external: true
+  minio-data:
+    external: true
+  minio-config:
+    external: true
+  mc-config:
+    external: true
+  toil-jobstore:
+    external: true
+  portainer-data:
+    external: true
+  prometheus-data:
+    external: true
+  consul-data:
+    external: true
+  grafana-data:
+    external: true
+  traefik-data:
+    external: true
+  keycloak-data:
+    external: true
+  opa-data:
+    external: true
+  tyk-data:
+    external: true
+  tyk-redis-data:
+    external: true
+  vault-data:
+    external: true
+  htsget-data:
+    external: true
+
+secrets:
+  aws-credentials:
+    file: $PWD/tmp/secrets/aws-credentials
+  federation-servers:
+    file: $PWD/tmp/federation/servers.json
+  federation-services:
+    file: $PWD/tmp/federation/services.json
+  metadata-app-secret:
+    file: $PWD/tmp/secrets/metadata-app-secret
+  metadata-db-user:
+    file: $PWD/tmp/secrets/metadata-db-user
+  metadata-db-secret:
+    file: $PWD/tmp/secrets/metadata-db-secret
+  metadata-settings:
+    file: $PWD/lib/chord-metadata/settings.py
+  minio-access-key:
+    file: $PWD/tmp/secrets/minio-access-key
+  minio-secret-key:
+    file: $PWD/tmp/secrets/minio-secret-key
+  portainer-user:
+    file: $PWD/tmp/secrets/portainer-user
+  portainer-secret:
+    file: $PWD/tmp/secrets/portainer-secret
+  traefik-ssl-key:
+    file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.key
+  traefik-ssl-crt:
+    file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.crt
+  wes-dependency-resolver:
+    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
+  keycloak-admin-user:
+    file: $PWD/tmp/secrets/keycloak-admin-user
+  keycloak-admin-password:
+    file: $PWD/tmp/secrets/keycloak-admin-password
+  keycloak-test-user:
+    file: $PWD/tmp/secrets/keycloak-test-user
+  keycloak-test-user-password:
+    file: $PWD/tmp/secrets/keycloak-test-user-password
+  keycloak-client-local-candig-secret:
+    file: $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret
+  selfsigned-site-crt:
+    file: $PWD/tmp/ssl/public.crt
+  selfsigned-site-key:
+    file: $PWD/tmp/ssl/selfsigned-root-ca.key
+  selfsigned-site-pem:
+    file: $PWD/tmp/ssl/cert.pem
+  vault-s3-token:
+    file: $PWD/tmp/secrets/vault-s3-token
+  opa-root-token:
+    file: $PWD/tmp/secrets/opa-root-token
+  opa-service-token:
+    file: $PWD/tmp/secrets/opa-service-token
+version: '3.7'
+
+services:
+
+  fluentd:
+    build:
+      context: $PWD/lib/logging/fluentd
+      args:
+        version: "${FLUENTD_VERSION}"
+    image: ${DOCKER_REGISTRY}/fluentd:${FLUENTD_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${FLUENTD_PORT}:24224"
+      - "${FLUENTD_PORT}:24224/udp"
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  elasticsearch:
+    image: elasticsearch:${ELASTIC_SEARCH_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${ELASTIC_SEARCH_HTTP_PORT}:9200"
+      - "${ELASTIC_SEARCH_TRANSPORT}:9300"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      - "discovery.type=single-node"
+
+  kibana:
+    image: kibana:${KIBANA_VERSION:-latest}
+    networks:
+      - ${DOCKER_NET}
+    ports:
+      - "${KIBANA_PORT}:5601"
+    depends_on:
+      - elasticsearch
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.lbswarm=true"
+        - "traefik.http.routers.kibana.rule=Host(`kibana.${CANDIG_DOMAIN}`)"
+        - "traefik.http.services.kibana.loadbalancer.server.port=${KIBANA_PORT}"
+version: '3.7'
+services:
+  opa-runner:
+    build:
+      context: $PWD/lib/opa/opa
+      args:
+        venv_python: "${VENV_PYTHON}"
+        alpine_version: "${ALPINE_VERSION}"
+        katsu_url: "${CHORD_METADATA_PUBLIC_URL}"
+        idp: "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
+        opa_site_admin_key: "${OPA_SITE_ADMIN_KEY}"
+    networks:
+      - ${DOCKER_NET}
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    logging: *default-logging
+    volumes:
+      - opa-data:/app
+    secrets:
+      - source: keycloak-client-local-candig-secret
+        target: idp_client_secret
+      - source: opa-root-token
+        target: opa-root-token
+      - source: opa-service-token
+        target: opa-service-token
+    environment:
+      IDP_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      IDP_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      OPA_SITE_ADMIN_KEY: ${OPA_SITE_ADMIN_KEY}
+      OPA_URL: ${OPA_URL}
+      IDP: "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
+      KATSU_URL: "${CHORD_METADATA_PUBLIC_URL}"
+
+  opa:
+    image: openpolicyagent/opa:latest
+    ports:
+      - "${OPA_PORT}:8181"
+    volumes:
+      - opa-data:/app
+    environment:
+      IDP: ${KEYCLOAK_REALM_URL}
+    command:
+      - "run"
+      - "--server"
+      - "--log-level=debug"
+      - "--authentication=token"
+      - "--authorization=basic"
+      - "app/data.json"
+      - "app/permissions_engine/"
+    networks:
+      - bridge-net
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    logging: *default-logging
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "${OPA_URL}" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3

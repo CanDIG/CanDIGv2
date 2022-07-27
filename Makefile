@@ -657,7 +657,7 @@ push-%:
 #<<<
 secret-%:
 	@dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | rev | cut -b 2- | rev | tr -d '\n\r+' > $(DIR)/tmp/secrets/$*
+		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]/%/g > $(DIR)/tmp/secrets/$*
 
 
 #>>>
