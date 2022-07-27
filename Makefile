@@ -466,6 +466,9 @@ docker-secrets: mkdir minio-secrets
 	$(MAKE) secret-tyk-analytics-admin-key
 
 	$(MAKE) secret-vault-s3-token
+	
+	$(MAKE) secret-opa-root-token
+	$(MAKE) secret-opa-service-token
 
 
 #>>>
