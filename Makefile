@@ -62,6 +62,10 @@ ifeq ($(VENV_OS), darwin)
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
 endif
+ifeq ($(VENV_OS), arm64mac)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
+endif
 	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
@@ -128,10 +132,18 @@ bin-minikube: mkdir
 #<<<
 bin-minio: mkdir
 	echo "    started bin-minio" >> $(LOGFILE)
-	curl -Lo $(DIR)/bin/minio \
-		https://dl.minio.io/server/minio/release/$(VENV_OS)-amd64/minio
-	curl -Lo $(DIR)/bin/mc \
-		https://dl.minio.io/client/mc/release/$(VENV_OS)-amd64/mc
+	ifeq ($(VENV_OS), arm64mac)
+		curl -Lo $(DIR)/bin/minio \
+			https://dl.minio.io/server/minio/release/darwin-arm64/minio
+		curl -Lo $(DIR)/bin/mc \
+			https://dl.minio.io/client/mc/release/darwin-arm64/mc
+	endif
+	ifneq ($(VENV_OS), arm64mac)
+		curl -Lo $(DIR)/bin/minio \
+			https://dl.minio.io/server/minio/release/$(VENV_OS)-amd64/minio
+		curl -Lo $(DIR)/bin/mc \
+			https://dl.minio.io/client/mc/release/$(VENV_OS)-amd64/mc
+	endif
 	chmod 755 $(DIR)/bin/minio
 	chmod 755 $(DIR)/bin/mc
 	echo "    finished bin-minio" >> $(LOGFILE)
@@ -145,8 +157,14 @@ bin-minio: mkdir
 bin-prometheus: mkdir
 	echo "    started bin-prometheus" >> $(LOGFILE)
 	mkdir -p $(DIR)/bin/prometheus
-	curl -Lo $(DIR)/bin/prometheus/prometheus.tar.gz \
-		https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).$(VENV_OS)-amd64.tar.gz
+	ifeq ($(VENV_OS), arm64mac)
+		curl -Lo $(DIR)/bin/prometheus/prometheus.tar.gz \
+			https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).darwin-arm64.tar.gz
+	endif
+	ifneq ($(VENV_OS), arm64mac)
+		curl -Lo $(DIR)/bin/prometheus/prometheus.tar.gz \
+			https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).$(VENV_OS)-amd64.tar.gz
+	endif
 	tar --strip-components=1 -zxvf $(DIR)/bin/prometheus/prometheus.tar.gz -C $(DIR)/bin/prometheus
 	chmod 755 $(DIR)/bin/prometheus/prometheus
 	echo "    finished bin-prometheus" >> $(LOGFILE)
@@ -159,8 +177,14 @@ bin-prometheus: mkdir
 #<<<
 bin-traefik: mkdir
 	echo "    started bin-traefik" >> $(LOGFILE)
-	curl -Lo $(DIR)/bin/traefik.tar.gz \
-		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_$(VENV_OS)_amd64.tar.gz
+	ifeq ($(VENV_OS), arm64mac)
+		curl -Lo $(DIR)/bin/miniconda_install.sh \
+			https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_darwin_arm64.tar.gz
+	endif
+	ifneq ($(VENV_OS, arm64mac)
+		curl -Lo $(DIR)/bin/traefik.tar.gz \
+			https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_$(VENV_OS)_amd64.tar.gz
+	endif
 	tar -xvzf $(DIR)/bin/traefik.tar.gz -C bin/
 	chmod 755 $(DIR)/bin/traefik
 	echo "    finished bin-traefik" >> $(LOGFILE)
