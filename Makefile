@@ -97,8 +97,7 @@ ifeq ($(VENV_OS), arm64mac)
 		https://dl.minio.io/server/minio/release/darwin-arm64/minio
 	curl -Lo $(DIR)/bin/mc \
 		https://dl.minio.io/client/mc/release/darwin-arm64/mc
-endif
-ifneq ($(VENV_OS), arm64mac)
+else
 	curl -Lo $(DIR)/bin/minio \
 		https://dl.minio.io/server/minio/release/$(VENV_OS)-amd64/minio
 	curl -Lo $(DIR)/bin/mc \
@@ -120,8 +119,7 @@ bin-prometheus: mkdir
 ifeq ($(VENV_OS), arm64mac)
 	curl -Lo $(DIR)/bin/prometheus/prometheus.tar.gz \
 		https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).darwin-arm64.tar.gz
-endif
-ifneq ($(VENV_OS), arm64mac)
+else
 	curl -Lo $(DIR)/bin/prometheus/prometheus.tar.gz \
 		https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).$(VENV_OS)-amd64.tar.gz
 endif
@@ -140,8 +138,7 @@ bin-traefik: mkdir
 ifeq ($(VENV_OS), arm64mac)
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
 		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_darwin_arm64.tar.gz
-endif
-ifneq ($(VENV_OS, arm64mac)
+else
 	curl -Lo $(DIR)/bin/traefik.tar.gz \
 		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_$(VENV_OS)_amd64.tar.gz
 endif
