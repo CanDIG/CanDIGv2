@@ -43,8 +43,7 @@ mkdir:
 
 #<<<
 .PHONY: bin-all
-bin-all: bin-conda bin-docker-machine bin-kompose bin-kubectl \
-	bin-minikube bin-minio bin-traefik bin-prometheus
+bin-all: bin-conda bin-docker-machine bin-minio bin-traefik bin-prometheus
 
 
 #>>>
@@ -84,45 +83,6 @@ bin-docker-machine: mkdir
 		https://github.com/docker/machine/releases/download/v0.16.2/docker-machine-`uname -s`-`uname -m`
 	chmod 755 $(DIR)/bin/docker-machine
 	echo "    finished bin-docker-machine" >> $(LOGFILE)
-
-
-#>>>
-# download kompose (for kubernetes deployment)
-# make bin-kompose
-
-#<<<
-bin-kompose: mkdir
-	echo "    started bin-kompose" >> $(LOGFILE)
-	curl -Lo $(DIR)/bin/kompose \
-		https://github.com/kubernetes/kompose/releases/download/v1.21.0/kompose-$(VENV_OS)-amd64
-	chmod 755 $(DIR)/bin/kompose
-	echo "    finished bin-kompose" >> $(LOGFILE)
-
-
-#>>>
-# download latest kubectl (for kubernetes deployment)
-# make bin-kubectl
-
-#<<<
-bin-kubectl: mkdir
-	echo "    started bin-kubectl" >> $(LOGFILE)
-	curl -Lo $(DIR)/bin/kubectl \
-		https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/$(VENV_OS)/amd64/kubectl
-	chmod 755 $(DIR)/bin/kubectl
-	echo "    finished bin-kubectl" >> $(LOGFILE)
-
-
-#>>>
-# download latest minikube binary from Google repo
-# make bin-minikube
-
-#<<<
-bin-minikube: mkdir
-	echo "    started bin-minikube" >> $(LOGFILE)
-	curl -Lo $(DIR)/bin/minikube \
-		https://storage.googleapis.com/minikube/releases/latest/minikube-$(VENV_OS)-amd64
-	chmod 755 $(DIR)/bin/minikube
-	echo "    finished bin-minikube" >> $(LOGFILE)
 
 
 #>>>
