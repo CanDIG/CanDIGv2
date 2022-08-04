@@ -466,6 +466,9 @@ docker-secrets: mkdir minio-secrets
 	$(MAKE) secret-tyk-analytics-admin-key
 
 	$(MAKE) secret-vault-s3-token
+	
+	$(MAKE) secret-opa-root-token
+	$(MAKE) secret-opa-service-token
 
 
 #>>>
@@ -654,7 +657,7 @@ push-%:
 #<<<
 secret-%:
 	@dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | rev | cut -b 2- | rev | tr -d '\n\r+' > $(DIR)/tmp/secrets/$*
+		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]/%/g > $(DIR)/tmp/secrets/$*
 
 
 #>>>
