@@ -136,7 +136,7 @@ endif
 bin-traefik: mkdir
 	echo "    started bin-traefik" >> $(LOGFILE)
 ifeq ($(VENV_OS), arm64mac)
-	curl -Lo $(DIR)/bin/miniconda_install.sh \
+	curl -Lo $(DIR)/bin/traefik.tar.gz \
 		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_darwin_arm64.tar.gz
 else
 	curl -Lo $(DIR)/bin/traefik.tar.gz \
