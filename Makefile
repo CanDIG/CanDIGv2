@@ -136,7 +136,7 @@ endif
 bin-traefik: mkdir
 	echo "    started bin-traefik" >> $(LOGFILE)
 ifeq ($(VENV_OS), arm64mac)
-	curl -Lo $(DIR)/bin/miniconda_install.sh \
+	curl -Lo $(DIR)/bin/traefik.tar.gz \
 		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_darwin_arm64.tar.gz
 else
 	curl -Lo $(DIR)/bin/traefik.tar.gz \
@@ -447,6 +447,9 @@ docker-secrets: mkdir minio-secrets
 	$(MAKE) secret-tyk-analytics-admin-key
 
 	$(MAKE) secret-vault-s3-token
+	
+	$(MAKE) secret-opa-root-token
+	$(MAKE) secret-opa-service-token
 
 
 #>>>
@@ -635,7 +638,7 @@ push-%:
 #<<<
 secret-%:
 	@dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | rev | cut -b 2- | rev | tr -d '\n\r+' > $(DIR)/tmp/secrets/$*
+		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]/%/g > $(DIR)/tmp/secrets/$*
 
 
 #>>>
@@ -658,7 +661,7 @@ ssl-cert:
 		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed Cert'
 
 	cp $(DIR)/etc/ssl/site.cnf $(DIR)/tmp/ssl/site.cnf
-	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/site.cnf
+	sed -i.bak s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/site.cnf
 	openssl x509 -req -days 750 -in $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
 		-CA $(DIR)/tmp/ssl/selfsigned-root-ca.crt \
 		-CAkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
@@ -666,7 +669,7 @@ ssl-cert:
 		-extfile $(DIR)/tmp/ssl/site.cnf -extensions server
 
 	cp $(DIR)/etc/ssl/alt_names.txt $(DIR)/tmp/ssl/alt_names.txt
-	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/alt_names.txt
+	sed -i.bak s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/alt_names.txt
 	openssl x509 -req -days 365 -in $(DIR)/tmp/ssl/selfsigned-root-ca.csr \
 	    -sha256 \
 	    -signkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \

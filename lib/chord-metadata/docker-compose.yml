@@ -49,6 +49,10 @@ services:
         target: metadata_db_user
       - source: metadata-db-secret
         target: metadata_db_secret
+      - source: opa-root-token
+        target: opa-root-token
+      - source: opa-service-token
+        target: opa-service-token
     entrypoint:
       - /bin/bash
       - -c

@@ -108,7 +108,38 @@ make bin-all
 make init-conda
 ```
 
-## Create CanDIGv2 Development VM
+
+## Choose Docker Deployment Strategy
+
+We provide instructions below for two different docker deployment strategies. Option 1 uses `docker-compose` to deploy each module. Option 2 builds a Docker Swarm cluster using `docker-machine`. We use Option 2 for production, but Option 1 is simpler for local dev installation. 
+
+### Option 1: Deploy CanDIGv2 Services with Compose
+
+The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets. 
+
+```bash
+# initialize docker environment
+make init-docker
+
+# (optional) create images
+make images
+
+# pull latest CanDIGv2 images (if you didn't create images locally)
+make docker-pull
+
+# deploy stack 
+make compose
+make init-authx
+# TODO: post deploy auth configuration
+
+# (optional) push updated images to $DOCKER_REGISTRY 
+docker login
+make docker-push
+```
+
+## Option 2: Deploy CanDIGv2 using Docker Swarm 
+
+### Create CanDIGv2 Development VM
 
 Using the provided steps will help to create a `docker-machine` cluster on VirtualBox. The `make` CLI can also be used to provision and connect a multi-vm Swarm cluster. Users are encouraged to use this docker environment for CanDIGv2 development as it provides an isolated domain from the host environment, increasing security and reducing conflicts with host processes. Modify the `MINIKUBE_*` options in `.env`, then launch a single-node or multi-node `docker-machine` with `make machine-$vm_name`, where `$vm_name` is a unique vm name.
 
@@ -119,9 +150,7 @@ To build a development swarm cluster run the following:
 
 To switch your local docker-client to use `docker-machine`, run `eval $(bin/docker-machine env manager)`. Add this line into `bashrc`  with `bin/docker-machine env manager >> $HOME/.bashrc` in order to set `docker-machine` as the default `$DOCKER_HOST` for all shells.
 
-You can move on to the initialize instructions for Docker.
-
-## Initialize CanDIGv2 (Docker)
+### Initialize CanDIGv2 (Docker)
 
 The following commands will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Only perform these actions once as it will override any previous configurations and secrets. Once completed, you can deploy a Compose or Swarm stack.
 
@@ -130,35 +159,7 @@ The following commands will initialize CanDIGv2 and set up docker networks, volu
 make init-docker
 ```
 
-## Deploy CanDIGv2 Services (Compose)
-
-```bash
-# create images (optional)
-make images
-
-# pull latest CanDIGv2 images (instead of make images)
-make docker-pull
-
-# deploy stack (if using docker-compose environment)
-make compose
-make init-authx
-# TODO: post deploy auth configuration
-
-# push updated images to $DOCKER_REGISTRY (optional)
-docker login
-make docker-push
-```
-
-## Update hosts
-
-Get your local IP address and edit your /etc/hosts file to add:
-
-```bash
-<your ip>  docker.localhost
-<your ip>  auth.docker.localhost
-```
-
-## Deploy CanDIGv2 Services (Swarm)
+### Deploy using Swarm
 > Note: swarm deployment requires minimum 2 nodes connected (1 manager, 1 worker)
 
 1. Create initial manager node
@@ -186,6 +187,15 @@ docker node ls
 
 # deploy CanDIGv2 services
 make stack
+```
+
+## Update hosts
+
+Get your local IP address and edit your /etc/hosts file to add:
+
+```bash
+<your ip>  docker.localhost
+<your ip>  auth.docker.localhost
 ```
 
 ## Cleanup CanDIGv2 Compose/Swarm Environment

@@ -37,10 +37,11 @@ services:
         target: cert.pem
       - source: vault-s3-token
         target: vault-s3-token
+      - source: opa-service-token
+        target: opa-service-token
     logging: *default-logging
     environment:
       HTSGET_TEST_KEY: "hoodlebug"
-      OPA_SECRET: ${CANDIG_OPA_SECRET}
       OPA_URL: ${OPA_PRIVATE_URL}
       CANDIG_AUTH: ${CANDIG_AUTHORIZATION}
       VAULT_URL: ${VAULT_SERVICE_URL}

@@ -90,3 +90,7 @@ secrets:
     file: $PWD/tmp/ssl/cert.pem
   vault-s3-token:
     file: $PWD/tmp/secrets/vault-s3-token
+  opa-root-token:
+    file: $PWD/tmp/secrets/opa-root-token
+  opa-service-token:
+    file: $PWD/tmp/secrets/opa-service-token
