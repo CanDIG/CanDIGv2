@@ -111,11 +111,12 @@ CanDIGv2/
 
 ## `.env` Environment File
 
-The `.env` file in the project root directory contains a set of global variables that are used as reference to
-the various parameters, plugins, and config options that operators can modify for testing purposes.
+You need an `.env` file in the project root directory, which contains a set of global variables that are used as reference to
+the various parameters, plugins, and config options that operators can modify for testing purposes. There is an example `.env` file in `etc/example.env`.
 
 Some of the functionality that is controlled through `.env` are:
 
+* operating system flags
 * change docker network, driver, and swarm host
 * modify ports, protocols, and plugins for various services
 * version control and app pinning

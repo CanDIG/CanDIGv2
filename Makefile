@@ -43,8 +43,7 @@ mkdir:
 
 #<<<
 .PHONY: bin-all
-bin-all: bin-conda bin-docker-machine bin-kompose bin-kubectl \
-	bin-minikube bin-minio bin-traefik bin-prometheus
+bin-all: bin-conda bin-docker-machine bin-minio bin-traefik bin-prometheus
 
 
 #>>>
@@ -61,6 +60,10 @@ endif
 ifeq ($(VENV_OS), darwin)
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+endif
+ifeq ($(VENV_OS), arm64mac)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
 endif
 	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
 	# init is needed to create bash aliases for conda but it won't work
@@ -83,55 +86,23 @@ bin-docker-machine: mkdir
 
 
 #>>>
-# download kompose (for kubernetes deployment)
-# make bin-kompose
-
-#<<<
-bin-kompose: mkdir
-	echo "    started bin-kompose" >> $(LOGFILE)
-	curl -Lo $(DIR)/bin/kompose \
-		https://github.com/kubernetes/kompose/releases/download/v1.21.0/kompose-$(VENV_OS)-amd64
-	chmod 755 $(DIR)/bin/kompose
-	echo "    finished bin-kompose" >> $(LOGFILE)
-
-
-#>>>
-# download latest kubectl (for kubernetes deployment)
-# make bin-kubectl
-
-#<<<
-bin-kubectl: mkdir
-	echo "    started bin-kubectl" >> $(LOGFILE)
-	curl -Lo $(DIR)/bin/kubectl \
-		https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/$(VENV_OS)/amd64/kubectl
-	chmod 755 $(DIR)/bin/kubectl
-	echo "    finished bin-kubectl" >> $(LOGFILE)
-
-
-#>>>
-# download latest minikube binary from Google repo
-# make bin-minikube
-
-#<<<
-bin-minikube: mkdir
-	echo "    started bin-minikube" >> $(LOGFILE)
-	curl -Lo $(DIR)/bin/minikube \
-		https://storage.googleapis.com/minikube/releases/latest/minikube-$(VENV_OS)-amd64
-	chmod 755 $(DIR)/bin/minikube
-	echo "    finished bin-minikube" >> $(LOGFILE)
-
-
-#>>>
 # download latest minio server/client from Minio repo
 # make bin-minio
 
 #<<<
 bin-minio: mkdir
 	echo "    started bin-minio" >> $(LOGFILE)
+ifeq ($(VENV_OS), arm64mac)
+	curl -Lo $(DIR)/bin/minio \
+		https://dl.minio.io/server/minio/release/darwin-arm64/minio
+	curl -Lo $(DIR)/bin/mc \
+		https://dl.minio.io/client/mc/release/darwin-arm64/mc
+else
 	curl -Lo $(DIR)/bin/minio \
 		https://dl.minio.io/server/minio/release/$(VENV_OS)-amd64/minio
 	curl -Lo $(DIR)/bin/mc \
 		https://dl.minio.io/client/mc/release/$(VENV_OS)-amd64/mc
+endif
 	chmod 755 $(DIR)/bin/minio
 	chmod 755 $(DIR)/bin/mc
 	echo "    finished bin-minio" >> $(LOGFILE)
@@ -145,8 +116,13 @@ bin-minio: mkdir
 bin-prometheus: mkdir
 	echo "    started bin-prometheus" >> $(LOGFILE)
 	mkdir -p $(DIR)/bin/prometheus
+ifeq ($(VENV_OS), arm64mac)
+	curl -Lo $(DIR)/bin/prometheus/prometheus.tar.gz \
+		https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).darwin-arm64.tar.gz
+else
 	curl -Lo $(DIR)/bin/prometheus/prometheus.tar.gz \
 		https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).$(VENV_OS)-amd64.tar.gz
+endif
 	tar --strip-components=1 -zxvf $(DIR)/bin/prometheus/prometheus.tar.gz -C $(DIR)/bin/prometheus
 	chmod 755 $(DIR)/bin/prometheus/prometheus
 	echo "    finished bin-prometheus" >> $(LOGFILE)
@@ -159,8 +135,13 @@ bin-prometheus: mkdir
 #<<<
 bin-traefik: mkdir
 	echo "    started bin-traefik" >> $(LOGFILE)
+ifeq ($(VENV_OS), arm64mac)
+	curl -Lo $(DIR)/bin/traefik.tar.gz \
+		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_darwin_arm64.tar.gz
+else
 	curl -Lo $(DIR)/bin/traefik.tar.gz \
 		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_$(VENV_OS)_amd64.tar.gz
+endif
 	tar -xvzf $(DIR)/bin/traefik.tar.gz -C bin/
 	chmod 755 $(DIR)/bin/traefik
 	echo "    finished bin-traefik" >> $(LOGFILE)
@@ -680,7 +661,7 @@ ssl-cert:
 		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed Cert'
 
 	cp $(DIR)/etc/ssl/site.cnf $(DIR)/tmp/ssl/site.cnf
-	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/site.cnf
+	sed -i.bak s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/site.cnf
 	openssl x509 -req -days 750 -in $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
 		-CA $(DIR)/tmp/ssl/selfsigned-root-ca.crt \
 		-CAkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
@@ -688,7 +669,7 @@ ssl-cert:
 		-extfile $(DIR)/tmp/ssl/site.cnf -extensions server
 
 	cp $(DIR)/etc/ssl/alt_names.txt $(DIR)/tmp/ssl/alt_names.txt
-	sed -i s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/alt_names.txt
+	sed -i.bak s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/alt_names.txt
 	openssl x509 -req -days 365 -in $(DIR)/tmp/ssl/selfsigned-root-ca.csr \
 	    -sha256 \
 	    -signkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
