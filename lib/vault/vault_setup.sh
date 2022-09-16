@@ -35,7 +35,7 @@ sleep 5
 
 # gather keys and login token
 echo ">> gathering keys"
-vault=$(docker ps | grep vault_1 | awk '{print $1}')
+vault=$(docker ps | grep vault-1 | awk '{print $1}')
 stuff=$(docker exec $vault sh -c "vault operator init") # | head -7 | rev | cut -d " " -f1 | rev)
 echo "found stuff as ${stuff}"
 
