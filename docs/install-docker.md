@@ -241,7 +241,7 @@ make clean-conda
 make clean-bin
 ```
 
-# Mac M1 Installation
+# Mac Apple Silicon Installation
 
 ### 1) Step1: Install OS Dependencies
 
