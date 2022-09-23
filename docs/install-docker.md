@@ -240,4 +240,133 @@ make clean-conda
 # 11. remove bin dir (inlcuding miniconda)
 make clean-bin
 ```
+# Mac M1 Installation
 
+### 1) Step1: Install OS Dependencies
+
+Mac users can get [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/). I also installed rosetta and used Docker Compose V2 as suggested at the moment.
+* **Optional**: these installations are not mentioned but might be needed:
+  * Install [brew](https://brew.sh/)
+  * Install md5sha1sum (`brew install md5sha1sum`)
+  * Install PostgreSQL (`brew install postgresql`)
+  
+### Step 2: Initialize CanDIGv2 Repo
+
+```bash
+# 1. initialize repo and submodules
+git clone -b develop https://github.com/CanDIG/CanDIGv2.git
+cd CanDIGv2
+git submodule update --init --recursive
+
+# 2. copy and edit .env with your site's local configuration
+cp -i etc/env/example.env .env
+```
+
+- Edit the .env `VENV_OS=arm64mac` (this is Mac M1 naming)
+
+```bash
+# 3. fetch binaries and initialize candig virtualenv
+make bin-all
+make init-conda
+```
+
+* To activate conda env, do the following:
+
+```bash
+conda env list
+# Copy the whole path that contains `/envs/candig`
+conda activate {path_to_folder}/CanDIGv2/bin/miniconda3/envs/candig
+```
+
+* Note: The reason we cannot activate it automatically on Mac was described in  this [post](<https://stackoverflow.com/questions/57527131/conda-environment-has-no-name-visible-in-conda-env-list-how-do-i-activate-it-a>). If `conda env` is not in the root folder, it won't have a name.
+
+### Step 3: Initialize CanDIGv2 (Docker)
+
+- Make sure you are in `candig` virtual environment (activate it in previous step)
+
+```bash
+make init-docker
+```
+  
+### Step 4: Deploy CanDIGv2 Services (Compose)
+
+```bash
+make compose
+```
+  
+### Step 5: Update hosts
+
+- Run this command in the terminal to get the local IP address (or google if it doesn't work for you)
+-```dig -4 TXT +short o-o.myaddr.l.google.com @ns1.google.com```
+
+* Open *your* system in `/etc/hosts` (not CanDIGv2's) by:
+
+```bash
+sudo nano /etc/hosts
+```
+
+- Add the IP address to the end of the file so it look like this:
+
+```bash
+# Other settings
+xx.xx.xx.xx  docker.localhost
+```
+
+Note: for local development, do the following instead
+  
+```bash
+# Other settings
+127.0.0.1 host.docker.internal
+```
+
+### Step 6: Create Auth Stack
+
+In the .env, comment out all the `WES_OPT+=…` (We don't use it right now)
+
+```bash
+# WES_OPT=--opt=extra=--batchSystem=Mesos
+...
+# WES_OPT+=--opt=extra=--metrics
+```
+
+The old keycloak image katsu has right now (15.0.0) is not compatible with M1, so we need to upgrade it.
+
+Go to `lib/keycloak/docker-compose.yml` and replace the `- BASE_IMAGE=candig/keycloak:${KEYCLOAK_VERSION}` with this:
+
+```bash
+- BASE_IMAGE=mihaibob/keycloak:18.0.2-legacy
+```
+
+(I found it on StackOverflow, and it worked, but @shaikh-rashid might want to look for an "official" one or build a candig version for us)
+
+Then add extra_hosts:
+
+```bash
+    networks:
+      - ${DOCKER_NET}
+    extra_hosts:
+      - "host.docker.internal:127.0.0.1"
+  # comment this out too
+  # volumes:
+  #   - keycloak-data:/opt/jboss/keycloak/standalone
+```
+
+Then create the auth stack:
+
+```bash
+make init-authx
+```
+
+If you got this error:
+
+```bash
+Getting keycloak token
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+KeyError: 'access_token'
+make: *** [init-authx] Error 1
+```
+
+Then try to replace all the keycloak passwords in `tmp/secrets` folder (`make docker-secrets` if you don't have this folder) with something simple like `thisisasupersecretpassword`, basically no special chars.
+
+Try `make clean-authx` and `make init-authx` and it should worked 🎉
