@@ -42,6 +42,7 @@ services:
       - CACHE_TIME=${CACHE_TIME}
       - CANDIG_OPA_SECRET=${CANDIG_OPA_SECRET}
       - CANDIG_OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
+      - HOST_CONTAINER_NAME=${CHORD_METADATA_CONTAINER}
     secrets:
       - source: metadata-app-secret
         target: metadata_app_secret
