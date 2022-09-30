@@ -264,9 +264,13 @@ git submodule update --init --recursive
 cp -i etc/env/example.env .env
 ```
 
-- Edit `VENV_OS=arm64mac` for the .env file:
+- Edit the .env file:
 
 ```bash
+# options are [<ip_addr>, <url>, host.docker.internal, docker.localhost]
+CANDIG_DOMAIN=host.docker.internal
+CANDIG_AUTH_DOMAIN=host.docker.internal
+...
 # options are [linux, darwin, arm64mac]
 VENV_OS=arm64mac
 VENV_NAME=candig
@@ -319,13 +323,6 @@ sudo nano /etc/hosts
 ```
 
 - Add the IP address to the end of the file so it look like this:
-
-```bash
-# Other settings
-xx.xx.xx.xx  docker.localhost
-```
-
-Note: for local development:
 
 ```bash
 # Other settings
