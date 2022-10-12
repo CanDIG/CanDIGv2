@@ -341,10 +341,12 @@ In the .env, comment out all the `WES_OPT+=…` (We don't use it right now)
 
 The old keycloak image (15.0.0) is not compatible with M1, so we need to upgrade it.
 
-Go to `lib/keycloak/docker-compose.yml` and replace the `- BASE_IMAGE=candig/keycloak:${KEYCLOAK_VERSION}` with this:
+Go to `lib/keycloak/docker-compose.yml` and replace the `- BASE_IMAGE=candig/keycloak:${KEYCLOAK_VERSION}` with one of the following:
 
 ```bash
 - BASE_IMAGE=mihaibob/keycloak:18.0.2-legacy
+# or 
+- BASE_IMAGE=quay.io/c3genomics/keycloak:16.1.1.arm64 # (an alternative built on an M1, for an M1)
 ```
 
 (I found it on StackOverflow, and it worked, but @shaikh-rashid might want to look for an "official" one or build a candig version for us)
