@@ -243,7 +243,7 @@ set_role() {
     -X POST -H "Content-Type: application/json" -d "${JSON}" \
     "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/roles" -k`
   
-  echo "Created role ${role_id}" | tee -a $LOGFILE
+  echo "Created role ${role}" | tee -a $LOGFILE
 }
 
 get_secret() {
