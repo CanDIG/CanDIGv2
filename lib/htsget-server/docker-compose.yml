@@ -42,6 +42,7 @@ services:
     logging: *default-logging
     environment:
       HTSGET_TEST_KEY: "hoodlebug"
+      HTSGET_URL: ${HTSGET_PRIVATE_URL}
       OPA_URL: ${OPA_PRIVATE_URL}
       CANDIG_AUTH: ${CANDIG_AUTHORIZATION}
       VAULT_URL: ${VAULT_SERVICE_URL}
