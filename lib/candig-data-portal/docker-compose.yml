@@ -3,7 +3,7 @@ version: '3.7'
 services:
   candig-data-portal:
     build:
-      context: $PWD/lib/candig-data-portal
+      context: $PWD/lib/candig-data-portal/candig-data-portal
       args:
         katsu_api_target_url: "${TYK_KATSU_API_TARGET}"
     image: ${DOCKER_REGISTRY}/candig-data-portal:${CANDIG_DATA_PORTAL_VERSION:-latest}
