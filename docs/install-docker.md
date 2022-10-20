@@ -268,8 +268,8 @@ cp -i etc/env/example.env .env
 
 ```bash
 # options are [<ip_addr>, <url>, host.docker.internal, docker.localhost]
-CANDIG_DOMAIN=host.docker.internal
-CANDIG_AUTH_DOMAIN=host.docker.internal
+CANDIG_DOMAIN=docker.localhost
+CANDIG_AUTH_DOMAIN=docker.localhost
 ...
 # options are [linux, darwin, arm64mac]
 VENV_OS=arm64mac
@@ -313,7 +313,7 @@ make compose
 - Get the local IP address in the terminal:
 
 ```bash
-dig -4 TXT +short o-o.myaddr.l.google.com @ns1.google.com
+ifconfig -l | xargs -n1 ipconfig getifaddr
 ```
 
 - Then edit your /etc/hosts file:
@@ -326,7 +326,7 @@ sudo nano /etc/hosts
 
 ```bash
 # Other settings
-127.0.0.1 host.docker.internal
+192.168.X.XX docker.localhost
 ```
 
 ### Step 6: Create Auth Stack
@@ -344,23 +344,9 @@ The old keycloak image (15.0.0) is not compatible with M1, so we need to upgrade
 Go to `lib/keycloak/docker-compose.yml` and replace the `- BASE_IMAGE=candig/keycloak:${KEYCLOAK_VERSION}` with one of the following:
 
 ```bash
-- BASE_IMAGE=mihaibob/keycloak:18.0.2-legacy
+- BASE_IMAGE=mihaibob/keycloak:18.0.2-legacy # (from StackOverflow)
 # or 
 - BASE_IMAGE=quay.io/c3genomics/keycloak:16.1.1.arm64 # (an alternative built on an M1, for an M1)
-```
-
-(I found it on StackOverflow, and it worked, but @shaikh-rashid might want to look for an "official" one or build a candig version for us)
-
-Note: for local development, add extra_hosts:
-
-```bash
-    networks:
-      - ${DOCKER_NET}
-    extra_hosts:
-      - "host.docker.internal:127.0.0.1"
-  # comment this out too
-  # volumes:
-  #   - keycloak-data:/opt/jboss/keycloak/standalone
 ```
 
 Then run `make`:
