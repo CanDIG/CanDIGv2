@@ -377,7 +377,7 @@ compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
 	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
 		$(DIR)/lib/$*/docker-compose.yml \
-		| docker-compose -f - up -d
+		| docker-compose --compatibility -f - up -d
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
@@ -638,7 +638,7 @@ push-%:
 #<<<
 secret-%:
 	@dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]/%/g > $(DIR)/tmp/secrets/$*
+		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > $(DIR)/tmp/secrets/$*
 
 
 #>>>

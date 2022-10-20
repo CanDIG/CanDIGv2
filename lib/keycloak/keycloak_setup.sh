@@ -53,11 +53,28 @@ add_user() {
     "type": "rawPassword",
     "value": "'${password}'"
   }'
-  echo "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/users/${user_id}"
+
   curl \
     -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X PUT -H "Content-Type: application/json" -d "${password_json}" \
     "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/users/${user_id}/reset-password" -k
+
+  if [[ ${attribute} == ${OPA_SITE_ADMIN_KEY} ]]; then
+    role_id=$(curl \
+      -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+      "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/roles" -k 2>/dev/null |
+      python3 -c 'import json,sys;obj=json.load(sys.stdin); print([l["id"] for l in obj if l["name"] ==
+      "'"site_admin"'" ][0])')
+    local realm='[{
+      "id": "'${role_id}'",
+      "name":"'${OPA_SITE_ADMIN_KEY}'"
+    }]'
+    curl \
+      -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+      -X POST -H "Content-Type: application/json" -d "${realm}" \
+      "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/users/${user_id}/role-mappings/realm" -k
+    echo "Set ${username} with role ${OPA_SITE_ADMIN_KEY}" | tee -a $LOGFILE
+  fi
 }
 
 get_token() {
@@ -212,6 +229,23 @@ set_client() {
   echo "Created client ${new_client}" | tee -a $LOGFILE
 }
 
+set_role() {
+  local realm=$1
+  local client=$2
+  local role=$3
+
+  local JSON='{
+    "name": "'${role}'"
+  }'
+
+  role_id=`curl \
+    -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
+    -X POST -H "Content-Type: application/json" -d "${JSON}" \
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/roles" -k`
+  
+  echo "Created role ${role}" | tee -a $LOGFILE
+}
+
 get_secret() {
   id=$(curl -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     ${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/clients -k 2>/dev/null |
@@ -257,6 +291,9 @@ fi ;
 
 echo "Setting client ${KEYCLOAK_CLIENT_ID}" | tee -a $LOGFILE
 set_client "${KEYCLOAK_REALM}" "${KEYCLOAK_CLIENT_ID}" "${KEYCLOAK_LOGIN_REDIRECT_PATH}"
+
+echo "Setting role ${OPA_SITE_ADMIN_KEY}" | tee -a $LOGFILE
+set_role "${KEYCLOAK_REALM}" "${KEYCLOAK_CLIENT_ID}" "${OPA_SITE_ADMIN_KEY}"
 
 echo "Getting keycloak secret" | tee -a $LOGFILE
 KEYCLOAK_SECRET_RESPONSE=$(get_secret ${KEYCLOAK_REALM})
