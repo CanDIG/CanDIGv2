@@ -4,9 +4,6 @@
 [submodule "lib/htsget-server/htsget_app"]
   path = lib/htsget-server/htsget_app
   url = https://github.com/CanDIG/htsget_app.git
-[submodule "lib/drs-server/chord_drs"]
-  path = lib/drs-server/chord_drs
-  url = https://github.com/CanDIG/chord_drs.git
 [submodule "lib/federation-service/federation_service"]
   path = lib/federation-service/federation_service
   url = https://github.com/CanDIG/federation_service
