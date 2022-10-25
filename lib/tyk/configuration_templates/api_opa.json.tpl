@@ -84,6 +84,7 @@
     
     "config_data": {
         "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
+        "KEYCLOAK_SECRET": "${KEYCLOAK_SECRET}",
         "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
         "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",
         "VAULT_ROLE":"researcher"
