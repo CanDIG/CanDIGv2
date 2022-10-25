@@ -37,8 +37,20 @@ sudo add-apt-repository \
   $(lsb_release -cs) \
   stable"
 
-## Docker installation instructions for Ubuntu 22.04
+sudo apt-get update
 
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+sudo systemctl enable docker
+
+sudo systemctl start docker
+
+sudo usermod -aG docker $(whoami)
+```
+
+### Ubuntu 22.04
+
+1. Update system/install dependencies
 ```bash
 sudo apt-get install \
   apt-transport-https \
@@ -49,21 +61,18 @@ sudo apt-get install \
   apt-transport-https \
   ca-certificates curl \
   software-properties-common
+```
+
+2. Install Docker
+
+```bash
+sudo apt-get update
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-```
 
-sudo apt-get update
-
-sudo apt-get install docker-ce docker-ce-cli containerd.io
-
-sudo systemctl enable docker
-
-sudo systemctl start docker
-
-sudo usermod -aG docker $(whoami)
+sudo apt install docker-ce docker-ce-cli containerd.io
 ```
 
 ### CentOS 7
