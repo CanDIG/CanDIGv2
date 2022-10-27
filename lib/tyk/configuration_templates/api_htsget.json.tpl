@@ -60,13 +60,7 @@
                 "require_session": false
             }
             ],
-        "post": [
-            {
-                "name": "permissionsStoreMiddleware",
-                "path": "/opt/tyk-gateway/middleware/permissionsStoreMiddleware.js",
-                "require_session": false
-            }
-        ],
+        "post": [],
         "id_extractor": {
             "extract_with": "",
             "extract_from": "",
