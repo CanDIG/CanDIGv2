@@ -9,27 +9,15 @@ Before running federation service, we first need to define the servers and servi
   "servers": [
     {
       "url": "https://candigtest.bcgsc.ca/federation/search",
-      "location": [
-        "BCGSC",
-        "British Columbia",
-        "ca-bc"
-      ]
+      "location": ["BCGSC", "British Columbia", "ca-bc"]
     },
     {
       "url": "https://candigv2.calculquebec.ca:8081/federation/search",
-      "location": [
-        "C3G",
-        "Quebec",
-        "ca-qc"
-      ]
+      "location": ["C3G", "Quebec", "ca-qc"]
     },
     {
       "url": "https://candig.uhnresearch.ca/federation/search",
-      "location": [
-        "UHN",
-        "Ontario",
-        "ca-on"
-      ]
+      "location": ["UHN", "Ontario", "ca-on"]
     }
   ]
 }
@@ -51,7 +39,7 @@ Once the federation-service is running, you will need to update your tyk configu
                 "client_ids": {
                     "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
                 }
-            },      
+            },
             {
                 "issuer": "https://candigauth.uhnresearch.ca/auth/realms/candig",
                 "client_ids": {
