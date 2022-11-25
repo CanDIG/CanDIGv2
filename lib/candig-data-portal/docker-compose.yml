@@ -10,7 +10,7 @@ services:
     networks:
       - ${DOCKER_NET}
     ports:
-      - "${CANDIG_DATA_PORTAL_PORT}:3000"
+      - "${CANDIG_DATA_PORTAL_PORT}:2543"
     deploy:
       placement:
         constraints:
@@ -26,6 +26,11 @@ services:
         - "traefik.http.routers.candig-data-portal.rule=Host(`candig-data-portal.${CANDIG_DOMAIN}`)"
         - "traefik.http.services.candig-data-portal.loadbalancer.server.port=${CANDIG_DATA_PORTAL_PORT}"
     logging: *default-logging
+    secrets:
+      - source: vault-s3-token
+        target: vault-s3-token
+      - source: opa-service-token
+        target: opa-service-token
     environment:
       - REACT_APP_KATSU_API_SERVER=${CHORD_METADATA_PUBLIC_URL}
       - REACT_APP_CANDIG_SERVER=${CANDIG_PUBLIC_URL}
@@ -34,7 +39,7 @@ services:
       - REACT_APP_BASE_NAME=
       - REACT_APP_SITE_LOCATION=${CANDIG_SITE_LOCATION}
     healthcheck:
-      test: [ "CMD", "curl", "http://localhost:3000" ]
+      test: [ "CMD", "curl", "http://localhost:2543" ]
       interval: 30s
       timeout: 20s
       retries: 3
