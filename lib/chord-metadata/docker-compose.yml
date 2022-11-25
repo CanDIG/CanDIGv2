@@ -37,10 +37,10 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
       - INSIDE_CANDIG=${INSIDE_CANDIG}
-      - CANDIG_OPA_URL=${OPA_PRIVATE_URL}
+      - OPA_URL=${OPA_PRIVATE_URL}
       - CANDIG_AUTHORIZATION=${CANDIG_AUTHORIZATION}
       - CACHE_TIME=${CACHE_TIME}
-      - CANDIG_OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
+      - OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
       - HOST_CONTAINER_NAME=${CHORD_METADATA_CONTAINER}
     secrets:
       - source: metadata-app-secret
