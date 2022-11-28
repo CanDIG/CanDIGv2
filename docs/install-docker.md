@@ -113,7 +113,7 @@ make init-conda
 
 ## Choose Docker Deployment Strategy
 
-We provide instructions below for two different docker deployment strategies. Option 1 uses `docker-compose` to deploy each module. Option 2 builds a Docker Swarm cluster using `docker-machine`. We use Option 2 for production, but Option 1 is simpler for local dev installation.
+We provide instructions below for two different docker deployment strategies. Option 1 uses `docker-compose` to deploy each module. Option 2 builds a Docker Swarm cluster using `docker-machine`. We use Option 2 for production, but Option 1 is simpler for local dev installation. It may be necessary to configure your Hosts file before proceeding (i.e. if you run into an error during `make init-authx`), check the [Hosts documentation](#update-hosts).
 
 ### Option 1: Deploy CanDIGv2 Services with Compose
 
@@ -132,6 +132,7 @@ make docker-pull
 # deploy stack
 make compose
 make init-authx
+# If the above command errors out, try editing the #update-hosts section of this Markdown file
 # TODO: post deploy auth configuration
 
 # (optional) push updated images to $DOCKER_REGISTRY
@@ -200,6 +201,8 @@ Get your local IP address and edit your /etc/hosts file to add:
 <your ip>  docker.localhost
 <your ip>  auth.docker.localhost
 ```
+
+It may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
 
 ## Cleanup CanDIGv2 Compose/Swarm Environment
 
