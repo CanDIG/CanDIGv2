@@ -1,6 +1,7 @@
 # CanDIGv2 Install Guide
 
 ---
+These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. 
 
 ## Install OS Dependencies
 
