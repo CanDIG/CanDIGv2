@@ -26,6 +26,7 @@ add_user() {
 
   local JSON='  {
     "username": "'${username}'",
+    "email": "'${username}'@test.ca",
     "enabled": true,
     "attributes": {
       "'${attribute}'": [
