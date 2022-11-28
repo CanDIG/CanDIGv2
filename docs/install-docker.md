@@ -1,7 +1,7 @@
 # CanDIGv2 Install Guide
 
 ---
-These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. 
+These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for hosts file at [update hosts](#update-hosts).
 
 Before beginning, you should set up your environment variables as described in the [README](README.md). 
 
@@ -203,6 +203,9 @@ Get your local IP address and edit your /etc/hosts file to add:
 ```
 
 It may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
+
+### WSL
+Edit your /etc/hosts file as stated above along with your Windows hosts file by adding your Windows IPv4 to both hosts files. This can be found at `C:\Windows\system32\drivers\etc`. How you edit this file will change between versions of Windows.  
 
 ## Cleanup CanDIGv2 Compose/Swarm Environment
 
