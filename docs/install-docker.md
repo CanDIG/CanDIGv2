@@ -267,10 +267,6 @@ cp -i etc/env/example.env .env
 - Edit the .env file:
 
 ```bash
-# options are [<ip_addr>, <url>, host.docker.internal, docker.localhost]
-CANDIG_DOMAIN=docker.localhost
-CANDIG_AUTH_DOMAIN=docker.localhost
-...
 # options are [linux, darwin, arm64mac]
 VENV_OS=arm64mac
 VENV_NAME=candig
@@ -331,14 +327,6 @@ sudo nano /etc/hosts
 
 ### Step 6: Create Auth Stack
 
-In the .env, comment out all the `WES_OPT+=…` (We don't use it right now)
-
-```bash
-# WES_OPT=--opt=extra=--batchSystem=Mesos
-...
-# WES_OPT+=--opt=extra=--metrics
-```
-
 The old keycloak image (15.0.0) is not compatible with M1, so we need to upgrade it.
 
 Go to `lib/keycloak/docker-compose.yml` and replace the `- BASE_IMAGE=candig/keycloak:${KEYCLOAK_VERSION}` with one of the following:
@@ -355,16 +343,3 @@ Then run `make`:
 make init-authx
 ```
 
-If you got this error:
-
-```bash
-Getting keycloak token
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-KeyError: 'access_token'
-make: *** [init-authx] Error 1
-```
-
-Then try to replace all the `keycloak` passwords in `tmp/secrets` with something simple like `thisisasupersecretpassword`, basically no special chars.
-
-Try `make clean-authx` and `make init-authx` and it should worked 🎉
