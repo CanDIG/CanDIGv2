@@ -3,6 +3,8 @@
 ---
 These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. 
 
+Before beginning, you should set up your environment variables as described in the [README](README.md). 
+
 ## Install OS Dependencies
 
 ### Debian
