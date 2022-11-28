@@ -141,16 +141,18 @@ services:
 
 ## `make` Deployment
 
-To deploy CanDIGv2, follow one of the available install guides in `docs/`:
+To deploy CanDIGv2, follow the docker deployment guide in `docs/`:
+
+* [Docker Deployment Guide](./docs/install-docker.md)
+
+There are other deprecated deployment guides in `docs`, but there are no guarantees that these still function:
 
 * [Vagrant Deployment Guide (with instructions for OpenStack)](./docs/install-vagrant.md)
-* [Docker Deployment Guide](./docs/install-docker.md)
 * [Kubernetes Deployment Guide](./docs/install-kubernetes.md)
 * [Tox Deployment Guide](./docs/install-tox.md)
 * [Authentication and Authorization Deployment Guide](./docs/authx-setup.md)
 
 View additional Makefile options with `make help`.
-
 
 ## Services and Components
 
