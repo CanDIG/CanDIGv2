@@ -1,4 +1,4 @@
-# CanDIG v2 PoC
+# CanDIG v2
 
 - - -
 
@@ -112,7 +112,11 @@ CanDIGv2/
 ## `.env` Environment File
 
 You need an `.env` file in the project root directory, which contains a set of global variables that are used as reference to
-the various parameters, plugins, and config options that operators can modify for testing purposes. There is an example `.env` file in `etc/example.env`.
+the various parameters, plugins, and config options that operators can modify for testing purposes. This repo contains an example `.env` file in `etc/env/example.env`.
+
+When deploying CanDIGv2
+using `make`, `.env` is imported by `make` and all uncommented variables are added as environment variables via
+`export`.
 
 Some of the functionality that is controlled through `.env` are:
 
@@ -122,13 +126,8 @@ Some of the functionality that is controlled through `.env` are:
 * version control and app pinning
 * pre-defined defaults for turnkey deployment
 
-Compose supports declaring default environment variables in an environment file named `.env` placed in the folder
-where the `docker-compose` command is executed (current working directory). Similarly, when deploying CanDIGv2
-using `make`, `.env` is imported by `make` and all uncommented variables are added as environment variables via
-`export`.
-
-These evironment variables can be read in `docker-compose` scripts through the variable substitution operator
-`${VAR}`.
+Environment variables defined in the `.env` file can be read in `docker-compose` scripts through the variable substitution operator
+`${VAR}`. 
 
 ```yaml
 # example compose YAML using variable substitution with default option
@@ -138,6 +137,21 @@ services:
     network_mode: ${DOCKER_MODE}
 ...
 ```
+### Configuring CanDIG modules
+
+Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` and `CANDIG_AUTH_MODULES` define which modules are included in the deployment. 
+
+By default (if you copy the sample file from `etc/env/example.env`) the installation includes the minimal list of modules:
+
+  CANDIG_MODULES=minio htsget-server chord-metadata candig-server candig-data-portal
+
+Optional modules follow the `#` and include federation service, various monitoring components, workflow execution, and some older modules not generally installed. 
+
+For federated installations, you will need `federation-service`. 
+
+For production deployments, you will probably want _add prod modules here_.
+
+Authorization and authentication modules defined in  `CANDIG_AUTH_MODULES` are only installed if you run `make init-authx` during deployment. 
 
 ## `make` Deployment
 
