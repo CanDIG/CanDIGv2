@@ -15,25 +15,21 @@ CanDIGv2/
  ├── Makefile                      - functions for repeatable testing/deployment (Docker/Kubernetes)
  ├── tox.ini                       - functions for repeatable testing/deployment (Python Venv/Screen)
  ├── bin/                          - local binaries directory
- ├── docs/                         - documentation for various aspects of CanDIGv2
+ ├── docs/                         - documentation, installation instructions 
  ├── etc/                          - contains misc files/config/scripts
  │    ├── docker/                  - docker configurations
- │    ├── env/                     - sample env files for site.env
+ │    ├── env/                     - sample env file
  │    ├── ssl/                     - ssl root-ca/site configs and certs
+ |    ├── tests/                   - integration tests (under development)
  │    ├── venv/                    - dependency files for virtualenvs (conda, pip, etc.)
  │    └── yml/                     - various yaml based configs (toil, traefik, etc.)
  ├── lib/                          - contains modules of servies/apps
- │    ├── compose/                 - set of base docker variables for Compose
- │    ├── kubernetes/              - set of base docker variables for Kubernetes
- │    ├── swarm/                   - set of base docker variables for Swarm
- │    ├── templates/               - set of template files used to create new module(s)
- │    └── ga4gh-dos/               - example module, folder name = module name (e.g. make compose-ga4gh-dos)
- │         ├── docker-compose.yml  - minimum requirement of module, contains deployment context
- │         ├── Dockerfile          - contains build context for module
- │         └── run.sh              - script which used for conda deployment (DEPRECATED)
  └── tmp/                          - contains temporary files used for runtime functionality
-      ├── configs/                 - directory to store config files that are added to services post-deployment
-      ├── data/                    - directory to store local data for running services
+      ├── configs/                 - config files that are added to services post-deployment
+      ├── data/                    - local data for running services
+      ├── federation/              - federation configuration files
+      ├── tyk/                     - tyk configuration files
+      ├── vault/                   - vault keys
       └── secrets/                 - directory to store randomly generated secrets for service deployment
 ```
 
