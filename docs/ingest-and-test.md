@@ -13,7 +13,7 @@ Check that you can generate a bearer token for user2 with the following call, su
 curl -X "POST" "http://docker.localhost:8080/auth/realms/candig/protocol/openid-connect/token" \
      -H 'Content-Type: application/x-www-form-urlencoded; charset=utf-8' \
      --data-urlencode "client_id=local_candig" \
-     --data-urlencode "client_secret=<client_secret" \
+     --data-urlencode "client_secret=<client_secret>" \
      --data-urlencode "grant_type=password" \
      --data-urlencode "username=user2" \
      --data-urlencode "password=<user2-password>" \
@@ -53,14 +53,15 @@ Install the requirements:
 pip install -r requirements.txt
 ```
 
-Generate a file env.sh
+Generate a file env.sh in the `candig2-ingest` repo:
 
 ```
 python settings.py ../CanDIGv2/
 source env.sh
 ```
 
-Create opa dataset policy (for example, dataset_name=SYNTHETIC_1 and user_name=user2)
+Create opa dataset policy based on the dataset name and the email 
+address of the user (for example, dataset_name=SYNTHETIC_1 and user_name=user2)
 
 ```
 python opa_ingest.py --dataset <dataset_name> --user <user_name> > access.json
@@ -72,7 +73,7 @@ Copy the access.json file to the docker:
 docker cp access.json candigv2_opa_1:/app/permissions_engine/access.json
 ```
 
-Get the `Synthetic_Clinical_Data.json` file from @daisieh (Daisie Huang) and place in the root folder, then copy it over to docker:
+Get the `Synthetic_Clinical_Data.json` file from @daisieh (Daisie Huang) and copy it into the root folder in the docker container:
 
 ```
 docker cp '/local_path_to_file/Synthetic_Clinical_Data.json' candigv2_chord-metadata_1:/app/chord_metadata_service/Synthetic_Clinical_Data.json
@@ -81,7 +82,7 @@ docker cp '/local_path_to_file/Synthetic_Clinical_Data.json' candigv2_chord-meta
 Then run ingest command (katsu should be running):
 
 ```
-python katsu_ingest.py --dataset <dataset_name> --input Synthetic_Clinical_Data.json --katsu_url http://docker.localhost:5080/katsu
+python katsu_ingest.py --dataset <dataset_name> --input /Synthetic_Clinical_Data.json 
 ```
 
 ## Test data services

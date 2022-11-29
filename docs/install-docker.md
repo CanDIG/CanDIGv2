@@ -194,7 +194,7 @@ make stack
 
 ## Update hosts
 
-Get your local IP address and edit your `/etc/hosts` file to add:
+Get your local IP address and edit your `/etc/hosts` file to add (note that the key and value are tab-delimited):
 
 ```bash
 <your ip>  docker.localhost
