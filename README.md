@@ -18,7 +18,7 @@ CanDIGv2/
  ├── docs/                         - documentation, installation instructions 
  ├── etc/                          - contains misc files/config/scripts
  │    ├── docker/                  - docker configurations
- │    ├── env/                     - sample env file
+ │    ├── env/                     - sample .env file
  │    ├── ssl/                     - ssl root-ca/site configs and certs
  |    ├── tests/                   - integration tests (under development)
  │    ├── venv/                    - dependency files for virtualenvs (conda, pip, etc.)
