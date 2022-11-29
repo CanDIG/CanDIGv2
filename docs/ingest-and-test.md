@@ -4,7 +4,7 @@ These instructions will lead you through some basic functionality tests, ingesti
 
 ## Initial tests
 
-Check that you can see the data portal in your browser at `http://docker.localhost:5080/`.
+Check that you can see the data portal in your browser at `http://docker.localhost:5080/`. If not, you may need to follow the instructions in the [Docker Deployment Guide](./install-docker.md)
 
 Check that you can generate a bearer token for user2 with the following call, substituting secrets and passwords from `tmp/secrets/keycloak-client-local_candig-secret` and `tmp/secrets/keycloak-test-user2-password`.
 
