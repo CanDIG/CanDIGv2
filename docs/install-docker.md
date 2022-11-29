@@ -1,6 +1,9 @@
 # CanDIGv2 Install Guide
 
 ---
+These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for hosts file at [update hosts](#update-hosts).
+
+Before beginning, you should set up your environment variables as described in the [README](README.md). 
 
 ## Install OS Dependencies
 
@@ -110,7 +113,7 @@ make init-conda
 
 ## Choose Docker Deployment Strategy
 
-We provide instructions below for two different docker deployment strategies. Option 1 uses `docker-compose` to deploy each module. Option 2 builds a Docker Swarm cluster using `docker-machine`. We use Option 2 for production, but Option 1 is simpler for local dev installation.
+We provide instructions below for two different docker deployment strategies. Option 1 uses `docker-compose` to deploy each module. Option 2 builds a Docker Swarm cluster using `docker-machine`. We use Option 2 for production, but Option 1 is simpler for local dev installation. It may be necessary to configure your Hosts file before proceeding (i.e. if you run into an error during `make init-authx`), check the [Hosts documentation](#update-hosts).
 
 ### Option 1: Deploy CanDIGv2 Services with Compose
 
@@ -128,7 +131,7 @@ make docker-pull
 
 # deploy stack
 make compose
-make init-authx
+make init-authx # If this command fails, try the #update-hosts section of this Markdown file
 # TODO: post deploy auth configuration
 
 # (optional) push updated images to $DOCKER_REGISTRY
@@ -191,12 +194,34 @@ make stack
 
 ## Update hosts
 
-Get your local IP address and edit your /etc/hosts file to add:
+Get your local IP address and edit your `/etc/hosts` file to add (note that the key and value are tab-delimited):
 
 ```bash
 <your ip>  docker.localhost
 <your ip>  auth.docker.localhost
 ```
+
+After saving your hosts file, make sure you reset the auth stack before retrying:
+```bash
+make clean-authx
+make init-authx
+```
+
+If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack. 
+
+Example (Ubuntu):
+Go to your `.env` file and write down the IP addresses for DOCKER_BRIDGE_IP and DOCKER_GWBRIDGE_IP.
+
+Edit your firewall settings to allow connections from those adresses:
+```bash
+sudo ufw allow from <DOCKER_BRIDGE_IP> to <your ip>
+sudo ufw allow from <DOCKER_GWBRIDGE_IP> to <your ip>
+```
+
+Re-run `make clean-authx` and `make init-authx` and it should work.
+
+### WSL
+Edit your /etc/hosts file as stated above along with your Windows hosts file by adding your Windows IPv4 to both hosts files. This can be found at `C:\Windows\system32\drivers\etc`. How you edit this file will change between versions of Windows.  
 
 ## Cleanup CanDIGv2 Compose/Swarm Environment
 
@@ -267,10 +292,6 @@ cp -i etc/env/example.env .env
 - Edit the .env file:
 
 ```bash
-# options are [<ip_addr>, <url>, host.docker.internal, docker.localhost]
-CANDIG_DOMAIN=docker.localhost
-CANDIG_AUTH_DOMAIN=docker.localhost
-...
 # options are [linux, darwin, arm64mac]
 VENV_OS=arm64mac
 VENV_NAME=candig
@@ -322,7 +343,7 @@ ifconfig -l | xargs -n1 ipconfig getifaddr
 sudo nano /etc/hosts
 ```
 
-- Add the IP address to the end of the file so it look like this:
+- Add the IP address to the end of the file so it look like this (noting that the key and value need to be tab-delimited):
 
 ```bash
 # Other settings
@@ -330,14 +351,6 @@ sudo nano /etc/hosts
 ```
 
 ### Step 6: Create Auth Stack
-
-In the .env, comment out all the `WES_OPT+=…` (We don't use it right now)
-
-```bash
-# WES_OPT=--opt=extra=--batchSystem=Mesos
-...
-# WES_OPT+=--opt=extra=--metrics
-```
 
 The old keycloak image (15.0.0) is not compatible with M1, so we need to upgrade it.
 
@@ -355,16 +368,3 @@ Then run `make`:
 make init-authx
 ```
 
-If you got this error:
-
-```bash
-Getting keycloak token
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-KeyError: 'access_token'
-make: *** [init-authx] Error 1
-```
-
-Then try to replace all the `keycloak` passwords in `tmp/secrets` with something simple like `thisisasupersecretpassword`, basically no special chars.
-
-Try `make clean-authx` and `make init-authx` and it should worked 🎉
