@@ -26,7 +26,7 @@ Doing much else will require test data.
 
 Federation service is required to run most of CanDig operations. The following example will add 1 UHN node to simulate the network calls.
 
-- add federation-service to the list of CANDIG_MODULES in .env
+- add `federation-service` to the list of `CANDIG_MODULES` in .env
 - add to /tmp/federation/ the file `servers.json`
 
 ```
@@ -112,7 +112,7 @@ docker cp access.json candigv2_opa_1:/app/permissions_engine/access.json
 Get the `Synthetic_Clinical_Data.json` file from @daisieh (Daisie Huang) and copy it into the root folder in the docker container:
 
 ```
-docker cp '/local_path_to_file/Synthetic_Clinical_Data.json' candigv2_chord-metadata_1:/app/chord_metadata_service/Synthetic_Clinical_Data.json
+docker cp '/local_path_to_file/Synthetic_Clinical_Data.json' candigv2_chord-metadata_1:/Synthetic_Clinical_Data.json
 ```
 
 Then run ingest command (katsu and federation should be running):
@@ -122,3 +122,4 @@ python katsu_ingest.py --dataset <dataset_name> --input /Synthetic_Clinical_Data
 ```
 
 ## Test data services
+To be continue
