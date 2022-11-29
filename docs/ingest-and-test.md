@@ -22,6 +22,42 @@ curl -X "POST" "http://docker.localhost:8080/auth/realms/candig/protocol/openid-
 
 Doing much else will require test data.
 
+## Setup Federation Service
+
+Federation service is required to run most of CanDig operations. The following example will add 1 UHN node to simulate the network calls.
+
+- add federation-service to the list of CANDIG_MODULES in .env
+- add to /tmp/federation/ the file `servers.json`
+
+```
+{
+    "servers": [
+        {
+            "url": "http://docker.localhost:4232/federation/search",
+            "location": [
+                "UHN",
+                "Ontario",
+                "ca-on"
+            ]
+        }
+    ]
+}
+```
+
+and `services.json`
+
+```
+{
+    "services": {
+        "katsu": "http://docker.localhost:5080/katsu",
+        "candig-server": "http://docker.localhost:5080/candig",
+        "htsget-app": "http://docker.localhost:5080/genomics"
+    }
+}
+```
+If you already have federation-service running, delete the container then run
+`make build-federation-service` and `make compose-federation-service` to recreate it.
+
 ## Install test data
 
 Clone the [candig-ingest](https://github.com/CanDIG/candigv2-ingest) repo:
@@ -79,7 +115,7 @@ Get the `Synthetic_Clinical_Data.json` file from @daisieh (Daisie Huang) and cop
 docker cp '/local_path_to_file/Synthetic_Clinical_Data.json' candigv2_chord-metadata_1:/app/chord_metadata_service/Synthetic_Clinical_Data.json
 ```
 
-Then run ingest command (katsu should be running):
+Then run ingest command (katsu and federation should be running):
 
 ```
 python katsu_ingest.py --dataset <dataset_name> --input /Synthetic_Clinical_Data.json 
