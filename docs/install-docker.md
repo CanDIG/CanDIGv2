@@ -131,8 +131,7 @@ make docker-pull
 
 # deploy stack
 make compose
-make init-authx
-# If the above command errors out, try editing the #update-hosts section of this Markdown file
+make init-authx # If this command fails, try the #update-hosts section of this Markdown file
 # TODO: post deploy auth configuration
 
 # (optional) push updated images to $DOCKER_REGISTRY
@@ -195,14 +194,31 @@ make stack
 
 ## Update hosts
 
-Get your local IP address and edit your /etc/hosts file to add:
+Get your local IP address and edit your `/etc/hosts` file to add:
 
 ```bash
 <your ip>  docker.localhost
 <your ip>  auth.docker.localhost
 ```
 
-It may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
+After saving your hosts file, make sure you reset the auth stack before retrying:
+```bash
+make clean-authx
+make init-authx
+```
+
+If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack. 
+
+Example (Ubuntu):
+Go to your `.env` file and write down the IP addresses for DOCKER_BRIDGE_IP and DOCKER_GWBRIDGE_IP.
+
+Edit your firewall settings to allow connections from those adresses:
+```bash
+sudo ufw allow from <DOCKER_BRIDGE_IP> to <your ip>
+sudo ufw allow from <DOCKER_GWBRIDGE_IP> to <your ip>
+```
+
+Re-run `make clean-authx` and `make init-authx` and it should work.
 
 ### WSL
 Edit your /etc/hosts file as stated above along with your Windows hosts file by adding your Windows IPv4 to both hosts files. This can be found at `C:\Windows\system32\drivers\etc`. How you edit this file will change between versions of Windows.  
