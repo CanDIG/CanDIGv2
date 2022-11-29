@@ -61,7 +61,7 @@ source env.sh
 ```
 
 Create opa dataset policy based on the dataset name and the email 
-address of the user (for example, dataset_name=SYNTHETIC_1 and user_name=user2)
+address of the user (for example, dataset_name=SYNTHETIC_1 and user_name=user2@test.ca)
 
 ```
 python opa_ingest.py --dataset <dataset_name> --user <user_name> > access.json
