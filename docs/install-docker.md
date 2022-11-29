@@ -343,7 +343,7 @@ ifconfig -l | xargs -n1 ipconfig getifaddr
 sudo nano /etc/hosts
 ```
 
-- Add the IP address to the end of the file so it look like this:
+- Add the IP address to the end of the file so it look like this (noting that the key and value need to be tab-delimited):
 
 ```bash
 # Other settings
