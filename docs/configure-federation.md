@@ -27,6 +27,54 @@ Services need to follow a consistent naming pattern so consult with federation s
 
 Once these files are set, you can add `federation-service` to the list of `CANDIG_MODULES` in `.env` and then run `make docker-pull` or `make build-federation-service` if you want to either pull the latest federation-service image matching `FEDERATION_VERSION` or build it from source. After this, you can run `make compose-federation-service` to deploy the federation-service in the CanDIGv2 stack. You can test the service by folloring the testing steps provided in `/lib/federation-service/federation_service/README.md`.
 
+## WSL Federation Configuration Errors
+
+```bash
+Creating candigv2_federation-service_1 ... error
+
+ERROR: for candigv2_federation-service_1  Cannot create container for service federation-service: not a directory
+
+ERROR: for federation-service  Cannot create container for service federation-service: not a directory
+ERROR: Encountered errors while bringing up the project.
+make: *** [Makefile:378: compose-federation-service] Error 1
+```
+If you are seeing the above directory not found error in WSL it is a issue with the communication between WSL and Windows docker in relation to the tmp folder. To get past this you need to do the following:
+
+Current directory: **../CanDIGv2**
+```bash
+#Copy the servers.json and services.json into the config folder instead:
+cp tmp/federation/* lib/federation-service/federation_service/configs 
+```
+You will need to comment out the 'secrets' section in the lib/federation-service/docker-compose.yml file. It will look like the code chunk below: 
+
+```yml
+    ...
+    logging: *default-logging
+    # secrets:
+    #   - source: federation-servers
+    #     target: /app/federation_service/configs/servers.json
+    #   - source: federation-services
+    #     target: /app/federation_service/configs/services.json
+    entrypoint: ["uwsgi", "federation.ini", "--http", "0.0.0.0:4232"]
+```
+Start the federation-service up:
+```bash
+make build-federation-service
+make compose-federation-service
+```
+To check that it is running you can look at the candigv2_federation-service_1 container in your Window Docker GUI. You can also run the following in terminal:
+```bash
+curl http://docker.localhost:4232/federation/services
+```
+The below output will return:
+```json
+{
+  "candig-server": "http://docker.localhost:5080/candig",
+  "htsget-app": "http://docker.localhost:5080/genomics",
+  "katsu": "http://docker.localhost:5080/katsu"
+}
+```
+
 ## Running Federation Service Behind Tyk
 
 Once the federation-service is running, you will need to update your tyk configuration templates in order to allow other federation servers to peer with each other. To do this, you will need to add the `issuer` and `client_ids` of the trusted nodes into any of the `api_*.json.tpl` files in `/lib/tyk/configuration_templates/`. This must be done for each service defined in `services.json` that you want federation peer(s) to access. For example, if you wanted to allow the UHN CanDIGv2 node to make federated searches to `katsu` data service, you would need to modify the `/lib/tyk/configuration_templates/api_katsu_chord.json.tpl` file and change the `providers` section to:
