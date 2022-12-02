@@ -368,3 +368,7 @@ Then run `make`:
 make init-authx
 ```
 
+Once everything has run without errors, take a look at the documentation for 
+[ingesting data and testing the deployment](docs/ingest-and-test.md) as well as 
+[how to modify code and test changes](docs/docker-and-submodules.md) in 
+the context of the CanDIG stack. 
