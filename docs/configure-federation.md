@@ -68,7 +68,7 @@ To check that it is running you can look at the candigv2_federation-service_1 co
 ```bash
 curl http://docker.localhost:4232/federation/services
 ```
-The below output will return:
+The below is an example of what will return it should be what is in your services.json
 ```json
 {
   "candig-server": "http://docker.localhost:5080/candig",
