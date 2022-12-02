@@ -29,6 +29,9 @@ docker ps       # see the name of your submodule
 make build-%    # % represents the name of your module
 make compose-%  # % represents the name of your module
 ```
+
+You can find the name of the module from the `NAMES` column in the output from `docker ps`.
+
 After you run these commands you should see your changes are now live. If you were making changes for candig-data-portal you will now see these on the web browser.
 
 If you want to understand how these commands are working you can find their source code in the MakeFile in CanDIGv2.
