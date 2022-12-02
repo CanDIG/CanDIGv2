@@ -61,6 +61,9 @@ If you already have federation-service running, delete the container then run
 
 ## WSL Federation Configuration Errors
 
+<details open>
+<summary>WSL Errors</summary>
+
 ```bash
 Creating candigv2_federation-service_1 ... error
 
@@ -106,6 +109,7 @@ The below output will return:
   "katsu": "http://docker.localhost:5080/katsu"
 }
 ```
+</details>
 
 ## Install test data
 

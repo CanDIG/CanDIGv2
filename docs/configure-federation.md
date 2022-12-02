@@ -28,6 +28,8 @@ Services need to follow a consistent naming pattern so consult with federation s
 Once these files are set, you can add `federation-service` to the list of `CANDIG_MODULES` in `.env` and then run `make docker-pull` or `make build-federation-service` if you want to either pull the latest federation-service image matching `FEDERATION_VERSION` or build it from source. After this, you can run `make compose-federation-service` to deploy the federation-service in the CanDIGv2 stack. You can test the service by folloring the testing steps provided in `/lib/federation-service/federation_service/README.md`.
 
 ## WSL Federation Configuration Errors
+<details open>
+<summary>WSL Errors</summary>
 
 ```bash
 Creating candigv2_federation-service_1 ... error
@@ -74,6 +76,7 @@ The below output will return:
   "katsu": "http://docker.localhost:5080/katsu"
 }
 ```
+</details>
 
 ## Running Federation Service Behind Tyk
 
