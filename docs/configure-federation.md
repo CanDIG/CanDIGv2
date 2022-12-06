@@ -27,6 +27,9 @@ Services need to follow a consistent naming pattern so consult with federation s
 
 Once these files are set, you can add `federation-service` to the list of `CANDIG_MODULES` in `.env` and then run `make docker-pull` or `make build-federation-service` if you want to either pull the latest federation-service image matching `FEDERATION_VERSION` or build it from source. After this, you can run `make compose-federation-service` to deploy the federation-service in the CanDIGv2 stack. You can test the service by folloring the testing steps provided in `/lib/federation-service/federation_service/README.md`.
 
+## WSL Federation Configuration Errors
+refer to [ingesting data and testing the deployment](docs/ingest-and-test.md) for errors starting up federation in WSL
+
 ## Running Federation Service Behind Tyk
 
 Once the federation-service is running, you will need to update your tyk configuration templates in order to allow other federation servers to peer with each other. To do this, you will need to add the `issuer` and `client_ids` of the trusted nodes into any of the `api_*.json.tpl` files in `/lib/tyk/configuration_templates/`. This must be done for each service defined in `services.json` that you want federation peer(s) to access. For example, if you wanted to allow the UHN CanDIGv2 node to make federated searches to `katsu` data service, you would need to modify the `/lib/tyk/configuration_templates/api_katsu_chord.json.tpl` file and change the `providers` section to:
