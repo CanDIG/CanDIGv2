@@ -6,25 +6,8 @@ services:
       context: ${PWD}/lib/tyk
       args:
         - BASE_IMAGE=tykio/tyk-gateway:${TYK_VERSION}
-    networks:
-      - ${DOCKER_NET}
     ports:
       - "${TYK_SERVICE_PUBLIC_PORT}:8080"
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.lbswarm=true"
-        - "traefik.http.routers.tyk.rule=Host(`tyk.${CANDIG_DOMAIN}`)"
-        - "traefik.http.services.tyk.loadbalancer.server.port=${TYK_SERVICE_PUBLIC_PORT}"
-    logging: *default-logging
     volumes:
       - tyk-data:/opt/tyk-gateway
     depends_on:
@@ -37,22 +20,10 @@ services:
 
   tyk-redis:
     image: redis:${TYK_REDIS_VERSION}
-    networks:
-      - ${DOCKER_NET}
     volumes:
       - tyk-redis-data:/data
     ports:
       - "6379:6379"
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    logging: *default-logging
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s

@@ -8,27 +8,10 @@ services:
         venv_python: "3.10"
         alpine_version: "3.16"
     image: ${DOCKER_REGISTRY}/chord-metadata:${CHORD_METADATA_VERSION:-latest}
-    networks:
-      - ${DOCKER_NET}
     ports:
       - "${CHORD_METADATA_PORT}:8000"
     depends_on:
       - metadata-db
-    deploy:
-      placement:
-        constraints:
-          - node.role == worker
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.lbswarm=true"
-        - "traefik.http.routers.chord-metadata.rule=Host(`chord-metadata.${CANDIG_DOMAIN}`)"
-        - "traefik.http.services.chord-metadata.loadbalancer.server.port=${CHORD_METADATA_PORT}"
-    logging: *default-logging
     environment:
       - CHORD_URL=${CHORD_METADATA_HOST}
       - CHORD_PERMISSIONS=${CHORD_METADATA_AUTH}
@@ -70,20 +53,8 @@ services:
       #- chord-metadata-db:/var/lib/postgresql/data
       #add volume name to lib/{compose,swarm,kubernetes}
       #add volume name to docker-volumes in Makefile
-    networks:
-      - ${DOCKER_NET}
     # ports:
     #   - "${CHORD_METADATA_PORT}:8000"
-    deploy:
-      placement:
-        constraints:
-          - node.role == worker
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    logging: *default-logging
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_DB=metadata
