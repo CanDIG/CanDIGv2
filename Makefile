@@ -118,8 +118,7 @@ clean-bin:
 .PHONY: clean-compose
 clean-compose:
 	$(foreach MODULE, $(CANDIG_MODULES), \
-		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml $(DIR)/lib/$(MODULE)/docker-compose.yml \
-		| docker-compose -f - down;)
+		docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml down;)
 
 
 #>>>
@@ -185,9 +184,6 @@ clean-volumes:
 .PHONY: compose
 compose:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
-	# cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-	# 	$(foreach MODULE, $(CANDIG_MODULES), $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-	# 	| docker-compose -f - up
 
 
 #>>>
@@ -198,9 +194,7 @@ compose:
 #<<<
 compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		$(DIR)/lib/$*/docker-compose.yml \
-		| docker-compose --compatibility -f - up -d
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml up -d
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
@@ -234,6 +228,7 @@ docker-push:
 .PHONY: docker-secrets
 docker-secrets: mkdir minio-secrets
 	@echo admin > $(DIR)/tmp/secrets/metadata-db-user
+	$(MAKE) secret-metadata-app-secret
 	$(MAKE) secret-metadata-db-secret
 
 	@echo admin > $(DIR)/tmp/secrets/keycloak-admin-user
@@ -330,8 +325,6 @@ minio-secrets:
 	@echo '[default]' > $(DIR)/tmp/secrets/aws-credentials
 	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> $(DIR)/tmp/secrets/aws-credentials
 	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> $(DIR)/tmp/secrets/aws-credentials
-	cp $(DIR)/tmp/ssl/selfsigned-site.crt $(DIR)/tmp/secrets/selfsigned-site-crt
-	cp $(DIR)/tmp/ssl/selfsigned-site.key $(DIR)/tmp/secrets/selfsigned-site-key
 
 
 #>>>
@@ -341,9 +334,7 @@ minio-secrets:
 
 #<<<
 pull-%:
-		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-			$(DIR)/lib/$*/docker-compose.yml \
-			| docker-compose -f - pull
+		docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml pull
 
 
 #>>>
@@ -353,9 +344,7 @@ pull-%:
 
 #<<<
 push-%:
-		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-			$(DIR)/lib/$*/docker-compose.yml \
-			| docker-compose -f - push
+		docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml push
 
 
 #>>>
@@ -406,3 +395,4 @@ help:
 #<<<
 print-%:
 	@echo '$*=$($*)'
+
