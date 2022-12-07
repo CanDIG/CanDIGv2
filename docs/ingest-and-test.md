@@ -78,13 +78,12 @@ If you are seeing the above directory not found error in WSL it is a issue with 
 Current directory: **../CanDIGv2**
 ```bash
 #Copy the servers.json and services.json into the config folder instead:
-cp tmp/federation/* lib/federation-service/federation_service/configs 
+cp tmp/federation/* lib/federation-service/federation_service/configs
 ```
-You will need to comment out the 'secrets' section in the lib/federation-service/docker-compose.yml file. It will look like the code chunk below: 
+You will need to comment out the 'secrets' section in the lib/federation-service/docker-compose.yml file. It will look like the code chunk below:
 
 ```yml
     ...
-    logging: *default-logging
     # secrets:
     #   - source: federation-servers
     #     target: /app/federation_service/configs/servers.json
@@ -149,7 +148,7 @@ python settings.py ../CanDIGv2/
 source env.sh
 ```
 
-Create opa dataset policy based on the dataset name and the email 
+Create opa dataset policy based on the dataset name and the email
 address of the user (for example, dataset_name=SYNTHETIC_1 and user_name=user2@test.ca)
 
 ```bash
@@ -171,7 +170,7 @@ docker cp '/local_path_to_file/Synthetic_Clinical_Data.json' candigv2_chord-meta
 Then run ingest command (katsu and federation should be running):
 
 ```bash
-python katsu_ingest.py --dataset <dataset_name> --input /Synthetic_Clinical_Data.json 
+python katsu_ingest.py --dataset <dataset_name> --input /Synthetic_Clinical_Data.json
 ```
 
 ## Test data services
