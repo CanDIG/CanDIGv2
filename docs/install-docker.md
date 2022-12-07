@@ -3,7 +3,7 @@
 ---
 These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for hosts file at [update hosts](#update-hosts).
 
-Before beginning, you should set up your environment variables as described in the [README](README.md). 
+Before beginning, you should set up your environment variables as described in the [README](README.md).
 
 ## Install OS Dependencies
 
@@ -107,24 +107,29 @@ git submodule update --init --recursive
 cp -i etc/env/example.env .env
 
 # 3. fetch binaries and initialize candig virtualenv
-make bin-all
+make bin-conda
 make init-conda
 ```
 
-## Choose Docker Deployment Strategy
+ ## Update hosts
 
-We provide instructions below for two different docker deployment strategies. Option 1 uses `docker-compose` to deploy each module. Option 2 builds a Docker Swarm cluster using `docker-machine`. We use Option 2 for production, but Option 1 is simpler for local dev installation. It may be necessary to configure your Hosts file before proceeding (i.e. if you run into an error during `make init-authx`), check the [Hosts documentation](#update-hosts).
+Get your local IP address and edit your `/etc/hosts` file to add (note that the key and value are tab-delimited):
 
-### Option 1: Deploy CanDIGv2 Services with Compose
+```bash
+<your ip>  docker.localhost
+<your ip>  auth.docker.localhost
+```
+
+### WSL
+Edit your /etc/hosts file as stated above along with your Windows hosts file by adding your Windows IPv4 to both hosts files. This can be found at `C:\Windows\system32\drivers\etc`. How you edit this file will change between versions of Windows.
+
+##  Deploy CanDIGv2 Services with Compose
 
 The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets.
 
 ```bash
 # initialize docker environment
 make init-docker
-
-# (optional) create images
-make images
 
 # pull latest CanDIGv2 images (if you didn't create images locally)
 make docker-pull
@@ -134,96 +139,19 @@ make compose
 make init-authx # If this command fails, try the #update-hosts section of this Markdown file
 # TODO: post deploy auth configuration
 
-# (optional) push updated images to $DOCKER_REGISTRY
-docker login
-make docker-push
 ```
 
-## Option 2: Deploy CanDIGv2 using Docker Swarm
-
-### Create CanDIGv2 Development VM
-
-Using the provided steps will help to create a `docker-machine` cluster on VirtualBox. The `make` CLI can also be used to provision and connect a multi-vm Swarm cluster. Users are encouraged to use this docker environment for CanDIGv2 development as it provides an isolated domain from the host environment, increasing security and reducing conflicts with host processes. Modify the `MINIKUBE_*` options in `.env`, then launch a single-node or multi-node `docker-machine` with `make machine-$vm_name`, where `$vm_name` is a unique vm name.
-
-To build a development swarm cluster run the following:
-
-- create a swarm manager with `make machine-manager`, additional nodes with `make machine-manager2`...
-- create a swarm worker with `make machine-worker`, additional nodes with `make machine-worker2`...
-
-To switch your local docker-client to use `docker-machine`, run `eval $(bin/docker-machine env manager)`. Add this line into `bashrc` with `bin/docker-machine env manager >> $HOME/.bashrc` in order to set `docker-machine` as the default `$DOCKER_HOST` for all shells.
-
-### Initialize CanDIGv2 (Docker)
-
-The following commands will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Only perform these actions once as it will override any previous configurations and secrets. Once completed, you can deploy a Compose or Swarm stack.
-
-```bash
-# initialize docker environment
-make init-docker
-```
-
-### Deploy using Swarm
-
-> Note: swarm deployment requires minimum 2 nodes connected (1 manager, 1 worker)
-
-1. Create initial manager node
-
-```bash
-eval $(bin/docker-machine env manager)
-make init-swarm
-```
-
-2. Add additional manager/worker nodes
-
-```bash
-# set the SWARM_MODE and SWARM_MANAGER_IP in .env
-eval $(bin/docker-machine env worker)
-make swarm-join
-```
-
-3. Deploy CanDIGv2 stack on the docker swarm
-
-```bash
-eval $(bin/docker-machine env manager)
-
-# check cluster status (READY:ACTIVE)
-docker node ls
-
-# deploy CanDIGv2 services
-make stack
-```
-
-## Update hosts
-
-Get your local IP address and edit your `/etc/hosts` file to add (note that the key and value are tab-delimited):
-
-```bash
-<your ip>  docker.localhost
-<your ip>  auth.docker.localhost
-```
-
-After saving your hosts file, make sure you reset the auth stack before retrying:
-```bash
-make clean-authx
-make init-authx
-```
-
-If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack. 
-
-Example (Ubuntu):
-Go to your `.env` file and write down the IP addresses for DOCKER_BRIDGE_IP and DOCKER_GWBRIDGE_IP.
+If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
 
 Edit your firewall settings to allow connections from those adresses:
 ```bash
-sudo ufw allow from <DOCKER_BRIDGE_IP> to <your ip>
-sudo ufw allow from <DOCKER_GWBRIDGE_IP> to <your ip>
+export DOCKER_BRIDGE_IP=$(docker network inspect bridge | grep Subnet | awk '{print $2}' | tr -d ',')
+sudo ufw allow from $DOCKER_BRIDGE_IP to <your ip>
 ```
 
 Re-run `make clean-authx` and `make init-authx` and it should work.
 
-### WSL
-Edit your /etc/hosts file as stated above along with your Windows hosts file by adding your Windows IPv4 to both hosts files. This can be found at `C:\Windows\system32\drivers\etc`. How you edit this file will change between versions of Windows.  
-
-## Cleanup CanDIGv2 Compose/Swarm Environment
+## Cleanup CanDIGv2 Compose Environment
 
 Use the following steps to clean up running CanDIGv2 services in a docker-compose configuration. Note that these steps are destructive and will remove **ALL** containers, secrets, volumes, networks, certs, and images. If you are using docker in a shared environment (i.e. with other non-CanDIGv2 containers running) please consider running the cleanup steps manually instead.
 
@@ -231,7 +159,6 @@ The following steps are performed by `make clean-all`:
 
 ```bash
 # 1. stop and remove running stacks
-make clean-stack
 make clean-compose
 
 # 2. stop and remove remaining containers
@@ -239,34 +166,21 @@ make clean-containers
 
 # 3. remove all configs/secrets from docker and local dir
 make clean-secrets
-make clean-configs
 
 # 4. remove all docker volumes and local data dir
 make clean-volumes
 
-# 5. remove all unused networks
-make clean-networks
-
-# 6. delete all cached images
+# 5. delete all cached images
 make clean-images
 
-# 7. leave swarm-cluster
-make clean-swarm
-
-# 8. destroy all docker-machine instances
-make clean-machines
-
-# 9. remove selfsigned-certs (including root-ca)
-make clean-certs
-
-# 10. remove conda environment
+# 6. remove conda environment
 make clean-conda
 
-# 11. remove bin dir (inlcuding miniconda)
+# 7. remove bin dir (inlcuding miniconda)
 make clean-bin
 ```
 
-# Mac Apple Silicon Installation
+## Mac Apple Silicon Installation
 
 ### 1) Step1: Install OS Dependencies
 
@@ -301,7 +215,6 @@ VENV_NAME=candig
 
 ```bash
 # 3. fetch binaries and initialize candig virtualenv
-make bin-all
 make init-conda
 ```
 
@@ -358,7 +271,7 @@ Go to `lib/keycloak/docker-compose.yml` and replace the `- BASE_IMAGE=candig/key
 
 ```bash
 - BASE_IMAGE=mihaibob/keycloak:18.0.2-legacy # (from StackOverflow)
-# or 
+# or
 - BASE_IMAGE=quay.io/c3genomics/keycloak:16.1.1.arm64 # (an alternative built on an M1, for an M1)
 ```
 
@@ -368,7 +281,7 @@ Then run `make`:
 make init-authx
 ```
 
-Once everything has run without errors, take a look at the documentation for 
-[ingesting data and testing the deployment](ingest-and-test.md) as well as 
-[how to modify code and test changes](docker-and-submodules.md) in 
-the context of the CanDIG stack. 
+Once everything has run without errors, take a look at the documentation for
+[ingesting data and testing the deployment](ingest-and-test.md) as well as
+[how to modify code and test changes](docker-and-submodules.md) in
+the context of the CanDIG stack.
