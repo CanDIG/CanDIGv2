@@ -43,7 +43,7 @@ mkdir:
 
 #<<<
 .PHONY: bin-all
-bin-all: bin-conda bin-docker-machine bin-minio bin-traefik bin-prometheus
+bin-all: bin-conda
 
 
 #>>>
@@ -73,81 +73,6 @@ endif
 
 
 #>>>
-# download docker-machine (for swarm deployment)
-# make bin-docker-machine
-
-#<<<
-bin-docker-machine: mkdir
-	echo "    started bin-docker-machine" >> $(LOGFILE)
-	curl -Lo $(DIR)/bin/docker-machine \
-		https://github.com/docker/machine/releases/download/v0.16.2/docker-machine-`uname -s`-`uname -m`
-	chmod 755 $(DIR)/bin/docker-machine
-	echo "    finished bin-docker-machine" >> $(LOGFILE)
-
-
-#>>>
-# download latest minio server/client from Minio repo
-# make bin-minio
-
-#<<<
-bin-minio: mkdir
-	echo "    started bin-minio" >> $(LOGFILE)
-ifeq ($(VENV_OS), arm64mac)
-	curl -Lo $(DIR)/bin/minio \
-		https://dl.minio.io/server/minio/release/darwin-arm64/minio
-	curl -Lo $(DIR)/bin/mc \
-		https://dl.minio.io/client/mc/release/darwin-arm64/mc
-else
-	curl -Lo $(DIR)/bin/minio \
-		https://dl.minio.io/server/minio/release/$(VENV_OS)-amd64/minio
-	curl -Lo $(DIR)/bin/mc \
-		https://dl.minio.io/client/mc/release/$(VENV_OS)-amd64/mc
-endif
-	chmod 755 $(DIR)/bin/minio
-	chmod 755 $(DIR)/bin/mc
-	echo "    finished bin-minio" >> $(LOGFILE)
-
-
-#>>>
-# download prometheus binaries from Github repo
-# make bin-prometheus
-
-#<<<
-bin-prometheus: mkdir
-	echo "    started bin-prometheus" >> $(LOGFILE)
-	mkdir -p $(DIR)/bin/prometheus
-ifeq ($(VENV_OS), arm64mac)
-	curl -Lo $(DIR)/bin/prometheus/prometheus.tar.gz \
-		https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).darwin-arm64.tar.gz
-else
-	curl -Lo $(DIR)/bin/prometheus/prometheus.tar.gz \
-		https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).$(VENV_OS)-amd64.tar.gz
-endif
-	tar --strip-components=1 -zxvf $(DIR)/bin/prometheus/prometheus.tar.gz -C $(DIR)/bin/prometheus
-	chmod 755 $(DIR)/bin/prometheus/prometheus
-	echo "    finished bin-prometheus" >> $(LOGFILE)
-
-
-#>>>
-# download latest traefik binary from Github repo
-# make bin-traefik
-
-#<<<
-bin-traefik: mkdir
-	echo "    started bin-traefik" >> $(LOGFILE)
-ifeq ($(VENV_OS), arm64mac)
-	curl -Lo $(DIR)/bin/traefik.tar.gz \
-		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_darwin_arm64.tar.gz
-else
-	curl -Lo $(DIR)/bin/traefik.tar.gz \
-		https://github.com/traefik/traefik/releases/download/v$(TRAEFIK_VERSION)/traefik_v$(TRAEFIK_VERSION)_$(VENV_OS)_amd64.tar.gz
-endif
-	tar -xvzf $(DIR)/bin/traefik.tar.gz -C bin/
-	chmod 755 $(DIR)/bin/traefik
-	echo "    finished bin-traefik" >> $(LOGFILE)
-
-
-#>>>
 # (re)build service image and deploy/test using docker-compose
 # $module is the name of the sub-folder in lib/
 # add BUILD_OPTS='--no-cache' to ignore cached builds
@@ -170,17 +95,8 @@ build-%:
 
 #<<<
 .PHONY: clean-all
-clean-all: clean-stack clean-compose clean-containers clean-secrets clean-configs \
-	clean-volumes clean-networks clean-images clean-swarm clean-machines \
-	clean-certs clean-conda clean-bin
-
-
-#>>>
-# close all authentication and authorization services
-
-#<<<
-clean-auth:
-
+clean-all: clean-compose clean-containers clean-secrets \
+	clean-volumes clean-images clean-conda clean-bin
 
 
 #>>>
@@ -192,16 +108,6 @@ clean-auth:
 .PHONY: clean-bin
 clean-bin:
 	rm -rf $(DIR)/bin
-
-
-#>>>
-# removed selfsigned-certs (including root-ca)
-# make clean-certs
-
-#<<<
-.PHONY: clean-certs
-clean-certs:
-	rm -f $(DIR)/tmp/ssl/selfsigned-*
 
 
 #>>>
@@ -229,17 +135,6 @@ clean-conda:
 
 
 #>>>
-# clear swarm configs and remove config files
-# make clean-configs
-
-#<<<
-.PHONY: clean-configs
-clean-configs:
-	-docker config rm `docker config ls -q`
-	rm -rf $(DIR)/tmp/configs
-
-
-#>>>
 # stop all running containers and remove all stopped containers
 # make clean-containers
 
@@ -261,48 +156,6 @@ clean-images:
 
 
 #>>>
-# shutdown kubernetes services
-# make clean-kubernetes
-
-#<<<
-.PHONY: clean-kubernetes
-clean-kubernetes:
-	$(DIR)/bin/kompose --file $(DIR)/lib/kubernetes/docker-compose.yml \
-		$(foreach MODULE, $(CANDIG_MODULES), --file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-		down
-
-
-#>>>
-# destroy docker-machine cluster
-# make clean-machines
-
-#<<<
-.PHONY: clean-machines
-clean-machines:
-	$(DIR)/bin/docker-machine rm -f `$(DIR)/bin/docker-machine ls -q`
-
-
-#>>>
-# destroy minikube cluster
-# make clean-minikube
-
-#<<<
-.PHONY: clean-minikube
-clean-minikube:
-	$(DIR)/bin/minikube delete
-
-
-#>>>
-# remove all unused networks
-# make clean-networks
-
-#<<<
-.PHONY: clean-networks
-clean-networks:
-	docker network prune -f
-
-
-#>>>
 # clear swarm secrets and remove secret files
 # make clean-secrets
 
@@ -311,36 +164,6 @@ clean-networks:
 clean-secrets:
 	-docker secret rm `docker secret ls -q`
 	rm -rf $(DIR)/tmp/secrets
-
-
-#>>>
-# remove all stacks
-# make clean-stack
-
-#<<<
-.PHONY: clean-stack
-clean-stack:
-	-docker stack rm `docker stack ls | awk '{print $$1}'`
-
-
-#>>>
-# leave docker-swarm
-# make clean-swarm
-
-#<<<
-.PHONY: clean-swarm
-clean-swarm:
-	docker swarm leave --force
-
-
-#>>>
-# clear all tox screen sessions
-# make clean-tox
-
-#<<<
-.PHONY: clean-tox
-clean-tox:
-	screen -ls | grep pts | cut -d. -f1 | awk '{print $$1}' | xargs kill
 
 
 #>>>
@@ -382,22 +205,6 @@ compose-%:
 
 
 #>>>
-# create docker bridge networks
-# make docker-networks
-
-#<<<
-.PHONY: docker-networks
-docker-networks:
-	docker network create --driver bridge --subnet=$(DOCKER_BRIDGE_IP) --attachable \
-		bridge-net || echo "bridge-net already exists..."
-	docker network create --driver bridge --subnet=$(DOCKER_GWBRIDGE_IP) --attachable \
-		-o com.docker.network.bridge.enable_icc=false \
-		-o com.docker.network.bridge.name=docker_gwbridge \
-		-o com.docker.network.bridge.enable_ip_masquerade=true \
-		docker_gwbridge || echo "docker_gwbridge already exists..."
-
-
-#>>>
 # pull images from $DOCKER_REGISTRY
 # make docker-pull
 
@@ -426,10 +233,6 @@ docker-push:
 #<<<
 .PHONY: docker-secrets
 docker-secrets: mkdir minio-secrets
-	@echo admin > $(DIR)/tmp/secrets/portainer-user
-	$(MAKE) secret-portainer-secret
-	$(MAKE) secret-metadata-app-secret
-
 	@echo admin > $(DIR)/tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-db-secret
 
@@ -447,7 +250,7 @@ docker-secrets: mkdir minio-secrets
 	$(MAKE) secret-tyk-analytics-admin-key
 
 	$(MAKE) secret-vault-s3-token
-	
+
 	$(MAKE) secret-opa-root-token
 	$(MAKE) secret-opa-service-token
 
@@ -459,17 +262,12 @@ docker-secrets: mkdir minio-secrets
 #<<<
 .PHONY: docker-volumes
 docker-volumes:
-	docker volume create consul-data
-	docker volume create datasets-data
 	docker volume create grafana-data
 	docker volume create jupyter-data
-	docker volume create mc-config
 	docker volume create minio-config
 	docker volume create minio-data $(MINIO_VOLUME_OPT)
-	docker volume create portainer-data
 	docker volume create prometheus-data
 	docker volume create toil-jobstore
-	docker volume create traefik-data
 	docker volume create keycloak-data
 	docker volume create tyk-data
 	docker volume create tyk-redis-data
@@ -518,78 +316,7 @@ init-conda:
 
 #<<<
 .PHONY: init-docker
-init-docker: ssl-cert docker-networks docker-volumes docker-secrets
-
-
-#>>>
-# initialize kubernetes environment
-# make init-kubernetes
-
-#<<<
-.PHONY: init-kubernetes
-init-kubernetes: ssl-cert docker-secrets docker-pull
-	$(DIR)/bin/kubectl create namespace $(DOCKER_NAMESPACE)
-
-
-#>>>
-# initialize docker-swarm environment and create swarm networks, configs, and secrets
-# make init-swarm
-
-#<<<
-.PHONY: init-swarm
-init-swarm: swarm-init swarm-networks swarm-configs swarm-secrets
-
-
-#>>>
-# deploy/test all modules in $CANDIG_MODULES using Kubernetes
-# make kubernetes
-
-#<<<
-.PHONY: kubernetes
-kubernetes:
-	$(DIR)/bin/kompose --file $(DIR)/lib/kubernetes/docker-compose.yml \
-		$(foreach MODULE, $(CANDIG_MODULES), --file $(DIR)/lib/$(MODULE)/docker-compose.yml) \
-		up
-
-
-#>>>
-# deploys individual module using kompose
-# $module is the name of the sub-folder in lib
-# make kube-$module
-
-#<<<
-kube-%:
-	$(DIR)/bin/kompose --file $(DIR)/lib/kubernetes/docker-compose.yml \
-		--file $(DIR)/lib/$*/docker-compose.yml up
-
-
-#>>>
-# create docker-machine instance(s) for Docker Compose/Swarm development
-# NOTE: only virtualbox is supported at this time
-# NOTE: use MINIKUBE_* to configure vm options
-# $vm_name must be a unique name for the docker-machine instance (e.g. make machine-manager)
-# make machine-$vm_name
-
-#<<<
-machine-%:
-	$(DIR)/bin/docker-machine create --driver "$(MINIKUBE_DRIVER)" \
-  		--virtualbox-cpu-count "$(MINIKUBE_CPUS)" --virtualbox-memory "$(MINIKUBE_MEM)" \
-		--virtualbox-disk-size "$(MINIKUBE_DISK)" --virtualbox-hostonly-cidr "192.168.56.1/24" \
-		--virtualbox-hostonly-nicpromisc "deny" --virtualbox-hostonly-nictype "82540EM" \
-		$*
-
-
-#>>>
-# create minikube environment for (kubernetes) integration testing
-# make minikube
-
-#<<<
-.PHONY: minikube
-minikube:
-	$(DIR)/bin/minikube start --container-runtime $(MINIKUBE_CRI) \
-		--cpus $(MINIKUBE_CPUS) --memory $(MINIKUBE_MEM) --disk-size $(MINIKUBE_DISK) \
-		--network-plugin cni --cni $(MINIKUBE_CNI) --driver $(MINIKUBE_DRIVER) \
-		--dns-domain $(CANDIG_DOMAIN) --nodes $(MINIKUBE_NODES)
+init-docker: docker-volumes docker-secrets
 
 
 #>>>
@@ -642,144 +369,6 @@ secret-%:
 
 
 #>>>
-# generate root-ca and site ssl certs using openssl
-# make ssl-cert
-
-#<<<
-ssl-cert:
-	openssl genrsa -out $(DIR)/tmp/ssl/selfsigned-root-ca.key 4096
-	openssl req -new -key $(DIR)/tmp/ssl/selfsigned-root-ca.key \
-		-out $(DIR)/tmp/ssl/selfsigned-root-ca.csr -sha256 \
-		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed CA'
-	openssl x509 -req -days 3650 -in $(DIR)/tmp/ssl/selfsigned-root-ca.csr \
-		-signkey $(DIR)/tmp/ssl/selfsigned-root-ca.key -sha256 \
-		-out $(DIR)/tmp/ssl/selfsigned-root-ca.crt \
-		-extfile $(DIR)/etc/ssl/root-ca.cnf -extensions root_ca
-	openssl genrsa -out $(DIR)/tmp/ssl/selfsigned-site.key 4096
-	openssl req -new -key $(DIR)/tmp/ssl/selfsigned-site.key \
-		-out $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
-		-subj '/C=CA/ST=ON/L=Toronto/O=CanDIG/CN=CanDIG Self-Signed Cert'
-
-	cp $(DIR)/etc/ssl/site.cnf $(DIR)/tmp/ssl/site.cnf
-	sed -i.bak s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/site.cnf
-	openssl x509 -req -days 750 -in $(DIR)/tmp/ssl/selfsigned-site.csr -sha256 \
-		-CA $(DIR)/tmp/ssl/selfsigned-root-ca.crt \
-		-CAkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
-		-CAcreateserial -out $(DIR)/tmp/ssl/selfsigned-site.crt \
-		-extfile $(DIR)/tmp/ssl/site.cnf -extensions server
-
-	cp $(DIR)/etc/ssl/alt_names.txt $(DIR)/tmp/ssl/alt_names.txt
-	sed -i.bak s/CANDIG_DOMAIN/$(CANDIG_DOMAIN)/ $(DIR)/tmp/ssl/alt_names.txt
-	openssl x509 -req -days 365 -in $(DIR)/tmp/ssl/selfsigned-root-ca.csr \
-	    -sha256 \
-	    -signkey $(DIR)/tmp/ssl/selfsigned-root-ca.key \
-		-extfile $(DIR)/tmp/ssl/alt_names.txt \
-		-out $(DIR)/tmp/ssl/public.crt
-	openssl x509 -in $(DIR)/tmp/ssl/public.crt -out $(DIR)/tmp/ssl/cert.pem
-
-
-
-#>>>
-# deploy/test all modules in $CANDIG_MODULES using docker stack
-# make stack
-
-#<<<
-.PHONY: stack
-stack:
-	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) stack-$(MODULE);)
-
-
-#>>>
-# deploy/test individual modules using docker stack
-# $module is the name of the sub-folder in lib/
-# make stack-$module
-
-#<<<
-stack-%:
-	cat $(DIR)/lib/swarm/docker-compose.yml \
-		$(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		$(DIR)/lib/$*/docker-compose.yml > $(DIR)/tmp/data/docker-compose.yml
-	docker stack deploy --compose-file $(DIR)/tmp/data/docker-compose.yml $(DOCKER_NAMESPACE)
-
-
-#>>>
-# initialize primary docker-swarm master node
-# make swarm-init
-
-
-#>>>
-# create docker configs for CanDIG services (swarm only)
-# configs are distributed to all swarm nodes
-# make swarm-configs
-
-#<<<
-.PHONY: swarm-configs
-swarm-configs:
-	docker config create chord-metadata-settings $(DIR)/lib/chord-metadata/settings.py
-	docker config create wes-dependency-resolver $(DIR)/etc/yml/$(WES_DEPENDENCY_RESOLVER).yml
-
-#<<<
-.PHONY: swarm-init
-swarm-init:
-	docker swarm init --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP)
-	@docker swarm join-token manager -q > $(DIR)/tmp/secrets/swarm-manager-token
-	@docker swarm join-token worker -q > $(DIR)/tmp/secrets/swarm-worker-token
-
-
-#>>>
-# join a docker swarm cluster using manager/worker token
-# make swarm-join
-
-#<<<
-.PHONY: swarm-join
-swarm-join:
-	@docker swarm join --advertise-addr $(SWARM_ADVERTISE_IP) --listen-addr $(SWARM_LISTEN_IP) \
-		--token `cat $(DIR)/tmp/secrets/swarm-$(SWARM_MODE)-token` $(SWARM_MANAGER_IP)
-
-
-#>>>
-# create docker swarm overlay networks
-# make-swarm-networks
-
-#<<<
-.PHONY: swarm-networks
-swarm-networks:
-	docker network create --driver overlay --opt encrypted=true traefik-net
-	docker network create --driver overlay --internal --opt encrypted=true agent-net
-
-#>>>
-# create docker swarm compatbile secrets
-# make swarm-secrets
-
-#<<<
-.PHONY: swarm-secrets
-swarm-secrets:
-	docker secret create aws-credentials $(DIR)/tmp/secrets/aws-credentials
-	docker secret create minio-access-key $(DIR)/tmp/secrets/minio-access-key
-	docker secret create minio-secret-key $(DIR)/tmp/secrets/minio-secret-key
-
-	docker secret create portainer-user $(DIR)/tmp/secrets/portainer-user
-	docker secret create portainer-secret $(DIR)/tmp/secrets/portainer-secret
-
-	docker secret create traefik-ssl-key $(DIR)/tmp/ssl/$(TRAEFIK_SSL_CERT).key
-	docker secret create traefik-ssl-crt $(DIR)/tmp/ssl/$(TRAEFIK_SSL_CERT).crt
-
-	docker secret create metadata-app-secret $(DIR)/tmp/secrets/metadata-app-secret
-	docker secret create metadata-db-user $(DIR)/tmp/secrets/metadata-db-user
-	docker secret create metadata-db-secret $(DIR)/tmp/secrets/metadata-db-secret
-
-	docker secret create keycloak-admin-user $(DIR)/tmp/secrets/keycloak-admin-user
-	docker secret create keycloak-admin-password $(DIR)/tmp/secrets/keycloak-admin-password
-
-	docker secret create tyk-secret-key $(DIR)/tmp/secrets/tyk-secret-key
-	docker secret create tyk-node-secret-key $(DIR)/tmp/secrets/tyk-node-secret-key
-
-	# TODO: review
-	#docker secret create keycloak-test-password-1 $(DIR)/tmp/secrets/keycloak-test-password-1
-	#docker secret create keycloak-test-password-2 $(DIR)/tmp/secrets/keycloak-test-password-2
-
-
-#>>>
 # create toil images using upstream CanDIG Toil repo
 # make toil-docker
 
@@ -796,26 +385,6 @@ toil-docker:
 		$(DOCKER_REGISTRY)/$(MODULE):latest;)
 	$(foreach MODULE, $(TOIL_MODULES), docker push $(DOCKER_REGISTRY)/$(MODULE):latest;)
 	echo "    finished toil-docker" >> $(LOGFILE)
-
-
-#>>>
-# deploys all modules using Tox
-# make tox
-
-#<<<
-.PHONY: tox
-tox:
-	dotenv -f .env run tox
-
-
-#>>>
-# deploys individual module using tox
-# $module is the name of the sub-folder in lib/
-# make tox-$module
-
-#<<<
-tox-%:
-	dotenv -f .env run tox -e $*
 
 
 #>>>
