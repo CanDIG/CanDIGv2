@@ -7,12 +7,14 @@ services:
       - minio-data:/data
       - minio-config:/root/.minio
     ports:
-      - "${MINIO_UI_PORT}:9090"
+      - "${MINIO_UI_PORT}:9001"
       - "${MINIO_PORT}:9000"
     environment:
       - MINIO_REGION=${MINIO_REGION}
-      - CANDIG_DOMAIN="${CANDIG_DOMAIN}"
-      - MINIO_SERVER_URL=${MINIO_PUBLIC_URL}
+      - MINIO_ADDRESS=:${MINIO_PORT}
+      - MINO_CONSOLE_ADDRESS=127.0.0.1:${MINIO_UI_PORT}
+      #- CANDIG_DOMAIN="${CANDIG_DOMAIN}"
+      #- MINIO_SERVER_URL=${MINIO_PUBLIC_URL}
     secrets:
       - source: minio-access-key
         target: access_key
