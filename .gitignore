@@ -16,6 +16,7 @@
 /etc/ssl/selfsigned-*
 */miniconda3
 .vagrant
+.hosts.tmp
 
 # test metadata
 etc/tests/integration/*/__pycache__/*
