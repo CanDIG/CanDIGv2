@@ -194,7 +194,9 @@ compose:
 #<<<
 compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
-	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml up -d
+	cat $(DIR)/lib/compose/docker-compose.yml \
+ 		$(DIR)/lib/$*/docker-compose.yml \
+ 		| docker-compose --compatibility -f - up -d
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
