@@ -12,9 +12,6 @@ services:
     environment:
       - MINIO_REGION=${MINIO_REGION}
       - MINIO_ADDRESS=:${MINIO_PORT}
-      - MINO_CONSOLE_ADDRESS=127.0.0.1:${MINIO_UI_PORT}
-      #- CANDIG_DOMAIN="${CANDIG_DOMAIN}"
-      #- MINIO_SERVER_URL=${MINIO_PUBLIC_URL}
     secrets:
       - source: minio-access-key
         target: access_key
