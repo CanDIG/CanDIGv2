@@ -1,7 +1,7 @@
 # CanDIGv2 Install Guide
 
 ---
-These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for hosts file at [update hosts](#update-hosts).
+These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for updating your firewall at [update firewall](#update-firewall).
 
 Before beginning, you should set up your environment variables as described in the [README](README.md).
 
@@ -111,17 +111,9 @@ make bin-conda
 make init-conda
 ```
 
- ## Update hosts
+## Update Firewall
 
-Get your local IP address and edit your `/etc/hosts` file to add (note that the key and value are tab-delimited):
-
-```bash
-<your ip>  docker.localhost
-<your ip>  auth.docker.localhost
-```
-
-### WSL
-Edit your /etc/hosts file as stated above along with your Windows hosts file by adding your Windows IPv4 to both hosts files. This can be found at `C:\Windows\system32\drivers\etc`. How you edit this file will change between versions of Windows.
+We provide instructions below for two different docker deployment strategies. Option 1 uses `docker-compose` to deploy each module. Option 2 builds a Docker Swarm cluster using `docker-machine`. We use Option 2 for production, but Option 1 is simpler for local dev installation. It may be necessary to configure your firewall file before proceeding (i.e. if you run into an error during `make init-authx`), check the [Firewall documentation](#update-firewall).
 
 ##  Deploy CanDIGv2 Services with Compose
 
@@ -136,12 +128,72 @@ make docker-pull
 
 # deploy stack
 make compose
-make init-authx # If this command fails, try the #update-hosts section of this Markdown file
+make init-authx # If this command fails, try the #update-firewall section of this Markdown file
 # TODO: post deploy auth configuration
 
 ```
 
 If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
+
+## Option 2: Deploy CanDIGv2 using Docker Swarm
+
+### Create CanDIGv2 Development VM
+
+Using the provided steps will help to create a `docker-machine` cluster on VirtualBox. The `make` CLI can also be used to provision and connect a multi-vm Swarm cluster. Users are encouraged to use this docker environment for CanDIGv2 development as it provides an isolated domain from the host environment, increasing security and reducing conflicts with host processes. Modify the `MINIKUBE_*` options in `.env`, then launch a single-node or multi-node `docker-machine` with `make machine-$vm_name`, where `$vm_name` is a unique vm name.
+
+To build a development swarm cluster run the following:
+
+- create a swarm manager with `make machine-manager`, additional nodes with `make machine-manager2`...
+- create a swarm worker with `make machine-worker`, additional nodes with `make machine-worker2`...
+
+To switch your local docker-client to use `docker-machine`, run `eval $(bin/docker-machine env manager)`. Add this line into `bashrc` with `bin/docker-machine env manager >> $HOME/.bashrc` in order to set `docker-machine` as the default `$DOCKER_HOST` for all shells.
+
+### Initialize CanDIGv2 (Docker)
+
+The following commands will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Only perform these actions once as it will override any previous configurations and secrets. Once completed, you can deploy a Compose or Swarm stack.
+
+```bash
+# initialize docker environment
+make init-docker
+```
+
+### Deploy using Swarm
+
+> Note: swarm deployment requires minimum 2 nodes connected (1 manager, 1 worker)
+
+1. Create initial manager node
+
+```bash
+eval $(bin/docker-machine env manager)
+make init-swarm
+```
+
+2. Add additional manager/worker nodes
+
+```bash
+# set the SWARM_MODE and SWARM_MANAGER_IP in .env
+eval $(bin/docker-machine env worker)
+make swarm-join
+```
+
+3. Deploy CanDIGv2 stack on the docker swarm
+
+```bash
+eval $(bin/docker-machine env manager)
+
+# check cluster status (READY:ACTIVE)
+docker node ls
+
+# deploy CanDIGv2 services
+make stack
+```
+
+## Update firewall
+
+It may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack. 
+
+Example (Ubuntu):
+Go to your `.env` file and write down the IP addresses for DOCKER_BRIDGE_IP and DOCKER_GWBRIDGE_IP.
 
 Edit your firewall settings to allow connections from those adresses:
 ```bash
@@ -242,28 +294,7 @@ make init-docker
 make compose
 ```
 
-### Step 5: Update hosts
-
-- Get the local IP address in the terminal:
-
-```bash
-ifconfig -l | xargs -n1 ipconfig getifaddr
-```
-
-- Then edit your /etc/hosts file:
-
-```bash
-sudo nano /etc/hosts
-```
-
-- Add the IP address to the end of the file so it look like this (noting that the key and value need to be tab-delimited):
-
-```bash
-# Other settings
-192.168.X.XX docker.localhost
-```
-
-### Step 6: Create Auth Stack
+### Step 5: Create Auth Stack
 
 The old keycloak image (15.0.0) is not compatible with M1, so we need to upgrade it.
 
