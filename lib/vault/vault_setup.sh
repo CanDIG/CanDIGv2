@@ -19,21 +19,6 @@ mkdir -p ${PWD}/lib/vault/tmp
 echo "Working on vault-config.json .."
 envsubst < ${PWD}/lib/vault/configuration_templates/vault-config.json.tpl > ${PWD}/lib/vault/tmp/vault-config.json
 
-# Replace docker.localhost entry in /etc/hosts
-echo "Replacing the docker.localhost entry in /etc/hosts (root access will be requried)..."
-sudo grep -v "	docker\.localhost" /etc/hosts >.hosts.tmp
-sudo printf "\n" >>.hosts.tmp
-
-if [ "$VENV_OS" == "linux" ]
-then
-  sudo ifconfig | grep -A 1 'wlp0\|eth0' | grep -o "inet [0-9.]\+" | cut -d' ' -f2 | tr -d $'\n' >>.hosts.tmp
-  sudo printf "\tdocker.localhost" >> .hosts.tmp
-else
-  sudo ifconfig en0 | grep -o "inet [0-9.]\+" | cut -d' ' -f2 | tr -d $'\n' >>.hosts.tmp
-  sudo printf "\tdocker.localhost" >> .hosts.tmp
-fi
-sudo mv .hosts.tmp /etc/hosts
-
 # boot container
 make build-vault
 make compose-vault

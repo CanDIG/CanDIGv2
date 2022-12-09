@@ -244,6 +244,13 @@ docker-secrets: mkdir minio-secrets
 	$(MAKE) secret-opa-root-token
 	$(MAKE) secret-opa-service-token
 
+#>>>
+# modify the hosts file
+
+#<<<
+.PHONY: hosts-file
+hosts-file:
+	source ${PWD}/setup_hosts.sh
 
 #>>>
 # create persistant volumes for docker containers
@@ -306,7 +313,7 @@ init-conda:
 
 #<<<
 .PHONY: init-docker
-init-docker: docker-volumes docker-secrets
+init-docker: docker-volumes docker-secrets hosts-file
 
 
 #>>>
