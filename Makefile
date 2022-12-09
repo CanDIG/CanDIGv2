@@ -118,7 +118,8 @@ clean-bin:
 .PHONY: clean-compose
 clean-compose:
 	$(foreach MODULE, $(CANDIG_MODULES), \
-		docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml down;)
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/$(MODULE)/docker-compose.yml \
+ 		| docker-compose -f - down;)
 
 
 #>>>
@@ -194,9 +195,8 @@ compose:
 #<<<
 compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
-	cat $(DIR)/lib/compose/docker-compose.yml \
- 		$(DIR)/lib/$*/docker-compose.yml \
- 		| docker-compose --compatibility -f - up -d
+	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/$*/docker-compose.yml \
+		| docker-compose --compatibility -f - up -d
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
@@ -336,7 +336,8 @@ minio-secrets:
 
 #<<<
 pull-%:
-		docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml pull
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/$*/docker-compose.yml \
+			| docker-compose -f - pull
 
 
 #>>>
@@ -346,7 +347,8 @@ pull-%:
 
 #<<<
 push-%:
-		docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml push
+		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/$*/docker-compose.yml \
+			| docker-compose -f - push
 
 
 #>>>
