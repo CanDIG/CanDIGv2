@@ -15,7 +15,7 @@ CanDIGv2/
  ├── Makefile                      - functions for repeatable testing/deployment (Docker/Kubernetes)
  ├── tox.ini                       - functions for repeatable testing/deployment (Python Venv/Screen)
  ├── bin/                          - local binaries directory
- ├── docs/                         - documentation, installation instructions 
+ ├── docs/                         - documentation, installation instructions
  ├── etc/                          - contains misc files/config/scripts
  │    ├── docker/                  - docker configurations
  │    ├── env/                     - sample .env file
@@ -51,7 +51,7 @@ Some of the functionality that is controlled through `.env` are:
 * pre-defined defaults for turnkey deployment
 
 Environment variables defined in the `.env` file can be read in `docker-compose` scripts through the variable substitution operator
-`${VAR}`. 
+`${VAR}`.
 
 ```yaml
 # example compose YAML using variable substitution with default option
@@ -63,19 +63,19 @@ services:
 ```
 ### Configuring CanDIG modules
 
-Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` and `CANDIG_AUTH_MODULES` define which modules are included in the deployment. 
+Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` and `CANDIG_AUTH_MODULES` define which modules are included in the deployment.
 
 By default (if you copy the sample file from `etc/env/example.env`) the installation includes the minimal list of modules:
 
   CANDIG_MODULES=minio htsget-server chord-metadata candig-data-portal
 
-Optional modules follow the `#` and include federation service, various monitoring components, workflow execution, and some older modules not generally installed. 
+Optional modules follow the `#` and include federation service, various monitoring components, workflow execution, and some older modules not generally installed.
 
-For federated installations, you will need `federation-service`. 
+For federated installations, you will need `federation-service`.
 
-For production deployments, you will probably want to include  `federation-service weavescope logging monitoring`. Be aware that the last three require more resources, includeing storage. 
+For production deployments, you will probably want to include  `federation-service weavescope logging monitoring`. Be aware that the last three require more resources, includeing storage.
 
-Authorization and authentication modules defined in  `CANDIG_AUTH_MODULES` are only installed if you run `make init-authx` during deployment. 
+Authorization and authentication modules defined in  `CANDIG_AUTH_MODULES` are only installed if you run `make init-authx` during deployment.
 
 ## `make` Deployment
 
@@ -85,9 +85,6 @@ To deploy CanDIGv2, follow the docker deployment guide in `docs/`:
 
 There are other deprecated deployment guides in `docs`, but there are no guarantees that these still function:
 
-* [Vagrant Deployment Guide (with instructions for OpenStack)](./docs/install-vagrant.md)
-* [Kubernetes Deployment Guide](./docs/install-kubernetes.md)
-* [Tox Deployment Guide](./docs/install-tox.md)
 * [Authentication and Authorization Deployment Guide](./docs/authx-setup.md)
 
 View additional Makefile options with `make help`.
@@ -106,14 +103,8 @@ The following table lists the details from the Data Flow Diagram in the "Overvie
 | Service/Component Name | Source | Notes                        |
 |------------------------|--------|------------------------------|
 | Katsu (CHORD Metadata) | links  | DFD: `chord_metadata`        |
-| CNV Service            | links  | DFD: `cnv_service`           |
-| Authorization Service  | links  | DFD: `authorization_service` |
 | Federation Service     | links  | DFD: `federation_service`    |
-| Datasets Service       | links  | DFD: `datasets_service`      |
-| RNAGet                 | links  | DFD: `rnaget`                |
-| CanDIGv1 Server        | links  | DFD: `candig_server`         |
 | HTSGet                 | links  | DFD: `htsget_app`            |
 | CHORD DRS              | links  | DFD: `chord_drs`             |
-| IGV JS                 | links  | DFD: `igv_js`                |
 | WES Server             | links  | DFD: `wes_server`            |
-| CanDIG Data Portal     | links  | DFD:                         |
+| CanDIG Data Portal     | links  | DFD: `candig-data-portal`    |
