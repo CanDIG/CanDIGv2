@@ -4,8 +4,7 @@
 
 #<<<
 clean-keycloak:
-	cat $(DIR)/lib/compose/docker-compose.yml \
-		$(DIR)/lib/keycloak/docker-compose.yml | docker-compose -f - down
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/keycloak/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'keycloak' | xargs -I{} docker rmi --force {}
@@ -18,8 +17,7 @@ clean-keycloak:
 
 #<<<
 clean-vault:
-	cat $(DIR)/lib/compose/docker-compose.yml \
-		$(DIR)/lib/vault/docker-compose.yml | docker-compose -f - down
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/vault/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'vault' | xargs -I{} docker rmi --force {}
@@ -33,8 +31,7 @@ clean-vault:
 
 #<<<
 clean-opa:
-	cat $(DIR)/lib/compose/docker-compose.yml \
-		$(DIR)/lib/opa/docker-compose.yml | docker-compose -f - down
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml docker-compose -f $(DIR)/lib/opa/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'openpolicyagent/opa' | xargs -I{} docker rmi --force {}
@@ -49,8 +46,7 @@ clean-opa:
 
 #<<<
 clean-tyk:
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		$(DIR)/lib/tyk/docker-compose.yml | docker-compose -f - down
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml down -f $(DIR)/lib/tyk/docker-compose.yml || true
 
 	# - remove intermittent docker images
 	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'tyk|redis' |  xargs -I{} docker rmi --force {}
@@ -76,12 +72,6 @@ clean-authx: clean-keycloak clean-tyk clean-vault clean-opa
 
 #<<<
 init-authx: mkdir
-	# Generate dynamic environment variables
-	# ==========  HACK ALERT ==============
-	# This setup with backslashes (\) is required because Make runs each command
-	# in its own shell.  So to pass the environment from previous commands, one has
-	# to do this backslash dance. This could have been resolved but we decided to
-	# move to a better solution so Aman made a decision to keep this hack as-is.
 	$(MAKE) docker-volumes
 	echo "Setting up Keycloak"; \
 	source ${PWD}/lib/keycloak/keycloak_setup.sh; \
@@ -107,12 +97,6 @@ init-authx: mkdir
 redeploy-tyk: mkdir
 	$(MAKE) clean-tyk
 	$(MAKE) docker-volumes
-	# Generate dynamic environment variables
-	# ==========  HACK ALERT ==============
-	# This setup with backslashes (\) is required because Make runs each command
-	# in its own shell.  So to pass the environment from previous commands, one has
-	# to do this backslash dance. This could have been resolved but we decided to
-	# move to a better solution so Aman made a decision to keep this hack as-is.
 	source ${PWD}/lib/tyk/tyk_setup.sh; \
 	echo ; \
 	$(MAKE) compose-tyk; \
@@ -129,4 +113,3 @@ redeploy-tyk: mkdir
 setup-%:
 	echo "Setting up $*"
 	source ${PWD}/lib/$*/$*_setup.sh
-
