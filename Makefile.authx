@@ -46,7 +46,7 @@ clean-opa:
 
 #<<<
 clean-tyk:
-	docker-compose -f $(DIR)/lib/compose/docker-compose.yml down -f $(DIR)/lib/tyk/docker-compose.yml || true
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/tyk/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'tyk|redis' |  xargs -I{} docker rmi --force {}
