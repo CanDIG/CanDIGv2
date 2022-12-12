@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Early-abort if this step isn't required
-test=$(grep "	docker\.localhost" /etc/hosts)
+test=$(grep -E "\sdocker\.localhost" /etc/hosts)
 
 if [[ ! -z "$test" ]]; then
     echo "Skipping hosts setup as docker.localhosts already exists there..."
@@ -26,7 +26,7 @@ if [ "$numlines" == "1" ]; then
     printf "$IP\tdocker.localhost" >> .hosts.tmp
     sudo mv .hosts.tmp /etc/hosts;
 else
-    echo "More than one IP has been detected. Since this script can't automatically determine which one"
+    echo "ERROR: More than one IP has been detected. Since this script can't automatically determine which one"
     echo "will make the build work, please remove all but one of the inserted docker.localhost lines in /etc/hosts."
     echo $IP >.hosts.tmp2
     awk '{printf "%s\tdocker.localhost\n", $0}' .hosts.tmp2 >> .hosts.tmp
