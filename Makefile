@@ -29,10 +29,7 @@ all:
 .PHONY: mkdir
 mkdir:
 	mkdir -p $(DIR)/bin
-	mkdir -p $(DIR)/tmp/configs
-	mkdir -p $(DIR)/tmp/data
-	mkdir -p $(DIR)/tmp/secrets
-	mkdir -p $(DIR)/tmp/ssl
+	mkdir -p $(DIR)/tmp/{configs,data,secrets}
 	mkdir -p $(DIR)/tmp/{keycloak,tyk,vault}
 	mkdir -p ${DIR}/tmp/federation
 
@@ -83,8 +80,7 @@ endif
 build-%:
 	echo "    started build-$*" >> $(LOGFILE)
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml $(DIR)/lib/$*/docker-compose.yml \
-		| docker-compose -f - build $(BUILD_OPTS)
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build $(BUILD_OPTS)
 	echo "    finished build-$*" >> $(LOGFILE)
 
 
@@ -118,8 +114,7 @@ clean-bin:
 .PHONY: clean-compose
 clean-compose:
 	$(foreach MODULE, $(CANDIG_MODULES), \
-		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/$(MODULE)/docker-compose.yml \
- 		| docker-compose -f - down;)
+		docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml down || true;)
 
 
 #>>>
@@ -141,7 +136,6 @@ clean-conda:
 #<<<
 .PHONY: clean-containers
 clean-containers:
-	-docker stop `docker ps -q`
 	docker container prune -f
 
 
@@ -195,8 +189,7 @@ compose:
 #<<<
 compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/$*/docker-compose.yml \
-		| docker-compose --compatibility -f - up -d
+	docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml --compatibility up -d
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
@@ -208,7 +201,7 @@ compose-%:
 .PHONY: docker-pull
 docker-pull:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) pull-$(MODULE);)
-	#$(foreach MODULE, $(TOIL_MODULES), docker pull $(DOCKER_REGISTRY)/$(MODULE):latest;)
+#$(foreach MODULE, $(TOIL_MODULES), docker pull $(DOCKER_REGISTRY)/$(MODULE):latest;)
 
 
 #>>>
@@ -219,7 +212,7 @@ docker-pull:
 .PHONY: docker-push
 docker-push:
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) push-$(MODULE);)
-	#$(foreach MODULE, $(TOIL_MODULES), docker push $(DOCKER_REGISTRY)/$(MODULE):latest;)
+#$(foreach MODULE, $(TOIL_MODULES), docker push $(DOCKER_REGISTRY)/$(MODULE):latest;)
 
 
 #>>>
@@ -301,9 +294,9 @@ init-conda:
 		&& conda activate $(VENV_NAME) \
 		&& pip install -U -r $(DIR)/etc/venv/requirements.txt
 
-	#@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
-	#@echo "Activate conda env: conda activate $(VENV_NAME)"
-	#@echo "Install requirements: pip install -U -r $(DIR)/etc/venv/requirements.txt"
+#@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
+#@echo "Activate conda env: conda activate $(VENV_NAME)"
+#@echo "Install requirements: pip install -U -r $(DIR)/etc/venv/requirements.txt"
 	echo "    finished init-conda" >> $(LOGFILE)
 
 
@@ -336,8 +329,7 @@ minio-secrets:
 
 #<<<
 pull-%:
-		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/$*/docker-compose.yml \
-			| docker-compose -f - pull
+		docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml pull
 
 
 #>>>
@@ -347,8 +339,7 @@ pull-%:
 
 #<<<
 push-%:
-		cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/$*/docker-compose.yml \
-			| docker-compose -f - push
+		docker-compose -f $(DIR)/lib/compose/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml push
 
 
 #>>>
@@ -369,7 +360,8 @@ secret-%:
 .PHONY: toil-docker
 toil-docker:
 	echo "    started toil-docker" >> $(LOGFILE)
-	VIRTUAL_ENV=1 DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 TOIL_DOCKER_REGISTRY=$(DOCKER_REGISTRY) $(MAKE) -C $(DIR)/lib/toil/toil-docker docker
+	VIRTUAL_ENV=1 DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 TOIL_DOCKER_REGISTRY=$(DOCKER_REGISTRY) \
+	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker
 	$(foreach MODULE,$(TOIL_MODULES), \
 		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION)-$(TOIL_BUILD_HASH) \
 		$(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION);)
