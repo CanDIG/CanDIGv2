@@ -12,53 +12,15 @@ services:
       #- {{service_name}}-data:/data
       #add volume name to lib/{compose,swarm,kubernetes}
       #add volume name to docker-volumes in Makefile
-    networks:
-      - ${DOCKER_NET}
-      #add network name to lib/{compose,swarm,kubernetes}
-      #add netowrk name to docker-net (bridge) or swarm-net (overlay) in Makefile
     ports:
       - "${{{service_port}}}:{{service_default_port}}"
     depends_on:
       - {{some_service}}
-    deploy:
-      placement:
-        constraints:
-          - node.role == {{service_role}} # manager or worker
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    # use global to deploy service on all nodes
-    # deploy:
-    #   mode: global
-    #   restart_policy:
-    #     condition: on-failure
-    #     delay: 5s
-    #     max_attempts: 3
-    #     window: 120s
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.lbswarm=true"
-        - "traefik.http.routers.{{service_name}}.rule=Host(`{{service_name}}.${CANDIG_DOMAIN}`)"
-        - "traefik.http.routers.{{service_name}}.entrypoints=${TRAEFIK_ENTRYPOINT}"
-        - "traefik.http.services.{{service_name}}.loadbalancer.server.port=${{{service_port}}}"
-        # include these labels (but leave disabled)
-    logging: *default-logging
     # WARNING: environment variables are world readable
     # DO NOT pass secrets through here
     environment:
       - MINIO_REGION="${MINIO_REGION}"
       - CANDIG_DOMAIN="${CANDIG_DOMAIN}"
-    configs:
-      - source: my_config
-        target: /redis_config
-        uid: '103'
-        gid: '103'
-        mode: 0440
-      #add config name to lib/{compose,swarm,kubernetes}
-      #add config name and path to swarm-configs in Makefile
-    # passes secrets to container as plaintext file (default: /run/secrets/<target>)
     secrets:
       - source: minio-access-key
         target: access_key

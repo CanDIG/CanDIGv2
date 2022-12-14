@@ -24,18 +24,18 @@ make build-vault
 make compose-vault
 
 echo ">> waiting for vault to start"
-docker ps | grep vault
+docker ps --format "{{.Names}}" | grep vault_1
 while [ $? -ne 0 ]
 do
   echo "..."
   sleep 1
-  docker ps | grep vault
+  docker ps --format "{{.Names}}" | grep vault_1
 done
 sleep 5
 
 # gather keys and login token
 echo ">> gathering keys"
-vault=$(docker ps | grep vault_1 | awk '{print $1}')
+vault=$(docker ps --format "{{.Names}}" | grep vault_1 | awk '{print $1}')
 stuff=$(docker exec $vault sh -c "vault operator init") # | head -7 | rev | cut -d " " -f1 | rev)
 echo "found stuff as ${stuff}"
 

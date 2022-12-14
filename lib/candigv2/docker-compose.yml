@@ -1,34 +1,15 @@
 version: '3.7'
 
-networks:
-  bridge:
-    external: true
-  bridge-net:
-    external: true
-  ingress:
-  traefik-net:
-  agent-net:
-
 volumes:
-  datasets-data:
-    external: true
   minio-data:
     external: true
   minio-config:
     external: true
-  mc-config:
-    external: true
   toil-jobstore:
-    external: true
-  portainer-data:
     external: true
   prometheus-data:
     external: true
-  consul-data:
-    external: true
   grafana-data:
-    external: true
-  traefik-data:
     external: true
   keycloak-data:
     external: true
@@ -66,10 +47,6 @@ secrets:
     file: $PWD/tmp/secrets/portainer-user
   portainer-secret:
     file: $PWD/tmp/secrets/portainer-secret
-  traefik-ssl-key:
-    file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.key
-  traefik-ssl-crt:
-    file: $PWD/tmp/ssl/${TRAEFIK_SSL_CERT}.crt
   wes-dependency-resolver:
     file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
   keycloak-admin-user:

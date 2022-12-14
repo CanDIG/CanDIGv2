@@ -14,26 +14,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - prometheus-data:/prometheus
-    networks:
-      - ${DOCKER_NET}
     ports:
       - "${PROMETHEUS_PORT}:9090"
     depends_on:
       - cadvisor
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.lbswarm=true"
-        - "traefik.http.routers.prometheus.rule=Host(`prometheus.${CANDIG_DOMAIN}`)"
-        - "traefik.http.services.prometheus.loadbalancer.server.port=${PROMETHEUS_PORT}"
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -50,15 +34,6 @@ services:
       - /:/rootfs:ro
     ports:
       - "${NODE_EXPORTER_PORT}:9100"
-    networks:
-      - ${DOCKER_NET}
-    deploy:
-      mode: global
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
     command:
       - --path.procfs=/host/proc
       - --path.sysfs=/host/sys
@@ -73,17 +48,6 @@ services:
     image: ${DOCKER_REGISTRY}/alertmanager:${ALERT_MANAGER_VERSION:-latest}
     ports:
       - "${ALERT_MANAGER_PORT}:9093"
-    networks:
-      - ${DOCKER_NET}
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
     command:
       - --config.file=/etc/alertmanager/config.yml
       - --storage.path=/alertmanager
@@ -98,15 +62,6 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
     ports:
       - "${CADVISOR_PORT}:8080"
-    networks:
-      - ${DOCKER_NET}
-    deploy:
-      mode: global
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
 
   grafana:
     build:
@@ -120,23 +75,7 @@ services:
       - "${GRAFANA_PORT}:3000"
     depends_on:
       - prometheus
-    networks:
-      - ${DOCKER_NET}
     user: "472"
-    deploy:
-      placement:
-        constraints:
-          - node.role==manager
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.lbswarm=true"
-        - "traefik.http.routers.grafana.rule=Host(`grafana.${CANDIG_DOMAIN}`)"
-        - "traefik.http.services.grafana.loadbalancer.server.port=${GRAFANA_PORT}"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/admin_password
