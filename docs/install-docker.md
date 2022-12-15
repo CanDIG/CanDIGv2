@@ -119,6 +119,9 @@ The `init-docker` command will initialize CanDIGv2 and set up docker networks, v
 # initialize docker environment
 make init-docker
 
+# Setup required local redirect
+make init-hosts-file
+
 # pull latest CanDIGv2 images (if you didn't create images locally)
 make docker-pull
 
@@ -224,6 +227,7 @@ conda activate {path_to_folder}/CanDIGv2/bin/miniconda3/envs/candig
 
 ```bash
 make init-docker
+make init-hosts-file # Setup required local redirect
 ```
 
 ### Step 4: Deploy CanDIGv2 Services (Compose)

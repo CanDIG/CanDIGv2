@@ -248,8 +248,8 @@ docker-secrets: mkdir minio-secrets
 # modify the hosts file
 
 #<<<
-.PHONY: hosts-file
-hosts-file:
+.PHONY: init-hosts-file
+init-hosts-file:
 	source ${PWD}/setup_hosts.sh
 
 #>>>
@@ -313,7 +313,7 @@ init-conda:
 
 #<<<
 .PHONY: init-docker
-init-docker: docker-volumes docker-secrets hosts-file
+init-docker: docker-volumes docker-secrets
 
 
 #>>>
