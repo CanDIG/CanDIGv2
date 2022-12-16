@@ -106,9 +106,9 @@ git submodule update --init --recursive
 # 2. copy and edit .env with your site's local configuration
 cp -i etc/env/example.env .env
 
-# 3. fetch binaries and initialize candig virtualenv
-make bin-conda
-make init-conda
+# 3. initialize candig virtualenv
+make init-pipenv
+pipenv shell
 ```
 
  ## Update hosts
