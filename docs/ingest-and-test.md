@@ -141,10 +141,11 @@ Install the requirements:
 pip install -r requirements.txt
 ```
 
-Generate a file env.sh in the `candig2-ingest` repo:
+Generate a file env.sh:
 
 ```bash
-python settings.py ../CanDIGv2/
+cd CanDIGv2/
+python settings.py
 source env.sh
 ```
 
