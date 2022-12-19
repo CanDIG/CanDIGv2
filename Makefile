@@ -10,8 +10,6 @@ export $(shell sed 's/=.*//' $(env))
 SHELL = bash
 DIR = $(PWD)
 LOGFILE = $(DIR)/tmp/progress.txt
-PYTHON_BIN_PATH="$(python3 -m site --user-base)/bin"
-PATH="$PATH:$PYTHON_BIN_PATH"
 
 .PHONY: all
 all:
@@ -228,21 +226,6 @@ docker-volumes:
 .PHONY: images
 images: #toil-docker
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE);)
-
-
-#>>>
-# initialize python virtual environment
-# make init-pipenv
-
-#<<<
-.PHONY: init-pipenv
-init-pipenv: mkdir
-	echo "    started init-pipenv" >> $(LOGFILE)
-	-`pip3 install pipenv`
-	pipenv --python $(VENV_PYTHON)
-	pipenv install --requirements requirements.txt
-
-	echo "    finished init-pipenv" >> $(LOGFILE)
 
 
 #>>>
