@@ -107,7 +107,7 @@ git submodule update --init --recursive
 cp -i etc/env/example.env .env
 
 # 3. initialize candig virtualenv
-source ./activate.sh
+./activate.sh
 ```
 
  ## Update hosts
