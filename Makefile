@@ -10,6 +10,8 @@ export $(shell sed 's/=.*//' $(env))
 SHELL = bash
 DIR = $(PWD)
 LOGFILE = $(DIR)/tmp/progress.txt
+PYTHON_BIN_PATH="$(python3 -m site --user-base)/bin"
+PATH="$PATH:$PYTHON_BIN_PATH"
 
 .PHONY: all
 all:
@@ -241,9 +243,9 @@ images: #toil-docker
 
 #<<<
 .PHONY: init-pipenv
-init-pipenv:
+init-pipenv: mkdir
 	echo "    started init-pipenv" >> $(LOGFILE)
-	-`pip3 install --user pipenv`
+	-`pip3 install pipenv`
 	pipenv --python $(VENV_PYTHON)
 	pipenv install --requirements requirements.txt
 
