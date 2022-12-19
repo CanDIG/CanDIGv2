@@ -108,7 +108,7 @@ cp -i etc/env/example.env .env
 
 # 3. initialize candig virtualenv
 make init-pipenv
-pipenv shell
+source ./activate.sh
 ```
 
  ## Update hosts
