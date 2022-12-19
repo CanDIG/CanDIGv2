@@ -241,7 +241,7 @@ images: #toil-docker
 
 #<<<
 .PHONY: init-docker
-init-docker: docker-volumes docker-secrets
+init-docker: mkdir docker-volumes docker-secrets
 
 
 #>>>
