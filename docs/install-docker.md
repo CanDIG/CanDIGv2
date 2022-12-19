@@ -1,7 +1,7 @@
 # CanDIGv2 Install Guide
 
 ---
-These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for hosts file at [update hosts](#update-hosts).
+These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
 
 Before beginning, you should set up your environment variables as described in the [README](README.md).
 
@@ -111,18 +111,6 @@ make bin-conda
 make init-conda
 ```
 
- ## Update hosts
-
-Get your local IP address and edit your `/etc/hosts` file to add (note that the key and value are tab-delimited):
-
-```bash
-<your ip>  docker.localhost
-<your ip>  auth.docker.localhost
-```
-
-### WSL
-Edit your /etc/hosts file as stated above along with your Windows hosts file by adding your Windows IPv4 to both hosts files. This can be found at `C:\Windows\system32\drivers\etc`. How you edit this file will change between versions of Windows.
-
 ##  Deploy CanDIGv2 Services with Compose
 
 The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets.
@@ -131,15 +119,20 @@ The `init-docker` command will initialize CanDIGv2 and set up docker networks, v
 # initialize docker environment
 make init-docker
 
+# Setup required local redirect
+make init-hosts-file
+
 # pull latest CanDIGv2 images (if you didn't create images locally)
 make docker-pull
 
 # deploy stack
 make compose
-make init-authx # If this command fails, try the #update-hosts section of this Markdown file
+make init-authx # If this command fails, try the #update-firewall section of this Markdown file
 # TODO: post deploy auth configuration
 
 ```
+
+## Update Firewall
 
 If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
 
@@ -234,6 +227,7 @@ conda activate {path_to_folder}/CanDIGv2/bin/miniconda3/envs/candig
 
 ```bash
 make init-docker
+make init-hosts-file # Setup required local redirect
 ```
 
 ### Step 4: Deploy CanDIGv2 Services (Compose)
@@ -242,28 +236,7 @@ make init-docker
 make compose
 ```
 
-### Step 5: Update hosts
-
-- Get the local IP address in the terminal:
-
-```bash
-ifconfig -l | xargs -n1 ipconfig getifaddr
-```
-
-- Then edit your /etc/hosts file:
-
-```bash
-sudo nano /etc/hosts
-```
-
-- Add the IP address to the end of the file so it look like this (noting that the key and value need to be tab-delimited):
-
-```bash
-# Other settings
-192.168.X.XX docker.localhost
-```
-
-### Step 6: Create Auth Stack
+### Step 5: Create Auth Stack
 
 The old keycloak image (15.0.0) is not compatible with M1, so we need to upgrade it.
 
