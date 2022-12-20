@@ -236,12 +236,27 @@ images: #toil-docker
 
 
 #>>>
+# initialize python virtual environment
+# make init-pipenv
+
+#<<<
+.PHONY: init-pipenv
+init-pipenv: mkdir
+	echo "    started init-pipenv" >> $(LOGFILE)
+	-`pip3 install pipenv`
+	pipenv --python $(VENV_PYTHON)
+	pipenv install --requirements requirements.txt
+
+	echo "    finished init-pipenv" >> $(LOGFILE)
+
+
+#>>>
 # initialize docker and create required docker networks, volumes, certs, secrets, and conda env
 # make init-docker
 
 #<<<
 .PHONY: init-docker
-init-docker: mkdir docker-volumes docker-secrets
+init-docker: docker-volumes docker-secrets
 
 
 #>>>
