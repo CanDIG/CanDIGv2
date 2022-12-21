@@ -18,7 +18,7 @@ sudo apt update && \
   sudo apt autoremove -y
 
 sudo apt install -y git-core build-essential curl
-sudo apt install libbz2-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
+sudo apt install -y libbz2-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
   libsqlite3-dev libssl-dev uuid-dev libreadline-dev zlib1g-dev tk-dev libffi-dev
 
 ```
@@ -111,8 +111,8 @@ cp -i etc/env/example.env .env
 
 # 3. initialize candig virtualenv
 make bin-pyenv
-make init-pipenv
 exec $SHELL
+make init-pipenv
 pipenv shell
 ```
 
