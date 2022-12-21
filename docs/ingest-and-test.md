@@ -112,7 +112,7 @@ The below is an example of what will return it should be what is in your service
 
 ## Install test data
 
-Clone the [candig-ingest](https://github.com/CanDIG/candigv2-ingest) repo:
+Clone the [candigv2-ingest](https://github.com/CanDIG/candigv2-ingest) repo:
 
 ```
 https://github.com/CanDIG/candigv2-ingest.git
@@ -149,30 +149,8 @@ python settings.py
 source env.sh
 ```
 
-Create opa dataset policy based on the dataset name and the email
-address of the user (for example, dataset_name=SYNTHETIC_1 and user_name=user2@test.ca)
-
-```bash
-python opa_ingest.py --dataset <dataset_name> --user <user_name> > access.json
-```
-
-Copy the access.json file to the docker:
-
-```bash
-docker cp access.json candigv2_opa_1:/app/permissions_engine/access.json
-```
-
-Get the `Synthetic_Clinical_Data.json` file from @daisieh (Daisie Huang) and copy it into the root folder in the docker container:
-
-```bash
-docker cp '/local_path_to_file/Synthetic_Clinical_Data.json' candigv2_chord-metadata_1:/Synthetic_Clinical_Data.json
-```
-
-Then run ingest command (katsu and federation should be running):
-
-```bash
-python katsu_ingest.py --dataset <dataset_name> --input /Synthetic_Clinical_Data.json
-```
+Download [synthetic data](https://github.com/CanDIG/mohccn-data) and follow the instructions there.
 
 ## Test data services
-To be continue
+
+Follow [Integration testing](https://candig.atlassian.net/wiki/spaces/CA/pages/665518081/Integration+testing) instructions to exercise your Docker installation.
