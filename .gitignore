@@ -18,6 +18,7 @@
 .vagrant
 Pipfile
 Pipfile.lock
+.python-version
 
 # test metadata
 etc/tests/integration/*/__pycache__/*

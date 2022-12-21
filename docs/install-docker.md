@@ -17,7 +17,10 @@ sudo apt update && \
   sudo apt autoclean && \
   sudo apt autoremove -y
 
-sudo apt install -y git-core build-essential
+sudo apt install -y git-core build-essential curl
+sudo apt install libbz2-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
+  libsqlite3-dev libssl-dev uuid-dev libreadline-dev zlib1g-dev tk-dev libffi-dev
+
 ```
 
 2. Install Docker
@@ -107,7 +110,9 @@ git submodule update --init --recursive
 cp -i etc/env/example.env .env
 
 # 3. initialize candig virtualenv
+make bin-pyenv
 make init-pipenv
+exec $SHELL
 pipenv shell
 ```
 
@@ -166,11 +171,8 @@ make clean-volumes
 # 5. delete all cached images
 make clean-images
 
-# 6. remove conda environment
-make clean-conda
-
-# 7. remove bin dir (inlcuding miniconda)
-make clean-bin
+# 6. remove virtualenv environment
+make clean-pipenv
 ```
 
 ## Mac Apple Silicon Installation
@@ -208,7 +210,9 @@ VENV_NAME=candig
 
 ```bash
 # 3. fetch binaries and initialize candig virtualenv
-make init-conda
+make bin-pyenv
+exec $SHELL
+make init-pipenv
 ```
 
 - To activate conda env, do the following:

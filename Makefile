@@ -32,6 +32,23 @@ mkdir:
 
 
 #>>>
+# download pyenv package
+# make bin-pyenv
+
+#<<<
+bin-pyenv: mkdir
+	echo "    started bin-pyenv" >> $(LOGFILE)
+	curl -Lo $(DIR)/bin/pyenv_install.sh \
+		https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer
+
+	bash $(DIR)/bin/pyenv_install.sh
+	echo 'export PYENV_ROOT="$$HOME/.pyenv"' >> ~/.bashrc
+	echo 'command -v pyenv >/dev/null || export PATH="$$PYENV_ROOT/bin:$$PATH"' >> ~/.bashrc
+	echo 'eval "$$(pyenv init -)"' >> ~/.bashrc
+	echo "    finished bin-pyenv" >> $(LOGFILE)
+
+
+#>>>
 # (re)build service image and deploy/test using docker-compose
 # $module is the name of the sub-folder in lib/
 # add BUILD_OPTS='--no-cache' to ignore cached builds
@@ -77,6 +94,7 @@ clean-compose:
 clean-pipenv:
 	-`deactivate`
 	pipenv --rm
+	rm -rf $(DIR)/bin
 
 
 #>>>
@@ -241,11 +259,13 @@ images: #toil-docker
 
 #<<<
 .PHONY: init-pipenv
-init-pipenv: mkdir
+init-pipenv:
 	echo "    started init-pipenv" >> $(LOGFILE)
+	-`pyenv install $(VENV_PYTHON)`
+	pyenv local $(VENV_PYTHON)
 	-`pip3 install pipenv`
 	pipenv --python $(VENV_PYTHON)
-	pipenv install --requirements requirements.txt
+	#pipenv install --requirements requirements.txt
 
 	echo "    finished init-pipenv" >> $(LOGFILE)
 
