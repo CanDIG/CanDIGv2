@@ -19,7 +19,8 @@ sudo apt update && \
 
 sudo apt install -y git-core build-essential curl
 sudo apt install -y libbz2-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
-  libsqlite3-dev libssl-dev uuid-dev libreadline-dev zlib1g-dev tk-dev libffi-dev
+  libsqlite3-dev libssl-dev uuid-dev libreadline-dev \
+  zlib1g-dev tk-dev libffi-dev python-dev
 
 ```
 
@@ -111,7 +112,7 @@ cp -i etc/env/example.env .env
 
 # 3. initialize candig virtualenv
 make bin-pyenv
-exec $SHELL
+exec bash
 make init-pipenv
 pipenv shell
 ```
