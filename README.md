@@ -63,7 +63,7 @@ Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODU
 
 By default (if you copy the sample file from `etc/env/example.env`) the installation includes the minimal list of modules:
 
-  CANDIG_MODULES=minio htsget-server chord-metadata candig-data-portal
+  CANDIG_MODULES=minio htsget-server katsu candig-data-portal
 
 Optional modules follow the `#` and include federation service, various monitoring components, workflow execution, and some older modules not generally installed.
 
@@ -98,9 +98,9 @@ The following table lists the details from the Data Flow Diagram in the "Overvie
 
 | Service/Component Name | Source | Notes                        |
 |------------------------|--------|------------------------------|
-| Katsu (CHORD Metadata) | links  | DFD: `chord_metadata`        |
+| Katsu (KATSU Metadata) | links  | DFD: `katsu`        |
 | Federation Service     | links  | DFD: `federation_service`    |
 | HTSGet                 | links  | DFD: `htsget_app`            |
-| CHORD DRS              | links  | DFD: `chord_drs`             |
+| KATSU DRS              | links  | DFD: `katsu_drs`             |
 | WES Server             | links  | DFD: `wes_server`            |
 | CanDIG Data Portal     | links  | DFD: `candig-data-portal`    |
