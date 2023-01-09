@@ -1,6 +1,7 @@
 # CanDIGv2 Install Guide
 
 ---
+
 These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
 
 Before beginning, you should set up your environment variables as described in the [README](README.md).
@@ -19,7 +20,8 @@ sudo apt update && \
 
 sudo apt install -y git-core build-essential curl
 sudo apt install -y libbz2-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
-  libsqlite3-dev libssl-dev uuid-dev libreadline-dev zlib1g-dev tk-dev libffi-dev
+  libsqlite3-dev libssl-dev uuid-dev libreadline-dev \
+  zlib1g-dev tk-dev libffi-dev python-dev
 
 ```
 
@@ -111,12 +113,12 @@ cp -i etc/env/example.env .env
 
 # 3. initialize candig virtualenv
 make bin-pyenv
-exec $SHELL
+exec bash
 make init-pipenv
 pipenv shell
 ```
 
-##  Deploy CanDIGv2 Services with Compose
+## Deploy CanDIGv2 Services with Compose
 
 The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets.
 
@@ -142,6 +144,7 @@ make init-authx # If this command fails, try the #update-firewall section of thi
 If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
 
 Edit your firewall settings to allow connections from those adresses:
+
 ```bash
 export DOCKER_BRIDGE_IP=$(docker network inspect bridge | grep Subnet | awk '{print $2}' | tr -d ',')
 sudo ufw allow from $DOCKER_BRIDGE_IP to <your ip>
