@@ -13,16 +13,11 @@ dataflow for genomic data.
 CanDIGv2/
  ├── .env                          - global variables
  ├── Makefile                      - functions for repeatable testing/deployment (Docker/Kubernetes)
- ├── tox.ini                       - functions for repeatable testing/deployment (Python Venv/Screen)
- ├── bin/                          - local binaries directory
  ├── docs/                         - documentation, installation instructions
  ├── etc/                          - contains misc files/config/scripts
  │    ├── docker/                  - docker configurations
  │    ├── env/                     - sample .env file
- │    ├── ssl/                     - ssl root-ca/site configs and certs
  |    ├── tests/                   - integration tests (under development)
- │    ├── venv/                    - dependency files for virtualenvs (conda, pip, etc.)
- │    └── yml/                     - various yaml based configs (toil, traefik, etc.)
  ├── lib/                          - contains modules of servies/apps
  └── tmp/                          - contains temporary files used for runtime functionality
       ├── configs/                 - config files that are added to services post-deployment
@@ -61,6 +56,7 @@ services:
     network_mode: ${DOCKER_MODE}
 ...
 ```
+
 ### Configuring CanDIG modules
 
 Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` and `CANDIG_AUTH_MODULES` define which modules are included in the deployment.
