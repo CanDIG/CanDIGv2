@@ -1,6 +1,7 @@
 # CanDIGv2 Install Guide
 
 ---
+
 These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
 
 Before beginning, you should set up your environment variables as described in the [README](README.md).
@@ -117,7 +118,7 @@ make init-pipenv
 pipenv shell
 ```
 
-##  Deploy CanDIGv2 Services with Compose
+## Deploy CanDIGv2 Services with Compose
 
 The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets.
 
@@ -143,6 +144,7 @@ make init-authx # If this command fails, try the #update-firewall section of thi
 If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
 
 Edit your firewall settings to allow connections from those adresses:
+
 ```bash
 export DOCKER_BRIDGE_IP=$(docker network inspect bridge | grep Subnet | awk '{print $2}' | tr -d ',')
 sudo ufw allow from $DOCKER_BRIDGE_IP to <your ip>
@@ -183,7 +185,7 @@ make clean-pipenv
 Mac users can get [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/). Also installed rosetta and used Docker Compose V2 as suggested at the moment.
 
 **Optional**: dependencies below are not required but might be needed (skip if you have)
-  
+
 ```bash
 # Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -227,6 +229,7 @@ make init-pipenv
 ```
 
 If you are using `zsh`, do this instead:
+
 ```bash
 # Install pyenv
 git clone https://github.com/pyenv/pyenv.git ~/.pyenv
@@ -252,24 +255,19 @@ pip install pipenv
 pipenv shell
 ```
 
-### Step 3: Initialize CanDIGv2 (Docker)
+### Step 3: Initialize and Compose CanDIGv2
 
 - Make sure you are in `CanDIGv2` virtual environment (activate it in previous step)
 
 ```bash
 make init-docker
 make init-hosts-file # Setup required local redirect
-```
-
-### Step 4: Deploy CanDIGv2 Services (Compose)
-
-```bash
 make compose
 ```
 
-### Step 5: Create Auth Stack
+### Step 4: Create Auth Stack
 
-Edit the .env, comment out the jboss and use c3g version
+Edit the .env, comment out the jboss and use c3g version for keycloak:
 
 ```bash
 # keycloak service
