@@ -180,11 +180,11 @@ make clean-pipenv
 
 ## Mac Apple Silicon Installation
 
-### 1) Step1: Install Docker and Dependencies
+### Step1: Install Docker and Dependencies
 
-Mac users can get [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/). Also installed rosetta and used Docker Compose V2 as suggested at the moment.
+Mac users can get [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/). 
 
-**Optional**: dependencies below are not required but might be needed (skip if you have)
+**Optional**: Depending on your local setup, you may need homebrew and brew-installed dependencies below. You may also need rosetta and Docker Compose V2.
 
 ```bash
 # Install Homebrew
@@ -219,16 +219,11 @@ cp -i etc/env/example.env .env
 VENV_OS=arm64mac
 ```
 
-If you are using `bash`, do the following (not tested):
+### Step 3: Set up python virtual environment
 
-```bash
-# 3. fetch binaries and initialize candig virtualenv
-make bin-pyenv
-exec $SHELL
-make init-pipenv
-```
+If you have conda installed and activated, you should first deactivate any conda environments (including the base env, if activated by default).
 
-If you are using `zsh`, do this instead:
+These instructions assume you are using the default `zsh` shell, if you are using bash on M1, you probably need to follow the linux instructions for setting up `pyenv` and `pipenv`, but this has not been tested. 
 
 ```bash
 # Install pyenv
@@ -255,7 +250,7 @@ pip install pipenv
 pipenv shell
 ```
 
-### Step 3: Initialize and Compose CanDIGv2
+### Step 4: Initialize and Compose CanDIGv2
 
 - Make sure you are in `CanDIGv2` virtual environment (activate it in previous step)
 
@@ -265,9 +260,9 @@ make init-hosts-file # Setup required local redirect
 make compose
 ```
 
-### Step 4: Create Auth Stack
+### Step 5: Create Auth Stack
 
-Edit the .env, comment out the jboss and use c3g version for keycloak:
+Edit the .env, replace the default KEYCLOAK_BASE_IMAGE from jboss and use a compatible version from c3genomics:
 
 ```bash
 # keycloak service
@@ -276,7 +271,7 @@ KEYCLOAK_BASE_IMAGE=quay.io/c3genomics/keycloak:${KEYCLOAK_VERSION}.arm64
 # KEYCLOAK_BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
 ```
 
-Then run `make`:
+Then run `make` steps:
 
 ```bash
 make init-authx
