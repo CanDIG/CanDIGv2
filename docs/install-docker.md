@@ -180,14 +180,25 @@ make clean-pipenv
 
 ## Mac Apple Silicon Installation
 
-### 1) Step1: Install OS Dependencies
+### Step1: Install Docker and Dependencies
 
-Mac users can get [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/). Also installed rosetta and used Docker Compose V2 as suggested at the moment.
+Mac users can get [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/). 
 
-- **Optional**: these installations are not mentioned but might be needed:
-  - Install [brew](https://brew.sh/)
-  - Install md5sha1sum (`brew install md5sha1sum`)
-  - Install PostgreSQL (`brew install postgresql`)
+**Optional**: Depending on your local setup, you may need homebrew and brew-installed dependencies below. You may also need rosetta and Docker Compose V2.
+
+```bash
+# Install Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install md5sha1sum
+brew install md5sha1sum
+
+# Install PostgreSQL
+brew install postgresql
+
+# Install dependencies for pyenv
+brew install openssl readline sqlite3 xz zlib
+```
 
 ### Step 2: Initialize CanDIGv2 Repo
 
@@ -201,64 +212,70 @@ git submodule update --init --recursive
 cp -i etc/env/example.env .env
 ```
 
-- Edit the .env file:
+- Edit the .env file to specify Apple Sillicon platform:
 
 ```bash
 # options are [linux, darwin, arm64mac]
 VENV_OS=arm64mac
-VENV_NAME=candig
 ```
 
-- Continue to run `make`
+### Step 3: Set up python virtual environment
+
+If you have conda installed and activated, you should first deactivate any conda environments (including the base env, if activated by default).
+
+These instructions assume you are using the default `zsh` shell, if you are using bash on M1, you probably need to follow the linux instructions for setting up `pyenv` and `pipenv`, but this has not been tested. 
 
 ```bash
-# 3. fetch binaries and initialize candig virtualenv
-make bin-pyenv
-exec $SHELL
-make init-pipenv
+# Install pyenv
+git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+
+# Set pyenv path in ~/.zshrc
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
+echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
+echo 'eval "$(pyenv init --path)"' >> ~/.zshrc
+
+# Restart the shell to take effect
+exec zsh
+
+# Install python (find the version in .env VENV_PYTHON)
+pyenv install 3.10.9
+
+# Set python version for this directory (for example CanDIGv2 root folder):
+pyenv local 3.10.9
+
+# Install pipenv
+pip install pipenv
+
+# spawn the virtual environment
+pipenv shell
 ```
 
-- To activate conda env, do the following:
+### Step 4: Initialize and Compose CanDIGv2
 
-```bash
-conda env list
-# Copy the whole path that contains `/envs/candig`
-conda activate {path_to_folder}/CanDIGv2/bin/miniconda3/envs/candig
-```
-
-- Note: The reason we cannot activate it automatically on Mac was described in this [post](https://stackoverflow.com/questions/57527131/conda-environment-has-no-name-visible-in-conda-env-list-how-do-i-activate-it-a). If `conda env` is not in the root folder, it won't have a name.
-
-### Step 3: Initialize CanDIGv2 (Docker)
-
-- Make sure you are in `candig` virtual environment (activate it in previous step)
+- Make sure you are in `CanDIGv2` virtual environment (activate it in previous step)
 
 ```bash
 make init-docker
 make init-hosts-file # Setup required local redirect
-```
-
-### Step 4: Deploy CanDIGv2 Services (Compose)
-
-```bash
 make compose
 ```
 
 ### Step 5: Create Auth Stack
 
-The old keycloak image (15.0.0) is not compatible with M1, so we need to upgrade it.
-
-Go to `lib/keycloak/docker-compose.yml` and replace the `- BASE_IMAGE=candig/keycloak:${KEYCLOAK_VERSION}` with one of the following:
+Edit the .env, replace the default KEYCLOAK_BASE_IMAGE from jboss and use a compatible version from c3genomics:
 
 ```bash
-- BASE_IMAGE=mihaibob/keycloak:18.0.2-legacy # (from StackOverflow)
-# or
-- BASE_IMAGE=quay.io/c3genomics/keycloak:16.1.1.arm64 # (an alternative built on an M1, for an M1)
+# keycloak service
+KEYCLOAK_VERSION=16.1.1
+KEYCLOAK_BASE_IMAGE=quay.io/c3genomics/keycloak:${KEYCLOAK_VERSION}.arm64
+# KEYCLOAK_BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
 ```
 
-Then run `make`:
+Then run `make` steps:
 
 ```bash
 make init-authx
+make compose-authx
 ```
 
 Once everything has run without errors, take a look at the documentation for
