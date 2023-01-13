@@ -71,8 +71,8 @@ cp ${PWD}/lib/tyk/configuration_templates/virtualToken.js ${CONFIG_DIR}/middlewa
 echo "Copying permissionsStoreMiddleware.js" | tee -a $LOGFILE
 cp ${PWD}/lib/tyk/configuration_templates/permissionsStoreMiddleware.js ${CONFIG_DIR}/middleware/permissionsStoreMiddleware.js
 
-echo "Working on api_katsu_katsu.json"
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_katsu_katsu.json.tpl > ${CONFIG_DIR}/apps/api_katsu.json
+echo "Working on api_katsu.json"
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_katsu.json.tpl > ${CONFIG_DIR}/apps/api_katsu.json
 
 echo "Working on api_candig_data_portal.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_mcode_candig_data_portal.json.tpl > ${CONFIG_DIR}/apps/api_candig_data_portal.json
