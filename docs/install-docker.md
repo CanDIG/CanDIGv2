@@ -135,6 +135,12 @@ make docker-pull
 # deploy stack
 make compose
 make init-authx # If this command fails, try the #update-firewall section of this Markdown file
+
+# Specific cached modules may be out of date, so to disable caching for a specific module, add BUILD_OPTS='--no-cache' at the end of make like so:
+# make build-htsget-server BUILD_OPTS='--no-cache'
+# make compose-htsget-server
+# make build-% and compose-% will work for any folder name in lib/
+
 # TODO: post deploy auth configuration
 
 ```
