@@ -110,6 +110,9 @@ cp -i etc/env/example.env .env
 # 3. fetch binaries and initialize candig virtualenv
 make bin-conda
 make init-conda
+
+# 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
+conda activate candig
 ```
 
 ## Deploy CanDIGv2 Services with Compose
