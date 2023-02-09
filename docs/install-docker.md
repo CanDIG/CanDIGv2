@@ -18,11 +18,7 @@ sudo apt update && \
   sudo apt autoclean && \
   sudo apt autoremove -y
 
-sudo apt install -y git-core build-essential curl
-sudo apt install -y libbz2-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
-  libsqlite3-dev libssl-dev uuid-dev libreadline-dev \
-  zlib1g-dev tk-dev libffi-dev python-dev
-
+sudo apt install -y git-core build-essential
 ```
 
 2. Install Docker
@@ -111,11 +107,9 @@ git submodule update --init --recursive
 # 2. copy and edit .env with your site's local configuration
 cp -i etc/env/example.env .env
 
-# 3. initialize candig virtualenv
-make bin-pyenv
-exec bash
-make init-pipenv
-pipenv shell
+# 3. fetch binaries and initialize candig virtualenv
+make bin-conda
+make init-conda
 ```
 
 ## Deploy CanDIGv2 Services with Compose
@@ -180,8 +174,11 @@ make clean-volumes
 # 5. delete all cached images
 make clean-images
 
-# 6. remove virtualenv environment
-make clean-pipenv
+# 6. remove conda environment
+make clean-conda
+
+# 7. remove bin dir (inlcuding miniconda)
+make clean-bin
 ```
 
 ## Mac Apple Silicon Installation
@@ -232,28 +229,8 @@ If you have conda installed and activated, you should first deactivate any conda
 These instructions assume you are using the default `zsh` shell, if you are using bash on M1, you probably need to follow the linux instructions for setting up `pyenv` and `pipenv`, but this has not been tested. 
 
 ```bash
-# Install pyenv
-git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-
-# Set pyenv path in ~/.zshrc
-echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
-echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
-echo 'eval "$(pyenv init --path)"' >> ~/.zshrc
-
-# Restart the shell to take effect
-exec zsh
-
-# Install python (find the version in .env VENV_PYTHON)
-pyenv install 3.10.9
-
-# Set python version for this directory (for example CanDIGv2 root folder):
-pyenv local 3.10.9
-
-# Install pipenv
-pip install pipenv
-
-# spawn the virtual environment
-pipenv shell
+# 3. fetch binaries and initialize candig virtualenv
+make init-conda
 ```
 
 ### Step 4: Initialize and Compose CanDIGv2

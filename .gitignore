@@ -16,9 +16,7 @@
 /etc/ssl/selfsigned-*
 */miniconda3
 .vagrant
-Pipfile
-Pipfile.lock
-.python-version
+.hosts.tmp
 
 # test metadata
 etc/tests/integration/*/__pycache__/*
