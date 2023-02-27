@@ -108,11 +108,18 @@ git submodule update --init --recursive
 cp -i etc/env/example.env .env
 
 # 3. fetch binaries and initialize candig virtualenv
-make bin-conda
+make bin-conda  # If this fails on WSL, see the Note for WSL Systems section below
 make init-conda
 
 # 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
 conda activate candig
+```
+
+### Note for WSL Systems
+Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop:
+
+```bash
+bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 ```
 
 ## Deploy CanDIGv2 Services with Compose
