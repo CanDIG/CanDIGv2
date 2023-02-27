@@ -9,7 +9,7 @@ export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
 DIR = $(PWD)
-CONDA_BASE = $(DIR)/bin/miniconda3
+CONDA_BASE = ${HOME}/bin/miniconda3
 CONDA = $(CONDA_BASE)/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_BASE)/etc/profile.d/conda.sh
 LOGFILE = $(DIR)/tmp/progress.txt
