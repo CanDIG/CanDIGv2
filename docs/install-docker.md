@@ -107,8 +107,14 @@ git submodule update --init --recursive
 # 2. copy and edit .env with your site's local configuration
 cp -i etc/env/example.env .env
 
-# 3. fetch binaries and initialize candig virtualenv
+# 3. option A: install miniconda and initialize candig virtualenv (use this option
+# for systems installations). Installs miniconda in the candigv2 repo. 
 make bin-conda  # If this fails on WSL, see the Note for WSL Systems section below
+make init-conda
+
+# 3. option B: if you want to use an existing conda installation on your local
+# at the top of the Makefile, set CONDA_BASE to your existing conda installation
+make mkdir # skip most of bin-conda, but need the dir-creating step 
 make init-conda
 
 # 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
