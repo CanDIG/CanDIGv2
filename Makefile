@@ -9,9 +9,10 @@ export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
 DIR = $(PWD)
-CONDA_BASE = ${HOME}/bin/miniconda3
-CONDA = $(CONDA_BASE)/bin/conda
+CONDA_BASE = ${HOME}/bin # this is where miniconda gets installed
+CONDA = $(CONDA_BASE)/miniconda3/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_BASE)/etc/profile.d/conda.sh
+
 LOGFILE = $(DIR)/tmp/progress.txt
 
 .PHONY: all
@@ -62,7 +63,7 @@ ifeq ($(VENV_OS), arm64mac)
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
 endif
-	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(DIR)/bin/miniconda3
+	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_BASE)/miniconda3
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
