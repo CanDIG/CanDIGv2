@@ -9,6 +9,10 @@ export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
 DIR = $(PWD)
+CONDA_BASE = ${HOME}/bin # this is where miniconda gets installed
+CONDA = $(CONDA_BASE)/miniconda3/bin/conda
+CONDA_ENV_SETTINGS = $(CONDA_BASE)/etc/profile.d/conda.sh
+
 LOGFILE = $(DIR)/tmp/progress.txt
 
 .PHONY: all
@@ -32,20 +36,38 @@ mkdir:
 
 
 #>>>
-# download pyenv package
-# make bin-pyenv
+# download all package binaries
+# make bin-all
 
 #<<<
-bin-pyenv: mkdir
-	echo "    started bin-pyenv" >> $(LOGFILE)
-	curl -Lo $(DIR)/bin/pyenv_install.sh \
-		https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer
+.PHONY: bin-all
+bin-all: bin-conda
 
-	bash $(DIR)/bin/pyenv_install.sh
-	echo 'export PYENV_ROOT="$$HOME/.pyenv"' >> ~/.bashrc
-	echo 'command -v pyenv >/dev/null || export PATH="$$PYENV_ROOT/bin:$$PATH"' >> ~/.bashrc
-	echo 'eval "$$(pyenv init -)"' >> ~/.bashrc
-	echo "    finished bin-pyenv" >> $(LOGFILE)
+
+#>>>
+# download miniconda package
+# make bin-conda
+
+#<<<
+bin-conda: mkdir
+	echo "    started bin-conda" >> $(LOGFILE)
+ifeq ($(VENV_OS), linux)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+endif
+ifeq ($(VENV_OS), darwin)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+endif
+ifeq ($(VENV_OS), arm64mac)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
+endif
+	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_BASE)/miniconda3
+	# init is needed to create bash aliases for conda but it won't work
+	# until you source the script that ships with conda
+	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
+	echo "    finished bin-conda" >> $(LOGFILE)
 
 
 #>>>
@@ -71,7 +93,18 @@ build-%:
 #<<<
 .PHONY: clean-all
 clean-all: clean-compose clean-containers clean-secrets \
-	clean-volumes clean-images clean-pipenv
+	clean-volumes clean-images clean-conda clean-bin
+
+
+#>>>
+# clear downloaded binaries
+# removes $PWD/bin/
+# make clean-bin
+
+#<<<
+.PHONY: clean-bin
+clean-bin:
+	rm -rf $(DIR)/bin
 
 
 #>>>
@@ -86,15 +119,15 @@ clean-compose:
 
 
 #>>>
-# deactivate and remove pipenv venv $VENV_NAME
-# make clean-pipenv
+# deactivate and remove conda env $VENV_NAME
+# make clean-conda
+
 
 #<<<
-.PHONY: clean-pipenv
-clean-pipenv:
-	-`deactivate`
-	pipenv --rm
-	rm -rf $(DIR)/bin
+.PHONY: clean-conda
+clean-conda:
+	$(CONDA) deactivate
+	$(CONDA) env remove -n $(VENV_NAME)
 
 
 #>>>
@@ -254,20 +287,25 @@ images: #toil-docker
 
 
 #>>>
-# initialize python virtual environment
-# make init-pipenv
+# initialize conda environment
+# make init-conda
 
 #<<<
-.PHONY: init-pipenv
-init-pipenv:
-	echo "    started init-pipenv" >> $(LOGFILE)
-	-`pyenv install $(VENV_PYTHON)`
-	pyenv local $(VENV_PYTHON)
-	-`pip3 install pipenv`
-	pipenv --python $(VENV_PYTHON)
-	#pipenv install --requirements requirements.txt
+.PHONY: init-conda
+init-conda:
+	echo "    started init-conda" >> $(LOGFILE)
+	# source conda's script to be safe, so the conda command is found
+	source $(CONDA_ENV_SETTINGS) \
+		&& $(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
 
-	echo "    finished init-pipenv" >> $(LOGFILE)
+	source $(CONDA_ENV_SETTINGS) \
+		&& conda activate $(VENV_NAME) \
+		&& pip install -U -r $(DIR)/etc/venv/requirements.txt
+
+#@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
+#@echo "Activate conda env: conda activate $(VENV_NAME)"
+#@echo "Install requirements: pip install -U -r $(DIR)/etc/venv/requirements.txt"
+	echo "    finished init-conda" >> $(LOGFILE)
 
 
 #>>>
