@@ -2,7 +2,7 @@
 
 ---
 
-These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
+These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, there are [modification instructions](#modifications-for-apple-silicon-m1) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
 
 Before beginning, you should set up your environment variables as described in the [README](README.md).
 
@@ -197,13 +197,34 @@ make clean-conda
 make clean-bin
 ```
 
-## Mac Apple Silicon Installation
+## Modifications for Apple Silicon M1
 
-### Step1: Install Docker and Dependencies
+There are some modifications that you need to make to install on M1 architecture. These are not full instructions, but only the changes from the standard install. 
 
-Mac users can get [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/). 
+### M1 environment variables
 
-**Optional**: Depending on your local setup, you may need homebrew and brew-installed dependencies below. You may also need rosetta and Docker Compose V2.
+- In your .env file, set the M1 architecture:
+
+```bash
+# options are [linux, darwin, arm64mac]
+VENV_OS=arm64mac
+```
+
+- Replace the default KEYCLOAK_BASE_IMAGE from jboss and use a compatible version from c3genomics:
+
+```bash
+# keycloak service
+KEYCLOAK_VERSION=16.1.1
+KEYCLOAK_BASE_IMAGE=quay.io/c3genomics/keycloak:${KEYCLOAK_VERSION}.arm64
+# KEYCLOAK_BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
+```
+
+
+### Step 1 mods: Install Docker and Dependencies
+
+Install [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/). 
+
+**Optional**: Install the following packages with homebrew (or your favourite package manager). Depending on your local setup, you may also need rosetta and Docker Compose V2.
 
 ```bash
 # Install Homebrew
@@ -215,67 +236,17 @@ brew install md5sha1sum
 # Install PostgreSQL
 brew install postgresql
 
-# Install dependencies for pyenv
-brew install openssl readline sqlite3 xz zlib
-```
-
-### Step 2: Initialize CanDIGv2 Repo
-
-```bash
-# 1. initialize repo and submodules
-git clone -b develop https://github.com/CanDIG/CanDIGv2.git
-cd CanDIGv2
-git submodule update --init --recursive
-
-# 2. copy and edit .env with your site's local configuration
-cp -i etc/env/example.env .env
-```
-
-- Edit the .env file to specify Apple Sillicon platform:
-
-```bash
-# options are [linux, darwin, arm64mac]
-VENV_OS=arm64mac
-```
-
-### Step 3: Set up python virtual environment
-
-If you have conda installed and activated, you should first deactivate any conda environments (including the base env, if activated by default).
-
-These instructions assume you are using the default `zsh` shell, if you are using bash on M1, you probably need to follow the linux instructions for setting up `pyenv` and `pipenv`, but this has not been tested. 
-
-```bash
-# 3. fetch binaries and initialize candig virtualenv
-make init-conda
-```
-
-### Step 4: Initialize and Compose CanDIGv2
-
-- Make sure you are in `CanDIGv2` virtual environment (activate it in previous step)
-
-```bash
-make init-docker
-make init-hosts-file # Setup required local redirect
-make compose
 ```
 
 ### Step 5: Create Auth Stack
 
-Edit the .env, replace the default KEYCLOAK_BASE_IMAGE from jboss and use a compatible version from c3genomics:
+- Update the opa image in `lib/opa/docker-compose.yml` to something arm-compatible (most of the `static` ones are. 
 
 ```bash
-# keycloak service
-KEYCLOAK_VERSION=16.1.1
-KEYCLOAK_BASE_IMAGE=quay.io/c3genomics/keycloak:${KEYCLOAK_VERSION}.arm64
-# KEYCLOAK_BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
+    opa:
+        image: openpolicyagent/opa:edge-static
 ```
 
-Then run `make` steps:
-
-```bash
-make init-authx
-make compose-authx
-```
 
 Once everything has run without errors, take a look at the documentation for
 [ingesting data and testing the deployment](ingest-and-test.md) as well as
