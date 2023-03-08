@@ -9,9 +9,17 @@ export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
 DIR = $(PWD)
-CONDA_BASE = ${HOME}/bin # this is where miniconda gets installed
-CONDA = $(CONDA_BASE)/miniconda3/bin/conda
-CONDA_ENV_SETTINGS = $(CONDA_BASE)/etc/profile.d/conda.sh
+
+#>>>
+# option A : set CONDA_INSTALL to $(DIR)/bin to install conda within the candigv2 repo
+#  and then use make bin-conda and make init-conda
+# option B: set CONDA_INSTALL to the location of an existing miniconda3 installation
+#  and then use make mkdir and make init-conda (no bin-conda, which will blow up an existing conda)
+# <<<
+
+CONDA_INSTALL = $(DIR)/bin
+CONDA = $(CONDA_INSTALL)/miniconda3/bin/conda
+CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
 
 LOGFILE = $(DIR)/tmp/progress.txt
 
@@ -54,20 +62,30 @@ bin-conda: mkdir
 ifeq ($(VENV_OS), linux)
 	curl -Lo $(DIR)/bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-endif
-ifeq ($(VENV_OS), darwin)
-	curl -Lo $(DIR)/bin/miniconda_install.sh \
-		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-endif
-ifeq ($(VENV_OS), arm64mac)
-	curl -Lo $(DIR)/bin/miniconda_install.sh \
-		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
-endif
-	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_BASE)/miniconda3
+	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
 	echo "    finished bin-conda" >> $(LOGFILE)
+endif
+ifeq ($(VENV_OS), darwin)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
+	# init is needed to create bash aliases for conda but it won't work
+	# until you source the script that ships with conda
+	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
+	echo "    finished bin-conda" >> $(LOGFILE)
+endif
+ifeq ($(VENV_OS), arm64mac)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
+	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
+	# init is needed to create bash aliases for conda but it won't work
+	# until you source the script that ships with conda
+	source $(CONDA_ENV_SETTINGS) && $(CONDA) init zsh
+	echo "    finished bin-conda" >> $(LOGFILE)
+endif
 
 
 #>>>
