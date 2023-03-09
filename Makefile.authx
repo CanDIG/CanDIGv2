@@ -80,6 +80,8 @@ init-authx: mkdir
 	echo ; \
 	$(MAKE) compose-tyk; \
 	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
+	echo "Grabbing our local IP address"; \
+	source ${PWD}/setup_hosts.sh; \
 	echo "Setting up Vault"; \
 	source ${PWD}/lib/vault/vault_setup.sh; \
 	echo "Setting up Opa"; \
