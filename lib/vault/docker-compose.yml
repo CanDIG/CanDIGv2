@@ -38,3 +38,4 @@ services:
         target: vault-s3-token
     extra_hosts:
       - "docker.localhost:${LOCAL_IP_ADDR}"
+
