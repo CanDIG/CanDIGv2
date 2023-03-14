@@ -1,0 +1,9 @@
+- type: conda
+    prefix: $HOME/miniconda3
+    exec: $HOME/miniconda3/bin/conda
+    versionless: false
+    debug: false
+    ensure_channels: iuc,conda-forge,bioconda,defaults
+    auto_install: false
+    auto_init: false
+    copy_dependencies: false
