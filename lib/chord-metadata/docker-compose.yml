@@ -21,6 +21,7 @@ services:
       - KATSU_AUTHORIZATION=${CANDIG_AUTHORIZATION}
       - OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
       - HOST_CONTAINER_NAME=${CHORD_METADATA_CONTAINER}
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret
