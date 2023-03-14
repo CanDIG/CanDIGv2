@@ -418,3 +418,21 @@ help:
 print-%:
 	@echo '$*=$($*)'
 
+#>>>
+# run integration tests
+# make build-all -P
+
+#<<<
+.PHONY: build-all
+build-all:
+	./pre-build-check.sh
+
+# Setup the entire stack
+	$(MAKE) init-docker
+	$(MAKE) build-minio
+	$(MAKE) build-htsget-server
+	$(MAKE) build-chord-metadata
+	$(MAKE) build-candig-data-portal
+	$(MAKE) build-opa
+	$(MAKE) compose
+	$(MAKE) init-authx
