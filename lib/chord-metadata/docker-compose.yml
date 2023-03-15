@@ -13,6 +13,7 @@ services:
     depends_on:
       - metadata-db
     environment:
+      - POSTGRES_DATABASE=metadata
       - POSTGRES_HOST=metadata-db
       - POSTGRES_PORT=5432
       - POSTGRES_USER=admin
