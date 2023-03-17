@@ -4,7 +4,7 @@
 
 #<<<
 clean-keycloak:
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/keycloak/docker-compose.yml down || true
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/keycloak/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'keycloak' | xargs -I{} docker rmi --force {}
@@ -17,7 +17,7 @@ clean-keycloak:
 
 #<<<
 clean-vault:
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/vault/docker-compose.yml down || true
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/vault/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'vault' | xargs -I{} docker rmi --force {}
@@ -31,7 +31,7 @@ clean-vault:
 
 #<<<
 clean-opa:
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/opa/docker-compose.yml down || true
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/opa/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'openpolicyagent/opa' | xargs -I{} docker rmi --force {}
@@ -46,7 +46,7 @@ clean-opa:
 
 #<<<
 clean-tyk:
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/tyk/docker-compose.yml down || true
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/tyk/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'tyk|redis' |  xargs -I{} docker rmi --force {}
