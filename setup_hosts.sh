@@ -14,7 +14,7 @@ fi
 if [ "$VENV_OS" == "linux" ]; then
     ip addr | grep -A 1 'wlp[0-9]\|eth[0-9]\|ens[0-9]' | grep -o "inet [0-9.]\+" | cut -d' ' -f2 > .hosts.tmp2
 else
-    ip addr | grep -o "inet [0-9.]\+" | cut -d' ' -f2 > .hosts.tmp2
+    ifconfig | awk '/inet /&&!/127.0.0.1/{print $2;exit}' > .hosts.tmp2
 fi
 
 numlines=$(cat .hosts.tmp2 | wc -l) # use cat to prevent the name of the file from being printed on some systems

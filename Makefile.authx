@@ -73,10 +73,10 @@ clean-authx: clean-keycloak clean-tyk clean-vault clean-opa
 #<<<
 init-authx: mkdir
 	$(MAKE) docker-volumes
-	echo "Setting up Keycloak"; \
-	source ${PWD}/lib/keycloak/keycloak_setup.sh; \
 	echo "Grabbing our local IP address"; \
 	source ${PWD}/setup_hosts.sh; \
+	echo "Setting up Keycloak"; \
+	source ${PWD}/lib/keycloak/keycloak_setup.sh; \
 	echo "Setting up Tyk"; \
 	${PWD}/lib/tyk/tyk_setup.sh; \
 	echo ; \
