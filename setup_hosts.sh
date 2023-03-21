@@ -22,7 +22,7 @@ if [ "$numlines" == "1" ]; then
     export LOCAL_IP_ADDR=`cat .hosts.tmp2`
 elif [ "$numlines" == "0" ]; then
     echo "ERROR: Your internet adapter could not be found automatically. Please determine your local IP address,"
-    echo "and add it to /etc/hosts for the 'docker.localhost' host."
+    echo "set LOCAL_IP_ADDR=<your local network IP address> (e.g. 192.168.x.x) in your .env file, then restart conda"
     cat .hosts.tmp2
 else
     echo "ERROR: More than one IP has been detected. Since this script can't automatically determine which one"
