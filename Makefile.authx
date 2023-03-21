@@ -81,8 +81,6 @@ init-authx: mkdir
 	source ${PWD}/setup_hosts.sh; \
 	echo "Setting up Keycloak"; \
 	source ${PWD}/lib/keycloak/keycloak_setup.sh; \
-	echo "Grabbing our local IP address"; \
-	source ${PWD}/setup_hosts.sh; \
 	echo "Setting up Tyk"; \
 	${PWD}/lib/tyk/tyk_setup.sh; \
 	echo ; \
