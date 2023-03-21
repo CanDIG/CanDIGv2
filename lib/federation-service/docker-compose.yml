@@ -15,4 +15,6 @@ services:
         target: /app/federation_service/configs/servers.json
       - source: federation-services
         target: /app/federation_service/configs/services.json
+    extra_hosts:
+        - "docker.localhost:${LOCAL_IP_ADDR}"
     entrypoint: ["uwsgi", "federation.ini", "--http", "0.0.0.0:4232"]
