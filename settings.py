@@ -1,6 +1,7 @@
 from dotenv import dotenv_values
 
-def main():
+
+def get_env():
     candigv2_env = dotenv_values(f".env")
 
     vars = {}
@@ -33,7 +34,13 @@ def main():
         vars["MINIO_ACCESS_KEY"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/minio-secret-key") as f:
         vars["MINIO_SECRET_KEY"] = f.read().splitlines().pop()
+    vars["CANDIG_ENV"] = candigv2_env
+    return vars
 
+
+def main():
+    vars = get_env()
+    vars.pop('CANDIG_ENV')
     with open("env.sh", "w") as f:
         for key in vars.keys():
             f.write(f"export {key}={vars[key]}\n")
