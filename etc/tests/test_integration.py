@@ -2,13 +2,13 @@ import os
 import sys
 import pytest
 import requests
-from settings import get_env
 from dotenv import dotenv_values
 from pathlib import Path
 
-# assumes that we are running pytest from the repo directory
-sys.path.insert(0,os.path.abspath("htsget_server"))
+REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../..")
+sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
 
+from settings import get_env
 ENV = get_env()
 
 def get_token(username=None, password=None):
