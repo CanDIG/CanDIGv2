@@ -5,3 +5,5 @@ tox
 connexion
 aiohttp
 requests
+pytest
+pytz
