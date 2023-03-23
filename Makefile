@@ -197,6 +197,7 @@ clean-volumes:
 #<<<
 .PHONY: compose
 compose:
+	source ${PWD}/setup_hosts.sh; \
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
 
 
