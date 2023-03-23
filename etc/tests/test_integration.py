@@ -140,7 +140,49 @@ def test_vault():
     print(response.json())
     assert response.json()['data']['url'] == payload['url']
 
+
 def test_htsget():
     retcode = pytest.main(["lib/htsget-server/htsget_app/tests/test_htsget_server.py"])
     print(retcode)
     assert retcode == pytest.ExitCode.OK
+
+
+def test_htsget_add_sample_to_dataset():
+    # Add NA18537 to dataset controlled4, which is only authorized for user1:
+    site_admin_token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
+    headers = {
+        'Authorization': f"Bearer {site_admin_token}",
+        'Content-Type': 'application/json; charset=utf-8'
+    }
+
+    payload = {
+        "id": "controlled4",
+        "drsobjects": [
+            "drs://localhost/NA18537"
+        ]
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets", headers=headers, json=payload)
+
+
+def user_access():
+    return [
+        ('CANDIG_SITE_ADMIN', 'NA18537', True), # site admin can access all data, even if not specified by dataset
+        ('CANDIG_NOT_ADMIN', 'NA18537', True), # user1 can access NA18537 as part of controlled4
+        ('CANDIG_NOT_ADMIN', 'NA20787', False), # user1 cannot access NA20787
+    ]
+
+@pytest.mark.parametrize('user, obj, access', user_access())
+def test_htsget_access_data(user, obj, access):
+    username = ENV[f"{user}_USER"]
+    password = ENV[f"{user}_PASSWORD"]
+    headers = {
+        'Authorization': f"Bearer {get_token(username=username, password=password)}",
+        'Content-Type': 'application/json; charset=utf-8',
+    }
+    params = {
+        'class': 'header'
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/data/{obj}", headers=headers, params=params)
+    print(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/v1/variants/data/{obj}")
+    assert (response.status_code == 200) == access
