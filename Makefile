@@ -132,6 +132,7 @@ clean-bin:
 #<<<
 .PHONY: clean-compose
 clean-compose:
+	source ${PWD}/setup_hosts.sh; \
 	$(foreach MODULE, $(CANDIG_MODULES), \
 		docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml down || true;)
 
