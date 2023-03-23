@@ -10,7 +10,7 @@ services:
     command: [ "-b", "${KEYCLOAK_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING" ]
     ports:
       - "${KEYCLOAK_CONTAINER_PORT}:8080"
-    extra-hosts:
+    extra_hosts:
       - "docker.localhost:${LOCAL_IP_ADDR}"
     volumes:
       - keycloak-data:/opt/jboss/keycloak/standalone
