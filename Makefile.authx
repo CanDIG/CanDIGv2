@@ -4,6 +4,7 @@
 
 #<<<
 clean-keycloak:
+	source ${PWD}/setup_hosts.sh; \
 	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/keycloak/docker-compose.yml down || true
 
 	# - remove intermittent docker images
@@ -17,6 +18,7 @@ clean-keycloak:
 
 #<<<
 clean-vault:
+	source ${PWD}/setup_hosts.sh; \
 	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/vault/docker-compose.yml down || true
 
 	# - remove intermittent docker images
@@ -31,6 +33,7 @@ clean-vault:
 
 #<<<
 clean-opa:
+	source ${PWD}/setup_hosts.sh; \
 	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/opa/docker-compose.yml down || true
 
 	# - remove intermittent docker images
@@ -46,6 +49,7 @@ clean-opa:
 
 #<<<
 clean-tyk:
+	source ${PWD}/setup_hosts.sh; \
 	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/tyk/docker-compose.yml down || true
 
 	# - remove intermittent docker images
