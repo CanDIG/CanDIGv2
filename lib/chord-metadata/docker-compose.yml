@@ -13,6 +13,7 @@ services:
     depends_on:
       - metadata-db
     environment:
+      - POSTGRES_DATABASE=metadata
       - POSTGRES_HOST=metadata-db
       - POSTGRES_PORT=5432
       - POSTGRES_USER=admin
@@ -21,6 +22,7 @@ services:
       - KATSU_AUTHORIZATION=${CANDIG_AUTHORIZATION}
       - OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
       - HOST_CONTAINER_NAME=${CHORD_METADATA_CONTAINER}
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret
