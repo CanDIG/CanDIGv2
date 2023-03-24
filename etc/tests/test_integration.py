@@ -23,12 +23,10 @@ def get_token(username=None, password=None):
     response = requests.post(f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/candig/protocol/openid-connect/token", data=payload)
     if response.status_code == 200:
         return response.json()['access_token']
-    else:
-        assert False
 
 
 def test_get_token():
-    get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
+    assert get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
 
 
 def test_tyk():
