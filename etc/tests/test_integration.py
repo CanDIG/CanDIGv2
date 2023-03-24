@@ -155,14 +155,23 @@ def test_htsget_add_sample_to_dataset():
         'Content-Type': 'application/json; charset=utf-8'
     }
 
+    # Delete dataset controlled4
+    response = requests.delete(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/controlled4", headers=headers)
+
+    # Add NA18537 and multisample_1 to dataset controlled4, which is only authorized for user1:
     payload = {
         "id": "controlled4",
         "drsobjects": [
-            "drs://localhost/NA18537"
+            "drs://localhost/NA18537",
+            "drs://localhost/multisample_1"
         ]
     }
 
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets", headers=headers, json=payload)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/controlled4", headers=headers)
+    print(response.json())
+    assert "drs://localhost/multisample_1" in response.json()['drsobjects']
+    assert "drs://localhost/multisample_2" not in response.json()['drsobjects']
 
 
 def user_access():
@@ -186,3 +195,29 @@ def test_htsget_access_data(user, obj, access):
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/data/{obj}", headers=headers, params=params)
     print(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/v1/variants/data/{obj}")
     assert (response.status_code == 200) == access
+
+
+def beacon_access():
+    return [
+        ('CANDIG_SITE_ADMIN', 'NC_000021.8:g.5030847T>A', ['multisample_1', 'multisample_2'], ['test']), # site admin can access all data, even if not specified by dataset
+        ('CANDIG_NOT_ADMIN', 'NC_000021.8:g.5030847T>A', ['multisample_1'], ['multisample_2', 'test']), # user1 can access NA18537 as part of controlled4
+        ('CANDIG_NOT_ADMIN', 'NC_000001.11:g.16565782G>A', [], ['multisample_1', 'multisample_2', 'test']), # user1 cannot access test
+    ]
+
+@pytest.mark.parametrize('user, search, can_access, cannot_access', beacon_access())
+def test_beacon(user, search, can_access, cannot_access):
+    username = ENV[f"{user}_USER"]
+    password = ENV[f"{user}_PASSWORD"]
+    headers = {
+        'Authorization': f"Bearer {get_token(username=username, password=password)}",
+        'Content-Type': 'application/json; charset=utf-8',
+    }
+    params = {
+        'allele': search
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/beacon/v2/g_variants", headers=headers, params=params)
+    for c in can_access:
+        assert c in str(response.json())
+    for c in cannot_access:
+        assert c not in str(response.json())
+    print(response.json())
