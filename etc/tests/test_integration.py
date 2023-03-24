@@ -11,6 +11,8 @@ sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
 from settings import get_env
 ENV = get_env()
 
+
+## Keycloak test: can we get an access token for a user?
 def get_token(username=None, password=None):
     payload = {
         "client_id": ENV["CANDIG_CLIENT_ID"],
@@ -29,6 +31,7 @@ def test_get_token():
     assert get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
 
 
+## Tyk test: can we get a response from Tyk for a service?
 def test_tyk():
     headers = {
         'Authorization': f"Bearer {get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])}"
@@ -37,6 +40,9 @@ def test_tyk():
     assert response.status_code == 200
 
 
+## Opa tests:
+
+## Can we get the correct dataset response for each user?
 def user_datasets():
     return [
         ('CANDIG_SITE_ADMIN', "controlled5"),
@@ -67,6 +73,7 @@ def test_opa_datasets(user, dataset):
     assert dataset in response.json()['result']
 
 
+## Is the user a site admin?
 def user_admin():
     return [
         ('CANDIG_SITE_ADMIN', True),
@@ -93,6 +100,7 @@ def test_site_admin(user, is_admin):
     assert ('result' in response.json()) == is_admin
 
 
+## Vault tests: can we add an aws access key and retrieve it, using both the site_admin user and the VAULT_S3_TOKEN?
 def test_vault():
     site_admin_token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
     headers = {
@@ -139,14 +147,17 @@ def test_vault():
     assert response.json()['data']['url'] == payload['url']
 
 
+## Htsget tests:
+
+## Run the main htsget test suite
 def test_htsget():
     retcode = pytest.main(["lib/htsget-server/htsget_app/tests/test_htsget_server.py"])
     print(retcode)
     assert retcode == pytest.ExitCode.OK
 
 
+## Can we add samples to Opa-controlled dataset?
 def test_htsget_add_sample_to_dataset():
-    # Add NA18537 to dataset controlled4, which is only authorized for user1:
     site_admin_token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
     headers = {
         'Authorization': f"Bearer {site_admin_token}",
@@ -172,6 +183,7 @@ def test_htsget_add_sample_to_dataset():
     assert "drs://localhost/multisample_2" not in response.json()['drsobjects']
 
 
+## Can we access the data when authorized to do so?
 def user_access():
     return [
         ('CANDIG_SITE_ADMIN', 'NA18537', True), # site admin can access all data, even if not specified by dataset
@@ -195,6 +207,7 @@ def test_htsget_access_data(user, obj, access):
     assert (response.status_code == 200) == access
 
 
+## Does Beacon return the correct level of authorized results?
 def beacon_access():
     return [
         ('CANDIG_SITE_ADMIN', 'NC_000021.8:g.5030847T>A', ['multisample_1', 'multisample_2'], ['test']), # site admin can access all data, even if not specified by dataset
