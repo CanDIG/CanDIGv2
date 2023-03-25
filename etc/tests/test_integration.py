@@ -45,8 +45,8 @@ def test_tyk():
 ## Can we get the correct dataset response for each user?
 def user_datasets():
     return [
-        ('CANDIG_SITE_ADMIN', "controlled5"),
-        ('CANDIG_NOT_ADMIN', "controlled4"),
+        ('CANDIG_SITE_ADMIN', "SYNTHETIC-2"),
+        ('CANDIG_NOT_ADMIN', "SYNTHETIC-1"),
     ]
 
 @pytest.mark.parametrize('user, dataset', user_datasets())
@@ -168,12 +168,12 @@ def test_htsget_add_sample_to_dataset():
         'Content-Type': 'application/json; charset=utf-8'
     }
 
-    # Delete dataset controlled4
-    response = requests.delete(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/controlled4", headers=headers)
+    # Delete dataset SYNTHETIC-1
+    response = requests.delete(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-1", headers=headers)
 
-    # Add NA18537 and multisample_1 to dataset controlled4, which is only authorized for user1:
+    # Add NA18537 and multisample_1 to dataset SYNTHETIC-1, which is only authorized for user1:
     payload = {
-        "id": "controlled4",
+        "id": "SYNTHETIC-1",
         "drsobjects": [
             "drs://localhost/NA18537",
             "drs://localhost/multisample_1"
@@ -181,7 +181,7 @@ def test_htsget_add_sample_to_dataset():
     }
 
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets", headers=headers, json=payload)
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/controlled4", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-1", headers=headers)
     print(response.json())
     assert "drs://localhost/multisample_1" in response.json()['drsobjects']
     assert "drs://localhost/multisample_2" not in response.json()['drsobjects']
@@ -191,7 +191,7 @@ def test_htsget_add_sample_to_dataset():
 def user_access():
     return [
         ('CANDIG_SITE_ADMIN', 'NA18537', True), # site admin can access all data, even if not specified by dataset
-        ('CANDIG_NOT_ADMIN', 'NA18537', True), # user1 can access NA18537 as part of controlled4
+        ('CANDIG_NOT_ADMIN', 'NA18537', True), # user1 can access NA18537 as part of SYNTHETIC-1
         ('CANDIG_NOT_ADMIN', 'NA20787', False), # user1 cannot access NA20787
     ]
 
@@ -215,7 +215,7 @@ def test_htsget_access_data(user, obj, access):
 def beacon_access():
     return [
         ('CANDIG_SITE_ADMIN', 'NC_000021.8:g.5030847T>A', ['multisample_1', 'multisample_2'], ['test']), # site admin can access all data, even if not specified by dataset
-        ('CANDIG_NOT_ADMIN', 'NC_000021.8:g.5030847T>A', ['multisample_1'], ['multisample_2', 'test']), # user1 can access NA18537 as part of controlled4
+        ('CANDIG_NOT_ADMIN', 'NC_000021.8:g.5030847T>A', ['multisample_1'], ['multisample_2', 'test']), # user1 can access NA18537 as part of SYNTHETIC-1
         ('CANDIG_NOT_ADMIN', 'NC_000001.11:g.16565782G>A', [], ['multisample_1', 'multisample_2', 'test']), # user1 cannot access test
     ]
 
