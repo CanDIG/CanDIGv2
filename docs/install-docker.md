@@ -144,6 +144,12 @@ On some machines (MacOS), it may be necessary to add the following to /etc/hosts
 ::1	docker.localhost
 ```
 
+In some other cases, it may be necessary to add your local (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, edit your .env file with:
+```bash
+LOCAL_IP_ADDR=<your local IP>
+```
+Where `<your local IP>` is your local network IP (e.g. 192.168.x.x)
+
 ### Old
 The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets.
 
