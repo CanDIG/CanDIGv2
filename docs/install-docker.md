@@ -130,6 +130,21 @@ bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 
 ## Deploy CanDIGv2 Services with Compose
 
+
+### New
+
+`build-all` will perform all of the steps of the old method (section below), minus the `docker-pull` step.
+
+```bash
+make build-all
+```
+
+On some machines (MacOS), it may be necessary to add the following to /etc/hosts:
+```
+::1	docker.localhost
+```
+
+### Old
 The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets.
 
 ```bash
