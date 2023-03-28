@@ -236,3 +236,53 @@ def test_beacon(user, search, can_access, cannot_access):
     for c in cannot_access:
         assert c not in str(response.json())
     print(response.json())
+
+
+def test_setup_katsu():
+    test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Program.json"
+    response = requests.get(test_loc)
+    assert response.status_code == 200
+
+    site_admin_token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
+    headers = {
+        'Authorization': f"Bearer {site_admin_token}",
+        'Content-Type': 'application/json; charset=utf-8'
+    }
+    response = requests.post(f"{ENV['CANDIG_URL']}/katsu/moh/v1/ingest/programs", headers=headers, json=response.json())
+    print(response.json())
+    if response.status_code >= 400:
+        errors = response.json()['error during ingest_programs']
+        assert "code='unique'" in errors and "program_id" in errors # this means that the error was just that the program IDs already exist
+    else:
+        assert response.status_code == 204 or response.status_code == 200
+
+
+def user_auth_datasets():
+    return [
+        ('CANDIG_SITE_ADMIN', "SYNTHETIC-2", "SYNTHETIC-1"),
+        ('CANDIG_NOT_ADMIN', "SYNTHETIC-1", "SYNTHETIC-2"),
+    ]
+
+@pytest.mark.parametrize('user, dataset, not_dataset', user_auth_datasets())
+def test_katsu_users(user, dataset, not_dataset):
+    username = ENV[f"{user}_USER"]
+    password = ENV[f"{user}_PASSWORD"]
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': f"Bearer {get_token(username=username, password=password)}"
+    }
+
+    response = requests.get(f"{ENV['CANDIG_URL']}/katsu/moh/v1/authorized/programs/", headers=headers)
+    programs = map(lambda x: x['program_id'], response.json()['results'])
+    print(programs)
+    assert dataset in programs
+    assert not_dataset not in programs
+
+    response = requests.get(f"{ENV['CANDIG_URL']}/katsu/moh/v1/authorized/donors/", headers=headers)
+    assert len(response.json()) > 0
+
+    donors = map(lambda x: x['program_id'], response.json())
+    assert dataset in donors
+    assert not_dataset not in donors
+
