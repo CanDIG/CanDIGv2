@@ -130,14 +130,32 @@ bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 
 ## Deploy CanDIGv2 Services with Compose
 
+
+### New
+
+`build-all` will perform all of the steps of the old method (section below), minus the `docker-pull` step.
+
+```bash
+make build-all
+```
+
+On some machines (MacOS), it may be necessary to add the following to /etc/hosts:
+```
+::1	docker.localhost
+```
+
+In some other cases, it may be necessary to add your local (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, edit your .env file with:
+```bash
+LOCAL_IP_ADDR=<your local IP>
+```
+Where `<your local IP>` is your local network IP (e.g. 192.168.x.x)
+
+### Old
 The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets.
 
 ```bash
 # initialize docker environment
 make init-docker
-
-# Setup required local redirect
-make init-hosts-file
 
 # pull latest CanDIGv2 images (if you didn't create images locally)
 make docker-pull

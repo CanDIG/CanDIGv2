@@ -12,6 +12,8 @@ services:
       - "${CHORD_METADATA_PORT}:8000"
     depends_on:
       - metadata-db
+    extra_hosts:
+      - "docker.localhost:${LOCAL_IP_ADDR}"
     environment:
       - POSTGRES_DATABASE=metadata
       - POSTGRES_HOST=metadata-db
@@ -38,6 +40,8 @@ services:
       - POSTGRES_DB=metadata
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
       - POSTGRES_HOST_AUTH_METHOD=password
+    extra_hosts:
+      - "docker.localhost:${LOCAL_IP_ADDR}"
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret

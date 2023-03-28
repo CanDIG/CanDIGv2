@@ -99,7 +99,7 @@ endif
 build-%:
 	echo "    started build-$*" >> $(LOGFILE)
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build $(BUILD_OPTS)
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build $(BUILD_OPTS)
 	echo "    finished build-$*" >> $(LOGFILE)
 
 
@@ -132,8 +132,9 @@ clean-bin:
 #<<<
 .PHONY: clean-compose
 clean-compose:
+	source ${PWD}/setup_hosts.sh; \
 	$(foreach MODULE, $(CANDIG_MODULES), \
-		docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml down || true;)
+		docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml down || true;)
 
 
 #>>>
@@ -197,6 +198,7 @@ clean-volumes:
 #<<<
 .PHONY: compose
 compose:
+	source ${PWD}/setup_hosts.sh; \
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
 
 
@@ -208,7 +210,7 @@ compose:
 #<<<
 compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml --compatibility up -d
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml --compatibility up -d
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
@@ -262,14 +264,6 @@ docker-secrets: mkdir minio-secrets
 
 	$(MAKE) secret-opa-root-token
 	$(MAKE) secret-opa-service-token
-
-#>>>
-# modify the hosts file
-
-#<<<
-.PHONY: init-hosts-file
-init-hosts-file:
-	source ${PWD}/setup_hosts.sh
 
 #>>>
 # create persistant volumes for docker containers
@@ -355,7 +349,7 @@ minio-secrets:
 
 #<<<
 pull-%:
-		docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml pull
+		docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml pull
 
 
 #>>>
@@ -365,7 +359,7 @@ pull-%:
 
 #<<<
 push-%:
-		docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml push
+		docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml push
 
 
 #>>>
@@ -418,3 +412,16 @@ help:
 print-%:
 	@echo '$*=$($*)'
 
+#>>>
+# run integration tests
+# make build-all -P
+
+#<<<
+.PHONY: build-all
+build-all:
+	./pre-build-check.sh
+
+# Setup the entire stack
+	$(MAKE) init-docker
+	$(MAKE) compose
+	$(MAKE) init-authx

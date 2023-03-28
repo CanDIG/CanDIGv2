@@ -1,35 +1,33 @@
 #!/usr/bin/env bash
 
 # Early-abort if this step isn't required
-test=$(grep -E "\sdocker\.localhost" /etc/hosts)
-
-if [[ ! -z "$test" ]]; then
-    echo "Skipping hosts setup as docker.localhosts already exists there..."
-    exit 0
+if [[ ! -z ${LOCAL_IP_ADDR:-} ]]; then
+    echo "IP Address is already set to: $LOCAL_IP_ADDR"
+    return
+fi
+if [[ "$CANDIG_DOMAIN" != "docker.localhost" ]]; then
+    echo "Hosts step not required when CANDIG_DOMAIN != docker.localhost"
+    return
 fi
 
 # Replace docker.localhost entry in /etc/hosts
-echo "HACK ALERT"
-echo "This step will introduce an entry into /etc/hosts so that requests to docker.localhost"
-echo "will bounce off your local network. Root access will be required..."
-cp /etc/hosts .hosts.tmp
-printf "\n" >>.hosts.tmp
-
 if [ "$VENV_OS" == "linux" ]; then
-  ifconfig | grep -A 1 'wlp0\|eth0' | grep -o "inet [0-9.]\+" | cut -d' ' -f2 > .hosts.tmp2
+    ip addr | grep -A 1 'wlp[0-9]\|eth[0-9]\|ens[0-9]' | grep -o "inet [0-9.]\+" | cut -d' ' -f2 > .hosts.tmp2
 else
-  ifconfig | grep -o "inet [0-9.]\+" | cut -d' ' -f2 > .hosts.tmp2
+    ifconfig | awk '/inet /&&!/127.0.0.1/{print $2;exit}' > .hosts.tmp2
 fi
 
-numlines=$(wc -l .hosts.tmp2)
+numlines=$(cat .hosts.tmp2 | wc -l) # use cat to prevent the name of the file from being printed on some systems
 if [ "$numlines" == "1" ]; then
-    printf "$IP\tdocker.localhost" >> .hosts.tmp
-    sudo mv .hosts.tmp /etc/hosts;
-    rm .hosts.tmp2;
+    export LOCAL_IP_ADDR=`cat .hosts.tmp2`
+elif [ "$numlines" == "0" ]; then
+    echo "ERROR: Your internet adapter could not be found automatically. Please determine your local IP address,"
+    echo "set LOCAL_IP_ADDR=<your local network IP address> (e.g. 192.168.x.x) in your .env file, then restart conda"
+    cat .hosts.tmp2
 else
     echo "ERROR: More than one IP has been detected. Since this script can't automatically determine which one"
-    echo "will make the build work, please remove all but one of the inserted docker.localhost lines in /etc/hosts."
-    awk '{printf "%s\tdocker.localhost\n", $0}' .hosts.tmp2 >> .hosts.tmp
-    sudo mv .hosts.tmp /etc/hosts;
-    rm .hosts.tmp2;
+    echo "will make the build work, please set LOCAL_IP_ADDR=<your local network IP address> (e.g. 192.168.x.x)"
+    echo "in your .env file, then restart conda"
+    cat .hosts.tmp2
 fi
+rm .hosts.tmp2;
