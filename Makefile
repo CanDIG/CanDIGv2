@@ -210,6 +210,7 @@ compose:
 #<<<
 compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
+	source ${PWD}/setup_hosts.sh; \
 	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml --compatibility up -d
 	echo "    finished compose-$*" >> $(LOGFILE)
 

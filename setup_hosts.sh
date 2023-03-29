@@ -5,10 +5,6 @@ if [[ ! -z ${LOCAL_IP_ADDR:-} ]]; then
     echo "IP Address is already set to: $LOCAL_IP_ADDR"
     return
 fi
-if [[ "$CANDIG_DOMAIN" != "docker.localhost" ]]; then
-    echo "Hosts step not required when CANDIG_DOMAIN != docker.localhost"
-    return
-fi
 
 # Replace docker.localhost entry in /etc/hosts
 if [ "$VENV_OS" == "linux" ]; then
