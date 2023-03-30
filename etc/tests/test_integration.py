@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import pytest
@@ -289,4 +290,17 @@ def test_katsu_users(user, dataset, not_dataset):
     donors = map(lambda x: x['program_id'], response.json())
     assert dataset in donors
     assert not_dataset not in donors
+
+
+## Federation tests:
+def test_server_count():
+    with open(f"{REPO_DIR}/tmp/federation/servers.json") as fp:
+        servers = json.load(fp)
+        token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'], password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
+        headers = {
+            'Authorization': f"Bearer {token}",
+            'Content-Type': 'application/json; charset=utf-8'
+        }
+        response = requests.get(f"{ENV['CANDIG_URL']}/federation/servers", headers=headers)
+        assert len(response.json()) == len(servers['servers'])
 
