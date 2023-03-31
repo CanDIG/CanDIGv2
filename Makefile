@@ -187,7 +187,7 @@ clean-secrets:
 #<<<
 .PHONY: clean-volumes
 clean-volumes:
-	-docker volume rm `docker volume ls -q`
+	-docker volume rm `docker volume ls -q --filter label=candigv2`
 #rm -rf $(DIR)/tmp/data
 
 
@@ -273,18 +273,18 @@ docker-secrets: mkdir minio-secrets
 #<<<
 .PHONY: docker-volumes
 docker-volumes:
-	docker volume create grafana-data
-	docker volume create jupyter-data
-	docker volume create minio-config
-	docker volume create minio-data $(MINIO_VOLUME_OPT)
-	docker volume create prometheus-data
-	docker volume create toil-jobstore
-	docker volume create keycloak-data
-	docker volume create tyk-data
-	docker volume create tyk-redis-data
-	docker volume create vault-data
-	docker volume create opa-data
-	docker volume create htsget-data
+	docker volume create grafana-data --label candigv2=volume
+	docker volume create jupyter-data --label candigv2=volume
+	docker volume create minio-config --label candigv2=volume
+	docker volume create minio-data $(MINIO_VOLUME_OPT) --label candigv2=volume
+	docker volume create prometheus-data --label candigv2=volume
+	docker volume create toil-jobstore --label candigv2=volume
+	docker volume create keycloak-data --label candigv2=volume
+	docker volume create tyk-data --label candigv2=volume
+	docker volume create tyk-redis-data --label candigv2=volume
+	docker volume create vault-data --label candigv2=volume
+	docker volume create opa-data --label candigv2=volume
+	docker volume create htsget-data --label candigv2=volume
 
 
 #>>>
