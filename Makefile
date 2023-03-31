@@ -176,7 +176,7 @@ clean-images:
 #<<<
 .PHONY: clean-secrets
 clean-secrets:
-	-docker secret rm `docker secret ls -q`
+	-docker secret rm `docker secret ls -q --filter label=candigv2`
 	rm -rf $(DIR)/tmp/secrets
 
 
