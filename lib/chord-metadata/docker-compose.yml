@@ -30,6 +30,8 @@ services:
         target: metadata_db_secret
       - source: opa-root-token
         target: opa-root-token
+    labels:
+      - "candigv2=chord-metadata"
 
   metadata-db:
     image: postgres:13-alpine
@@ -45,4 +47,6 @@ services:
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret
+    labels:
+      - "candigv2=chord-metadata"
 

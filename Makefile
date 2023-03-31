@@ -156,7 +156,7 @@ clean-conda:
 #<<<
 .PHONY: clean-containers
 clean-containers:
-	docker container prune -f
+	docker container prune -f --filter "label=candigv2"
 
 
 #>>>

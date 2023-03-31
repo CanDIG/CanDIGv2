@@ -11,6 +11,8 @@ services:
       args:
         version: "v${PROMETHEUS_VERSION}"
     image: ${DOCKER_REGISTRY}/prometheus:v${PROMETHEUS_VERSION:-latest}
+    labels:
+      - "candigv2=monitoring"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - prometheus-data:/prometheus
@@ -28,6 +30,8 @@ services:
 
   node-exporter:
     image: prom/node-exporter:${NODE_EXPORTER_VERSION:-latest}
+    labels:
+      - "candigv2=monitoring"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -46,6 +50,8 @@ services:
       args:
         version: "${ALERT_MANAGER_VERSION}"
     image: ${DOCKER_REGISTRY}/alertmanager:${ALERT_MANAGER_VERSION:-latest}
+    labels:
+      - "candigv2=monitoring"
     ports:
       - "${ALERT_MANAGER_PORT}:9093"
     command:
@@ -55,6 +61,8 @@ services:
   cadvisor:
     #image: google/cadvisor:${CADVISOR_VERSION:-latest}
     image: gcr.io/cadvisor/cadvisor:${CADVISOR_VERSION:-latest}
+    labels:
+      - "candigv2=monitoring"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -69,6 +77,8 @@ services:
       args:
         version: "${GRAFANA_VERSION}"
     image: ${DOCKER_REGISTRY}/grafana:${GRAFANA_VERSION:-latest}
+    labels:
+      - "candigv2=monitoring"
     volumes:
       - grafana-data:/var/lib/grafana
     ports:

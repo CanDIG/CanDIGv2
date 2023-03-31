@@ -2,6 +2,8 @@ version: '3.7'
 
 services:
   candig-data-portal:
+    labels:
+      - "candigv2=candig-data-portal"
     build:
       context: $PWD/lib/candig-data-portal/candig-data-portal
       args:
