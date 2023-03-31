@@ -260,6 +260,17 @@ def test_setup_katsu():
     else:
         assert response.status_code == 204 or response.status_code == 200
 
+    test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Donor.json"
+    response = requests.get(test_loc)
+    assert response.status_code == 200
+    response = requests.post(f"{ENV['CANDIG_URL']}/katsu/moh/v1/ingest/donors", headers=headers, json=response.json())
+    print(response.json())
+    if response.status_code >= 400:
+        errors = response.json()['error during ingest_donors']
+        assert "code='unique'" in errors and "donor_id" in errors # this means that the error was just that the program IDs already exist
+    else:
+        assert response.status_code == 204 or response.status_code == 200
+
 
 # Can each user only see results from their authorized datasets?
 def user_auth_datasets():
@@ -279,15 +290,16 @@ def test_katsu_users(user, dataset, not_dataset):
     }
 
     response = requests.get(f"{ENV['CANDIG_URL']}/katsu/moh/v1/authorized/programs/", headers=headers)
-    programs = map(lambda x: x['program_id'], response.json()['results'])
+    programs = list(map(lambda x: x['program_id'], response.json()['results']))
     print(programs)
     assert dataset in programs
     assert not_dataset not in programs
 
     response = requests.get(f"{ENV['CANDIG_URL']}/katsu/moh/v1/authorized/donors/", headers=headers)
     assert len(response.json()) > 0
-
-    donors = map(lambda x: x['program_id'], response.json())
+    print(response.json())
+    donors = list(map(lambda x: x['program_id'], response.json()['results']))
+    print(donors)
     assert dataset in donors
     assert not_dataset not in donors
 
@@ -302,5 +314,6 @@ def test_server_count():
             'Content-Type': 'application/json; charset=utf-8'
         }
         response = requests.get(f"{ENV['CANDIG_URL']}/federation/servers", headers=headers)
+        print(response.json())
         assert len(response.json()) == len(servers['servers'])
 
