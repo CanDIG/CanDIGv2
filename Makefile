@@ -166,7 +166,7 @@ clean-containers:
 #<<<
 .PHONY: clean-images
 clean-images:
-	docker image prune -a -f
+	docker image prune -a -f --filter "label=candigv2"
 
 
 #>>>
