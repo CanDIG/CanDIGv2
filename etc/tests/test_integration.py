@@ -258,7 +258,7 @@ def test_setup_katsu():
         errors = response.json()['error during ingest_programs']
         assert "code='unique'" in errors and "program_id" in errors # this means that the error was just that the program IDs already exist
     else:
-        assert response.status_code <= 200 and response.status_code < 300
+        assert response.status_code >= 200 and response.status_code < 300
 
     test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Donor.json"
     response = requests.get(test_loc)
@@ -269,7 +269,7 @@ def test_setup_katsu():
         errors = response.json()['error during ingest_donors']
         assert "code='unique'" in errors and "donor_id" in errors # this means that the error was just that the program IDs already exist
     else:
-        assert response.status_code <= 200 and response.status_code < 300
+        assert response.status_code >= 200 and response.status_code < 300
 
 
 # Can each user only see results from their authorized datasets?
