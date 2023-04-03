@@ -426,3 +426,13 @@ build-all:
 	$(MAKE) init-docker
 	$(MAKE) compose
 	$(MAKE) init-authx
+
+#>>>
+# run integration tests
+
+#<<<
+.PHONY: test-integration
+test-integration:
+	python ./settings.py
+	source ./env.sh
+	pytest ./etc/tests

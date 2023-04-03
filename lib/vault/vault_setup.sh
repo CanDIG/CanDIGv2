@@ -93,7 +93,7 @@ docker exec $vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [
 
 echo
 echo ">> setting up aws policy"
-docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"update\", \"read\"]}' >> vault-policy.hcl; vault policy write aws vault-policy.hcl"
+docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> vault-policy.hcl; vault policy write aws vault-policy.hcl"
 
 # user claims
 echo
@@ -174,4 +174,4 @@ echo "enable kv store for aws secrets"
 docker exec $vault vault secrets enable -path="aws" -description="AWS-style ID/secret pairs" kv
 
 vault_runner=$(docker ps | grep vault-runner | awk '{print $1}')
-docker restart $vault_runner 
+docker restart $vault_runner
