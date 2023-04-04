@@ -100,6 +100,19 @@ build-all:
 	$(MAKE) compose
 	$(MAKE) init-authx
 
+
+#>>>
+	# (re)build service image for all modules
+	# add BUILD_OPTS='--no-cache' to ignore cached builds
+	# BUILD_OPTS='--no-cache' make build-$module
+	# make images
+
+	#<<<
+	.PHONY: build-images
+	build-images: #toil-docker
+		$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE);)
+
+
 #>>>
 # (re)build service image and deploy/test using docker-compose
 # $module is the name of the sub-folder in lib/
@@ -299,18 +312,6 @@ docker-volumes:
 	docker volume create opa-data --label candigv2=volume
 	docker volume create htsget-data --label candigv2=volume
 	docker volume create postgres-data --label candigv2=volume
-
-
-#>>>
-# (re)build service image for all modules
-# add BUILD_OPTS='--no-cache' to ignore cached builds
-# BUILD_OPTS='--no-cache' make build-$module
-# make images
-
-#<<<
-.PHONY: build-images
-build-images: #toil-docker
-	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE);)
 
 
 #>>>
