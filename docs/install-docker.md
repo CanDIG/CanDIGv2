@@ -133,7 +133,7 @@ bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 
 ### New
 
-`build-all` will perform all of the steps of the old method (section below), minus the `docker-pull` step.
+`build-all` will perform all of the steps of the old method (section below), building images explicitly.
 
 ```bash
 make build-all
