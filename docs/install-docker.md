@@ -108,13 +108,13 @@ git submodule update --init --recursive
 cp -i etc/env/example.env .env
 
 # 3. option A: install miniconda and initialize candig virtualenv (use this option
-# for systems installations). Installs miniconda in the candigv2 repo. 
+# for systems installations). Installs miniconda in the candigv2 repo.
 make bin-conda  # If this fails on WSL, see the Note for WSL Systems section below
 make init-conda
 
 # 3. option B: if you want to use an existing conda installation on your local
 # at the top of the Makefile, set CONDA_BASE to your existing conda installation
-make mkdir # skip most of bin-conda, but need the dir-creating step 
+make mkdir # skip most of bin-conda, but need the dir-creating step
 make init-conda
 
 # 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
@@ -133,7 +133,7 @@ bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 
 ### New
 
-`build-all` will perform all of the steps of the old method (section below), minus the `docker-pull` step.
+`build-all` will perform all of the steps of the old method (section below), building images explicitly.
 
 ```bash
 make build-all
@@ -157,8 +157,12 @@ The `init-docker` command will initialize CanDIGv2 and set up docker networks, v
 # initialize docker environment
 make init-docker
 
-# pull latest CanDIGv2 images (if you didn't create images locally)
+## Do one of the following:
+# pull latest CanDIGv2 images:
 make docker-pull
+
+# or build images:
+make build-images
 
 # deploy stack
 make compose
@@ -208,16 +212,13 @@ make clean-volumes
 # 5. delete all cached images
 make clean-images
 
-# 6. remove conda environment
-make clean-conda
-
-# 7. remove bin dir (inlcuding miniconda)
+# 6. remove bin dir (inlcuding miniconda)
 make clean-bin
 ```
 
 ## Modifications for Apple Silicon M1
 
-There are some modifications that you need to make to install on M1 architecture. These are not full instructions, but only the changes from the standard install. 
+There are some modifications that you need to make to install on M1 architecture. These are not full instructions, but only the changes from the standard install.
 
 ### M1 environment variables
 
@@ -240,7 +241,7 @@ KEYCLOAK_BASE_IMAGE=quay.io/c3genomics/keycloak:${KEYCLOAK_VERSION}.arm64
 
 ### Step 1 mods: Install Docker and Dependencies
 
-Install [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/). 
+Install [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/).
 
 **Optional**: Install the following packages with homebrew (or your favourite package manager). Depending on your local setup, you may also need rosetta and Docker Compose V2.
 
@@ -258,7 +259,7 @@ brew install postgresql
 
 ### Step 5: Create Auth Stack
 
-- Update the opa image in `lib/opa/docker-compose.yml` to something arm-compatible (most of the `static` ones are. 
+- Update the opa image in `lib/opa/docker-compose.yml` to something arm-compatible (most of the `static` ones are.
 
 ```bash
     opa:

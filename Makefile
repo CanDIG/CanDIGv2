@@ -87,6 +87,32 @@ ifeq ($(VENV_OS), arm64mac)
 	echo "    finished bin-conda" >> $(LOGFILE)
 endif
 
+#>>>
+# make build-all -P
+
+#<<<
+.PHONY: build-all
+build-all:
+	./pre-build-check.sh
+
+# Setup the entire stack
+	$(MAKE) init-docker
+	$(MAKE) build-images
+	$(MAKE) compose
+	$(MAKE) init-authx
+
+
+#>>>
+# (re)build service image for all modules
+# add BUILD_OPTS='--no-cache' to ignore cached builds
+# BUILD_OPTS='--no-cache' make build-$module
+# make images
+
+#<<<
+.PHONY: build-images
+build-images: #toil-docker
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE);)
+
 
 #>>>
 # (re)build service image and deploy/test using docker-compose
@@ -111,7 +137,7 @@ build-%:
 #<<<
 .PHONY: clean-all
 clean-all: clean-authx clean-compose clean-containers clean-secrets \
-	clean-volumes clean-images clean-conda clean-bin
+	clean-volumes clean-images clean-bin
 
 
 #>>>
@@ -290,18 +316,6 @@ docker-volumes:
 
 
 #>>>
-# (re)build service image for all modules
-# add BUILD_OPTS='--no-cache' to ignore cached builds
-# BUILD_OPTS='--no-cache' make build-$module
-# make images
-
-#<<<
-.PHONY: images
-images: #toil-docker
-	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE);)
-
-
-#>>>
 # initialize conda environment
 # make init-conda
 
@@ -414,20 +428,6 @@ help:
 #<<<
 print-%:
 	@echo '$*=$($*)'
-
-#>>>
-# run integration tests
-# make build-all -P
-
-#<<<
-.PHONY: build-all
-build-all:
-	./pre-build-check.sh
-
-# Setup the entire stack
-	$(MAKE) init-docker
-	$(MAKE) compose
-	$(MAKE) init-authx
 
 #>>>
 # run integration tests
