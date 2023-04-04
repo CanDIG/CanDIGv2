@@ -2,6 +2,7 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 LABEL Maintainer="CanDIG Project"
+LABEL "candigv2"="tyk"
 
 # TODO: this image uses temp dir inside the lib/tyk which deviates from convention of this repo
 # See tyk_setup.sh for the same.
