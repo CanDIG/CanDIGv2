@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   vault:
-    image: library/vault:${VAULT_VERSION}
+    image: hashicorp/vault:${VAULT_VERSION}
     labels:
       - "candigv2=vault"
     ports:
