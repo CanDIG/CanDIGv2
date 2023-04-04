@@ -2,6 +2,7 @@ ARG alpine_version
 FROM alpine:${alpine_version}
 
 LABEL Maintainer="CanDIG Project"
+LABEL "candigv2"="vault"
 
 USER root
 

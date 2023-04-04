@@ -3,6 +3,7 @@ ARG wes_version
 
 FROM candig/toil:$toil_version
 LABEL maintainer=CanDIG
+LABEL "candigv2"="wes-server"
 
 RUN pip install -U pip && pip install --no-cache-dir wes-service
 

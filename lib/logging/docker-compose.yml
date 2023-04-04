@@ -11,12 +11,16 @@ services:
     ports:
       - "${FLUENTD_PORT}:24224"
       - "${FLUENTD_PORT}:24224/udp"
+    labels:
+      - "candigv2=logging"
 
   elasticsearch:
     image: elasticsearch:${ELASTIC_SEARCH_VERSION:-latest}
     ports:
       - "${ELASTIC_SEARCH_HTTP_PORT}:9200"
       - "${ELASTIC_SEARCH_TRANSPORT}:9300"
+    labels:
+      - "candigv2=logging"
 
   kibana:
     image: kibana:${KIBANA_VERSION:-latest}
@@ -24,3 +28,5 @@ services:
       - "${KIBANA_PORT}:5601"
     depends_on:
       - elasticsearch
+    labels:
+      - "candigv2=logging"

@@ -8,6 +8,8 @@ services:
         toil_version: "${TOIL_VERSION}"
         wes_version: "${WES_VERSION}"
     image: ${DOCKER_REGISTRY}/wes-server:${WES_VERSION:-latest}
+    labels:
+      - "candigv2=wes-server"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - toil-jobstore:/jobStoreParentDir
@@ -47,6 +49,8 @@ services:
 
   wes-worker:
     image: ${DOCKER_REGISTRY}/wes-server:${WES_VERSION:-latest}
+    labels:
+      - "candigv2=wes-server"
     volumes:
       - toil-jobstore:/jobStoreParentDir
       - /var/run/docker.sock:/var/run/docker.sock:rw

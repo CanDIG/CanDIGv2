@@ -6,6 +6,8 @@ services:
       context: ${PWD}/lib/tyk
       args:
         - BASE_IMAGE=tykio/tyk-gateway:${TYK_VERSION}
+    labels:
+      - "candigv2=tyk"
     ports:
       - "${TYK_SERVICE_PUBLIC_PORT}:8080"
     volumes:
@@ -22,6 +24,8 @@ services:
 
   tyk-redis:
     image: redis:${TYK_REDIS_VERSION}
+    labels:
+      - "candigv2=tyk"
     volumes:
       - tyk-redis-data:/data
     ports:
