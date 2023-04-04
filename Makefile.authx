@@ -10,7 +10,7 @@ clean-keycloak:
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'keycloak' | xargs -I{} docker rmi --force {}
 
-	docker volume rm keycloak-data
+	-docker volume rm keycloak-data
 
 #>>>
 # close vault services
@@ -24,7 +24,7 @@ clean-vault:
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'vault' | xargs -I{} docker rmi --force {}
 
-	docker volume rm vault-data
+	-docker volume rm vault-data
 
 
 #>>>
@@ -40,7 +40,7 @@ clean-opa:
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'openpolicyagent/opa' | xargs -I{} docker rmi --force {}
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'opa-runner' | xargs -I{} docker rmi --force {}
 
-	docker volume rm opa-data
+	-docker volume rm opa-data
 
 
 #>>>
@@ -58,8 +58,8 @@ clean-tyk:
 	# - clean tmp dir inside lib/tyk
 	rm -r $(DIR)/lib/tyk/tmp || true
 
-	docker volume rm tyk-data
-	docker volume rm tyk-redis-data
+	-docker volume rm tyk-data
+	-docker volume rm tyk-redis-data
 
 
 #>>>
