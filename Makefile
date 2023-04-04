@@ -97,6 +97,7 @@ build-all:
 
 # Setup the entire stack
 	$(MAKE) init-docker
+	$(MAKE) build-images
 	$(MAKE) compose
 	$(MAKE) init-authx
 
