@@ -111,7 +111,7 @@ build-%:
 #<<<
 .PHONY: clean-all
 clean-all: clean-authx clean-compose clean-containers clean-secrets \
-	clean-volumes clean-images clean-conda clean-bin
+	clean-volumes clean-images clean-bin
 
 
 #>>>
