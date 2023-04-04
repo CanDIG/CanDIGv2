@@ -87,6 +87,18 @@ ifeq ($(VENV_OS), arm64mac)
 	echo "    finished bin-conda" >> $(LOGFILE)
 endif
 
+#>>>
+# make build-all -P
+
+#<<<
+.PHONY: build-all
+build-all:
+	./pre-build-check.sh
+
+# Setup the entire stack
+	$(MAKE) init-docker
+	$(MAKE) compose
+	$(MAKE) init-authx
 
 #>>>
 # (re)build service image and deploy/test using docker-compose
@@ -414,20 +426,6 @@ help:
 #<<<
 print-%:
 	@echo '$*=$($*)'
-
-#>>>
-# run integration tests
-# make build-all -P
-
-#<<<
-.PHONY: build-all
-build-all:
-	./pre-build-check.sh
-
-# Setup the entire stack
-	$(MAKE) init-docker
-	$(MAKE) compose
-	$(MAKE) init-authx
 
 #>>>
 # run integration tests
