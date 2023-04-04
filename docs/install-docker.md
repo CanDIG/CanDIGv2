@@ -212,10 +212,7 @@ make clean-volumes
 # 5. delete all cached images
 make clean-images
 
-# 6. remove conda environment
-make clean-conda
-
-# 7. remove bin dir (inlcuding miniconda)
+# 6. remove bin dir (inlcuding miniconda)
 make clean-bin
 ```
 
