@@ -157,8 +157,12 @@ The `init-docker` command will initialize CanDIGv2 and set up docker networks, v
 # initialize docker environment
 make init-docker
 
-# pull latest CanDIGv2 images (if you didn't create images locally)
+## Do one of the following:
+# pull latest CanDIGv2 images:
 make docker-pull
+
+# or build images:
+make build-images
 
 # deploy stack
 make compose
