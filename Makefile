@@ -308,8 +308,8 @@ docker-volumes:
 # make images
 
 #<<<
-.PHONY: images
-images: #toil-docker
+.PHONY: build-images
+build-images: #toil-docker
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE);)
 
 
