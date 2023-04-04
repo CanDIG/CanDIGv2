@@ -188,6 +188,7 @@ clean-secrets:
 .PHONY: clean-volumes
 clean-volumes:
 	-docker volume rm `docker volume ls -q --filter label=candigv2`
+	-docker volume rm `docker volume ls -q --filter dangling=true`
 #rm -rf $(DIR)/tmp/data
 
 
