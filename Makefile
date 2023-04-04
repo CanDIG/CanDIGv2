@@ -435,5 +435,4 @@ build-all:
 .PHONY: test-integration
 test-integration:
 	python ./settings.py
-	source ./env.sh
-	pytest ./etc/tests
+	source ./env.sh; pytest ./etc/tests
