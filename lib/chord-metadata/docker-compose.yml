@@ -44,6 +44,8 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=password
     extra_hosts:
       - "docker.localhost:${LOCAL_IP_ADDR}"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret

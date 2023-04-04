@@ -23,6 +23,8 @@ volumes:
     external: true
   htsget-data:
     external: true
+  postgres-data:
+    external: true
 
 secrets:
   aws-credentials:

@@ -286,6 +286,7 @@ docker-volumes:
 	docker volume create vault-data --label candigv2=volume
 	docker volume create opa-data --label candigv2=volume
 	docker volume create htsget-data --label candigv2=volume
+	docker volume create postgres-data --label candigv2=volume
 
 
 #>>>
