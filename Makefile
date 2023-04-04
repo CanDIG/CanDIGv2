@@ -103,15 +103,15 @@ build-all:
 
 
 #>>>
-	# (re)build service image for all modules
-	# add BUILD_OPTS='--no-cache' to ignore cached builds
-	# BUILD_OPTS='--no-cache' make build-$module
-	# make images
+# (re)build service image for all modules
+# add BUILD_OPTS='--no-cache' to ignore cached builds
+# BUILD_OPTS='--no-cache' make build-$module
+# make images
 
-	#<<<
-	.PHONY: build-images
-	build-images: #toil-docker
-		$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE);)
+#<<<
+.PHONY: build-images
+build-images: #toil-docker
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE);)
 
 
 #>>>
