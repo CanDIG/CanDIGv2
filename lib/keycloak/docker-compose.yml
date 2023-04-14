@@ -13,7 +13,7 @@ services:
     ports:
       - "${KEYCLOAK_CONTAINER_PORT}:8080"
     extra_hosts:
-      - "docker.localhost:${LOCAL_IP_ADDR}"
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     volumes:
       - keycloak-data:/opt/jboss/keycloak/standalone
     environment:

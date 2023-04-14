@@ -20,7 +20,7 @@ services:
       - source: minio-secret-key
         target: secret_key
     extra_hosts:
-        - "docker.localhost:${LOCAL_IP_ADDR}"
+        - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     command: ["server", "/data","--console-address", ":${MINIO_UI_PORT}"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
