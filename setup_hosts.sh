@@ -6,7 +6,7 @@ if [[ ! -z ${LOCAL_IP_ADDR:-} ]]; then
     return
 fi
 
-# Replace docker.localhost entry in /etc/hosts
+# Find local IP address:
 if [ "$VENV_OS" == "linux" ]; then
     ip addr | grep -A 1 'wlp[0-9]\|eth[0-9]\|ens[0-9]' | grep -o "inet [0-9.]\+" | cut -d' ' -f2 > .hosts.tmp2
 else
