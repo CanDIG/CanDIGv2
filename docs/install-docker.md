@@ -141,7 +141,7 @@ make build-all
 
 On some machines (MacOS), it may be necessary to add the following to /etc/hosts:
 ```
-::1	docker.localhost
+::1	candig.docker.internal
 ```
 
 In some other cases, it may be necessary to add your local (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, edit your .env file with:
