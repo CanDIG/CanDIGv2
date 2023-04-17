@@ -27,7 +27,7 @@ services:
       IDP: "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
       KATSU_URL: "${CHORD_METADATA_PUBLIC_URL}"
     extra_hosts:
-      - "docker.localhost:${LOCAL_IP_ADDR}"
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
 
   opa:
     image: openpolicyagent/opa:latest
@@ -53,4 +53,4 @@ services:
       timeout: 20s
       retries: 3
     extra_hosts:
-      - "docker.localhost:${LOCAL_IP_ADDR}"
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"

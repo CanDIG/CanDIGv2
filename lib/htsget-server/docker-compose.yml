@@ -34,5 +34,5 @@ services:
       DB_PATH: /data/files.db
       TESTENV_URL: ${HTSGET_PRIVATE_URL}
     extra_hosts:
-      - "docker.localhost:${LOCAL_IP_ADDR}"
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     command: ["--host", "0.0.0.0", "--port", "3000"]

@@ -15,7 +15,7 @@ services:
     depends_on:
       - tyk-redis
     extra_hosts:
-      - "docker.localhost:${LOCAL_IP_ADDR}"
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
       test: [ "CMD", "curl", "http://0.0.0.0:8080/hello" ]
       interval: 30s
@@ -31,7 +31,7 @@ services:
     ports:
       - "6379:6379"
     extra_hosts:
-      - "docker.localhost:${LOCAL_IP_ADDR}"
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
