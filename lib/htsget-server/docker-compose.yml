@@ -32,6 +32,7 @@ services:
       MINIO_URL: ${MINIO_PRIVATE_URL}
       DEBUG_MODE: ${CANDIG_DEBUG_MODE}
       DB_PATH: /data/files.db
+      SERVER_LOCAL_DATA: /app/htsget_server/data
       TESTENV_URL: ${HTSGET_PRIVATE_URL}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
