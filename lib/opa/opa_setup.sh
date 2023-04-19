@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-set -Euo pipefail
+set -Eeuo pipefail
 
 LOGFILE=$PWD/tmp/progress.txt
+
+# This script runs after the container is composed.
 
 
 opa_runner=$(docker ps -a --format "{{.Names}}" | grep "opa-runner" | awk '{print $1}')
