@@ -238,8 +238,10 @@ compose:
 #<<<
 compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
+	-source $(DIR)/lib/$*/$*_preflight.sh
 	source ${PWD}/setup_hosts.sh; \
 	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml --compatibility up -d
+	-source $(DIR)/lib/$*/$*_setup.sh
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
