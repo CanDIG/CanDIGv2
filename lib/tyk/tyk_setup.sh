@@ -9,9 +9,15 @@ LOGFILE=$PWD/tmp/progress.txt
 
 echo "Starting Tyk key setup, post launch" | tee -a $LOGFILE
 
-echo "Lets wait for Redis and Tyk to get up" | tee -a $LOGFILE
-# if this fails in the future add a more robust test
-sleep 5;
+echo ">> waiting for Tyk to start"
+docker ps --format "{{.Names}}" | grep tyk_1
+while [ $? -ne 0 ]
+do
+  echo "..."
+  sleep 1
+  docker ps --format "{{.Names}}" | grep tyk_1
+done
+sleep 5
 
 TYK_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-secret-key)
 export TYK_SECRET_KEY=$TYK_SECRET_KEY_VAL
