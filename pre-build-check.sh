@@ -2,7 +2,7 @@
 
 if command -v getent >/dev/null 2>&1; then
     CANDIG_HOST=`getent hosts candig-dev`
-elif command -v dnscacheutil >/dev/null 2>&1; then
+elif command -v dscacheutil >/dev/null 2>&1; then
     CANDIG_HOST=`dscacheutil -q host -a name candig-dev`
 fi
 
