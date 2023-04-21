@@ -77,21 +77,14 @@ clean-authx: clean-keycloak clean-tyk clean-vault clean-opa
 #<<<
 init-authx: mkdir
 	$(MAKE) docker-volumes
-	echo "Grabbing our local IP address"; \
-	source ${PWD}/setup_hosts.sh; \
 	echo "Setting up Keycloak"; \
-	source ${PWD}/lib/keycloak/keycloak_setup.sh; \
+	$(MAKE) compose-keycloak; \
 	echo "Setting up Tyk"; \
-	${PWD}/lib/tyk/tyk_setup.sh; \
-	echo ; \
 	$(MAKE) compose-tyk; \
-	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
 	echo "Setting up Vault"; \
-	source ${PWD}/lib/vault/vault_setup.sh; \
+	$(MAKE) compose-vault; \
 	echo "Setting up Opa"; \
-	$(MAKE) build-opa; \
 	$(MAKE) compose-opa; \
-	source ${PWD}/lib/opa/opa_setup.sh; \
 	echo ;
 
 
