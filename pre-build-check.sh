@@ -6,4 +6,3 @@ if [ ! -z "$CANDIG_HOST" ]; then
     exit 1
 fi
 
-diff .env etc/env/example.env
