@@ -11,3 +11,19 @@ if [ ! -z "$CANDIG_HOST" ]; then
     exit 1
 fi
 
+DIFF_OUT=$(diff -I 'VENV_OS=.*' -I 'LOCAL_IP_ADDR=.*' -bwBE etc/env/example.env .env)
+if [ "$DIFF_OUT" == "" ]; then
+    echo "Your .env matches etc/env/example.env, continuing"
+else
+    echo "Your .env differs from etc/env/example.env:"
+    echo "$DIFF_OUT"
+    while true
+    do
+        read -r -p 'Do you want to continue? ' choice
+        case "$choice" in
+          n|N) exit 1;;
+          y|Y) exit 0;;
+          *) echo 'Response not valid';;
+        esac
+    done
+fi
