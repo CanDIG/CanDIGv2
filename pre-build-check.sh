@@ -11,7 +11,7 @@ if [ ! -z "$CANDIG_HOST" ]; then
     exit 1
 fi
 
-DIFF_OUT=$(diff -I 'VENV_OS=.*' -I 'LOCAL_IP_ADDR=.*' -bwBE etc/env/example.env .env)
+DIFF_OUT=$(diff -I 'VENV_OS=.*' -I 'LOCAL_IP_ADDR=.*' -bwB etc/env/example.env .env)
 if [ "$DIFF_OUT" == "" ]; then
     echo "Your .env matches etc/env/example.env, continuing"
 else
@@ -19,7 +19,7 @@ else
     echo "$DIFF_OUT"
     while true
     do
-        read -r -p 'Do you want to continue? ' choice
+        read -r -p 'Do you want to continue? (y/n)' choice
         case "$choice" in
           n|N) exit 1;;
           y|Y) exit 0;;
