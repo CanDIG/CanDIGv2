@@ -19,7 +19,7 @@ else
     echo "$DIFF_OUT"
     while true
     do
-        read -r -p 'Do you want to continue? ' choice
+        read -r -p 'Do you want to continue? (y/n)' choice
         case "$choice" in
           n|N) exit 1;;
           y|Y) exit 0;;
