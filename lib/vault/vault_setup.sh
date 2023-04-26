@@ -2,6 +2,10 @@
 
 set -Euo pipefail
 
+LOGFILE=$PWD/tmp/progress.txt
+
+# This script runs after the container is composed.
+
 # This script will set up a full vault environment on your local CanDIGv2 cluster
 
 # Automates instructions written at
@@ -12,16 +16,6 @@ set -Euo pipefail
 # https://learn.hashicorp.com/tutorials/vault/identity
 # https://stackoverflow.com/questions/35703317/docker-exec-write-text-to-file-in-container
 # https://www.vaultproject.io/api-docs/secret/identity/entity#batch-delete-entities
-
-mkdir -p ${PWD}/lib/vault/tmp
-
-# vault-config.json
-echo "Working on vault-config.json .."
-envsubst < ${PWD}/lib/vault/configuration_templates/vault-config.json.tpl > ${PWD}/lib/vault/tmp/vault-config.json
-
-# boot container
-make build-vault
-make compose-vault
 
 echo ">> waiting for vault to start"
 docker ps --format "{{.Names}}" | grep vault_1
