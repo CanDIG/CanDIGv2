@@ -1,9 +1,33 @@
 from dotenv import dotenv_values
+import json
+import os
+import re
+import tempfile
+
+CANDIGV2_ENV = None
+with open(".env") as f:
+    envs = f.read().replace("define ", "").replace("endef", "")
+    with tempfile.NamedTemporaryFile("w", delete=False) as fp:
+        fp.write(envs)
+    CANDIGV2_ENV = dotenv_values(fp.name, interpolate=False)
+    os.unlink(fp.name)
+
+
+def get_env_value(key):
+    raw_value = CANDIGV2_ENV[key]
+
+    while True:
+        var_match = re.match(r"^(.*)\$\{(.+?)\}(.*)$", raw_value, re.DOTALL)
+        if var_match is not None:
+            raw_value = var_match.group(1) + CANDIGV2_ENV[var_match.group(2)] + var_match.group(3)
+        else:
+            break
+
+    CANDIGV2_ENV[key] = raw_value
+    return raw_value
 
 
 def get_env():
-    candigv2_env = dotenv_values(f".env")
-
     vars = {}
     vars["CANDIG_URL"] = candigv2_env["TYK_LOGIN_TARGET_URL"]
     vars["CANDIG_CLIENT_ID"] = candigv2_env["KEYCLOAK_CLIENT_ID"]
