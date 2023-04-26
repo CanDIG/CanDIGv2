@@ -1,12 +1,12 @@
-version: '3.7'
+version: '3.8'
 
 services:
   chord-metadata:
     build:
       context: $PWD/lib/chord-metadata/chord_metadata_service
       args:
-        venv_python: "3.10"
-        alpine_version: "3.16"
+        venv_python: "3.11"
+        alpine_version: "3.17"
     image: ${DOCKER_REGISTRY}/chord-metadata:${CHORD_METADATA_VERSION:-latest}
     ports:
       - "${CHORD_METADATA_PORT}:8000"
@@ -34,7 +34,7 @@ services:
       - "candigv2=chord-metadata"
 
   metadata-db:
-    image: postgres:13-alpine
+    image: postgres:15-alpine
     ports:
       - "5433:5432"
     environment:
