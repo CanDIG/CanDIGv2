@@ -12,40 +12,29 @@ services:
       - "${KATSU_PORT}:8000"
     depends_on:
       - metadata-db
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     environment:
       - KATSU_URL=${KATSU_HOST}
       - KATSU_PERMISSIONS=${KATSU_AUTH}
       - KATSU_DEBUG=${KATSU_DEBUG}
+      - POSTGRES_DATABASE=metadata
       - POSTGRES_HOST=metadata-db
+      - POSTGRES_PORT=5432
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
-      - INSIDE_CANDIG=${INSIDE_CANDIG}
       - OPA_URL=${OPA_PRIVATE_URL}
-      - CANDIG_AUTHORIZATION=${CANDIG_AUTHORIZATION}
-      - CACHE_TIME=${CACHE_TIME}
+      - KATSU_AUTHORIZATION=${CANDIG_AUTHORIZATION}
       - OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
       - HOST_CONTAINER_NAME=${KATSU_CONTAINER}
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
     secrets:
-      - source: metadata-app-secret
-        target: metadata_app_secret
-      - source: metadata-db-user
-        target: metadata_db_user
       - source: metadata-db-secret
         target: metadata_db_secret
       - source: opa-root-token
         target: opa-root-token
-    entrypoint:
-      - /bin/bash
-      - -c
-      - |
-        python manage.py makemigrations
-        python manage.py migrate
-        python manage.py runserver 0.0.0.0:8000
-    #healthcheck:
-      #test: ["CMD", "curl", "-f", "http://localhost:8000/metrics"]
-      #interval: 30s
-      #timeout: 20s
-      #retries: 3
+    labels:
+      - "candigv2=chord-metadata"
 
   metadata-db:
     image: postgres:13-alpine
@@ -53,21 +42,20 @@ services:
       #- katsu-db:/var/lib/postgresql/data
       #add volume name to lib/{compose,swarm,kubernetes}
       #add volume name to docker-volumes in Makefile
-    # ports:
-    #   - "${KATSU_PORT}:8000"
+    ports:
+      - "5433:5432"
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_DB=metadata
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
       - POSTGRES_HOST_AUTH_METHOD=password
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     secrets:
-      - source: metadata-db-user
-        target: metadata_db_user
       - source: metadata-db-secret
         target: metadata_db_secret
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8000/metrics"]
-    #   interval: 30s
-    #   timeout: 20s
-    #   retries: 3
+    labels:
+      - "candigv2=chord-metadata"
 

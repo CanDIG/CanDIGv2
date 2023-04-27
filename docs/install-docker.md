@@ -2,7 +2,7 @@
 
 ---
 
-These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, follow the [Mac Apple Silicon Installation](#mac-apple-silicon-installation) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
+These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, there are [modification instructions](#modifications-for-apple-silicon-m1) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
 
 Before beginning, you should set up your environment variables as described in the [README](README.md).
 
@@ -18,11 +18,7 @@ sudo apt update && \
   sudo apt autoclean && \
   sudo apt autoremove -y
 
-sudo apt install -y git-core build-essential curl
-sudo apt install -y libbz2-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
-  libsqlite3-dev libssl-dev uuid-dev libreadline-dev \
-  zlib1g-dev tk-dev libffi-dev python-dev
-
+sudo apt install -y git-core build-essential
 ```
 
 2. Install Docker
@@ -111,30 +107,72 @@ git submodule update --init --recursive
 # 2. copy and edit .env with your site's local configuration
 cp -i etc/env/example.env .env
 
-# 3. initialize candig virtualenv
-make bin-pyenv
-exec bash
-make init-pipenv
-pipenv shell
+# 3. option A: install miniconda and initialize candig virtualenv (use this option
+# for systems installations). Installs miniconda in the candigv2 repo.
+make bin-conda  # If this fails on WSL, see the Note for WSL Systems section below
+make init-conda
+
+# 3. option B: if you want to use an existing conda installation on your local
+# at the top of the Makefile, set CONDA_BASE to your existing conda installation
+make mkdir # skip most of bin-conda, but need the dir-creating step
+make init-conda
+
+# 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
+conda activate candig
+```
+
+### Note for WSL Systems
+Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop:
+
+```bash
+bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 ```
 
 ## Deploy CanDIGv2 Services with Compose
 
+
+### New
+
+`build-all` will perform all of the steps of the old method (section below), building images explicitly.
+
+```bash
+make build-all
+```
+
+On some machines (MacOS), it may be necessary to add the following to /etc/hosts:
+```
+::1	candig.docker.internal
+```
+
+In some other cases, it may be necessary to add your local (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, edit your .env file with:
+```bash
+LOCAL_IP_ADDR=<your local IP>
+```
+Where `<your local IP>` is your local network IP (e.g. 192.168.x.x)
+
+### Old
 The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets.
 
 ```bash
 # initialize docker environment
 make init-docker
 
-# Setup required local redirect
-make init-hosts-file
-
-# pull latest CanDIGv2 images (if you didn't create images locally)
+## Do one of the following:
+# pull latest CanDIGv2 images:
 make docker-pull
+
+# or build images:
+make build-images
 
 # deploy stack
 make compose
 make init-authx # If this command fails, try the #update-firewall section of this Markdown file
+
+# Specific cached modules may be out of date, so to disable caching for a specific module, add BUILD_OPTS='--no-cache' at the end of make like so:
+# make build-htsget-server BUILD_OPTS='--no-cache'
+# make compose-htsget-server
+# make build-% and compose-% will work for any folder name in lib/
+
 # TODO: post deploy auth configuration
 
 ```
@@ -174,17 +212,38 @@ make clean-volumes
 # 5. delete all cached images
 make clean-images
 
-# 6. remove virtualenv environment
-make clean-pipenv
+# 6. remove bin dir (inlcuding miniconda)
+make clean-bin
 ```
 
-## Mac Apple Silicon Installation
+## Modifications for Apple Silicon M1
 
-### Step1: Install Docker and Dependencies
+There are some modifications that you need to make to install on M1 architecture. These are not full instructions, but only the changes from the standard install.
 
-Mac users can get [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/). 
+### M1 environment variables
 
-**Optional**: Depending on your local setup, you may need homebrew and brew-installed dependencies below. You may also need rosetta and Docker Compose V2.
+- In your .env file, set the M1 architecture:
+
+```bash
+# options are [linux, darwin, arm64mac]
+VENV_OS=arm64mac
+```
+
+- Replace the default KEYCLOAK_BASE_IMAGE from jboss and use a compatible version from c3genomics:
+
+```bash
+# keycloak service
+KEYCLOAK_VERSION=16.1.1
+KEYCLOAK_BASE_IMAGE=quay.io/c3genomics/keycloak:${KEYCLOAK_VERSION}.arm64
+# KEYCLOAK_BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
+```
+
+
+### Step 1 mods: Install Docker and Dependencies
+
+Install [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/).
+
+**Optional**: Install the following packages with homebrew (or your favourite package manager). Depending on your local setup, you may also need rosetta and Docker Compose V2.
 
 ```bash
 # Install Homebrew
@@ -196,87 +255,17 @@ brew install md5sha1sum
 # Install PostgreSQL
 brew install postgresql
 
-# Install dependencies for pyenv
-brew install openssl readline sqlite3 xz zlib
-```
-
-### Step 2: Initialize CanDIGv2 Repo
-
-```bash
-# 1. initialize repo and submodules
-git clone -b develop https://github.com/CanDIG/CanDIGv2.git
-cd CanDIGv2
-git submodule update --init --recursive
-
-# 2. copy and edit .env with your site's local configuration
-cp -i etc/env/example.env .env
-```
-
-- Edit the .env file to specify Apple Sillicon platform:
-
-```bash
-# options are [linux, darwin, arm64mac]
-VENV_OS=arm64mac
-```
-
-### Step 3: Set up python virtual environment
-
-If you have conda installed and activated, you should first deactivate any conda environments (including the base env, if activated by default).
-
-These instructions assume you are using the default `zsh` shell, if you are using bash on M1, you probably need to follow the linux instructions for setting up `pyenv` and `pipenv`, but this has not been tested. 
-
-```bash
-# Install pyenv
-git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-
-# Set pyenv path in ~/.zshrc
-echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
-echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
-echo 'eval "$(pyenv init --path)"' >> ~/.zshrc
-
-# Restart the shell to take effect
-exec zsh
-
-# Install python (find the version in .env VENV_PYTHON)
-pyenv install 3.10.9
-
-# Set python version for this directory (for example CanDIGv2 root folder):
-pyenv local 3.10.9
-
-# Install pipenv
-pip install pipenv
-
-# spawn the virtual environment
-pipenv shell
-```
-
-### Step 4: Initialize and Compose CanDIGv2
-
-- Make sure you are in `CanDIGv2` virtual environment (activate it in previous step)
-
-```bash
-make init-docker
-make init-hosts-file # Setup required local redirect
-make compose
 ```
 
 ### Step 5: Create Auth Stack
 
-Edit the .env, replace the default KEYCLOAK_BASE_IMAGE from jboss and use a compatible version from c3genomics:
+- Update the opa image in `lib/opa/docker-compose.yml` to something arm-compatible (most of the `static` ones are.
 
 ```bash
-# keycloak service
-KEYCLOAK_VERSION=16.1.1
-KEYCLOAK_BASE_IMAGE=quay.io/c3genomics/keycloak:${KEYCLOAK_VERSION}.arm64
-# KEYCLOAK_BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
+    opa:
+        image: openpolicyagent/opa:edge-static
 ```
 
-Then run `make` steps:
-
-```bash
-make init-authx
-make compose-authx
-```
 
 Once everything has run without errors, take a look at the documentation for
 [ingesting data and testing the deployment](ingest-and-test.md) as well as

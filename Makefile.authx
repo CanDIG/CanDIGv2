@@ -4,12 +4,13 @@
 
 #<<<
 clean-keycloak:
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/keycloak/docker-compose.yml down || true
+	source ${PWD}/setup_hosts.sh; \
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/keycloak/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'keycloak' | xargs -I{} docker rmi --force {}
 
-	docker volume rm keycloak-data
+	-docker volume rm keycloak-data
 
 #>>>
 # close vault services
@@ -17,12 +18,13 @@ clean-keycloak:
 
 #<<<
 clean-vault:
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/vault/docker-compose.yml down || true
+	source ${PWD}/setup_hosts.sh; \
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/vault/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'vault' | xargs -I{} docker rmi --force {}
 
-	docker volume rm vault-data
+	-docker volume rm vault-data
 
 
 #>>>
@@ -31,13 +33,14 @@ clean-vault:
 
 #<<<
 clean-opa:
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/opa/docker-compose.yml down || true
+	source ${PWD}/setup_hosts.sh; \
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/opa/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'openpolicyagent/opa' | xargs -I{} docker rmi --force {}
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'opa-runner' | xargs -I{} docker rmi --force {}
 
-	docker volume rm opa-data
+	-docker volume rm opa-data
 
 
 #>>>
@@ -46,7 +49,8 @@ clean-opa:
 
 #<<<
 clean-tyk:
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/tyk/docker-compose.yml down || true
+	source ${PWD}/setup_hosts.sh; \
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/tyk/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'tyk|redis' |  xargs -I{} docker rmi --force {}
@@ -54,8 +58,8 @@ clean-tyk:
 	# - clean tmp dir inside lib/tyk
 	rm -r $(DIR)/lib/tyk/tmp || true
 
-	docker volume rm tyk-data
-	docker volume rm tyk-redis-data
+	-docker volume rm tyk-data
+	-docker volume rm tyk-redis-data
 
 
 #>>>
@@ -74,18 +78,13 @@ clean-authx: clean-keycloak clean-tyk clean-vault clean-opa
 init-authx: mkdir
 	$(MAKE) docker-volumes
 	echo "Setting up Keycloak"; \
-	source ${PWD}/lib/keycloak/keycloak_setup.sh; \
+	$(MAKE) compose-keycloak; \
 	echo "Setting up Tyk"; \
-	${PWD}/lib/tyk/tyk_setup.sh; \
-	echo ; \
 	$(MAKE) compose-tyk; \
-	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
 	echo "Setting up Vault"; \
-	source ${PWD}/lib/vault/vault_setup.sh; \
+	$(MAKE) compose-vault; \
 	echo "Setting up Opa"; \
-	$(MAKE) build-opa; \
 	$(MAKE) compose-opa; \
-	source ${PWD}/lib/opa/opa_setup.sh; \
 	echo ;
 
 

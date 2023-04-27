@@ -2,7 +2,9 @@ version: '3.7'
 
 services:
   vault:
-    image: library/vault:${VAULT_VERSION}
+    image: hashicorp/vault:${VAULT_VERSION}
+    labels:
+      - "candigv2=vault"
     ports:
       - ${VAULT_SERVICE_PORT}:8200
     volumes:
@@ -21,12 +23,16 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
 
   vault-runner:
     build:
       context: $PWD/lib/vault
       args:
         alpine_version: "${ALPINE_VERSION}"
+    labels:
+      - "candigv2=vault"
     volumes:
       - vault-data:/vault
     environment:
@@ -34,3 +40,6 @@ services:
     secrets:
       - source: vault-s3-token
         target: vault-s3-token
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+

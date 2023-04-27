@@ -4,13 +4,13 @@ These instructions will lead you through some basic functionality tests, ingesti
 
 ## Initial tests
 
-Check that you can see the data portal in your browser at `http://docker.localhost:5080/`. If not, you may need to follow the instructions in the [Docker Deployment Guide](./install-docker.md)
+Check that you can see the data portal in your browser at `http://candig.docker.internal:5080/`. If not, you may need to follow the instructions in the [Docker Deployment Guide](./install-docker.md)
 
 Check that you can generate a bearer token for user2 with the following call, substituting usernames, secrets and passwords from `tmp/secrets/keycloak-test-user2`, `tmp/secrets/keycloak-client-local_candig-secret` and `tmp/secrets/keycloak-test-user2-password`.
 
 ```bash
 ## user2 bearer token
-curl -X "POST" "http://docker.localhost:8080/auth/realms/candig/protocol/openid-connect/token" \
+curl -X "POST" "http://candig.docker.internal:8080/auth/realms/candig/protocol/openid-connect/token" \
      -H 'Content-Type: application/x-www-form-urlencoded; charset=utf-8' \
      --data-urlencode "client_id=local_candig" \
      --data-urlencode "client_secret=<client_secret>" \
@@ -33,7 +33,7 @@ Federation service is required to run most of CanDig operations. The following e
 {
     "servers": [
         {
-            "url": "http://docker.localhost:4232/federation/search",
+            "url": "http://candig.docker.internal:4232/federation/search",
             "location": [
                 "UHN",
                 "Ontario",
@@ -49,9 +49,9 @@ and `services.json`
 ```json
 {
     "services": {
-        "katsu": "http://docker.localhost:5080/katsu",
-        "candig-server": "http://docker.localhost:5080/candig",
-        "htsget-app": "http://docker.localhost:5080/genomics"
+        "katsu": "http://candig.docker.internal:5080/katsu",
+        "candig-server": "http://candig.docker.internal:5080/candig",
+        "htsget-app": "http://candig.docker.internal:5080/genomics"
     }
 }
 ```
@@ -98,14 +98,14 @@ make compose-federation-service
 ```
 To check that it is running you can look at the candigv2_federation-service_1 container in your Window Docker GUI. You can also run the following in terminal:
 ```bash
-curl http://docker.localhost:4232/federation/services
+curl http://candig.docker.internal:4232/federation/services
 ```
 The below is an example of what will return it should be what is in your services.json
 ```json
 {
-  "candig-server": "http://docker.localhost:5080/candig",
-  "htsget-app": "http://docker.localhost:5080/genomics",
-  "katsu": "http://docker.localhost:5080/katsu"
+  "candig-server": "http://candig.docker.internal:5080/candig",
+  "htsget-app": "http://candig.docker.internal:5080/genomics",
+  "katsu": "http://candig.docker.internal:5080/katsu"
 }
 ```
 </details>

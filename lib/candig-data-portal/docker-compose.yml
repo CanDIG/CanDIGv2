@@ -2,6 +2,8 @@ version: '3.7'
 
 services:
   candig-data-portal:
+    labels:
+      - "candigv2=candig-data-portal"
     build:
       context: $PWD/lib/candig-data-portal/candig-data-portal
       args:
@@ -14,6 +16,8 @@ services:
         target: vault-s3-token
       - source: opa-service-token
         target: opa-service-token
+    extra_hosts:
+        - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     environment:
       - REACT_APP_KATSU_API_SERVER=${KATSU_PUBLIC_URL}
       - REACT_APP_HTSGET_SERVER=${HTSGET_PUBLIC_URL}

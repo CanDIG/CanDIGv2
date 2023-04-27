@@ -8,6 +8,8 @@ services:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
     image: ${DOCKER_REGISTRY}/federation-service:${FEDERATION_VERSION:-latest}
+    labels:
+      - "candigv2=federation-service"
     ports:
       - "${FEDERATION_PORT}:4232"
     secrets:
@@ -15,4 +17,6 @@ services:
         target: /app/federation_service/configs/servers.json
       - source: federation-services
         target: /app/federation_service/configs/services.json
+    extra_hosts:
+        - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     entrypoint: ["uwsgi", "federation.ini", "--http", "0.0.0.0:4232"]

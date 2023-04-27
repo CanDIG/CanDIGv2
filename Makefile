@@ -9,6 +9,18 @@ export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
 DIR = $(PWD)
+
+#>>>
+# option A : set CONDA_INSTALL to $(DIR)/bin to install conda within the candigv2 repo
+#  and then use make bin-conda and make init-conda
+# option B: set CONDA_INSTALL to the location of an existing miniconda3 installation
+#  and then use make mkdir and make init-conda (no bin-conda, which will blow up an existing conda)
+# <<<
+
+CONDA_INSTALL = $(DIR)/bin
+CONDA = $(CONDA_INSTALL)/miniconda3/bin/conda
+CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
+
 LOGFILE = $(DIR)/tmp/progress.txt
 
 .PHONY: all
@@ -32,20 +44,75 @@ mkdir:
 
 
 #>>>
-# download pyenv package
-# make bin-pyenv
+# download all package binaries
+# make bin-all
 
 #<<<
-bin-pyenv: mkdir
-	echo "    started bin-pyenv" >> $(LOGFILE)
-	curl -Lo $(DIR)/bin/pyenv_install.sh \
-		https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer
+.PHONY: bin-all
+bin-all: bin-conda
 
-	bash $(DIR)/bin/pyenv_install.sh
-	echo 'export PYENV_ROOT="$$HOME/.pyenv"' >> ~/.bashrc
-	echo 'command -v pyenv >/dev/null || export PATH="$$PYENV_ROOT/bin:$$PATH"' >> ~/.bashrc
-	echo 'eval "$$(pyenv init -)"' >> ~/.bashrc
-	echo "    finished bin-pyenv" >> $(LOGFILE)
+
+#>>>
+# download miniconda package
+# make bin-conda
+
+#<<<
+bin-conda: mkdir
+	echo "    started bin-conda" >> $(LOGFILE)
+ifeq ($(VENV_OS), linux)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
+	# init is needed to create bash aliases for conda but it won't work
+	# until you source the script that ships with conda
+	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
+	echo "    finished bin-conda" >> $(LOGFILE)
+endif
+ifeq ($(VENV_OS), darwin)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
+	# init is needed to create bash aliases for conda but it won't work
+	# until you source the script that ships with conda
+	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
+	echo "    finished bin-conda" >> $(LOGFILE)
+endif
+ifeq ($(VENV_OS), arm64mac)
+	curl -Lo $(DIR)/bin/miniconda_install.sh \
+		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
+	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
+	# init is needed to create bash aliases for conda but it won't work
+	# until you source the script that ships with conda
+	source $(CONDA_ENV_SETTINGS) && $(CONDA) init zsh
+	echo "    finished bin-conda" >> $(LOGFILE)
+endif
+
+#>>>
+# make build-all -P
+
+#<<<
+.PHONY: build-all
+build-all:
+	./pre-build-check.sh
+
+# Setup the entire stack
+	$(MAKE) init-docker
+	$(MAKE) init-conda
+	$(MAKE) build-images
+	$(MAKE) compose
+	$(MAKE) init-authx
+
+
+#>>>
+# (re)build service image for all modules
+# add BUILD_OPTS='--no-cache' to ignore cached builds
+# BUILD_OPTS='--no-cache' make build-$module
+# make images
+
+#<<<
+.PHONY: build-images
+build-images: #toil-docker
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE);)
 
 
 #>>>
@@ -59,7 +126,7 @@ bin-pyenv: mkdir
 build-%:
 	echo "    started build-$*" >> $(LOGFILE)
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build $(BUILD_OPTS)
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build $(BUILD_OPTS)
 	echo "    finished build-$*" >> $(LOGFILE)
 
 
@@ -70,8 +137,19 @@ build-%:
 
 #<<<
 .PHONY: clean-all
-clean-all: clean-compose clean-containers clean-secrets \
-	clean-volumes clean-images clean-pipenv
+clean-all: clean-authx clean-compose clean-containers clean-secrets \
+	clean-volumes clean-images clean-bin
+
+
+#>>>
+# clear downloaded binaries
+# removes $PWD/bin/
+# make clean-bin
+
+#<<<
+.PHONY: clean-bin
+clean-bin:
+	rm -rf $(DIR)/bin
 
 
 #>>>
@@ -81,20 +159,21 @@ clean-all: clean-compose clean-containers clean-secrets \
 #<<<
 .PHONY: clean-compose
 clean-compose:
+	source ${PWD}/setup_hosts.sh; \
 	$(foreach MODULE, $(CANDIG_MODULES), \
-		docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml down || true;)
+		docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml down || true;)
 
 
 #>>>
-# deactivate and remove pipenv venv $VENV_NAME
-# make clean-pipenv
+# deactivate and remove conda env $VENV_NAME
+# make clean-conda
+
 
 #<<<
-.PHONY: clean-pipenv
-clean-pipenv:
-	-`deactivate`
-	pipenv --rm
-	rm -rf $(DIR)/bin
+.PHONY: clean-conda
+clean-conda:
+	$(CONDA) deactivate
+	$(CONDA) env remove -n $(VENV_NAME)
 
 
 #>>>
@@ -104,7 +183,7 @@ clean-pipenv:
 #<<<
 .PHONY: clean-containers
 clean-containers:
-	docker container prune -f
+	docker container prune -f --filter "label=candigv2"
 
 
 #>>>
@@ -124,7 +203,7 @@ clean-images:
 #<<<
 .PHONY: clean-secrets
 clean-secrets:
-	-docker secret rm `docker secret ls -q`
+	-docker secret rm `docker secret ls -q --filter label=candigv2`
 	rm -rf $(DIR)/tmp/secrets
 
 
@@ -135,7 +214,8 @@ clean-secrets:
 #<<<
 .PHONY: clean-volumes
 clean-volumes:
-	-docker volume rm `docker volume ls -q`
+	-docker volume rm `docker volume ls -q --filter label=candigv2`
+	-docker volume rm `docker volume ls -q --filter dangling=true`
 #rm -rf $(DIR)/tmp/data
 
 
@@ -146,6 +226,7 @@ clean-volumes:
 #<<<
 .PHONY: compose
 compose:
+	source ${PWD}/setup_hosts.sh; \
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
 
 
@@ -157,7 +238,10 @@ compose:
 #<<<
 compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
-	docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml --compatibility up -d
+	-source $(DIR)/lib/$*/$*_preflight.sh
+	source ${PWD}/setup_hosts.sh; \
+	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml --compatibility up -d
+	-source $(DIR)/lib/$*/$*_setup.sh
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
@@ -213,61 +297,47 @@ docker-secrets: mkdir minio-secrets
 	$(MAKE) secret-opa-service-token
 
 #>>>
-# modify the hosts file
-
-#<<<
-.PHONY: init-hosts-file
-init-hosts-file:
-	source ${PWD}/setup_hosts.sh
-
-#>>>
 # create persistant volumes for docker containers
 # make docker-volumes
 
 #<<<
 .PHONY: docker-volumes
 docker-volumes:
-	docker volume create grafana-data
-	docker volume create jupyter-data
-	docker volume create minio-config
-	docker volume create minio-data $(MINIO_VOLUME_OPT)
-	docker volume create prometheus-data
-	docker volume create toil-jobstore
-	docker volume create keycloak-data
-	docker volume create tyk-data
-	docker volume create tyk-redis-data
-	docker volume create vault-data
-	docker volume create opa-data
-	docker volume create htsget-data
+	docker volume create grafana-data --label candigv2=volume
+	docker volume create jupyter-data --label candigv2=volume
+	docker volume create minio-config --label candigv2=volume
+	docker volume create minio-data $(MINIO_VOLUME_OPT) --label candigv2=volume
+	docker volume create prometheus-data --label candigv2=volume
+	docker volume create toil-jobstore --label candigv2=volume
+	docker volume create keycloak-data --label candigv2=volume
+	docker volume create tyk-data --label candigv2=volume
+	docker volume create tyk-redis-data --label candigv2=volume
+	docker volume create vault-data --label candigv2=volume
+	docker volume create opa-data --label candigv2=volume
+	docker volume create htsget-data --label candigv2=volume
+	docker volume create postgres-data --label candigv2=volume
 
 
 #>>>
-# (re)build service image for all modules
-# add BUILD_OPTS='--no-cache' to ignore cached builds
-# BUILD_OPTS='--no-cache' make build-$module
-# make images
+# initialize conda environment
+# make init-conda
 
 #<<<
-.PHONY: images
-images: #toil-docker
-	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE);)
+.PHONY: init-conda
+init-conda:
+	echo "    started init-conda" >> $(LOGFILE)
+	# source conda's script to be safe, so the conda command is found
+	source $(CONDA_ENV_SETTINGS) \
+		&& $(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
 
+	source $(CONDA_ENV_SETTINGS) \
+		&& conda activate $(VENV_NAME) \
+		&& pip install -U -r $(DIR)/etc/venv/requirements.txt
 
-#>>>
-# initialize python virtual environment
-# make init-pipenv
-
-#<<<
-.PHONY: init-pipenv
-init-pipenv:
-	echo "    started init-pipenv" >> $(LOGFILE)
-	-`pyenv install $(VENV_PYTHON)`
-	pyenv local $(VENV_PYTHON)
-	-`pip3 install pipenv`
-	pipenv --python $(VENV_PYTHON)
-	#pipenv install --requirements requirements.txt
-
-	echo "    finished init-pipenv" >> $(LOGFILE)
+#@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
+#@echo "Activate conda env: conda activate $(VENV_NAME)"
+#@echo "Install requirements: pip install -U -r $(DIR)/etc/venv/requirements.txt"
+	echo "    finished init-conda" >> $(LOGFILE)
 
 
 #>>>
@@ -299,7 +369,7 @@ minio-secrets:
 
 #<<<
 pull-%:
-		docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml pull
+		docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml pull
 
 
 #>>>
@@ -309,7 +379,7 @@ pull-%:
 
 #<<<
 push-%:
-		docker-compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml push
+		docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml push
 
 
 #>>>
@@ -362,3 +432,11 @@ help:
 print-%:
 	@echo '$*=$($*)'
 
+#>>>
+# run integration tests
+
+#<<<
+.PHONY: test-integration
+test-integration:
+	python ./settings.py
+	source ./env.sh; pytest ./etc/tests

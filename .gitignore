@@ -16,18 +16,9 @@
 /etc/ssl/selfsigned-*
 */miniconda3
 .vagrant
-Pipfile
-Pipfile.lock
-.python-version
+.hosts.tmp
 
 # test metadata
-etc/tests/integration/*/__pycache__/*
-etc/tests/integration/*/.pytest_cache/*
-etc/tests/integration/*/src/__pycache__/*
-etc/tests/integration/*/src/.pytest_cache/*
-
-etc/tests/integration/*/geckodriver
-etc/tests/integration/*/geckodriver.log
-etc/tests/integration/*/chromedriver
+__pycache__/
 geckodriver.log
 env.sh

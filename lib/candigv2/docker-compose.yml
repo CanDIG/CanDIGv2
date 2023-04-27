@@ -23,51 +23,99 @@ volumes:
     external: true
   htsget-data:
     external: true
+  postgres-data:
+    external: true
 
 secrets:
   aws-credentials:
     file: $PWD/tmp/secrets/aws-credentials
+    labels:
+      - "candigv2=secret"
   federation-servers:
     file: $PWD/tmp/federation/servers.json
+    labels:
+      - "candigv2=secret"
   federation-services:
     file: $PWD/tmp/federation/services.json
+    labels:
+      - "candigv2=secret"
   metadata-app-secret:
     file: $PWD/tmp/secrets/metadata-app-secret
+    labels:
+      - "candigv2=secret"
   metadata-db-user:
     file: $PWD/tmp/secrets/metadata-db-user
+    labels:
+      - "candigv2=secret"
   metadata-db-secret:
     file: $PWD/tmp/secrets/metadata-db-secret
+    labels:
+      - "candigv2=secret"
   metadata-settings:
     file: $PWD/lib/katsu/settings.py
+    labels:
+      - "candigv2=secret"
   minio-access-key:
     file: $PWD/tmp/secrets/minio-access-key
+    labels:
+      - "candigv2=secret"
   minio-secret-key:
     file: $PWD/tmp/secrets/minio-secret-key
+    labels:
+      - "candigv2=secret"
   portainer-user:
     file: $PWD/tmp/secrets/portainer-user
+    labels:
+      - "candigv2=secret"
   portainer-secret:
     file: $PWD/tmp/secrets/portainer-secret
+    labels:
+      - "candigv2=secret"
   wes-dependency-resolver:
     file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
+    labels:
+      - "candigv2=secret"
   keycloak-admin-user:
     file: $PWD/tmp/secrets/keycloak-admin-user
+    labels:
+      - "candigv2=secret"
   keycloak-admin-password:
     file: $PWD/tmp/secrets/keycloak-admin-password
+    labels:
+      - "candigv2=secret"
   keycloak-test-user:
     file: $PWD/tmp/secrets/keycloak-test-user
+    labels:
+      - "candigv2=secret"
   keycloak-test-user-password:
     file: $PWD/tmp/secrets/keycloak-test-user-password
+    labels:
+      - "candigv2=secret"
   keycloak-client-local-candig-secret:
     file: $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret
+    labels:
+      - "candigv2=secret"
   selfsigned-site-crt:
     file: $PWD/tmp/ssl/public.crt
+    labels:
+      - "candigv2=secret"
   selfsigned-site-key:
     file: $PWD/tmp/ssl/selfsigned-root-ca.key
+    labels:
+      - "candigv2=secret"
   selfsigned-site-pem:
     file: $PWD/tmp/ssl/cert.pem
+    labels:
+      - "candigv2=secret"
   vault-s3-token:
     file: $PWD/tmp/secrets/vault-s3-token
+    labels:
+      - "candigv2=secret"
   opa-root-token:
     file: $PWD/tmp/secrets/opa-root-token
+    labels:
+      - "candigv2=secret"
   opa-service-token:
     file: $PWD/tmp/secrets/opa-service-token
+    labels:
+      - "candigv2=secret"
