@@ -32,7 +32,7 @@ refer to [ingesting data and testing the deployment](docs/ingest-and-test.md) fo
 
 ## Running Federation Service Behind Tyk
 
-Once the federation-service is running, you will need to update your tyk configuration templates in order to allow other federation servers to peer with each other. To do this, you will need to add the `issuer` and `client_ids` of the trusted nodes into any of the `api_*.json.tpl` files in `/lib/tyk/configuration_templates/`. This must be done for each service defined in `services.json` that you want federation peer(s) to access. For example, if you wanted to allow the UHN CanDIGv2 node to make federated searches to `katsu` data service, you would need to modify the `/lib/tyk/configuration_templates/api_katsu_katsu.json.tpl` file and change the `providers` section to:
+Once the federation-service is running, you will need to update your tyk configuration templates in order to allow other federation servers to peer with each other. To do this, you will need to add the `issuer` and `client_ids` of the trusted nodes into any of the `api_*.json.tpl` files in `/lib/tyk/configuration_templates/`. This must be done for each service defined in `services.json` that you want federation peer(s) to access. For example, if you wanted to allow the UHN CanDIGv2 node to make federated searches to `katsu` data service, you would need to modify the `/lib/tyk/configuration_templates/api_katsu.json.tpl` file and change the `providers` section to:
 
 ```json
 ...
