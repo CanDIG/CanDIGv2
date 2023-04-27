@@ -15,9 +15,6 @@ services:
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     environment:
-      - KATSU_URL=${KATSU_HOST}
-      - KATSU_PERMISSIONS=${KATSU_AUTH}
-      - KATSU_DEBUG=${KATSU_DEBUG}
       - POSTGRES_DATABASE=metadata
       - POSTGRES_HOST=metadata-db
       - POSTGRES_PORT=5432
