@@ -7,9 +7,9 @@
 [submodule "lib/federation-service/federation_service"]
   path = lib/federation-service/federation_service
   url = https://github.com/CanDIG/federation_service
-[submodule "lib/chord-metadata/chord_metadata_service"]
-  path = lib/chord-metadata/chord_metadata_service
-  url = https://github.com/CanDIG/katsu.git 
+[submodule "lib/katsu/katsu_service"]
+  path = lib/katsu/katsu_service
+	url = https://github.com/CanDIG/katsu.git
 [submodule "lib/candig-data-portal/candig-data-portal"]
   path = lib/candig-data-portal/candig-data-portal
   url = https://github.com/CanDIG/candig-data-portal.git

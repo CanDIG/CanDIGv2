@@ -72,7 +72,7 @@ Changes not staged for commit:
   (commit or discard the untracked or modified content in submodules)
 
         modified:   lib/candig-data-portal/candig-data-portal (new commits, modified content)
-        modified:   lib/chord-metadata/chord_metadata_service (new commits)
+        modified:   lib/katsu/katsu_service (new commits)
         modified:   lib/federation-service/federation_service (new commits, modified content)
         modified:   lib/htsget-server/htsget_app (new commits)
         modified:   lib/opa/opa (new commits)

@@ -6,7 +6,7 @@ services:
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
-        katsu_url: "${CHORD_METADATA_PUBLIC_URL}"
+        katsu_url: "${KATSU_PUBLIC_URL}"
         idp: "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
         opa_site_admin_key: "${OPA_SITE_ADMIN_KEY}"
     labels:
@@ -25,7 +25,7 @@ services:
       OPA_SITE_ADMIN_KEY: ${OPA_SITE_ADMIN_KEY}
       OPA_URL: ${OPA_URL}
       IDP: "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
-      KATSU_URL: "${CHORD_METADATA_PUBLIC_URL}"
+      KATSU_URL: "${KATSU_PUBLIC_URL}"
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
 

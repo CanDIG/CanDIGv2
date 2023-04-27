@@ -52,7 +52,7 @@ secrets:
     labels:
       - "candigv2=secret"
   metadata-settings:
-    file: $PWD/lib/chord-metadata/settings.py
+    file: $PWD/lib/katsu/settings.py
     labels:
       - "candigv2=secret"
   minio-access-key:

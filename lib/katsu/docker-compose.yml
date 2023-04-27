@@ -1,15 +1,15 @@
 version: '3.7'
 
 services:
-  chord-metadata:
+  katsu:
     build:
-      context: $PWD/lib/chord-metadata/chord_metadata_service
+      context: $PWD/lib/katsu/katsu_service
       args:
         venv_python: "3.10"
         alpine_version: "3.16"
-    image: ${DOCKER_REGISTRY}/chord-metadata:${CHORD_METADATA_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/katsu:${KATSU_VERSION:-latest}
     ports:
-      - "${CHORD_METADATA_PORT}:8000"
+      - "${KATSU_PORT}:8000"
     depends_on:
       - metadata-db
     extra_hosts:
@@ -23,7 +23,7 @@ services:
       - OPA_URL=${OPA_PRIVATE_URL}
       - KATSU_AUTHORIZATION=${CANDIG_AUTHORIZATION}
       - OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
-      - HOST_CONTAINER_NAME=${CHORD_METADATA_CONTAINER}
+      - HOST_CONTAINER_NAME=${KATSU_CONTAINER}
       - DJANGO_SETTINGS_MODULE=config.settings.dev
     secrets:
       - source: metadata-db-secret
@@ -35,6 +35,10 @@ services:
 
   metadata-db:
     image: postgres:13-alpine
+    #volumes:
+      #- katsu-db:/var/lib/postgresql/data
+      #add volume name to lib/{compose,swarm,kubernetes}
+      #add volume name to docker-volumes in Makefile
     ports:
       - "5433:5432"
     environment:
