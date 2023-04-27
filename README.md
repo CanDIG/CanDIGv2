@@ -102,9 +102,8 @@ The following table lists the details from the Data Flow Diagram in the "Overvie
 
 | Service/Component Name | Source | Notes                        |
 |------------------------|--------|------------------------------|
-| Katsu (KATSU Metadata) | links  | DFD: `katsu`        |
+| Katsu                  | links  | DFD: `katsu`        |
 | Federation Service     | links  | DFD: `federation_service`    |
 | HTSGet                 | links  | DFD: `htsget_app`            |
-| KATSU DRS              | links  | DFD: `katsu_drs`             |
 | WES Server             | links  | DFD: `wes_server`            |
 | CanDIG Data Portal     | links  | DFD: `candig-data-portal`    |
