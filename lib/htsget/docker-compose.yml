@@ -1,19 +1,19 @@
 version: '3.7'
 
 services:
-  htsget-app:
+  htsget:
     build:
-      context: $PWD/lib/htsget-server/htsget_app
+      context: $PWD/lib/htsget/htsget_app
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
-    image: ${DOCKER_REGISTRY}/htsget-app:${HTSGET_APP_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/htsget:${HTSGET_VERSION:-latest}
     labels:
-      - "candigv2=htsget-server"
+      - "candigv2=htsget"
     volumes:
       - htsget-data:/data
     ports:
-      - "${HTSGET_APP_PORT}:3000"
+      - "${HTSGET_PORT}:3000"
     secrets:
       - source: vault-s3-token
         target: vault-s3-token

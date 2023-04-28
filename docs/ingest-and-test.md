@@ -51,7 +51,7 @@ and `services.json`
     "services": {
         "katsu": "http://candig.docker.internal:5080/katsu",
         "candig-server": "http://candig.docker.internal:5080/candig",
-        "htsget-app": "http://candig.docker.internal:5080/genomics"
+        "htsget": "http://candig.docker.internal:5080/genomics"
     }
 }
 ```
@@ -104,7 +104,7 @@ The below is an example of what will return it should be what is in your service
 ```json
 {
   "candig-server": "http://candig.docker.internal:5080/candig",
-  "htsget-app": "http://candig.docker.internal:5080/genomics",
+  "htsget": "http://candig.docker.internal:5080/genomics",
   "katsu": "http://candig.docker.internal:5080/katsu"
 }
 ```

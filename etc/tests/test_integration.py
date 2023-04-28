@@ -13,7 +13,15 @@ from settings import get_env
 ENV = get_env()
 
 
-## Keycloak test: can we get an access token for a user?
+## Keycloak tests:
+
+## Does Keycloak respond?
+def test_keycloak():
+    response = requests.get(f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/candig/.well-known/openid-configuration")
+    assert response.status_code == 200
+    assert "grant_types_supported" in response.json()
+
+## Can we get an access token for a user?
 def get_token(username=None, password=None):
     payload = {
         "client_id": ENV["CANDIG_CLIENT_ID"],
@@ -153,8 +161,8 @@ def test_vault():
 ## Run the main htsget test suite
 def test_htsget():
     old_val = os.environ.get("TESTENV_URL")
-    os.environ['TESTENV_URL'] = f"http://{ENV['CANDIG_ENV']['CANDIG_DOMAIN']}:{ENV['CANDIG_ENV']['HTSGET_APP_PORT']}"
-    retcode = pytest.main(["-x", "lib/htsget-server/htsget_app/tests/test_htsget_server.py"])
+    os.environ['TESTENV_URL'] = f"http://{ENV['CANDIG_ENV']['CANDIG_DOMAIN']}:{ENV['CANDIG_ENV']['HTSGET_PORT']}"
+    retcode = pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py"])
     if old_val is not None:
         os.environ['TESTENV_URL'] = old_val
     print(retcode)
