@@ -17,6 +17,11 @@ services:
         target: /app/federation_service/configs/servers.json
       - source: federation-services
         target: /app/federation_service/configs/services.json
+      - source: opa-service-token
+        target: opa-service-token
+    environment:
+        TEST_KEY: "hoodlebug"
+        CANDIG_OPA_URL: ${OPA_PRIVATE_URL}
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     entrypoint: ["uwsgi", "federation.ini", "--http", "0.0.0.0:4232"]
