@@ -154,7 +154,7 @@ def test_vault():
 def test_htsget():
     old_val = os.environ.get("TESTENV_URL")
     os.environ['TESTENV_URL'] = f"http://{ENV['CANDIG_ENV']['CANDIG_DOMAIN']}:{ENV['CANDIG_ENV']['HTSGET_APP_PORT']}"
-    retcode = pytest.main(["-x", "lib/htsget-server/htsget_app/tests/test_htsget_server.py"])
+    retcode = pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py"])
     if old_val is not None:
         os.environ['TESTENV_URL'] = old_val
     print(retcode)
