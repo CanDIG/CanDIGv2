@@ -13,7 +13,15 @@ from settings import get_env
 ENV = get_env()
 
 
-## Keycloak test: can we get an access token for a user?
+## Keycloak tests:
+
+## Does Keycloak respond?
+def test_keycloak():
+    response = requests.get(f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/candig/.well-known/openid-configuration")
+    assert response.status_code == 200
+    assert "grant_types_supported" in response.json()
+
+## Can we get an access token for a user?
 def get_token(username=None, password=None):
     payload = {
         "client_id": ENV["CANDIG_CLIENT_ID"],
