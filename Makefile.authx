@@ -85,6 +85,8 @@ init-authx: mkdir
 	$(MAKE) compose-vault; \
 	echo "Setting up Opa"; \
 	$(MAKE) compose-opa; \
+	echo "Setting up federation"; \
+	$(MAKE) compose-federation-service; \
 	echo ;
 
 
