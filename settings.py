@@ -5,11 +5,13 @@ import re
 import tempfile
 
 CANDIGV2_ENV = None
+INTERPOLATED_ENV = None
 with open(".env") as f:
     envs = f.read().replace("define ", "").replace("endef", "")
     with tempfile.NamedTemporaryFile("w", delete=False) as fp:
         fp.write(envs)
     CANDIGV2_ENV = dotenv_values(fp.name, interpolate=False)
+    INTERPOLATED_ENV = dotenv_values(fp.name, interpolate=True)
     os.unlink(fp.name)
 
 
@@ -29,13 +31,13 @@ def get_env_value(key):
 
 def get_env():
     vars = {}
-    vars["CANDIG_URL"] = candigv2_env["TYK_LOGIN_TARGET_URL"]
-    vars["CANDIG_CLIENT_ID"] = candigv2_env["KEYCLOAK_CLIENT_ID"]
-    vars["KEYCLOAK_PUBLIC_URL"] = candigv2_env["KEYCLOAK_PUBLIC_URL"]
+    vars["CANDIG_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
+    vars["CANDIG_CLIENT_ID"] = get_env_value("KEYCLOAK_CLIENT_ID")
+    vars["KEYCLOAK_PUBLIC_URL"] = get_env_value("KEYCLOAK_PUBLIC_URL")
     vars["VAULT_URL"] = vars["CANDIG_URL"] + "/vault"
     vars["OPA_URL"] = vars["CANDIG_URL"] + "/policy"
-    vars["OPA_SITE_ADMIN_KEY"] = candigv2_env["OPA_SITE_ADMIN_KEY"]
-    vars["MINIO_URL"] = candigv2_env["MINIO_PUBLIC_URL"]
+    vars["OPA_SITE_ADMIN_KEY"] = get_env_value("OPA_SITE_ADMIN_KEY")
+    vars["MINIO_URL"] = get_env_value("MINIO_PUBLIC_URL")
 
     # vars that come from files:
     with open(f"tmp/secrets/opa-root-token") as f:
@@ -58,7 +60,7 @@ def get_env():
         vars["MINIO_ACCESS_KEY"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/minio-secret-key") as f:
         vars["MINIO_SECRET_KEY"] = f.read().splitlines().pop()
-    vars["CANDIG_ENV"] = candigv2_env
+    vars["CANDIG_ENV"] = INTERPOLATED_ENV
     return vars
 
 
