@@ -24,4 +24,3 @@ services:
         CANDIG_OPA_URL: ${OPA_PRIVATE_URL}
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
-    entrypoint: ["uwsgi", "federation.ini", "--http", "0.0.0.0:4232"]
