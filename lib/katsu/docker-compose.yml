@@ -1,12 +1,12 @@
-version: '4.0'
+version: '3.7'
 
 services:
   katsu:
     build:
       context: $PWD/lib/katsu/katsu_service
       args:
-        venv_python: "3.11"
-        alpine_version: "3.17"
+        venv_python: "${VENV_PYTHON}"
+        alpine_version: "${ALPINE_VERSION}"
     image: ${DOCKER_REGISTRY}/katsu:${KATSU_VERSION:-latest}
     ports:
       - "${KATSU_PORT}:8000"
