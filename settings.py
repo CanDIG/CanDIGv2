@@ -38,6 +38,8 @@ def get_env():
     vars["OPA_URL"] = vars["CANDIG_URL"] + "/policy"
     vars["OPA_SITE_ADMIN_KEY"] = get_env_value("OPA_SITE_ADMIN_KEY")
     vars["MINIO_URL"] = get_env_value("MINIO_PUBLIC_URL")
+    vars["TYK_LOGIN_TARGET_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
+    vars["TYK_POLICY_ID"] = get_env_value("TYK_POLICY_ID")
 
     # vars that come from files:
     with open(f"tmp/secrets/opa-root-token") as f:
@@ -60,6 +62,8 @@ def get_env():
         vars["MINIO_ACCESS_KEY"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/minio-secret-key") as f:
         vars["MINIO_SECRET_KEY"] = f.read().splitlines().pop()
+    with open(f"tmp/secrets/tyk-secret-key") as f:
+        vars["TYK_SECRET_KEY"] = f.read().splitlines().pop()
     vars["CANDIG_ENV"] = INTERPOLATED_ENV
     return vars
 

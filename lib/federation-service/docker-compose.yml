@@ -19,8 +19,14 @@ services:
         target: /app/federation_service/configs/services.json
       - source: opa-service-token
         target: opa-service-token
+      - source: tyk-secret-key
+        target: tyk-secret-key
     environment:
         TEST_KEY: "hoodlebug"
         CANDIG_OPA_URL: ${OPA_PRIVATE_URL}
+        TYK_POLICY_ID: ${TYK_POLICY_ID}
+        KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
+        KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+        TYK_LOGIN_TARGET_URL: ${TYK_LOGIN_TARGET_URL}
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"

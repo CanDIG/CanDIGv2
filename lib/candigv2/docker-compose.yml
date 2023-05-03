@@ -119,3 +119,7 @@ secrets:
     file: $PWD/tmp/secrets/opa-service-token
     labels:
       - "candigv2=secret"
+  tyk-secret-key:
+    file: $PWD/tmp/secrets/tyk-secret-key
+    labels:
+      - "candigv2=secret"
