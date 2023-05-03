@@ -88,11 +88,7 @@ init-authx: mkdir
 redeploy-tyk: mkdir
 	$(MAKE) clean-tyk
 	$(MAKE) docker-volumes
-	source ${PWD}/lib/tyk/tyk_setup.sh; \
-	echo ; \
-	$(MAKE) compose-tyk; \
-	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
-	echo ;
+	$(MAKE) compose-tyk
 
 
 #>>>
