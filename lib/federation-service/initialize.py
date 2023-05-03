@@ -20,9 +20,9 @@ def find_services():
         service = {
             'id': s
         }
-        service_tyk_listen_path = f"TYK_{s.upper()}_API_LISTEN_PATH"
+        service_port = f"{s.upper()}_PORT"
         service_version = f"{s.upper()}_VERSION"
-        service['url'] = f"{get_env_value('TYK_LOGIN_TARGET_URL')}/{get_env_value(service_tyk_listen_path)}"
+        service['url'] = f"http://{get_env_value('CANDIG_DOMAIN')}:{get_env_value(service_port)}"
         service['version'] = get_env_value(service_version)
         services.append(service)
     return services

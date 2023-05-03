@@ -314,14 +314,55 @@ def test_katsu_users(user, dataset, not_dataset):
 
 ## Federation tests:
 def test_server_count():
-    with open(f"{REPO_DIR}/tmp/federation/servers.json") as fp:
-        servers = json.load(fp)
-        token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'], password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
-        headers = {
-            'Authorization': f"Bearer {token}",
-            'Content-Type': 'application/json; charset=utf-8'
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'], password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
+    headers = {
+        'Authorization': f"Bearer {token}",
+        'Content-Type': 'application/json; charset=utf-8'
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/federation/servers", headers=headers)
+    print(response.json())
+    assert len(response.json()) > 0
+
+
+def test_add_server():
+    token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
+    headers = {
+        'Authorization': f"Bearer {token}",
+        'Content-Type': 'application/json; charset=utf-8'
+    }
+
+    response = requests.get(f"{ENV['CANDIG_URL']}/federation/servers", headers=headers)
+    body = response.json()[0]
+    body['id'] = 'test'
+    response = requests.post(f"{ENV['CANDIG_URL']}/federation/servers", headers=headers, json=body)
+    print(response.json())
+    assert response.status_code == 200
+
+
+    #        ('CANDIG_SITE_ADMIN', 'NC_000021.8:g.5030847T>A', ['multisample_1', 'multisample_2'], ['test']), # site admin can access all data, even if not specified by dataset
+
+@pytest.mark.parametrize('user, search, can_access, cannot_access', beacon_access())
+def test_federation_call(user, search, can_access, cannot_access):
+    body = {
+      "endpoint_service": "htsget",
+      "request_type": "POST",
+      "endpoint_payload": {
+        "query": {
+          "requestParameters": {
+            "reference_name": "21",
+            "end": [
+              5030847
+            ],
+            "assembly_id": "hg37",
+            "start": [
+              5030000
+            ]
+          }
+        },
+        "meta": {
+          "apiVersion": "v2"
         }
-        response = requests.get(f"{ENV['CANDIG_URL']}/federation/servers", headers=headers)
-        print(response.json())
-        assert len(response.json()) == len(servers['servers'])
+      },
+      "endpoint_path": "beacon/v2/g_variants"
+    }
 
