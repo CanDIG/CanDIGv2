@@ -34,8 +34,8 @@ def get_env():
     vars["CANDIG_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
     vars["CANDIG_CLIENT_ID"] = get_env_value("KEYCLOAK_CLIENT_ID")
     vars["KEYCLOAK_PUBLIC_URL"] = get_env_value("KEYCLOAK_PUBLIC_URL")
-    vars["VAULT_URL"] = vars["CANDIG_URL"] + "/vault"
-    vars["OPA_URL"] = vars["CANDIG_URL"] + "/policy"
+    vars["VAULT_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
+    vars["OPA_URL"] = get_env_value("OPA_URL")
     vars["OPA_SITE_ADMIN_KEY"] = get_env_value("OPA_SITE_ADMIN_KEY")
     vars["MINIO_URL"] = get_env_value("MINIO_PUBLIC_URL")
     vars["TYK_LOGIN_TARGET_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
