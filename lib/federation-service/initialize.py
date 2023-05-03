@@ -28,17 +28,24 @@ def find_services():
     return services
 
 def main():
+    token = get_access_token(username=os.getenv("CANDIG_SITE_ADMIN_USER"), password=os.getenv("CANDIG_SITE_ADMIN_PASSWORD"))
 
-    servers = json.loads(get_env_value("FEDERATION_SELF_SERVER").replace('\'', '"'))
-    services = find_services()
-
+    server = {
+        "server": json.loads(get_env_value("FEDERATION_SELF_SERVER").replace('\'', '"')),
+        "authentication": {
+            "issuer": get_env_value("KEYCLOAK_REALM_URL"),
+            "token": token
+        }
+    }
     token = get_access_token(username=os.getenv("CANDIG_SITE_ADMIN_USER"), password=os.getenv("CANDIG_SITE_ADMIN_PASSWORD"))
     headers = {}
     headers["Authorization"] = f"Bearer {token}"
     url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/servers"
-    for server in servers:
-        response = requests.request("POST", url, headers=headers, json=server)
-
+    response = requests.request("POST", url, headers=headers, json=server)
+    # add other federated servers here
+    if response.status_code != 200:
+        print(response.text)
+    services = find_services()
     url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/services"
     for service in services:
         response = requests.request("POST", url, headers=headers, json=service)
