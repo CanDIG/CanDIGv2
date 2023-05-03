@@ -13,10 +13,6 @@ services:
     ports:
       - "${FEDERATION_PORT}:4232"
     secrets:
-      - source: federation-servers
-        target: /app/federation_service/configs/servers.json
-      - source: federation-services
-        target: /app/federation_service/configs/services.json
       - source: opa-service-token
         target: opa-service-token
       - source: tyk-secret-key
