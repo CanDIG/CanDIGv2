@@ -13,10 +13,10 @@
     "use_keyless": false,
     "enable_coprocess_auth": false,
     "base_identity_provided_by": "",
-    
+
     "proxy": {
         "target_url": "${TYK_FEDERATION_API_TARGET}",
-        "strip_listen_path": false,
+        "strip_listen_path": true,
         "disable_strip_slash": false,
         "listen_path": "/${TYK_FEDERATION_API_LISTEN_PATH}",
         "transport": {
@@ -75,7 +75,7 @@
         "post_key_auth": [],
         "response": []
     },
-    
+
     "config_data": {
         "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
         "KEYCLOAK_SECRET": "${KEYCLOAK_SECRET}",
