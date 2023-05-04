@@ -40,20 +40,24 @@ def main():
     token = get_access_token(username=os.getenv("CANDIG_SITE_ADMIN_USER"), password=os.getenv("CANDIG_SITE_ADMIN_PASSWORD"))
     headers = {}
     headers["Authorization"] = f"Bearer {token}"
-    url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/servers"
+
+    print("Adding servers to federation...")
+    url = f"{get_env_value('FEDERATION_SERVICE_URL')}/v1/servers"
     response = requests.request("POST", url, headers=headers, json=server)
     # add other federated servers here
     if response.status_code != 200:
-        print(response.text)
+        print(f"POST response: {response.status_code} {response.text}")
+    url = f"{get_env_value('FEDERATION_SERVICE_URL')}/v1/servers"
+    response = requests.request("GET", url, headers=headers)
+    print(response.text)
+
+    print("Adding services to federation...")
     services = find_services()
-    url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/services"
+    url = f"{get_env_value('FEDERATION_SERVICE_URL')}/v1/services"
     for service in services:
         response = requests.request("POST", url, headers=headers, json=service)
 
-    url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/servers"
-    response = requests.request("GET", url, headers=headers)
-    print(response.text)
-    url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/services"
+    url = f"{get_env_value('FEDERATION_SERVICE_URL')}/v1/services"
     response = requests.request("GET", url, headers=headers)
     print(response.text)
 
