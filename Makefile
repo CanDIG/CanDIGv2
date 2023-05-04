@@ -40,7 +40,6 @@ mkdir:
 	mkdir -p $(DIR)/bin
 	mkdir -p $(DIR)/tmp/{configs,data,secrets}
 	mkdir -p $(DIR)/tmp/{keycloak,tyk,vault}
-	mkdir -p ${DIR}/tmp/federation
 
 
 #>>>
