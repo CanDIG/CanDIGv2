@@ -25,5 +25,6 @@ services:
         TYK_LOGIN_TARGET_URL: ${TYK_LOGIN_TARGET_URL}
         TYK_POLICY_ID: ${TYK_POLICY_ID}
         OPA_URL: ${OPA_URL}
+        TYK_FEDERATION_API_ID: ${TYK_FEDERATION_API_ID}
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
