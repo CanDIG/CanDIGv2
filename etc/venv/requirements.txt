@@ -7,5 +7,5 @@ aiohttp
 requests
 pytest
 pytz
-candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v1.0.0
+candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v1.1.0
 minio==7.1.12
