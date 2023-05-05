@@ -2,7 +2,7 @@
 	path = lib/toil/toil-docker
 	url = https://github.com/DataBiosphere/toil.git
 [submodule "lib/federation-service/federation_service"]
-	path = lib/federation-service/federation_service
+	path = lib/federation/federation_service
 	url = https://github.com/CanDIG/federation_service
 [submodule "lib/katsu/katsu_service"]
 	path = lib/katsu/katsu_service

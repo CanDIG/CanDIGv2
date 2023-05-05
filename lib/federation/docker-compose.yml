@@ -1,15 +1,15 @@
 version: '3.7'
 
 services:
-  federation-service:
+  federation:
     build:
-      context: $PWD/lib/federation-service/federation_service
+      context: $PWD/lib/federation/federation_service
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
-    image: ${DOCKER_REGISTRY}/federation-service:${FEDERATION_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/federation:${FEDERATION_VERSION:-latest}
     labels:
-      - "candigv2=federation-service"
+      - "candigv2=federation"
     ports:
       - "${FEDERATION_PORT}:4232"
     secrets:
