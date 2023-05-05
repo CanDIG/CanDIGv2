@@ -24,91 +24,13 @@ Doing much else will require test data.
 
 ## Setup Federation Service
 
-Federation service is required to run most of CanDig operations. The following example will add 1 UHN node to simulate the network calls.
+Federation service is required to run most of CanDIG operations.
 
-- add `federation-service` to the list of `CANDIG_MODULES` in .env
-- add to /tmp/federation/ the file `servers.json`
+- add `federation` to the list of `CANDIG_AUTH_MODULES` in .env
 
-```json
-{
-    "servers": [
-        {
-            "url": "http://candig.docker.internal:4232/federation/search",
-            "location": [
-                "UHN",
-                "Ontario",
-                "ca-on"
-            ]
-        }
-    ]
-}
-```
+If you already have federation running, delete the container then run
+`make build-federation` and `make compose-federation` to recreate it.
 
-and `services.json`
-
-```json
-{
-    "services": {
-        "katsu": "http://candig.docker.internal:5080/katsu",
-        "candig-server": "http://candig.docker.internal:5080/candig",
-        "htsget": "http://candig.docker.internal:5080/genomics"
-    }
-}
-```
-
-If you already have federation-service running, delete the container then run
-`make build-federation-service` and `make compose-federation-service` to recreate it.
-
-## WSL Federation Configuration Errors
-
-<details open>
-<summary>WSL Errors</summary>
-
-```bash
-Creating candigv2_federation-service_1 ... error
-
-ERROR: for candigv2_federation-service_1  Cannot create container for service federation-service: not a directory
-
-ERROR: for federation-service  Cannot create container for service federation-service: not a directory
-ERROR: Encountered errors while bringing up the project.
-make: *** [Makefile:378: compose-federation-service] Error 1
-```
-If you are seeing the above directory not found error in WSL it is a issue with the communication between WSL and Windows docker in relation to the tmp folder. To get past this you need to do the following:
-
-Current directory: **../CanDIGv2**
-```bash
-#Copy the servers.json and services.json into the config folder instead:
-cp tmp/federation/* lib/federation-service/federation_service/configs
-```
-You will need to comment out the 'secrets' section in the lib/federation-service/docker-compose.yml file. It will look like the code chunk below:
-
-```yml
-    ...
-    # secrets:
-    #   - source: federation-servers
-    #     target: /app/federation_service/configs/servers.json
-    #   - source: federation-services
-    #     target: /app/federation_service/configs/services.json
-    entrypoint: ["uwsgi", "federation.ini", "--http", "0.0.0.0:4232"]
-```
-Start the federation-service up:
-```bash
-make build-federation-service
-make compose-federation-service
-```
-To check that it is running you can look at the candigv2_federation-service_1 container in your Window Docker GUI. You can also run the following in terminal:
-```bash
-curl http://candig.docker.internal:4232/federation/services
-```
-The below is an example of what will return it should be what is in your services.json
-```json
-{
-  "candig-server": "http://candig.docker.internal:5080/candig",
-  "htsget": "http://candig.docker.internal:5080/genomics",
-  "katsu": "http://candig.docker.internal:5080/katsu"
-}
-```
-</details>
 
 ## Install test data
 
