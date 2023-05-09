@@ -13,17 +13,21 @@ if [ ! -z "$CANDIG_HOST" ]; then
 fi
 
 # Check 2: The value of CANDIG_DOMAIN can be reached
-if command -v getent >/dev/null 2>&1; then
-    TEST_DOMAIN=`getent hosts $CANDIG_DOMAIN`
-elif command -v dscacheutil >/dev/null 2>&1; then
-    TEST_DOMAIN=`dscacheutil -q host -a name $CANDIG_DOMAIN`
-fi
+if [ -z "$CANDIG_DOMAIN" ]; then
+    echo "Note: \$CANDIG_DOMAIN is not set, possibly because this script was run directly from the command line."
+else
+    if command -v getent >/dev/null 2>&1; then
+        TEST_DOMAIN=`getent hosts $CANDIG_DOMAIN`
+    elif command -v dscacheutil >/dev/null 2>&1; then
+        TEST_DOMAIN=`dscacheutil -q host -a name $CANDIG_DOMAIN`
+    fi
 
-if [ -z "$TEST_DOMAIN" ]; then
-    echo "Please ensure the value of \$CANDIG_DOMAIN in your .env file points to this machine"
-    echo "This should either be: 1) your local IP address, as assigned by your local network, or"
-    echo "2) a domain name that resolves to this IP address"
-    exit 1
+    if [ -z "$TEST_DOMAIN" ]; then
+        echo "Please ensure the value of \$CANDIG_DOMAIN in your .env file points to this machine"
+        echo "This should either be: 1) your local IP address, as assigned by your local network, or"
+        echo "2) a domain name that resolves to this IP address"
+        exit 1
+    fi
 fi
 
 # Check 3: Submodules have been checked out
