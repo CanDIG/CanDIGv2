@@ -17,6 +17,11 @@ LOGFILE=$PWD/tmp/progress.txt
 # https://stackoverflow.com/questions/35703317/docker-exec-write-text-to-file-in-container
 # https://www.vaultproject.io/api-docs/secret/identity/entity#batch-delete-entities
 
+vault=$(docker ps -a --format "{{.Names}}" | grep vault_1 | awk '{print $1}')
+
+# if vault isn't started, start it:
+docker restart $vault
+
 echo ">> waiting for vault to start"
 docker ps --format "{{.Names}}" | grep vault_1
 while [ $? -ne 0 ]
@@ -29,7 +34,6 @@ sleep 5
 
 # gather keys and login token
 echo ">> gathering keys"
-vault=$(docker ps --format "{{.Names}}" | grep vault_1 | awk '{print $1}')
 stuff=$(docker exec $vault sh -c "vault operator init") # | head -7 | rev | cut -d " " -f1 | rev)
 echo "found stuff as ${stuff}"
 
