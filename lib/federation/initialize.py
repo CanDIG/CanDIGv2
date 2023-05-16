@@ -1,4 +1,3 @@
-from dotenv import dotenv_values
 import json
 import os
 import re
