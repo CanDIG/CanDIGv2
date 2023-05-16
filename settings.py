@@ -4,6 +4,12 @@ import os
 import re
 import tempfile
 
+
+### Use this to handle getting env vars from the .env file; it will handle the differences between Make's .env format and python-dotenv's format.
+# get_env_value returns the correct, interpolated value for a variable.
+# get_env returns variables that are often exported for env vars, as well as several variables that come from generated secrets. All other values are saved as CANDIG_ENV.
+
+
 CANDIGV2_ENV = None
 INTERPOLATED_ENV = None
 with open(".env") as f:
@@ -15,6 +21,7 @@ with open(".env") as f:
     os.unlink(fp.name)
 
 
+# Python-dotenv doesn't interpolate quite correctly, so get_env_value interpolates manually
 def get_env_value(key):
     raw_value = CANDIGV2_ENV[key]
 
