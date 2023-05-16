@@ -313,17 +313,61 @@ def test_katsu_users(user, dataset, not_dataset):
 
 
 ## Federation tests:
+
+# Do we have at least one server present?
 def test_server_count():
     token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'], password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
     headers = {
         'Authorization': f"Bearer {token}",
         'Content-Type': 'application/json; charset=utf-8'
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/federation/servers", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers)
     print(response.json())
     assert len(response.json()) > 0
 
 
+# Do we have at least one service present?
+def test_services_count():
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'], password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
+    headers = {
+        'Authorization': f"Bearer {token}",
+        'Content-Type': 'application/json; charset=utf-8'
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/federation/v1/services", headers=headers)
+    print(response.json())
+    assert len(response.json()) > 0
+    services = map(lambda x: x['id'], response.json())
+    assert 'htsget' in services
+
+
+# Do federated and non-federated calls look correct?
+def test_federation_call():
+    body = {
+        "service": "htsget",
+        "method": "GET",
+        "payload": {},
+        "path": "beacon/v2/service-info"
+    }
+
+    token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
+    headers = {
+        'Authorization': f"Bearer {token}",
+        "content-type": "application/json",
+        "federation": "false"
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body)
+    print(response.json())
+    assert "results" in response.json()
+
+    headers['federation'] = "true"
+    response = requests.post(f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body)
+    print(response.json())
+    assert "list" in str(type(response.json()))
+    assert "results" in response.json()[0]
+
+
+# Add a server, then test to see if federated calls now include that server in the results
 def test_add_server():
     token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
     headers = {
@@ -331,38 +375,34 @@ def test_add_server():
         'Content-Type': 'application/json; charset=utf-8'
     }
 
-    response = requests.get(f"{ENV['CANDIG_URL']}/federation/servers", headers=headers)
-    body = response.json()[0]
-    body['id'] = 'test'
-    response = requests.post(f"{ENV['CANDIG_URL']}/federation/servers", headers=headers, json=body)
-    print(response.json())
-    assert response.status_code == 200
+    response = requests.get(f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers)
 
-
-    #        ('CANDIG_SITE_ADMIN', 'NC_000021.8:g.5030847T>A', ['multisample_1', 'multisample_2'], ['test']), # site admin can access all data, even if not specified by dataset
-
-@pytest.mark.parametrize('user, search, can_access, cannot_access', beacon_access())
-def test_federation_call(user, search, can_access, cannot_access):
     body = {
-      "endpoint_service": "htsget",
-      "request_type": "POST",
-      "endpoint_payload": {
-        "query": {
-          "requestParameters": {
-            "reference_name": "21",
-            "end": [
-              5030847
-            ],
-            "assembly_id": "hg37",
-            "start": [
-              5030000
-            ]
-          }
-        },
-        "meta": {
-          "apiVersion": "v2"
+        "server": response.json()[0],
+        "authentication": {
+            "issuer": ENV["KEYCLOAK_REALM_URL"],
+            "token": token
         }
-      },
-      "endpoint_path": "beacon/v2/g_variants"
     }
+    body['server']['id'] = 'test'
+    body['server']['location']['name'] = 'test'
+    response = requests.post(f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers, json=body)
+    assert response.status_code in [201, 204]
+
+    headers['federation'] = "true"
+    body = {
+        "service": "htsget",
+        "method": "GET",
+        "payload": {},
+        "path": "beacon/v2/service-info"
+    }
+    response = requests.post(f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body)
+    last_result = response.json().pop()
+    print(last_result)
+    assert last_result['location']['name'] == "test"
+
+    # delete the server
+    response = requests.delete(f"{ENV['CANDIG_URL']}/federation/v1/servers/test", headers=headers)
+    print(response.text)
+    assert response.status_code == 200
 
