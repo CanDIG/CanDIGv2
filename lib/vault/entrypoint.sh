@@ -4,6 +4,10 @@ set -Euo pipefail
 
 
 if [[ -f "initial_setup" ]]; then
+    cp -R /app/* /vault
+    mkdir /vault/data
+    chmod 777 /vault/data
+
     rm initial_setup
 else
     sleep 10
@@ -17,7 +21,7 @@ else
     KEY=$(head -n 4 /vault/config/keys.txt | tail -n 1)
     echo '{ "key": "'$KEY'" }' > payload.json
     curl --request POST --data @payload.json http://vault:8200/v1/sys/unseal
-    
+
 fi
 
 bash /vault/create_token.sh

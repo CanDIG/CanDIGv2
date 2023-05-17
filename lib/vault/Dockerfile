@@ -17,13 +17,11 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 # add the config file
-COPY ./tmp/vault-config.json /vault/config/vault-config.json
+COPY ./tmp/vault-config.json /app/config/vault-config.json
 
 # copy entrypoint
-COPY . /vault
-RUN mkdir /vault/data
-RUN chmod 777 /vault/data
+COPY . /app
 
 RUN touch initial_setup
 # run vault
-ENTRYPOINT ["bash", "/vault/entrypoint.sh"]
+ENTRYPOINT ["bash", "/app/entrypoint.sh"]
