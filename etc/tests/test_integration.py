@@ -79,7 +79,7 @@ def user_datasets():
 def test_opa_datasets(user, dataset):
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
-    payload = {"input": {"body": {"path": "/katsu/katsu/v2/dataset", "method": "GET"}}}
+    payload = {"input": {"body": {"path": "/katsu/v2/dataset", "method": "GET"}}}
 
     headers = {
         "Content-Type": "application/json",
@@ -332,7 +332,7 @@ def test_setup_katsu():
         "Content-Type": "application/json; charset=utf-8",
     }
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/katsu/katsu/v2/ingest/programs",
+        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/programs",
         headers=headers,
         json=response.json(),
     )
@@ -349,7 +349,7 @@ def test_setup_katsu():
     response = requests.get(test_loc)
     assert response.status_code == 200
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/katsu/katsu/v2/ingest/donors",
+        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/donors",
         headers=headers,
         json=response.json(),
     )
@@ -382,7 +382,7 @@ def test_katsu_users(user, dataset, not_dataset):
     }
 
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/katsu/v2/authorized/programs/", headers=headers
+        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/", headers=headers
     )
     programs = list(map(lambda x: x["program_id"], response.json()["results"]))
     print(programs)
@@ -390,7 +390,7 @@ def test_katsu_users(user, dataset, not_dataset):
     assert not_dataset not in programs
 
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/katsu/v2/authorized/donors/", headers=headers
+        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/donors/", headers=headers
     )
     assert len(response.json()) > 0
     print(response.json())
