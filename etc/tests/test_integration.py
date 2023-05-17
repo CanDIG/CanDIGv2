@@ -79,7 +79,7 @@ def user_datasets():
 def test_opa_datasets(user, dataset):
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
-    payload = {"input": {"body": {"path": "/katsu/v2/dataset", "method": "GET"}}}
+    payload = {"input": {"body": {"path": "/v2/discovery/", "method": "GET"}}}
 
     headers = {
         "Content-Type": "application/json",
