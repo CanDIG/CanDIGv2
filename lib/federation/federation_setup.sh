@@ -15,5 +15,6 @@ do
   docker ps --format "{{.Names}}" | grep federation_1
 done
 
+python settings.py
 source env.sh
 python $PWD/lib/federation/initialize.py
