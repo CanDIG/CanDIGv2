@@ -4,8 +4,8 @@
 
 #<<<
 clean-keycloak:
-	source ${PWD}/setup_hosts.sh; \
-	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/keycloak/docker-compose.yml down || true
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/keycloak/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'keycloak' | xargs -I{} docker rmi --force {}
@@ -18,8 +18,8 @@ clean-keycloak:
 
 #<<<
 clean-vault:
-	source ${PWD}/setup_hosts.sh; \
-	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/vault/docker-compose.yml down || true
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/vault/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'vault' | xargs -I{} docker rmi --force {}
@@ -33,8 +33,8 @@ clean-vault:
 
 #<<<
 clean-opa:
-	source ${PWD}/setup_hosts.sh; \
-	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/opa/docker-compose.yml down || true
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/opa/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'openpolicyagent/opa' | xargs -I{} docker rmi --force {}
@@ -49,14 +49,14 @@ clean-opa:
 
 #<<<
 clean-tyk:
-	source ${PWD}/setup_hosts.sh; \
-	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/tyk/docker-compose.yml down || true
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/tyk/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'tyk|redis' |  xargs -I{} docker rmi --force {}
 
 	# - clean tmp dir inside lib/tyk
-	rm -r $(DIR)/lib/tyk/tmp || true
+	rm -r lib/tyk/tmp || true
 
 	-docker volume rm tyk-data
 	-docker volume rm tyk-redis-data
@@ -99,4 +99,4 @@ redeploy-tyk: mkdir
 #<<<
 setup-%:
 	echo "Setting up $*"
-	source ${PWD}/lib/$*/$*_setup.sh
+	source lib/$*/$*_setup.sh
