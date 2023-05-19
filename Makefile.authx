@@ -77,15 +77,7 @@ clean-authx: clean-keycloak clean-tyk clean-vault clean-opa
 #<<<
 init-authx: mkdir
 	$(MAKE) docker-volumes
-	echo "Setting up Keycloak"; \
-	$(MAKE) compose-keycloak; \
-	echo "Setting up Tyk"; \
-	$(MAKE) compose-tyk; \
-	echo "Setting up Vault"; \
-	$(MAKE) compose-vault; \
-	echo "Setting up Opa"; \
-	$(MAKE) compose-opa; \
-	echo ;
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) compose-$(MODULE);)
 
 
 #>>>
@@ -96,11 +88,7 @@ init-authx: mkdir
 redeploy-tyk: mkdir
 	$(MAKE) clean-tyk
 	$(MAKE) docker-volumes
-	source lib/tyk/tyk_setup.sh; \
-	echo ; \
-	$(MAKE) compose-tyk; \
-	source lib/tyk/tyk_key_generation.sh; \
-	echo ;
+	$(MAKE) compose-tyk
 
 
 #>>>

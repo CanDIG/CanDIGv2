@@ -1,17 +1,53 @@
 from dotenv import dotenv_values
+import json
+import os
+import re
+import tempfile
+
+
+### Use this to handle getting env vars from the .env file; it will handle the differences between Make's .env format and python-dotenv's format.
+# get_env_value returns the correct, interpolated value for a variable.
+# get_env returns variables that are often exported for env vars, as well as several variables that come from generated secrets. All other values are saved as CANDIG_ENV.
+
+
+CANDIGV2_ENV = None
+INTERPOLATED_ENV = None
+with open(".env") as f:
+    envs = f.read().replace("define ", "").replace("endef", "")
+    with tempfile.NamedTemporaryFile("w", delete=False) as fp:
+        fp.write(envs)
+    CANDIGV2_ENV = dotenv_values(fp.name, interpolate=False)
+    INTERPOLATED_ENV = dotenv_values(fp.name, interpolate=True)
+    os.unlink(fp.name)
+
+
+# Python-dotenv doesn't interpolate quite correctly, so get_env_value interpolates manually
+def get_env_value(key):
+    raw_value = CANDIGV2_ENV[key]
+
+    while True:
+        var_match = re.match(r"^(.*)\$\{(.+?)\}(.*)$", raw_value, re.DOTALL)
+        if var_match is not None:
+            raw_value = var_match.group(1) + CANDIGV2_ENV[var_match.group(2)] + var_match.group(3)
+        else:
+            break
+
+    CANDIGV2_ENV[key] = raw_value
+    return raw_value
 
 
 def get_env():
-    candigv2_env = dotenv_values(f".env")
-
     vars = {}
-    vars["CANDIG_URL"] = candigv2_env["TYK_LOGIN_TARGET_URL"]
-    vars["CANDIG_CLIENT_ID"] = candigv2_env["KEYCLOAK_CLIENT_ID"]
-    vars["KEYCLOAK_PUBLIC_URL"] = candigv2_env["KEYCLOAK_PUBLIC_URL"]
-    vars["VAULT_URL"] = vars["CANDIG_URL"] + "/vault"
-    vars["OPA_URL"] = vars["CANDIG_URL"] + "/policy"
-    vars["OPA_SITE_ADMIN_KEY"] = candigv2_env["OPA_SITE_ADMIN_KEY"]
-    vars["MINIO_URL"] = candigv2_env["MINIO_PUBLIC_URL"]
+    vars["CANDIG_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
+    vars["CANDIG_CLIENT_ID"] = get_env_value("KEYCLOAK_CLIENT_ID")
+    vars["KEYCLOAK_PUBLIC_URL"] = get_env_value("KEYCLOAK_PUBLIC_URL")
+    vars["KEYCLOAK_REALM_URL"] = get_env_value("KEYCLOAK_REALM_URL")
+    vars["VAULT_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
+    vars["OPA_URL"] = get_env_value("OPA_URL")
+    vars["OPA_SITE_ADMIN_KEY"] = get_env_value("OPA_SITE_ADMIN_KEY")
+    vars["MINIO_URL"] = get_env_value("MINIO_PUBLIC_URL")
+    vars["TYK_LOGIN_TARGET_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
+    vars["TYK_POLICY_ID"] = get_env_value("TYK_POLICY_ID")
 
     # vars that come from files:
     with open(f"tmp/secrets/opa-root-token") as f:
@@ -34,7 +70,9 @@ def get_env():
         vars["MINIO_ACCESS_KEY"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/minio-secret-key") as f:
         vars["MINIO_SECRET_KEY"] = f.read().splitlines().pop()
-    vars["CANDIG_ENV"] = candigv2_env
+    with open(f"tmp/secrets/tyk-secret-key") as f:
+        vars["TYK_SECRET_KEY"] = f.read().splitlines().pop()
+    vars["CANDIG_ENV"] = INTERPOLATED_ENV
     return vars
 
 

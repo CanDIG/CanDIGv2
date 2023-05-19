@@ -38,7 +38,6 @@ mkdir:
 	mkdir -p bin
 	mkdir -p tmp/{configs,data,secrets}
 	mkdir -p tmp/{keycloak,tyk,vault}
-	mkdir -p tmp/federation
 
 
 #>>>

@@ -35,6 +35,8 @@ export KEYCLOAK_PUBLIC_KEY=$KEYCLOAK_PUBLIC_KEY_VAL
 
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
 
+# Copy files from template configs
+
 echo "Working on tyk.conf"  | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/tyk.conf.tpl > ${CONFIG_DIR}/tyk.conf
 
@@ -47,19 +49,11 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/backendAuthMiddleware.js > ${C
 echo "Working on frontendAuthMiddleware.js" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/frontendAuthMiddleware.js > ${CONFIG_DIR}/middleware/frontendAuthMiddleware.js
 
-echo "Working on api_auth.json" | tee -a $LOGFILE
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_auth.json.tpl > ${CONFIG_DIR}/apps/api_auth.json
-
-echo "Working on api_candig.json" | tee -a $LOGFILE
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_candig.json.tpl > ${CONFIG_DIR}/apps/api_candig.json
-
 echo "Working on policies.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/policies.json.tpl > ${CONFIG_DIR}/policies/policies.json
 
 echo "Working on tyk_analytics" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/tyk_analytics.conf.tpl > ${CONFIG_DIR}/tyk_analytics.conf
-
-# Copy files from template configs
 
 echo "Copying virtualLogin.js" | tee -a $LOGFILE
 cp ${PWD}/lib/tyk/configuration_templates/virtualLogin.js ${CONFIG_DIR}/middleware/virtualLogin.js
@@ -73,26 +67,29 @@ cp ${PWD}/lib/tyk/configuration_templates/virtualToken.js ${CONFIG_DIR}/middlewa
 echo "Copying permissionsStoreMiddleware.js" | tee -a $LOGFILE
 cp ${PWD}/lib/tyk/configuration_templates/permissionsStoreMiddleware.js ${CONFIG_DIR}/middleware/permissionsStoreMiddleware.js
 
+echo "Working on api_auth.json" | tee -a $LOGFILE
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_auth.json.tpl > ${CONFIG_DIR}/apps/${TYK_AUTH_API_ID}.json
+
 echo "Working on api_katsu.json"
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_katsu.json.tpl > ${CONFIG_DIR}/apps/api_katsu.json
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_katsu.json.tpl > ${CONFIG_DIR}/apps/${TYK_KATSU_API_ID}.json
 
 echo "Working on api_candig_data_portal.json"
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_mcode_candig_data_portal.json.tpl > ${CONFIG_DIR}/apps/api_candig_data_portal.json
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_mcode_candig_data_portal.json.tpl > ${CONFIG_DIR}/apps/${TYK_CANDIG_DATA_PORTAL_API_ID}.json
 
 echo "Working on api_graphql.json"
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_graphql.json.tpl > ${CONFIG_DIR}/apps/api_graphql.json
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_graphql.json.tpl > ${CONFIG_DIR}/apps/${TYK_GRAPHQL_API_ID}.json
 
 echo "Working on api_htsget.json" | tee -a $LOGFILE
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_htsget.json.tpl > ${CONFIG_DIR}/apps/api_htsget.json
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_htsget.json.tpl > ${CONFIG_DIR}/apps/${TYK_HTSGET_API_ID}.json
 
 echo "Working on api_opa.json"
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_opa.json.tpl > ${CONFIG_DIR}/apps/api_opa.json
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_opa.json.tpl > ${CONFIG_DIR}/apps/${TYK_OPA_API_ID}.json
 
 echo "Working on api_vault.json"
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_vault.json.tpl > ${CONFIG_DIR}/apps/api_vault.json
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_vault.json.tpl > ${CONFIG_DIR}/apps/${TYK_VAULT_API_ID}.json
 
 echo "Working on api_federation.json" | tee -a $LOGFILE
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_federation.json.tpl > ${CONFIG_DIR}/apps/api_federation.json
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_federation.json.tpl > ${CONFIG_DIR}/apps/${TYK_FEDERATION_API_ID}.json
 
 # Extra APIs can be added here
 #echo "Working on api_example.json"
