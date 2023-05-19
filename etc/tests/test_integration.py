@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 import pytest
 import requests
@@ -177,6 +178,7 @@ def test_htsget_add_sample_to_dataset():
         'Content-Type': 'application/json; charset=utf-8'
     }
 
+    TESTENV_URL = ENV["CANDIG_ENV"]["HTSGET_PUBLIC_URL"].replace("http://", "drs://").replace("https://", "drs://")
     # Delete dataset SYNTHETIC-1
     response = requests.delete(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-1", headers=headers)
 
@@ -184,8 +186,8 @@ def test_htsget_add_sample_to_dataset():
     payload = {
         "id": "SYNTHETIC-1",
         "drsobjects": [
-            "drs://localhost/NA18537",
-            "drs://localhost/multisample_1"
+            f"{TESTENV_URL}/NA18537",
+            f"{TESTENV_URL}/multisample_1"
         ]
     }
 
