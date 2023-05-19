@@ -194,8 +194,27 @@ def test_htsget_add_sample_to_dataset():
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets", headers=headers, json=payload)
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-1", headers=headers)
     print(response.json())
-    assert "drs://localhost/multisample_1" in response.json()['drsobjects']
-    assert "drs://localhost/multisample_2" not in response.json()['drsobjects']
+    assert f"{TESTENV_URL}/multisample_1" in response.json()['drsobjects']
+    assert f"{TESTENV_URL}/multisample_2" not in response.json()['drsobjects']
+
+    # Delete dataset SYNTHETIC-2
+    response = requests.delete(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-2", headers=headers)
+
+    # Add NA20787 and multisample_2 to dataset SYNTHETIC-2, which is only authorized for user2:
+    payload = {
+        "id": "SYNTHETIC-2",
+        "drsobjects": [
+            f"{TESTENV_URL}/NA20787",
+            f"{TESTENV_URL}/multisample_2"
+        ]
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets", headers=headers, json=payload)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-2", headers=headers)
+    print(response.json())
+    assert f"{TESTENV_URL}/multisample_2" in response.json()['drsobjects']
+    assert f"{TESTENV_URL}/multisample_1" not in response.json()['drsobjects']
+
 
 
 ## Can we access the data when authorized to do so?
