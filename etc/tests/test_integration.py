@@ -333,6 +333,48 @@ def test_katsu_users(user, dataset, not_dataset):
     assert not_dataset not in donors
 
 
+## HTSGet + katsu:
+def test_add_sample_to_genomic():
+    test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/SampleRegistration.json"
+    response = requests.get(test_loc)
+    first_sample = response.json().pop(0)
+
+    site_admin_token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
+    headers = {
+        'Authorization': f"Bearer {site_admin_token}",
+        'Content-Type': 'application/json; charset=utf-8'
+    }
+
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/{first_sample['program_id']}", headers=headers)
+
+    assert response.status_code == 200
+
+    assert len(response.json()['drsobjects']) > 0
+    drs_obj = response.json()['drsobjects'].pop(0)
+    drs_obj_match = re.match(r"^(.+)\/(.+?)$", drs_obj)
+    if drs_obj_match is not None:
+        host = drs_obj_match.group(1)
+        drs_obj_name = drs_obj_match.group(2)
+
+        # assign the first member of this dataset to the sample
+        sample_drs_obj = {
+            "id": first_sample['submitter_sample_id'],
+            "contents": [{
+                    "drs_uri": [
+                        drs_obj
+                    ],
+                    "name": drs_obj_name,
+                    "id": "genomic"
+                }],
+            "version": "v1"
+        }
+
+        url = f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects"
+        response = requests.request("POST", url, json=sample_drs_obj, headers=headers)
+        print(response.text)
+        assert response.status_code == 200
+
+
 ## Federation tests:
 
 # Do we have at least one server present?
