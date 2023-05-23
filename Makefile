@@ -20,6 +20,7 @@ CONDA = $(CONDA_INSTALL)/miniconda3/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
 
 LOGFILE = tmp/progress.txt
+ERRORLOG = tmp/error.txt
 
 .PHONY: all
 all:
@@ -90,6 +91,7 @@ endif
 #<<<
 .PHONY: build-all
 build-all:
+	printf "Build started at `date '+%D %T'`.\n\n" > $(ERRORLOG)
 	./pre-build-check.sh
 
 # Setup the entire stack
@@ -123,9 +125,10 @@ build-images: #toil-docker
 
 #<<<
 build-%:
+	printf "\n\nErrors during build-$*: \n" >> $(ERRORLOG)
 	echo "    started build-$*" >> $(LOGFILE)
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) --progress=plain 2> >(tee -a $(ERRORLOG))
 	echo "    finished build-$*" >> $(LOGFILE)
 
 
@@ -236,11 +239,12 @@ compose:
 
 #<<<
 compose-%:
+	printf "\n\nErrors during compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
-	-source lib/$*/$*_preflight.sh
+	-source lib/$*/$*_preflight.sh 2> >(tee -a $(ERRORLOG))
 	source setup_hosts.sh; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d
-	-source lib/$*/$*_setup.sh
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2> >(tee -a $(ERRORLOG))
+	-source lib/$*/$*_setup.sh 2> >(tee -a $(ERRORLOG))
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
