@@ -9,7 +9,7 @@ declare -A MODULE_COUNTS
 # Note: Logging, drs-server and wes-server are not currently built by
 # the Makefile. Their values will need to be changed when this is no
 # longer the case.
-MODULE_COUNTS=( ["candig-data-portal"]=1 ["federation-service"]=1 ["htsget"]=1
+MODULE_COUNTS=( ["candig-data-portal"]=1 ["federation"]=1 ["htsget"]=1
 				["katsu"]=2 ["keycloak"]=1 ["logging"]=3 ["minio"]=1 ["monitoring"]=5
 				["opa"]=2 ["toil"]=2 ["tyk"]=2 ["vault"]=2 ["wes-server"]=1 ["drs-server"]=0 )
 				
@@ -30,8 +30,8 @@ done
 
 if [ $(docker ps -q | wc -l) == $SERVICE_COUNT ]
 then
-	echo -e "${GREEN}Number of expected services matches number of containers running!${DEFAULT}"
+	echo -e "${GREEN}Number of expected CanDIG services matches number of containers running!${DEFAULT}"
 else
-	echo -e "${RED}WARNING: ${YELLOW}The number of containers running does not match the number of expected services.\nRunning: ${BLUE}$(docker ps -q | wc -l) ${YELLOW}Expected: ${BLUE}${SERVICE_COUNT}
+	echo -e "${RED}WARNING: ${YELLOW}The number of CanDIG containers running does not match the number of expected services.\nRunning: ${BLUE}$(docker ps -q | wc -l) ${YELLOW}Expected: ${BLUE}${SERVICE_COUNT}
 ${DEFAULT}Check your build/docker logs."
 fi

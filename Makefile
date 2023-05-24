@@ -22,6 +22,8 @@ CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
 LOGFILE = tmp/progress.txt
 ERRORLOG = tmp/error.txt
 
+$(shell > $(ERRORLOG))
+
 .PHONY: all
 all:
 	@echo "CanDIGv2 Makefile Deployment"
@@ -127,6 +129,7 @@ build-images: #toil-docker
 build-%:
 	printf "\n\nErrors during build-$*: \n" >> $(ERRORLOG)
 	echo "    started build-$*" >> $(LOGFILE)
+	source setup_hosts.sh; \
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 1> >(tee -a >(grep -C 2 "[Ee]rror|[Ww]arning" >> $(ERRORLOG)) /dev/null) 2> >(tee -a $(ERRORLOG))
 	echo "    finished build-$*" >> $(LOGFILE)
@@ -242,6 +245,7 @@ compose-%:
 	printf "\n\nErrors during compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
 	-source lib/$*/$*_preflight.sh 1> >(tee -a >(grep -C 2 "[Ee]rror|[Ww]arning" >> $(ERRORLOG)) /dev/null) 2> >(tee -a $(ERRORLOG))
+	source setup_hosts.sh; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 1> >(tee -a >(grep -C 2 "[Ee]rror|[Ww]arning" >> $(ERRORLOG)) /dev/null) 2> >(tee -a $(ERRORLOG))
 	-source lib/$*/$*_setup.sh 1> >(tee -a >(grep -C 2 "[Ee]rror|[Ww]arning" >> $(ERRORLOG)) /dev/null) 2> >(tee -a $(ERRORLOG))
 	echo "    finished compose-$*" >> $(LOGFILE)
