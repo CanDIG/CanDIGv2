@@ -128,7 +128,7 @@ build-%:
 	printf "\n\nErrors during build-$*: \n" >> $(ERRORLOG)
 	echo "    started build-$*" >> $(LOGFILE)
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) --progress=plain 2> >(tee -a $(ERRORLOG))
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 1> >(tee -a >(grep -C 2 "[Ee]rror|[Ww]arning" >> $(ERRORLOG)) /dev/null) 2> >(tee -a $(ERRORLOG))
 	echo "    finished build-$*" >> $(LOGFILE)
 
 
@@ -241,10 +241,9 @@ compose:
 compose-%:
 	printf "\n\nErrors during compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
-	-source lib/$*/$*_preflight.sh 2> >(tee -a $(ERRORLOG))
-	source setup_hosts.sh; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2> >(tee -a $(ERRORLOG))
-	-source lib/$*/$*_setup.sh 2> >(tee -a $(ERRORLOG))
+	-source lib/$*/$*_preflight.sh 1> >(tee -a >(grep -C 2 "[Ee]rror|[Ww]arning" >> $(ERRORLOG)) /dev/null) 2> >(tee -a $(ERRORLOG))
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 1> >(tee -a >(grep -C 2 "[Ee]rror|[Ww]arning" >> $(ERRORLOG)) /dev/null) 2> >(tee -a $(ERRORLOG))
+	-source lib/$*/$*_setup.sh 1> >(tee -a >(grep -C 2 "[Ee]rror|[Ww]arning" >> $(ERRORLOG)) /dev/null) 2> >(tee -a $(ERRORLOG))
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
