@@ -20,7 +20,7 @@ function print_module_logs() {
 	if [[ $BUILD_LINE != "" ]]; then
 		LNO=$BUILD_LINE
 		while read -r LINE; do
-			if [[ $LINE == "Errors during build-"* || $LINE == "Errors during compose-"* ]]; then
+			if [[ $LINE == "Output of build-"* || $LINE == "Output of compose-"* ]]; then
 				break
 			else
 				if [[ ${LINE,,} =~ .*(error|warn).* ]]; then
@@ -34,7 +34,7 @@ function print_module_logs() {
 	if [[ $COMPOSE_LINE != "" ]]; then
 		LNO=$COMPOSE_LINE
 		while read -r LINE; do
-			if [[ $LINE == "Errors during build-"* || $LINE == "Errors during compose-"* ]]; then
+			if [[ $LINE == "Output of build-"* || $LINE == "Output of compose-"* ]]; then
 				break
 			else
 				if [[ ${LINE,,} =~ .*(error|warn).* ]]; then

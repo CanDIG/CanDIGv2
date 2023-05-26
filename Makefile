@@ -23,8 +23,6 @@ LOGFILE = tmp/progress.txt
 
 $(shell printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG) $(ERRORLOG))
 
-export BUILDKIT_PROGRESS := tty
-
 .PHONY: all
 all:
 	@echo "CanDIGv2 Makefile Deployment"
@@ -127,7 +125,7 @@ build-images: #toil-docker
 
 #<<<
 build-%:
-	printf "\n\nErrors during build-$*: \n" >> $(ERRORLOG)
+	printf "\nOutput of build-$*: \n" >> $(ERRORLOG)
 	echo "    started build-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
@@ -248,7 +246,7 @@ compose:
 
 #<<<
 compose-%:
-	printf "\n\nErrors during compose-$*: \n" >> $(ERRORLOG)
+	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
 	-source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG)
 	source setup_hosts.sh; \
