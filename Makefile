@@ -8,20 +8,18 @@ include Makefile.authx
 export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
-DIR = $(PWD)
-
 #>>>
-# option A : set CONDA_INSTALL to $(DIR)/bin to install conda within the candigv2 repo
+# option A : set CONDA_INSTALL to bin to install conda within the candigv2 repo
 #  and then use make bin-conda and make init-conda
 # option B: set CONDA_INSTALL to the location of an existing miniconda3 installation
 #  and then use make mkdir and make init-conda (no bin-conda, which will blow up an existing conda)
 # <<<
 
-CONDA_INSTALL = $(DIR)/bin
+CONDA_INSTALL = bin
 CONDA = $(CONDA_INSTALL)/miniconda3/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
 
-LOGFILE = $(DIR)/tmp/progress.txt
+LOGFILE = tmp/progress.txt
 
 .PHONY: all
 all:
@@ -37,10 +35,9 @@ all:
 #<<<
 .PHONY: mkdir
 mkdir:
-	mkdir -p $(DIR)/bin
-	mkdir -p $(DIR)/tmp/{configs,data,secrets}
-	mkdir -p $(DIR)/tmp/{keycloak,tyk,vault}
-	mkdir -p ${DIR}/tmp/federation
+	mkdir -p bin
+	mkdir -p tmp/{configs,data,secrets}
+	mkdir -p tmp/{keycloak,tyk,vault}
 
 
 #>>>
@@ -60,27 +57,27 @@ bin-all: bin-conda
 bin-conda: mkdir
 	echo "    started bin-conda" >> $(LOGFILE)
 ifeq ($(VENV_OS), linux)
-	curl -Lo $(DIR)/bin/miniconda_install.sh \
+	curl -Lo bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
+	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
 	echo "    finished bin-conda" >> $(LOGFILE)
 endif
 ifeq ($(VENV_OS), darwin)
-	curl -Lo $(DIR)/bin/miniconda_install.sh \
+	curl -Lo bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
+	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
 	echo "    finished bin-conda" >> $(LOGFILE)
 endif
 ifeq ($(VENV_OS), arm64mac)
-	curl -Lo $(DIR)/bin/miniconda_install.sh \
+	curl -Lo bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
-	bash $(DIR)/bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
+	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init zsh
@@ -126,7 +123,7 @@ build-images: #toil-docker
 build-%:
 	echo "    started build-$*" >> $(LOGFILE)
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
-	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml build $(BUILD_OPTS)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS)
 	echo "    finished build-$*" >> $(LOGFILE)
 
 
@@ -149,7 +146,7 @@ clean-all: clean-authx clean-compose clean-containers clean-secrets \
 #<<<
 .PHONY: clean-bin
 clean-bin:
-	rm -rf $(DIR)/bin
+	rm -rf bin
 
 
 #>>>
@@ -159,9 +156,9 @@ clean-bin:
 #<<<
 .PHONY: clean-compose
 clean-compose:
-	source ${PWD}/setup_hosts.sh; \
+	source setup_hosts.sh; \
 	$(foreach MODULE, $(CANDIG_MODULES), \
-		docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$(MODULE)/docker-compose.yml down || true;)
+		docker compose -f lib/candigv2/docker-compose.yml -f lib/$(MODULE)/docker-compose.yml down || true;)
 
 
 #>>>
@@ -204,7 +201,7 @@ clean-images:
 .PHONY: clean-secrets
 clean-secrets:
 	-docker secret rm `docker secret ls -q --filter label=candigv2`
-	rm -rf $(DIR)/tmp/secrets
+	rm -rf tmp/secrets
 
 
 #>>>
@@ -216,7 +213,7 @@ clean-secrets:
 clean-volumes:
 	-docker volume rm `docker volume ls -q --filter label=candigv2`
 	-docker volume rm `docker volume ls -q --filter dangling=true`
-#rm -rf $(DIR)/tmp/data
+#rm -rf tmp/data
 
 
 #>>>
@@ -226,7 +223,7 @@ clean-volumes:
 #<<<
 .PHONY: compose
 compose:
-	source ${PWD}/setup_hosts.sh; \
+	source setup_hosts.sh; \
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) compose-$(MODULE);)
 
 
@@ -238,10 +235,10 @@ compose:
 #<<<
 compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
-	-source $(DIR)/lib/$*/$*_preflight.sh
-	source ${PWD}/setup_hosts.sh; \
-	docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml --compatibility up -d
-	-source $(DIR)/lib/$*/$*_setup.sh
+	-source lib/$*/$*_preflight.sh
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d
+	-source lib/$*/$*_setup.sh
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
@@ -274,17 +271,17 @@ docker-push:
 #<<<
 .PHONY: docker-secrets
 docker-secrets: mkdir minio-secrets
-	@echo admin > $(DIR)/tmp/secrets/metadata-db-user
+	@echo admin > tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-app-secret
 	$(MAKE) secret-metadata-db-secret
 
-	@echo admin > $(DIR)/tmp/secrets/keycloak-admin-user
+	@echo admin > tmp/secrets/keycloak-admin-user
 	$(MAKE) secret-keycloak-admin-password
 
-	@echo user1 > $(DIR)/tmp/secrets/keycloak-test-user
+	@echo user1 > tmp/secrets/keycloak-test-user
 	$(MAKE) secret-keycloak-test-user-password
 
-	@echo user2 > $(DIR)/tmp/secrets/keycloak-test-user2
+	@echo user2 > tmp/secrets/keycloak-test-user2
 	$(MAKE) secret-keycloak-test-user2-password
 
 	$(MAKE) secret-tyk-secret-key
@@ -332,11 +329,11 @@ init-conda:
 
 	source $(CONDA_ENV_SETTINGS) \
 		&& conda activate $(VENV_NAME) \
-		&& pip install -U -r $(DIR)/etc/venv/requirements.txt
+		&& pip install -U -r etc/venv/requirements.txt
 
-#@echo "Load local conda: source $(DIR)/bin/miniconda3/etc/profile.d/conda.sh"
+#@echo "Load local conda: source bin/miniconda3/etc/profile.d/conda.sh"
 #@echo "Activate conda env: conda activate $(VENV_NAME)"
-#@echo "Install requirements: pip install -U -r $(DIR)/etc/venv/requirements.txt"
+#@echo "Install requirements: pip install -U -r etc/venv/requirements.txt"
 	echo "    finished init-conda" >> $(LOGFILE)
 
 
@@ -355,11 +352,11 @@ init-docker: docker-volumes docker-secrets
 
 #<<<
 minio-secrets:
-	@echo admin > $(DIR)/tmp/secrets/minio-access-key
+	@echo admin > tmp/secrets/minio-access-key
 	$(MAKE) secret-minio-secret-key
-	@echo '[default]' > $(DIR)/tmp/secrets/aws-credentials
-	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> $(DIR)/tmp/secrets/aws-credentials
-	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> $(DIR)/tmp/secrets/aws-credentials
+	@echo '[default]' > tmp/secrets/aws-credentials
+	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> tmp/secrets/aws-credentials
+	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> tmp/secrets/aws-credentials
 
 
 #>>>
@@ -369,7 +366,7 @@ minio-secrets:
 
 #<<<
 pull-%:
-		docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml pull
+		docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml pull
 
 
 #>>>
@@ -379,7 +376,7 @@ pull-%:
 
 #<<<
 push-%:
-		docker compose -f $(DIR)/lib/candigv2/docker-compose.yml -f $(DIR)/lib/$*/docker-compose.yml push
+		docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml push
 
 
 #>>>
@@ -389,7 +386,7 @@ push-%:
 #<<<
 secret-%:
 	@dd if=/dev/urandom bs=1 count=16 2>/dev/null \
-		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > $(DIR)/tmp/secrets/$*
+		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/$*
 
 
 #>>>
@@ -401,7 +398,7 @@ secret-%:
 toil-docker:
 	echo "    started toil-docker" >> $(LOGFILE)
 	VIRTUAL_ENV=1 DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 TOIL_DOCKER_REGISTRY=$(DOCKER_REGISTRY) \
-	$(MAKE) -C $(DIR)/lib/toil/toil-docker docker
+	$(MAKE) -C lib/toil/toil-docker docker
 	$(foreach MODULE,$(TOIL_MODULES), \
 		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION)-$(TOIL_BUILD_HASH) \
 		$(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION);)
