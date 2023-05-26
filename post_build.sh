@@ -1,16 +1,42 @@
 #!/usr/bin/env bash
 
+# This script is meant to be run after make build-all, and checks whether
+# the number of running docker containers matches the number of containers
+# that should be running based on services specified in .env.
+
+ERRORLOG="tmp/error.txt"
+
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 DEFAULT='\033[0m'
 
+function print_module_logs() {
+	MODULE=$1
+	BUILD_LINE=$(grep -n build-${MODULE} ${ERRORLOG} | tail -1 | cut -d ':' -f 1)
+	while read -r LINE; do
+		if [[ $LINE == "Errors during build-"* || $LINE == "Errors during compose-"* ]]; then
+			break
+		else
+			echo $LINE
+		fi
+	done < <(tail -n "+$((BUILD_LINE + 1))" $ERRORLOG)
+	COMPOSE_LINE=$(grep -n compose-${MODULE} ${ERRORLOG} | tail -1 | cut -d ':' -f 1)
+	while read -r LINE; do
+		if [[ $LINE == "Errors during build-"* || $LINE == "Errors during compose-"* ]]; then
+			break
+		else
+			echo $LINE
+		fi
+	done < <(tail -n "+$((COMPOSE_LINE+1))" $ERRORLOG)
+}
+
+
 declare -A MODULE_COUNTS
 
-# Note: Logging, drs-server and wes-server are not currently built by
-# the Makefile. Their values will need to be changed when this is no
-# longer the case.
+# Note: drs-server is not currently built by the Makefile. Its values will need 
+# to be changed when this is no longer the case.
 MODULE_COUNTS=( ["candig-data-portal"]=1 ["federation"]=1 ["htsget"]=1
 				["katsu"]=2 ["keycloak"]=1 ["logging"]=3 ["minio"]=1 ["monitoring"]=5
 				["opa"]=2 ["toil"]=2 ["tyk"]=2 ["vault"]=2 ["wes-server"]=1 ["drs-server"]=0 )
@@ -18,14 +44,10 @@ MODULE_COUNTS=( ["candig-data-portal"]=1 ["federation"]=1 ["htsget"]=1
 SERVICE_COUNT=0
 
 MODULES=$(cat .env | grep CANDIG_MODULES | cut -c 16- | cut -d '#' -f 1)
-	
-for MODULE in $MODULES; do
-	MODULE_SERVICES=${MODULE_COUNTS[$MODULE]}
-	SERVICE_COUNT=$((SERVICE_COUNT + MODULE_SERVICES))
-done
-
 MODULES_AUTH=$(cat .env | grep CANDIG_AUTH_MODULES | cut -c 21- | cut -d '#' -f 1)
-for MODULE in $MODULES_AUTH; do
+ALL_MODULES="${MODULES}${MODULES_AUTH}"
+
+for MODULE in $ALL_MODULES; do
 	MODULE_SERVICES=${MODULE_COUNTS[$MODULE]}
 	SERVICE_COUNT=$((SERVICE_COUNT + MODULE_SERVICES))
 done
@@ -34,6 +56,14 @@ if [ $(docker ps -q | wc -l) == $SERVICE_COUNT ]
 then
 	echo -e "${GREEN}Number of expected CanDIG services matches number of containers running!${DEFAULT}"
 else
+	RUNNING_MODULES=$(docker ps --format "{{.Names}}")
+	for MODULE in $ALL_MODULES; do
+		if [[ $RUNNING_MODULES != *"$MODULE"* ]]; then
+			printf "${RED}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
+			print_module_logs $MODULE
+			printf "${RED}\n--------------------\n${DEFAULT}"
+		fi
+	done
 	echo -e "${RED}WARNING: ${YELLOW}The number of CanDIG containers running does not match the number of expected services.\nRunning: ${BLUE}$(docker ps -q | wc -l) ${YELLOW}Expected: ${BLUE}${SERVICE_COUNT}
-${DEFAULT}Check your build/docker logs."
+${DEFAULT}Check your build/docker logs. Potentially offending service logs shown above."
 fi
