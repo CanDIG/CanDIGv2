@@ -15,31 +15,33 @@ DEFAULT='\033[0m'
 function print_module_logs() {
 	MODULE=$1
 	BUILD_LINE=$(grep -n build-${MODULE} ${ERRORLOG} | tail -1 | cut -d ':' -f 1)
-	if [[ $BUILD_LINE == "" ]]; then
-		return
+	if [[ $BUILD_LINE != "" ]]; then
+		LNO=$BUILD_LINE
+		while read -r LINE; do
+			if [[ $LINE == "Errors during build-"* || $LINE == "Errors during compose-"* ]]; then
+				break
+			else
+				if [[ ${LINE,,} =~ .*(error|warn).* ]]; then
+					printf "${GREEN}${LNO}${DEFAULT}	${LINE}\n"
+				fi
+			fi
+			LNO=$((LNO+1))
+		done < <(tail -n "+$((BUILD_LINE + 1))" $ERRORLOG)
 	fi
-	LNO=1
-	while read -r LINE; do
-		if [[ $LINE == "Errors during build-"* || $LINE == "Errors during compose-"* ]]; then
-			break
-		else
-			if [[ ${LINE,,} =~ .*(error|warn).* ]]; then
-				printf "${GREEN}${LNO}${DEFAULT}	${LINE}"
-			fi
-		fi
-		LNO=$((LNO+1))
-	done < <(tail -n "+$((BUILD_LINE + 1))" $ERRORLOG)
 	COMPOSE_LINE=$(grep -n compose-${MODULE} ${ERRORLOG} | tail -1 | cut -d ':' -f 1)
-	while read -r LINE; do
-		if [[ $LINE == "Errors during build-"* || $LINE == "Errors during compose-"* ]]; then
-			break
-		else
-			if [[ ${LINE,,} =~ .*(error|warn).* ]]; then
-				printf "${GREEN}${LNO}${DEFAULT}	${LINE}"
+	if [[ $COMPOSE_LINE != "" ]]; then
+		LNO=$COMPOSE_LINE
+		while read -r LINE; do
+			if [[ $LINE == "Errors during build-"* || $LINE == "Errors during compose-"* ]]; then
+				break
+			else
+				if [[ ${LINE,,} =~ .*(error|warn).* ]]; then
+					printf "${GREEN}${LNO}${DEFAULT}	${LINE}\n"
+				fi
 			fi
-		fi
-		LNO=$((LNO+1))
-	done < <(tail -n "+$((COMPOSE_LINE+1))" $ERRORLOG)
+			LNO=$((LNO+1))
+		done < <(tail -n "+$((COMPOSE_LINE+1))" $ERRORLOG)
+	fi
 }
 
 
@@ -68,11 +70,9 @@ then
 else
 	RUNNING_MODULES=$(docker ps --format "{{.Names}}")
 	for MODULE in $ALL_MODULES; do
-		if [[ $RUNNING_MODULES != *"$MODULE"* ]]; then
-			printf "${RED}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
-			print_module_logs $MODULE
-			printf "${RED}\n--------------------\n${DEFAULT}"
-		fi
+		printf "\n\n${RED}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
+		print_module_logs $MODULE
+		printf "${RED}--------------------\n${DEFAULT}"
 	done
 	echo -e "${RED}WARNING: ${YELLOW}The number of CanDIG containers running does not match the number of expected services.\nRunning: ${BLUE}$(docker ps -q | wc -l) ${YELLOW}Expected: ${BLUE}${SERVICE_COUNT}
 ${DEFAULT}Check your build/docker logs. Potentially offending service logs shown above. View ${ERRORLOG} for more information."

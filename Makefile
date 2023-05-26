@@ -24,6 +24,8 @@ ERRORLOG = tmp/error.txt
 
 $(shell printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG) $(ERRORLOG))
 
+export BUILDKIT_PROGRESS := tty
+
 .PHONY: all
 all:
 	@echo "CanDIGv2 Makefile Deployment"
@@ -130,7 +132,7 @@ build-%:
 	echo "    started build-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) | tee -a $(ERRORLOG)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(ERRORLOG)
 	echo "    finished build-$*" >> $(LOGFILE)
 
 
@@ -141,9 +143,15 @@ build-%:
 
 #<<<
 .PHONY: clean-all
-clean-all: clean-authx clean-compose clean-containers clean-secrets \
+clean-all: clean-logs clean-authx clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images clean-bin
-
+	
+	
+# Empties error and progress logs
+.PHONY: clean-logs
+clean-logs:
+	> $(ERRORLOG)
+	> $(LOGFILE)
 
 #>>>
 # clear downloaded binaries
@@ -243,10 +251,10 @@ compose:
 compose-%:
 	printf "\n\nErrors during compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
-	-source lib/$*/$*_preflight.sh | tee -a $(ERRORLOG)
+	-source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG)
 	source setup_hosts.sh; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d | tee -a $(ERRORLOG)
-	-source lib/$*/$*_setup.sh | tee -a $(ERRORLOG)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
+	-source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG)
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
