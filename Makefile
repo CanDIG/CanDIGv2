@@ -20,7 +20,6 @@ CONDA = $(CONDA_INSTALL)/miniconda3/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
 
 LOGFILE = tmp/progress.txt
-ERRORLOG = tmp/error.txt
 
 $(shell printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG) $(ERRORLOG))
 

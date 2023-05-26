@@ -6,7 +6,7 @@
 # Also prints out all relevant logs from the error logging file (i.e., all lines 
 # that contain the phrases 'error' or 'warn').
 
-ERRORLOG="tmp/error.txt"
+source <(grep --color=never "ERRORLOG" .env)
 
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -45,7 +45,6 @@ function print_module_logs() {
 		done < <(tail -n "+$((COMPOSE_LINE+1))" $ERRORLOG)
 	fi
 }
-
 
 declare -A MODULE_COUNTS
 
