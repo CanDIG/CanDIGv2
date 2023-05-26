@@ -2,7 +2,7 @@
 
 # This script is meant to be run after make build-all, and checks whether
 # the number of running docker containers matches the number of containers
-# that should be running based on services specified in .env.
+# that should be running based on enabled services specified in .env.
 
 ERRORLOG="tmp/error.txt"
 
@@ -15,20 +15,30 @@ DEFAULT='\033[0m'
 function print_module_logs() {
 	MODULE=$1
 	BUILD_LINE=$(grep -n build-${MODULE} ${ERRORLOG} | tail -1 | cut -d ':' -f 1)
+	if [[ $BUILD_LINE == "" ]]; then
+		return
+	fi
+	LNO=1
 	while read -r LINE; do
 		if [[ $LINE == "Errors during build-"* || $LINE == "Errors during compose-"* ]]; then
 			break
 		else
-			echo $LINE
+			if [[ ${LINE,,} =~ .*(error|warn).* ]]; then
+				printf "${GREEN}${LNO}${DEFAULT}	${LINE}"
+			fi
 		fi
+		LNO=$((LNO+1))
 	done < <(tail -n "+$((BUILD_LINE + 1))" $ERRORLOG)
 	COMPOSE_LINE=$(grep -n compose-${MODULE} ${ERRORLOG} | tail -1 | cut -d ':' -f 1)
 	while read -r LINE; do
 		if [[ $LINE == "Errors during build-"* || $LINE == "Errors during compose-"* ]]; then
 			break
 		else
-			echo $LINE
+			if [[ ${LINE,,} =~ .*(error|warn).* ]]; then
+				printf "${GREEN}${LNO}${DEFAULT}	${LINE}"
+			fi
 		fi
+		LNO=$((LNO+1))
 	done < <(tail -n "+$((COMPOSE_LINE+1))" $ERRORLOG)
 }
 
@@ -65,5 +75,5 @@ else
 		fi
 	done
 	echo -e "${RED}WARNING: ${YELLOW}The number of CanDIG containers running does not match the number of expected services.\nRunning: ${BLUE}$(docker ps -q | wc -l) ${YELLOW}Expected: ${BLUE}${SERVICE_COUNT}
-${DEFAULT}Check your build/docker logs. Potentially offending service logs shown above."
+${DEFAULT}Check your build/docker logs. Potentially offending service logs shown above. View ${ERRORLOG} for more information."
 fi
