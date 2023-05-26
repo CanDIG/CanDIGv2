@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
 # This script is meant to be run after make build-all, and checks whether
-# the number of running docker containers matches the number of containers
-# that should be running based on enabled services specified in .env.
+# the number of currently running docker containers matches the number of 
+# containers that should be running based on enabled services specified in .env. 
+# Also prints out all relevant logs from the error logging file (i.e., all lines 
+# that contain the phrases 'error' or 'warn').
 
 ERRORLOG="tmp/error.txt"
 
