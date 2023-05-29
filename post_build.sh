@@ -65,11 +65,17 @@ for MODULE in $ALL_MODULES; do
 	SERVICE_COUNT=$((SERVICE_COUNT + MODULE_SERVICES))
 done
 
+RUNNING_MODULES=$(docker ps --format "{{.Names}}")
+
 if [ $(docker ps -q | wc -l) == $SERVICE_COUNT ]
 then
-	echo -e "${GREEN}Number of expected CanDIG services matches number of containers running!${DEFAULT}"
+	for MODULE in $ALL_MODULES; do
+		printf "\n\n${BLUE}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
+		print_module_logs $MODULE
+		printf "${BLUE}--------------------\n${DEFAULT}"
+	done
+	echo -e "${GREEN}Number of expected CanDIG services matches number of containers running!${DEFAULT} Potentially useful error log segments listed above for debugging."
 else
-	RUNNING_MODULES=$(docker ps --format "{{.Names}}")
 	for MODULE in $ALL_MODULES; do
 		printf "\n\n${RED}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
 		print_module_logs $MODULE
