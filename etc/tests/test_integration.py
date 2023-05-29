@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 import pytest
 import requests
@@ -177,6 +178,7 @@ def test_htsget_add_sample_to_dataset():
         'Content-Type': 'application/json; charset=utf-8'
     }
 
+    TESTENV_URL = ENV["CANDIG_ENV"]["HTSGET_PUBLIC_URL"].replace("http://", "drs://").replace("https://", "drs://")
     # Delete dataset SYNTHETIC-1
     response = requests.delete(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-1", headers=headers)
 
@@ -184,16 +186,35 @@ def test_htsget_add_sample_to_dataset():
     payload = {
         "id": "SYNTHETIC-1",
         "drsobjects": [
-            "drs://localhost/NA18537",
-            "drs://localhost/multisample_1"
+            f"{TESTENV_URL}/NA18537",
+            f"{TESTENV_URL}/multisample_1"
         ]
     }
 
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets", headers=headers, json=payload)
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-1", headers=headers)
     print(response.json())
-    assert "drs://localhost/multisample_1" in response.json()['drsobjects']
-    assert "drs://localhost/multisample_2" not in response.json()['drsobjects']
+    assert f"{TESTENV_URL}/multisample_1" in response.json()['drsobjects']
+    assert f"{TESTENV_URL}/multisample_2" not in response.json()['drsobjects']
+
+    # Delete dataset SYNTHETIC-2
+    response = requests.delete(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-2", headers=headers)
+
+    # Add NA20787 and multisample_2 to dataset SYNTHETIC-2, which is only authorized for user2:
+    payload = {
+        "id": "SYNTHETIC-2",
+        "drsobjects": [
+            f"{TESTENV_URL}/NA20787",
+            f"{TESTENV_URL}/multisample_2"
+        ]
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets", headers=headers, json=payload)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-2", headers=headers)
+    print(response.json())
+    assert f"{TESTENV_URL}/multisample_2" in response.json()['drsobjects']
+    assert f"{TESTENV_URL}/multisample_1" not in response.json()['drsobjects']
+
 
 
 ## Can we access the data when authorized to do so?
@@ -310,6 +331,48 @@ def test_katsu_users(user, dataset, not_dataset):
     print(donors)
     assert dataset in donors
     assert not_dataset not in donors
+
+
+## HTSGet + katsu:
+def test_add_sample_to_genomic():
+    test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/SampleRegistration.json"
+    response = requests.get(test_loc)
+    first_sample = response.json().pop(0)
+
+    site_admin_token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
+    headers = {
+        'Authorization': f"Bearer {site_admin_token}",
+        'Content-Type': 'application/json; charset=utf-8'
+    }
+
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/{first_sample['program_id']}", headers=headers)
+
+    assert response.status_code == 200
+
+    assert len(response.json()['drsobjects']) > 0
+    drs_obj = response.json()['drsobjects'].pop(0)
+    drs_obj_match = re.match(r"^(.+)\/(.+?)$", drs_obj)
+    if drs_obj_match is not None:
+        host = drs_obj_match.group(1)
+        drs_obj_name = drs_obj_match.group(2)
+
+        # assign the first member of this dataset to the sample
+        sample_drs_obj = {
+            "id": first_sample['submitter_sample_id'],
+            "contents": [{
+                    "drs_uri": [
+                        drs_obj
+                    ],
+                    "name": drs_obj_name,
+                    "id": "genomic"
+                }],
+            "version": "v1"
+        }
+
+        url = f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects"
+        response = requests.request("POST", url, json=sample_drs_obj, headers=headers)
+        print(response.text)
+        assert response.status_code == 200
 
 
 ## Federation tests:
