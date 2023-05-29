@@ -21,6 +21,8 @@ CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
 
 LOGFILE = tmp/progress.txt
 
+$(shell printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG) $(ERRORLOG))
+
 .PHONY: all
 all:
 	@echo "CanDIGv2 Makefile Deployment"
@@ -98,6 +100,8 @@ build-all:
 	$(MAKE) build-images
 	$(MAKE) compose
 	$(MAKE) init-authx
+	
+	./post_build.sh
 
 
 #>>>
@@ -121,9 +125,11 @@ build-images: #toil-docker
 
 #<<<
 build-%:
+	printf "\nOutput of build-$*: \n" >> $(ERRORLOG)
 	echo "    started build-$*" >> $(LOGFILE)
+	source setup_hosts.sh; \
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(ERRORLOG)
 	echo "    finished build-$*" >> $(LOGFILE)
 
 
@@ -134,9 +140,15 @@ build-%:
 
 #<<<
 .PHONY: clean-all
-clean-all: clean-authx clean-compose clean-containers clean-secrets \
+clean-all: clean-logs clean-authx clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images clean-bin
-
+	
+	
+# Empties error and progress logs
+.PHONY: clean-logs
+clean-logs:
+	> $(ERRORLOG)
+	> $(LOGFILE)
 
 #>>>
 # clear downloaded binaries
@@ -234,11 +246,12 @@ compose:
 
 #<<<
 compose-%:
+	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
-	-source lib/$*/$*_preflight.sh
+	-source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG)
 	source setup_hosts.sh; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d
-	-source lib/$*/$*_setup.sh
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
+	-source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG)
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
