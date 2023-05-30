@@ -100,7 +100,7 @@ build-all:
 	$(MAKE) build-images
 	$(MAKE) compose
 	$(MAKE) init-authx
-	
+
 	./post_build.sh
 
 
@@ -142,8 +142,8 @@ build-%:
 .PHONY: clean-all
 clean-all: clean-logs clean-authx clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images clean-bin
-	
-	
+
+
 # Empties error and progress logs
 .PHONY: clean-logs
 clean-logs:
@@ -449,4 +449,4 @@ print-%:
 .PHONY: test-integration
 test-integration:
 	python ./settings.py
-	source ./env.sh; pytest ./etc/tests
+	source ./env.sh; pytest -v ./etc/tests
