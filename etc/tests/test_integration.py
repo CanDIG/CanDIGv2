@@ -47,6 +47,7 @@ def test_tyk():
         'Authorization': f"Bearer {get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])}"
     }
     response = requests.get(f"{ENV['CANDIG_URL']}/{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info", headers=headers)
+    print(response.text)
     assert response.status_code == 200
 
 
@@ -80,6 +81,7 @@ def test_opa_datasets(user, dataset):
 
     payload['input']['token'] = get_token(username=username, password=password)
     response = requests.post(f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/permissions/datasets", json=payload, headers=headers)
+    print(response.text)
     assert dataset in response.json()['result']
 
 
@@ -106,7 +108,7 @@ def test_site_admin(user, is_admin):
     password = ENV[f"{user}_PASSWORD"]
     payload['input']['token'] = get_token(username=username, password=password)
     response = requests.post(f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/idp/site_admin", json=payload, headers=headers)
-    print(response.json())
+    print(response.text)
     assert ('result' in response.json()) == is_admin
 
 
@@ -130,18 +132,18 @@ def test_vault():
     headers["X-Vault-Token"] = client_token
     # delete the test secret, if it exists:
     response = requests.delete(f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers)
-    print(response)
+    print(response.text)
     assert response.status_code == 204
 
     # confirm that the test secret does not yet exist:
     response = requests.get(f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers)
-    print(response.json())
+    print(response.text)
     assert response.status_code == 404
 
     # confirm that this works with the CANDIG_S3_TOKEN too:
     headers["X-Vault-Token"] = ENV['VAULT_S3_TOKEN']
     response = requests.get(f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers)
-    print(response.json())
+    print(response.text)
     assert response.status_code == 404
 
     # set a secret
@@ -153,7 +155,7 @@ def test_vault():
     response = requests.post(f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers, json=payload)
     response = requests.get(f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers)
 
-    print(response.json())
+    print(response.text)
     assert response.json()['data']['url'] == payload['url']
 
 
@@ -193,7 +195,7 @@ def test_htsget_add_sample_to_dataset():
 
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets", headers=headers, json=payload)
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-1", headers=headers)
-    print(response.json())
+    print(response.text)
     assert f"{TESTENV_URL}/multisample_1" in response.json()['drsobjects']
     assert f"{TESTENV_URL}/multisample_2" not in response.json()['drsobjects']
 
@@ -211,7 +213,7 @@ def test_htsget_add_sample_to_dataset():
 
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets", headers=headers, json=payload)
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-2", headers=headers)
-    print(response.json())
+    print(response.text)
     assert f"{TESTENV_URL}/multisample_2" in response.json()['drsobjects']
     assert f"{TESTENV_URL}/multisample_1" not in response.json()['drsobjects']
 
@@ -238,6 +240,7 @@ def test_htsget_access_data(user, obj, access):
     }
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/data/{obj}", headers=headers, params=params)
     print(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/v1/variants/data/{obj}")
+    print(response.text)
     assert (response.status_code == 200) == access
 
 
@@ -261,11 +264,11 @@ def test_beacon(user, search, can_access, cannot_access):
         'allele': search
     }
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/beacon/v2/g_variants", headers=headers, params=params)
+    print(response.text)
     for c in can_access:
         assert c in str(response.json())
     for c in cannot_access:
         assert c not in str(response.json())
-    print(response.json())
 
 
 ## Katsu tests:
@@ -282,7 +285,7 @@ def test_setup_katsu():
         'Content-Type': 'application/json; charset=utf-8'
     }
     response = requests.post(f"{ENV['CANDIG_URL']}/katsu/moh/v1/ingest/programs", headers=headers, json=response.json())
-    print(response.json())
+    print(response.text)
     if response.status_code >= 400:
         errors = response.json()['error during ingest_programs']
         assert "code='unique'" in errors and "program_id" in errors # this means that the error was just that the program IDs already exist
@@ -293,7 +296,7 @@ def test_setup_katsu():
     response = requests.get(test_loc)
     assert response.status_code == 200
     response = requests.post(f"{ENV['CANDIG_URL']}/katsu/moh/v1/ingest/donors", headers=headers, json=response.json())
-    print(response.json())
+    print(response.text)
     if response.status_code >= 400:
         errors = response.json()['error during ingest_donors']
         assert "code='unique'" in errors and "donor_id" in errors # this means that the error was just that the program IDs already exist
@@ -326,7 +329,7 @@ def test_katsu_users(user, dataset, not_dataset):
 
     response = requests.get(f"{ENV['CANDIG_URL']}/katsu/moh/v1/authorized/donors/", headers=headers)
     assert len(response.json()) > 0
-    print(response.json())
+    print(response.text)
     donors = list(map(lambda x: x['program_id'], response.json()['results']))
     print(donors)
     assert dataset in donors
@@ -346,7 +349,7 @@ def test_add_sample_to_genomic():
     }
 
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/{first_sample['program_id']}", headers=headers)
-
+    print(response.text)
     assert response.status_code == 200
 
     assert len(response.json()['drsobjects']) > 0
@@ -385,7 +388,7 @@ def test_server_count():
         'Content-Type': 'application/json; charset=utf-8'
     }
     response = requests.get(f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers)
-    print(response.json())
+    print(response.text)
     assert len(response.json()) > 0
 
 
@@ -397,7 +400,7 @@ def test_services_count():
         'Content-Type': 'application/json; charset=utf-8'
     }
     response = requests.get(f"{ENV['CANDIG_URL']}/federation/v1/services", headers=headers)
-    print(response.json())
+    print(response.text)
     assert len(response.json()) > 0
     services = map(lambda x: x['id'], response.json())
     assert 'htsget' in services
@@ -420,12 +423,12 @@ def test_federation_call():
     }
 
     response = requests.post(f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body)
-    print(response.json())
+    print(response.text)
     assert "results" in response.json()
 
     headers['federation'] = "true"
     response = requests.post(f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body)
-    print(response.json())
+    print(response.text)
     assert "list" in str(type(response.json()))
     assert "results" in response.json()[0]
 
@@ -450,6 +453,7 @@ def test_add_server():
     body['server']['id'] = 'test'
     body['server']['location']['name'] = 'test'
     response = requests.post(f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers, json=body)
+    print(response.text)
     assert response.status_code in [201, 204]
 
     headers['federation'] = "true"
