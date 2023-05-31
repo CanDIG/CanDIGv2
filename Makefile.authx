@@ -65,7 +65,6 @@ clean-tyk:
 #>>>
 # close federation service
 # make clean-federation
-
 #<<<
 clean-federation:
 	source setup_hosts.sh; \
@@ -90,6 +89,7 @@ clean-authx: clean-keycloak clean-tyk clean-vault clean-opa clean-federation
 #<<<
 init-authx: mkdir
 	$(MAKE) docker-volumes
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE);)
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) compose-$(MODULE);)
 
 
