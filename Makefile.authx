@@ -63,11 +63,23 @@ clean-tyk:
 
 
 #>>>
+# close federation service
+# make clean-federation
+#<<<
+clean-federation:
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/federation/docker-compose.yml down || true
+
+	# - remove intermittent docker images
+	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'federation' |  xargs -I{} docker rmi --force {}
+
+
+#>>>
 # close all authentication and authorization services
 # make clean-authx
 
 #<<<
-clean-authx: clean-keycloak clean-tyk clean-vault clean-opa
+clean-authx: clean-keycloak clean-tyk clean-vault clean-opa clean-federation
 
 
 #>>>
@@ -77,6 +89,7 @@ clean-authx: clean-keycloak clean-tyk clean-vault clean-opa
 #<<<
 init-authx: mkdir
 	$(MAKE) docker-volumes
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE);)
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) compose-$(MODULE);)
 
 
