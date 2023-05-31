@@ -21,15 +21,12 @@ CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
 
 LOGFILE = tmp/progress.txt
 
-$(shell printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG) $(ERRORLOG))
-
 .PHONY: all
 all:
 	@echo "CanDIGv2 Makefile Deployment"
 	@echo "Type 'make help' to view available options"
 	@echo "View README.md for additional information"
-
-
+	
 #>>>
 # create non-repo directories
 # make mkdir
@@ -92,6 +89,7 @@ endif
 #<<<
 .PHONY: build-all
 build-all:
+	printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG)
 	./pre-build-check.sh
 
 # Setup the entire stack
