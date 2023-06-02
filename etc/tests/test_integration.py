@@ -590,3 +590,4 @@ def test_add_server():
     )
     print(response.text)
     assert response.status_code == 200
+

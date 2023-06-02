@@ -23,7 +23,7 @@ function print_module_logs() {
 			if [[ $LINE == "Output of build-"* || $LINE == "Output of compose-"* ]]; then
 				break
 			else
-				if [[ ${LINE,,} =~ .*(error|warn).* ]]; then
+				if [[ ${LINE} =~ .*([Ee]rror|[Ww]arn).* ]]; then
 					printf "${GREEN}${LNO}${DEFAULT}	${LINE}\n"
 				fi
 			fi
@@ -37,7 +37,7 @@ function print_module_logs() {
 			if [[ $LINE == "Output of build-"* || $LINE == "Output of compose-"* ]]; then
 				break
 			else
-				if [[ ${LINE,,} =~ .*(error|warn).* ]]; then
+				if [[ ${LINE} =~ .*([Ee]rror|[Ww]arn).* ]]; then
 					printf "${GREEN}${LNO}${DEFAULT}	${LINE}\n"
 				fi
 			fi
@@ -46,24 +46,34 @@ function print_module_logs() {
 	fi
 }
 
-declare -A MODULE_COUNTS
-
-# Note: drs-server is not currently built by the Makefile. Its values will need 
-# to be changed when this is no longer the case.
-MODULE_COUNTS=( ["candig-data-portal"]=1 ["federation"]=1 ["htsget"]=1
-				["katsu"]=2 ["keycloak"]=1 ["logging"]=3 ["minio"]=1 ["monitoring"]=5
-				["opa"]=2 ["toil"]=2 ["tyk"]=2 ["vault"]=2 ["wes-server"]=1 ["drs-server"]=0 )
-				
-SERVICE_COUNT=0
-
 MODULES=$(cat .env | grep CANDIG_MODULES | cut -c 16- | cut -d '#' -f 1)
 MODULES_AUTH=$(cat .env | grep CANDIG_AUTH_MODULES | cut -c 21- | cut -d '#' -f 1)
 ALL_MODULES="${MODULES}${MODULES_AUTH}"
 
-for MODULE in $ALL_MODULES; do
-	MODULE_SERVICES=${MODULE_COUNTS[$MODULE]}
-	SERVICE_COUNT=$((SERVICE_COUNT + MODULE_SERVICES))
-done
+# Note: drs-server is not currently built by the Makefile. Its values will need 
+# to be changed when this is no longer the case.
+SERVICE_COUNT=$(awk -v modules_raw="$ALL_MODULES" 'BEGIN {
+	mcounts["candig-data-portal"]=1
+	mcounts["federation"]=1
+	mcounts["htsget"]=1
+	mcounts["katsu"]=2
+	mcounts["keycloak"]=1
+	mcounts["logging"]=3
+	mcounts["minio"]=1
+	mcounts["monitoring"]=5
+	mcounts["opa"]=2
+	mcounts["toil"]=2
+	mcounts["tyk"]=2
+	mcounts["vault"]=2
+	mcounts["wes-server"]=1
+	mcounts["drs-server"]=0
+	split(modules_raw, modules, " ")
+	service_count = 0
+	for (module in modules) {
+		service_count += mcounts[modules[module]]
+	}
+	print service_count
+}')
 
 RUNNING_MODULES=$(docker ps --format "{{.Names}}")
 
