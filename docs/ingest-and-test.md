@@ -71,7 +71,7 @@ python settings.py
 source env.sh
 ```
 
-Download [synthetic data](https://github.com/CanDIG/mohccn-data) and follow the instructions there.
+Follow the instructions for [Clinical data](https://github.com/CanDIG/candigv2-ingest#ingest-clinical-data) and [Genomic data](https://github.com/CanDIG/candigv2-ingest#ingest-genomic-files)
 
 ## Test data services
 
