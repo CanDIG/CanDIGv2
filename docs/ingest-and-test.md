@@ -2,6 +2,15 @@
 
 These instructions will lead you through some basic functionality tests, ingesting some sample data, and running some tests of the data services to make sure your local installation is working as expected.
 
+## Automatic testing
+
+The easiest way to test your local installation is to run the integration tests.
+
+```bash
+make test-integration
+```
+
+If you want to run the tests manually, follow the instructions below.
 ## Initial tests
 
 Check that you can see the data portal in your browser at `http://candig.docker.internal:5080/`. If not, you may need to follow the instructions in the [Docker Deployment Guide](./install-docker.md)
@@ -71,8 +80,4 @@ python settings.py
 source env.sh
 ```
 
-Download [synthetic data](https://github.com/CanDIG/mohccn-data) and follow the instructions there.
-
-## Test data services
-
-Follow [Integration testing](https://candig.atlassian.net/wiki/spaces/CA/pages/665518081/Integration+testing) instructions to exercise your Docker installation.
+Follow the instructions for [Clinical data](https://github.com/CanDIG/candigv2-ingest#ingest-clinical-data) and [Genomic data](https://github.com/CanDIG/candigv2-ingest#ingest-genomic-files)
