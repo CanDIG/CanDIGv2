@@ -16,3 +16,7 @@
 [submodule "lib/htsget/htsget_app"]
 	path = lib/htsget/htsget_app
 	url = https://github.com/CanDIG/htsget_app.git
+[submodule "lib/candig-ingest/candigv2-ingest"]
+	path = lib/candig-ingest/candigv2-ingest
+	url = https://github.com/CanDIG/candigv2-ingest
+	branch = containerize-ingest

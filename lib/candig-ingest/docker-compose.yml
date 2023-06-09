@@ -1,0 +1,18 @@
+version: 1.0.1
+
+services:
+    candig-ingest:
+        build:
+            context: $PWD/lib/candig-ingest/candigv2-ingest
+            args:
+                venv_python: "${VENV_PYTHON}"
+                alpine_version: "${ALPINE_VERSION}"
+        image: ${DOCKER_REGISTRY}/candig-ingest:${CANDIG_INGEST_VERSION:-latest}
+        labels:
+            - "candigv2=candig-ingest"
+        ports:
+            - "${CANDIG_INGEST_PORT}:1235"
+        environment:
+            CANDIG_URL: ${CANDIG_URL}
+        extra_hosts:
+              - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
