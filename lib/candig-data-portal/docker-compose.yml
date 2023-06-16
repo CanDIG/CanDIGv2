@@ -24,6 +24,7 @@ services:
       - REACT_APP_FEDERATION_API_SERVER=${FEDERATION_PUBLIC_URL}
       - REACT_APP_BASE_NAME=
       - REACT_APP_SITE_LOCATION=${CANDIG_SITE_LOCATION}
+      - WDS_SOCKET_PORT=0
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:2543" ]
       interval: 30s
