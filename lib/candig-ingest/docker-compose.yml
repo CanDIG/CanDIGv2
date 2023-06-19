@@ -13,6 +13,7 @@ services:
         ports:
             - "${CANDIG_INGEST_PORT}:1235"
         environment:
-            CANDIG_URL: ${CANDIG_URL}
+            CANDIG_URL: "${CANDIG_URL}"
+            VAULT_URL: "http://${CANDIG_DOMAIN}:${VAULT_SERVICE_PORT}"
         extra_hosts:
               - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
