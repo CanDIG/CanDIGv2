@@ -1,0 +1,21 @@
+name: Test-CanDIG-build
+run-name: Build Validation
+on: [push]
+jobs:
+  Build-CanDIG:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Grab example environment file
+        run: cp etc/env/example.env .env
+      - name: Display environment file
+        run: cat ".env"
+      - name: Add CanDIG local domain redirection to hosts
+        run: echo "::1 candig.docker.internal" | sudo tee -a /etc/hosts
+      - name: Install submodules
+        run: git submodule update --init --recursive
+      - name: Install conda
+        run: make bin-conda
+      - name: run make build-all
+        run: make build-all
