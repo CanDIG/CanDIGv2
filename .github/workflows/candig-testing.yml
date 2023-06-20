@@ -3,7 +3,10 @@ run-name: Build Validation
 on: [push]
 jobs:
   Build-CanDIG:
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest]
+    defaults:
+      run:
+       shell: bash -l {0}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -15,7 +18,12 @@ jobs:
         run: echo "::1 candig.docker.internal" | sudo tee -a /etc/hosts
       - name: Install submodules
         run: git submodule update --init --recursive
-      - name: Install conda
-        run: make bin-conda
-      - name: run make build-all
+      - name: Install CanDIG conda environment
+        run: |
+              make bin-conda
+              make init-conda
+              conda activate candig
+      - name: Build stack
         run: make build-all
+      - name: Integration testing
+        run: make test-integration
