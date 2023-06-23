@@ -30,6 +30,7 @@ jobs:
         run: git submodule update --init --recursive
       - name: Install CanDIG conda environment
         run: |
+              make mkdir
               make init-conda
               conda activate candig
       - name: Build stack
