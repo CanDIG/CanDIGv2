@@ -32,8 +32,11 @@ jobs:
         run: |
               make mkdir
               make init-conda
-              conda activate candig
       - name: Build stack
-        run: (yes || true) | make build-all
+        run: |
+              conda activate candig
+              (yes || true) | make build-all
       - name: Integration testing
-        run: make test-integration
+        run: |
+              conda activate candig
+              make test-integration
