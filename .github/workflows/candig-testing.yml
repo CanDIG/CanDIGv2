@@ -34,6 +34,6 @@ jobs:
               make init-conda
               conda activate candig
       - name: Build stack
-        run: yes | make build-all
+        run: (yes || true) | make build-all
       - name: Integration testing
         run: make test-integration
