@@ -85,6 +85,7 @@ then
 		printf "${BLUE}--------------------\n${DEFAULT}"
 	done
 	echo -e "${GREEN}Number of expected CanDIG services matches number of containers running!${DEFAULT} Potentially useful error log segments listed above for debugging."
+ 	exit 0
 else
 	for MODULE in $ALL_MODULES; do
 		printf "\n\n${RED}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
