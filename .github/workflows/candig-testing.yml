@@ -36,6 +36,12 @@ jobs:
         run: |
               conda activate candig
               (yes || true) | make build-all
+      - name: Save error logs as artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Post-build error log
+          path: tmp/error.txt
       - name: Integration testing
         run: |
               conda activate candig
