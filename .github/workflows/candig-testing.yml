@@ -1,0 +1,42 @@
+name: Test-CanDIG-build
+run-name: Build Validation
+on: [push]
+jobs:
+  Build-CanDIG:
+    runs-on: [ubuntu-latest]
+    defaults:
+      run:
+       shell: bash -l {0}
+    steps:
+      - name: Install conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          channels: conda-forge, defaults
+          use-only-tar-bz2: true
+          auto-update-conda: true
+          auto-activate-base: true
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Setup environment file
+        run: | 
+            cp etc/env/example.env example.env
+            sed "286s@bin/miniconda3@$CONDA@" example.env > .env
+      - name: Display environment file
+        run: cat ".env"
+      - name: Add CanDIG local domain redirection to hosts
+        run: echo "::1 candig.docker.internal" | sudo tee -a /etc/hosts
+      - name: Install submodules
+        run: git submodule update --init --recursive
+      - name: Install CanDIG conda environment
+        run: |
+              make mkdir
+              make init-conda
+      - name: Build stack
+        run: |
+              conda activate candig
+              (yes || true) | make build-all
+      - name: Integration testing
+        run: |
+              conda activate candig
+              make test-integration

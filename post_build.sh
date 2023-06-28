@@ -85,6 +85,7 @@ then
 		printf "${BLUE}--------------------\n${DEFAULT}"
 	done
 	echo -e "${GREEN}Number of expected CanDIG services matches number of containers running!${DEFAULT} Potentially useful error log segments listed above for debugging."
+ 	exit 0
 else
 	for MODULE in $ALL_MODULES; do
 		printf "\n\n${RED}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
@@ -93,4 +94,5 @@ else
 	done
 	echo -e "${RED}WARNING: ${YELLOW}The number of CanDIG containers running does not match the number of expected services.\nRunning: ${BLUE}$(docker ps -q | wc -l) ${YELLOW}Expected: ${BLUE}${SERVICE_COUNT}
 ${DEFAULT}Check your build/docker logs. Potentially offending service logs shown above. View ${ERRORLOG} for more information."
+	exit 1
 fi

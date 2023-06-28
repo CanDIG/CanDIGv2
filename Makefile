@@ -15,9 +15,8 @@ SHELL = bash
 #  and then use make mkdir and make init-conda (no bin-conda, which will blow up an existing conda)
 # <<<
 
-CONDA_INSTALL = bin
-CONDA = $(CONDA_INSTALL)/miniconda3/bin/conda
-CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
+CONDA = $(CONDA_INSTALL)/bin/conda
+CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/etc/profile.d/conda.sh
 
 LOGFILE = tmp/progress.txt
 
