@@ -18,7 +18,7 @@ LOGFILE=tmp/progress.txt
 # https://www.vaultproject.io/api-docs/secret/identity/entity#batch-delete-entities
 
 vault=$(docker ps -a --format "{{.Names}}" | grep vault_1 | awk '{print $1}')
-docker cp tmp/vault-config.json $vault:/vault/config/
+docker cp lib/vault/tmp/vault-config.json $vault:/vault/config/
 
 # if vault isn't started, start it:
 docker restart $vault
