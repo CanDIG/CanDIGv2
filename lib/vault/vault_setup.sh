@@ -174,3 +174,4 @@ docker exec $vault vault secrets enable -path="aws" -description="AWS-style ID/s
 
 vault_runner=$(docker ps | grep vault-runner | awk '{print $1}')
 docker restart $vault_runner
+docker exec $vault_runner bash /vault/create_token.sh
