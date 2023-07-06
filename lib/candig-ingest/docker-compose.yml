@@ -13,7 +13,10 @@ services:
         ports:
             - "${CANDIG_INGEST_PORT}:1235"
         environment:
-            CANDIG_URL: "${CANDIG_URL}"
+            KEYCLOAK_PUBLIC_URL: "${KEYCLOAK_PUBLIC_URL}"
+            CANDIG_URL: "http://${CANDIG_DOMAIN}:5080"
             VAULT_URL: "http://${CANDIG_DOMAIN}:${VAULT_SERVICE_PORT}"
+            CANDIG_CLIENT_ID: "${CANDIG_CLIENT_ID}"
+            CANDIG_CLIENT_SECRET: "${CANDIG_CLIENT_SECRET}"
         extra_hosts:
               - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
