@@ -4,6 +4,7 @@ set -Euo pipefail
 
 
 if [[ -f "initial_setup" ]]; then
+    echo "initial setup"
     cp -R /app/* /vault
     mkdir /vault/data
     chmod 777 /vault/data
