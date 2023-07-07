@@ -27,11 +27,26 @@ jobs:
       - name: Add CanDIG local domain redirection to hosts
         run: echo "::1 candig.docker.internal" | sudo tee -a /etc/hosts
       - name: Install submodules
-        run: git submodule update --init --recursive
-      - name: Install CanDIG conda environment
         run: |
-              make mkdir
+             git submodule update --init --recursive
+             make mkdir
+      - name: Restore Conda environment cache
+        id: cache-conda
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CONDA }}
+          key: ${{ runner.os }}-conda-${{ hashFiles('etc/venv/requirements.txt') }}
+      - name: Install CanDIG conda environment
+        if: ${{ steps.cache-conda.outputs.cache-hit != 'true' }}
+        id: install-conda
+        run: |
               make init-conda
+      - name: Save Conda cache
+        uses: actions/cache/save@v3
+        if: steps.install-conda.outcome == 'success'
+        with:
+          path: ${{ env.CONDA }}
+          key: ${{ runner.os }}-conda-${{ hashFiles('etc/venv/requirements.txt') }}
       - name: Build stack
         run: |
               conda activate candig

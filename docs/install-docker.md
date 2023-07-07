@@ -107,12 +107,12 @@ git submodule update --init --recursive
 # 2. copy and edit .env with your site's local configuration
 cp -i etc/env/example.env .env
 
-# 3. option A: install miniconda and initialize candig virtualenv (use this option
+# 3. (IF NOT USING MAKE INSTALL-ALL) option A: install miniconda and initialize candig virtualenv (use this option
 # for systems installations). Installs miniconda in the candigv2 repo.
 make bin-conda  # If this fails on WSL, see the Note for WSL Systems section below
 make init-conda
 
-# 3. option B: if you want to use an existing conda installation on your local
+# 3. (IF NOT USING MAKE INSTALL-ALL) option B: if you want to use an existing conda installation on your local
 # at the top of the Makefile, set CONDA_BASE to your existing conda installation
 make mkdir # skip most of bin-conda, but need the dir-creating step
 make init-conda
@@ -133,7 +133,13 @@ bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 
 ### New
 
-`build-all` will perform all of the steps of the old method (section below), building images explicitly.
+`install-all` will perform all of the steps of the old method (section below) including the conda install, building images explicitly.
+
+```bash
+make install-all
+```
+
+`build-all` will do the same without running bin-conda and init-conda:
 
 ```bash
 make build-all

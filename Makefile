@@ -93,12 +93,17 @@ build-all:
 
 # Setup the entire stack
 	$(MAKE) init-docker
-	$(MAKE) init-conda
 	$(MAKE) build-images
 	$(MAKE) compose
 	$(MAKE) init-authx
 	
 	./post_build.sh
+	
+.PHONY: install-all
+install-all:
+	$(MAKE) bin-conda
+	$(MAKE) init-conda
+	$(MAKE) build-all
 
 
 #>>>
