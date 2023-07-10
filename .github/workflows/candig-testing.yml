@@ -1,6 +1,12 @@
 name: Test-CanDIG-build
 run-name: Build Validation
-on: [push]
+on: 
+  push:
+    branches: [test-actions]
+  workflow_dispatch:
+    inputs:
+      module:
+        type: string
 jobs:
   Build-CanDIG:
     runs-on: [ubuntu-latest]
