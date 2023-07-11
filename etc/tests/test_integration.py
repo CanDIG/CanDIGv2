@@ -163,7 +163,6 @@ def test_vault():
 
     # confirm that this works with the CANDIG_S3_TOKEN too:
     headers["X-Vault-Token"] = ENV["VAULT_S3_TOKEN"]
-    print(f"vault token is {headers['X-Vault-Token']}")
     response = requests.get(
         f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers
     )
