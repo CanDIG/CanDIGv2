@@ -24,6 +24,7 @@ services:
       - KATSU_AUTHORIZATION=${CANDIG_AUTHORIZATION}
       - OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
       - HOST_CONTAINER_NAME=${KATSU_CONTAINER}
+      - CONN_MAX_AGE=60
       - DJANGO_SETTINGS_MODULE=config.settings.dev
     secrets:
       - source: metadata-db-secret
