@@ -30,6 +30,8 @@ services:
         target: metadata_db_secret
       - source: opa-root-token
         target: opa-root-token
+      - source: katsu-secret-key
+        target: katsu_secret
     labels:
       - "candigv2=chord-metadata"
 
