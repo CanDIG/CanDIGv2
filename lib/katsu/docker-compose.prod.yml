@@ -4,3 +4,4 @@ services:
   katsu:
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.prod
+      - CONN_MAX_AGE=60
