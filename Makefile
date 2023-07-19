@@ -15,8 +15,8 @@ SHELL = bash
 #  and then use make mkdir and make init-conda (no bin-conda, which will blow up an existing conda)
 # <<<
 
-CONDA = $(CONDA_INSTALL)/bin/conda
-CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/etc/profile.d/conda.sh
+CONDA = $(CONDA_INSTALL)/miniconda3/bin/conda
+CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
 
 LOGFILE = tmp/progress.txt
 
@@ -34,6 +34,7 @@ all:
 .PHONY: mkdir
 mkdir:
 	mkdir -p bin
+	mkdir -p $(CONDA_INSTALL)
 	mkdir -p tmp/{configs,data,secrets}
 	mkdir -p tmp/{keycloak,tyk,vault}
 
@@ -53,6 +54,10 @@ bin-all: bin-conda
 
 #<<<
 bin-conda: mkdir
+ifndef CONDA_INSTALL
+	echo "ERROR: Conda install location not specified. Do you have a .env?"
+	exit 1
+endif
 	echo "    started bin-conda" >> $(LOGFILE)
 ifeq ($(VENV_OS), linux)
 	curl -Lo bin/miniconda_install.sh \

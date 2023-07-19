@@ -133,7 +133,8 @@ bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 
 ### New
 
-`install-all` will perform all of the steps of the old method (section below) including the conda install, building images explicitly.
+`install-all` will perform all of the steps of the old method (section below) including the conda install, building images explicitly. **Note**: On Mac M1, you will not be able to use make install-all; instead, use the conda installation instructions as described above. Build-all will then build and compose the containers for you.
+
 
 ```bash
 make install-all
