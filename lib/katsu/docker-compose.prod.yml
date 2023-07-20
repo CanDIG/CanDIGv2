@@ -8,3 +8,6 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.prod
       - CONN_MAX_AGE=60 # change on traffic and performance
+  metadata-db:
+    ports:
+      - "5432:5432"
