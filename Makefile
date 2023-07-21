@@ -290,7 +290,10 @@ docker-push:
 
 #<<<
 .PHONY: docker-secrets
-docker-secrets: mkdir minio-secrets katsu-secrets
+docker-secrets: mkdir minio-secrets
+	@echo admin > tmp/secrets/metadata-db-user
+	$(MAKE) secret-metadata-app-secret
+	$(MAKE) secret-metadata-db-secret
 
 	@echo admin > tmp/secrets/keycloak-admin-user
 	$(MAKE) secret-keycloak-admin-password
@@ -309,8 +312,6 @@ docker-secrets: mkdir minio-secrets katsu-secrets
 
 	$(MAKE) secret-opa-root-token
 	$(MAKE) secret-opa-service-token
-
-
 
 #>>>
 # create persistant volumes for docker containers
@@ -377,18 +378,7 @@ minio-secrets:
 	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> tmp/secrets/aws-credentials
 	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> tmp/secrets/aws-credentials
 
-#>>>
-# make katsu-secret and database secret
 
-#<<<
-katsu-secrets:
-	@echo admin > tmp/secrets/katsu-secret-key
-	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
-		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
-	
-	@echo admin > tmp/secrets/metadata-db-user
-	$(MAKE) secret-metadata-app-secret
-	$(MAKE) secret-metadata-db-secret
 #>>>
 # pull docker image to $DOCKER_REGISTRY
 # $module is the name of the sub-folder in lib/

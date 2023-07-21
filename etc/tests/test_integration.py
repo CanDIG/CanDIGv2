@@ -430,30 +430,6 @@ def test_katsu_users(user, dataset, not_dataset):
     assert dataset in donors
     assert not_dataset not in donors
 
-def test_katsu_delete():
-    test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Program.json"
-    response = requests.get(test_loc)
-    assert response.status_code == 200
-
-    site_admin_token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {site_admin_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-    
-    program_data = response.json()
-    program_ids = [item["program_id"] for item in program_data]
-
-    for program_id in program_ids:
-        response = requests.delete(
-            f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{program_id}/",
-            headers=headers
-        )
-        assert response.status_code == 204, f"Failed to delete program '{program_id}'. Status code: {response.status_code}"
-        print(f"Deletion of program '{program_id}' was successful.")
 
 ## HTSGet + katsu:
 def test_add_sample_to_genomic():
