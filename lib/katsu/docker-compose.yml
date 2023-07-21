@@ -7,6 +7,7 @@ services:
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
+        katsu_env: "dev"
     image: ${DOCKER_REGISTRY}/katsu:${KATSU_VERSION:-latest}
     ports:
       - "${KATSU_PORT}:8000"
@@ -24,12 +25,15 @@ services:
       - KATSU_AUTHORIZATION=${CANDIG_AUTHORIZATION}
       - OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
       - HOST_CONTAINER_NAME=${KATSU_CONTAINER}
+      - CONN_MAX_AGE=60
       - DJANGO_SETTINGS_MODULE=config.settings.dev
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret
       - source: opa-root-token
         target: opa-root-token
+      - source: katsu-secret-key
+        target: katsu_secret
     labels:
       - "candigv2=chord-metadata"
 

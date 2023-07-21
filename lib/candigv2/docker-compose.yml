@@ -39,6 +39,10 @@ secrets:
     file: $PWD/tmp/federation/services.json
     labels:
       - "candigv2=secret"
+  katsu-secret-key:
+    file: $PWD/tmp/secrets/katsu-secret-key
+    labels:
+      - "candigv2=secret"
   metadata-app-secret:
     file: $PWD/tmp/secrets/metadata-app-secret
     labels:
