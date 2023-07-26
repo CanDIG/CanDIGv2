@@ -1,0 +1,18 @@
+version: '3.7'
+
+services:
+  query:
+    labels:
+      - "candigv2=query"
+    build:
+      context: $PWD/lib/query/query
+    image: ${DOCKER_REGISTRY}/query:${CANDIG_QUERY_VERSION:-latest}
+    ports:
+      - "${CANDIG_QUERY_PORT}:2543"
+    extra_hosts:
+        - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:2543" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
