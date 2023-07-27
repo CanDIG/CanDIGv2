@@ -18,5 +18,6 @@ services:
             VAULT_URL: "http://${CANDIG_DOMAIN}:${VAULT_SERVICE_PORT}"
             CANDIG_CLIENT_ID: "${CANDIG_CLIENT_ID}"
             CANDIG_CLIENT_SECRET: "${CANDIG_CLIENT_SECRET}"
+            OPA_URL: "${OPA_URL}"
         extra_hosts:
               - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
