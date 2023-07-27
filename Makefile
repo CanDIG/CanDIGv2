@@ -15,7 +15,6 @@ SHELL = bash
 #  and then use make mkdir and make init-conda (no bin-conda, which will blow up an existing conda)
 # <<<
 
-CONDA_INSTALL = bin
 CONDA = $(CONDA_INSTALL)/miniconda3/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
 
@@ -35,6 +34,7 @@ all:
 .PHONY: mkdir
 mkdir:
 	mkdir -p bin
+	mkdir -p $(CONDA_INSTALL)
 	mkdir -p tmp/{configs,data,secrets}
 	mkdir -p tmp/{keycloak,tyk,vault}
 
@@ -54,6 +54,10 @@ bin-all: bin-conda
 
 #<<<
 bin-conda: mkdir
+ifndef CONDA_INSTALL
+	echo "ERROR: Conda install location not specified. Do you have a .env?"
+	exit 1
+endif
 	echo "    started bin-conda" >> $(LOGFILE)
 ifeq ($(VENV_OS), linux)
 	curl -Lo bin/miniconda_install.sh \
@@ -94,12 +98,17 @@ build-all:
 
 # Setup the entire stack
 	$(MAKE) init-docker
-	$(MAKE) init-conda
 	$(MAKE) build-images
 	$(MAKE) compose
 	$(MAKE) init-authx
 	
 	./post_build.sh
+	
+.PHONY: install-all
+install-all:
+	$(MAKE) bin-conda
+	$(MAKE) init-conda
+	$(MAKE) build-all
 
 
 #>>>
@@ -281,10 +290,7 @@ docker-push:
 
 #<<<
 .PHONY: docker-secrets
-docker-secrets: mkdir minio-secrets
-	@echo admin > tmp/secrets/metadata-db-user
-	$(MAKE) secret-metadata-app-secret
-	$(MAKE) secret-metadata-db-secret
+docker-secrets: mkdir minio-secrets katsu-secrets
 
 	@echo admin > tmp/secrets/keycloak-admin-user
 	$(MAKE) secret-keycloak-admin-password
@@ -303,6 +309,8 @@ docker-secrets: mkdir minio-secrets
 
 	$(MAKE) secret-opa-root-token
 	$(MAKE) secret-opa-service-token
+
+
 
 #>>>
 # create persistant volumes for docker containers
@@ -369,7 +377,18 @@ minio-secrets:
 	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> tmp/secrets/aws-credentials
 	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> tmp/secrets/aws-credentials
 
+#>>>
+# make katsu-secret and database secret
 
+#<<<
+katsu-secrets:
+	@echo admin > tmp/secrets/katsu-secret-key
+	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
+		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
+	
+	@echo admin > tmp/secrets/metadata-db-user
+	$(MAKE) secret-metadata-app-secret
+	$(MAKE) secret-metadata-db-secret
 #>>>
 # pull docker image to $DOCKER_REGISTRY
 # $module is the name of the sub-folder in lib/

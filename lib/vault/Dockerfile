@@ -16,9 +16,6 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 
-# add the config file
-COPY ./tmp/vault-config.json /app/config/vault-config.json
-
 # copy entrypoint
 COPY . /app
 
