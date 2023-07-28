@@ -25,7 +25,7 @@ all:
 	@echo "CanDIGv2 Makefile Deployment"
 	@echo "Type 'make help' to view available options"
 	@echo "View README.md for additional information"
-	
+
 #>>>
 # create non-repo directories
 # make mkdir
@@ -101,9 +101,9 @@ build-all:
 	$(MAKE) build-images
 	$(MAKE) compose
 	$(MAKE) init-authx
-	
+
 	./post_build.sh
-	
+
 .PHONY: install-all
 install-all:
 	$(MAKE) bin-conda
@@ -149,8 +149,8 @@ build-%:
 .PHONY: clean-all
 clean-all: clean-logs clean-authx clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images clean-bin
-	
-	
+
+
 # Empties error and progress logs
 .PHONY: clean-logs
 clean-logs:
@@ -385,7 +385,7 @@ katsu-secrets:
 	@echo admin > tmp/secrets/katsu-secret-key
 	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
 		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
-	
+
 	@echo admin > tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-app-secret
 	$(MAKE) secret-metadata-db-secret
