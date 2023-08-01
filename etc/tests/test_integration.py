@@ -53,16 +53,22 @@ def test_get_token():
     )
 
 
-## Tyk test: can we get a response from Tyk for a service?
+## Tyk test: can we get a response from Tyk for all of our services?
 def test_tyk():
     headers = {
         "Authorization": f"Bearer {get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])}"
     }
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
-        headers=headers,
-    )
-    assert response.status_code == 200
+    endpoints = [f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
+        f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v2/version_check",
+        f"{ENV['CANDIG_ENV']['TYK_FEDERATION_API_LISTEN_PATH']}/v1/service-info",
+        F"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/paths"]
+    for endpoint in endpoints:
+        response = requests.get(
+            f"{ENV['CANDIG_URL']}/{endpoint}",
+            headers=headers,
+            timeout=10
+        )
+        assert response.status_code == 200
 
 
 ## Opa tests:
