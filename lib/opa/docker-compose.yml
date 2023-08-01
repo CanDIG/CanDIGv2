@@ -31,7 +31,7 @@ services:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
 
   opa:
-    image: openpolicyagent/opa:latest
+    image: openpolicyagent/opa:latest-static
     labels:
       - "candigv2=opa"
     ports:
