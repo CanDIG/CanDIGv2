@@ -61,14 +61,17 @@ def test_tyk():
     endpoints = [f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
         f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v2/version_check",
         f"{ENV['CANDIG_ENV']['TYK_FEDERATION_API_LISTEN_PATH']}/v1/service-info",
-        F"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/paths"]
+        f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/paths"]
+    responses = []
     for endpoint in endpoints:
         response = requests.get(
             f"{ENV['CANDIG_URL']}/{endpoint}",
             headers=headers,
             timeout=10
         )
-        assert response.status_code == 200
+        responses.append(response.status_code)
+        print(f"{endpoint}: {response.status_code == 200}")
+    assert all(response == 200 for response in responses)
 
 
 ## Opa tests:
@@ -449,7 +452,7 @@ def test_katsu_delete():
         "Authorization": f"Bearer {site_admin_token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    
+
     program_data = response.json()
     program_ids = [item["program_id"] for item in program_data]
 
