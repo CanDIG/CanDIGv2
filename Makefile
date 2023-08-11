@@ -15,8 +15,8 @@ SHELL = bash
 #  and then use make mkdir and make init-conda (no bin-conda, which will blow up an existing conda)
 # <<<
 
-CONDA = $(CONDA_INSTALL)/miniconda3/bin/conda
-CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/miniconda3/etc/profile.d/conda.sh
+CONDA = $(CONDA_INSTALL)/bin/conda
+CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/etc/profile.d/conda.sh
 
 LOGFILE = tmp/progress.txt
 
@@ -62,7 +62,7 @@ endif
 ifeq ($(VENV_OS), linux)
 	curl -Lo bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
+	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
@@ -71,7 +71,7 @@ endif
 ifeq ($(VENV_OS), darwin)
 	curl -Lo bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
+	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
@@ -80,7 +80,7 @@ endif
 ifeq ($(VENV_OS), arm64mac)
 	curl -Lo bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
-	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)/miniconda3
+	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init zsh
