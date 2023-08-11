@@ -41,22 +41,22 @@ def main():
     headers["Authorization"] = f"Bearer {token}"
 
     print("Adding servers to federation...")
-    url = f"{get_env_value('FEDERATION_SERVICE_URL')}/federation/v1/servers"
+    url = f"http://localhost:{get_env_value("FEDERATION_PORT")}/federation/v1/servers"
     response = requests.request("POST", url, headers=headers, json=server)
     # add other federated servers here
     if response.status_code != 200:
         print(f"POST response: {response.status_code} {response.text}")
-    url = f"{get_env_value('FEDERATION_SERVICE_URL')}/federation/v1/servers"
+    url = f"http://localhost:4232/federation/v1/servers"
     response = requests.request("GET", url, headers=headers)
     print(response.text)
 
     print("Adding services to federation...")
     services = find_services()
-    url = f"{get_env_value('FEDERATION_SERVICE_URL')}/federation/v1/services"
+    url = f"http://localhost:{get_env_value("FEDERATION_PORT")}/federation/v1/services"
     for service in services:
         response = requests.request("POST", url, headers=headers, json=service)
 
-    url = f"{get_env_value('FEDERATION_SERVICE_URL')}/federation/v1/services"
+    url = f"http://localhost:{get_env_value("FEDERATION_PORT")}/federation/v1/services"
     response = requests.request("GET", url, headers=headers)
     print(response.text)
 

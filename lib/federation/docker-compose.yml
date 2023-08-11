@@ -26,6 +26,7 @@ services:
         TYK_POLICY_ID: ${TYK_POLICY_ID}
         OPA_URL: ${OPA_URL}
         TYK_FEDERATION_API_ID: ${TYK_FEDERATION_API_ID}
+        TYK_PRIVATE_URL: ${TYK_PRIVATE_URL}
         CONFIG_DIR: "/app/config"
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
