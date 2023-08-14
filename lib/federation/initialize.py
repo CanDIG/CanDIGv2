@@ -46,7 +46,7 @@ def main():
     # add other federated servers here
     if response.status_code != 200:
         print(f"POST response: {response.status_code} {response.text}")
-    url = f"http://localhost:4232/federation/v1/servers"
+    url = f"http://localhost:{get_env_value('FEDERATION_PORT')}/federation/v1/servers"
     response = requests.request("GET", url, headers=headers)
     print(response.text)
 
