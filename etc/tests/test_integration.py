@@ -344,9 +344,11 @@ def test_beacon(user, search, can_access, cannot_access):
         assert c not in str(response.json())
     print(response.json())
 
-## Katsu tests:
-# set up katsu: ingest the small synthetic dataset from GitHub
 
+## Katsu tests:
+
+
+# set up katsu: ingest the small synthetic dataset from GitHub
 def test_setup_katsu():
     test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Program.json"
     response = requests.get(test_loc)
