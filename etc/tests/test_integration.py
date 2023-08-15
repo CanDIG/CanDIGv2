@@ -345,10 +345,32 @@ def test_beacon(user, search, can_access, cannot_access):
     print(response.json())
 
 
-## Katsu tests:
+#===========================|| KATSU ||========================================#
+@pytest.fixture
+def setup_katsu():
+    admin_user = ENV.get("CANDIG_SITE_ADMIN_USER")
+    admin_pass = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
+    
+    if not admin_user or not admin_pass:
+        pytest.skip("Site admin credentials not provided")
+    
+    site_admin_token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    if not site_admin_token:
+        pytest.fail("Failed to authenticate site admin")
+        
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
 
-
-# set up katsu: ingest the small synthetic dataset from GitHub
+    
+    yield headers
+    
+    # Teardown code (if needed) can be added here 
+    
 def test_setup_katsu():
     test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Program.json"
     response = requests.get(test_loc)
