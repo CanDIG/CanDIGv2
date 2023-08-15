@@ -52,6 +52,8 @@ sudo systemctl start docker
 sudo usermod -aG docker $(whoami)
 ```
 
+Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
+
 ### CentOS 7
 
 1. Update system/install dependencies
