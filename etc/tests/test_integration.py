@@ -2,6 +2,7 @@ import json
 import os
 import re
 import sys
+from http import HTTPStatus
 from pathlib import Path
 
 import pytest
@@ -345,39 +346,51 @@ def test_beacon(user, search, can_access, cannot_access):
     print(response.json())
 
 
-#===========================|| KATSU ||========================================#
+# ===========================|| KATSU ||========================================#
 @pytest.fixture
-def setup_katsu():
+def katsu_headers():
     admin_user = ENV.get("CANDIG_SITE_ADMIN_USER")
     admin_pass = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
-    
+
     if not admin_user or not admin_pass:
         pytest.skip("Site admin credentials not provided")
-    
+
     site_admin_token = get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
     if not site_admin_token:
         pytest.fail("Failed to authenticate site admin")
-        
+
     headers = {
         "Authorization": f"Bearer {site_admin_token}",
         "Content-Type": "application/json; charset=utf-8",
     }
 
     yield headers
-    
-    # Teardown code (if needed) can be added here 
-    
-def test_katsu_online(setup_katsu):
-    headers = setup_katsu
+
+    # Teardown code (if needed) can be added here
+
+
+def test_katsu_online(katsu_headers):
+    """
+    Verify that Katsu is online and responding as expected.
+
+    Testing Strategy:
+    - Send a GET request to health check endpoint with authentication headers.
+
+    Expected result:
+    - HTTP 200 OK status
+    """
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/version_check",
-        headers=headers
+        f"{ENV['CANDIG_URL']}/katsu/v2/version_check", headers=katsu_headers
     )
-    assert response.status_code == 200
-    
+    assert (
+        response.status_code == HTTPStatus.OK
+    ), f"Expected status code {HTTPStatus.OK}, but got {response.status_code}. "
+    f"Response content: {response.content}"
+
+
 def test_setup_katsu():
     test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Program.json"
     response = requests.get(test_loc)
@@ -459,6 +472,7 @@ def test_katsu_users(user, dataset, not_dataset):
     assert dataset in donors
     assert not_dataset not in donors
 
+
 def test_katsu_delete():
     test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Program.json"
     response = requests.get(test_loc)
@@ -472,17 +486,20 @@ def test_katsu_delete():
         "Authorization": f"Bearer {site_admin_token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    
+
     program_data = response.json()
     program_ids = [item["program_id"] for item in program_data]
 
     for program_id in program_ids:
         response = requests.delete(
             f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{program_id}/",
-            headers=headers
+            headers=headers,
         )
-        assert response.status_code == 204, f"Failed to delete program '{program_id}'. Status code: {response.status_code}"
+        assert (
+            response.status_code == 204
+        ), f"Failed to delete program '{program_id}'. Status code: {response.status_code}"
         print(f"Deletion of program '{program_id}' was successful.")
+
 
 ## HTSGet + katsu:
 def test_add_sample_to_genomic():
@@ -643,4 +660,3 @@ def test_add_server():
     )
     print(response.text)
     assert response.status_code == 200
-
