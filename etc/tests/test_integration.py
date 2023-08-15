@@ -345,10 +345,28 @@ def test_beacon(user, search, can_access, cannot_access):
     print(response.json())
 
 
-## Katsu tests:
+#===========================|| KATSU ||========================================#
+@pytest.fixture
+def setup_katsu():
 
+    admin_username = ENV.get("CANDIG_SITE_ADMIN_USER")
+    admin_password = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
+    if not admin_username or not admin_password:
+        pytest.skip("Site admin credentials not provided")
+        
+    site_admin_token = get_token(
+        username=admin_username,
+        password=admin_password,
+    )
+    
+    if site_admin_token.status_code != 200:
+        pytest.fail("Failed to authenticate site admin")
+        
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
 
-# set up katsu: ingest the small synthetic dataset from GitHub
 def test_setup_katsu():
     test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Program.json"
     response = requests.get(test_loc)
@@ -363,7 +381,7 @@ def test_setup_katsu():
         "Content-Type": "application/json; charset=utf-8",
     }
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/programs",
+        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/programs/",
         headers=headers,
         json=response.json(),
     )
@@ -380,7 +398,7 @@ def test_setup_katsu():
     response = requests.get(test_loc)
     assert response.status_code == 200
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/donors",
+        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/donors/",
         headers=headers,
         json=response.json(),
     )
