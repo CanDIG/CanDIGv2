@@ -2,7 +2,7 @@ name: Test-CanDIG-build
 run-name: Build Validation
 on: 
   push:
-    branches: [develop, actions-hotfix]
+    branches: [develop]
   pull_request:
   workflow_dispatch:
     inputs:
