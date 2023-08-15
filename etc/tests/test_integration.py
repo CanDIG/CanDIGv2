@@ -366,10 +366,17 @@ def setup_katsu():
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    
     yield headers
     
     # Teardown code (if needed) can be added here 
+    
+def test_katsu_online(setup_katsu):
+    headers = setup_katsu
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/katsu/v2/version_check",
+        headers=headers
+    )
+    assert response.status_code == 200
     
 def test_setup_katsu():
     test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Program.json"
