@@ -460,70 +460,6 @@ def cleanup_program(program_id, katsu_headers, name):
 def test_authorized_ingest(katsu_headers):
     # to simplify the test data, only 1 unique id is needed
     test_id = "TEST-" + str(uuid.uuid4())
-
-    chemotherapy_data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
-    hormonetherapy_data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
-    radiation_data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
-    immunotherapy_data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
-    surgery_data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
-    follow_up_data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_primary_diagnosis_id": test_id,
-            "submitter_treatment_id": test_id,
-            "submitter_follow_up_id": test_id,
-        },
-    ]
-    biomarker_data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-        },
-    ]
-    comorbidity_data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-        },
-    ]
-    exposure_data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-        },
-    ]
-
     try:
         # Ingest program
         program_data = [{"program_id": test_id}]
@@ -626,6 +562,170 @@ def test_authorized_ingest(katsu_headers):
         )
         assert response.status_code == HTTPStatus.CREATED, (
             f"INGEST_TREATMENT Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest chemo
+        chemotherapy_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+                "submitter_treatment_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/chemotherapies",
+            headers=katsu_headers,
+            json=chemotherapy_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_CHEMOTHERAPY Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest hormonetherapy
+        hormonetherapy_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+                "submitter_treatment_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/hormone_therapies",
+            headers=katsu_headers,
+            json=hormonetherapy_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_HORMONE Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest radiation
+        radiation_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+                "submitter_treatment_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/radiations",
+            headers=katsu_headers,
+            json=radiation_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_RADIATION Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest immunotherapy
+        immunotherapy_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+                "submitter_treatment_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/immunotherapies",
+            headers=katsu_headers,
+            json=immunotherapy_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_IMMUNOTHERAPY Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest surgery
+        surgery_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+                "submitter_treatment_id": test_id,
+                "margin_types_involved": [],
+                "margin_types_not_involved": [],
+                "margin_types_not_assessed": [],
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/surgeries",
+            headers=katsu_headers,
+            json=surgery_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_SURGERY Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest follow_up
+        follow_up_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+                "submitter_primary_diagnosis_id": test_id,
+                "submitter_treatment_id": test_id,
+                "submitter_follow_up_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/follow_ups",
+            headers=katsu_headers,
+            json=follow_up_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_FOLLOW_UP Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest biomarker
+        biomarker_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/biomarkers",
+            headers=katsu_headers,
+            json=biomarker_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_BIOMARKER Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest comorbidity
+        comorbidity_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/comorbidities",
+            headers=katsu_headers,
+            json=comorbidity_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_COMORBIDITY Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest exposure
+        exposure_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/exposures",
+            headers=katsu_headers,
+            json=exposure_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_EXPOSURE Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
             f" Response content: {response.content}"
         )
 
