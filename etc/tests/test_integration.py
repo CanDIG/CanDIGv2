@@ -348,22 +348,26 @@ def test_beacon(user, search, can_access, cannot_access):
 
 
 # ===========================|| KATSU ||====================================== #
-def get_katsu_headers():
-    admin_user = ENV.get("CANDIG_SITE_ADMIN_USER")
-    admin_pass = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
+def get_headers(is_admin=False):
+    if is_admin:
+        user = ENV.get("CANDIG_SITE_ADMIN_USER")
+        password = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
+        user_type = "site admin"
+    else:
+        user = ENV.get("CANDIG_NOT_ADMIN_USER")
+        password = ENV.get("CANDIG_NOT_ADMIN_PASSWORD")
+        user_type = "user"
 
-    if not admin_user or not admin_pass:
-        pytest.skip("Site admin credentials not provided")
+    if not user or not password:
+        pytest.skip(f"{user_type.capitalize()} credentials not provided")
 
-    site_admin_token = get_token(
-        username=admin_user,
-        password=admin_pass,
-    )
-    if not site_admin_token:
-        pytest.fail("Failed to authenticate site admin")
+    token = get_token(username=user, password=password)
+
+    if not token:
+        pytest.fail(f"Failed to authenticate {user_type}")
 
     headers = {
-        "Authorization": f"Bearer {site_admin_token}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
 
@@ -381,7 +385,7 @@ def test_katsu_online():
     - HTTP 200 OK status
     """
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/version_check", headers=get_katsu_headers()
+        f"{ENV['CANDIG_URL']}/katsu/v2/version_check", headers=get_headers()
     )
     assert (
         response.status_code == HTTPStatus.OK
@@ -389,38 +393,52 @@ def test_katsu_online():
     f" Response content: {response.content}"
 
 
-def ingest_programs(test_id):
+def ingest_programs(test_id, is_admin=False):
     program_data = [{"program_id": test_id}]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/programs",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=program_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_PROGRAM Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_PROGRAM Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_donors(test_id):
+def ingest_donors(test_id, is_admin=False):
     donor_data = [
         {
             "submitter_donor_id": test_id,
             "program_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/donors",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=donor_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_DONOR Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_DONOR Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_diagnoses(test_id):
+def ingest_diagnoses(test_id, is_admin=False):
     diagnosis_data = [
         {
             "submitter_donor_id": test_id,
@@ -428,18 +446,25 @@ def ingest_diagnoses(test_id):
             "submitter_primary_diagnosis_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/primary_diagnoses",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=diagnosis_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_PRIMARY Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_PRIMARY Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_specimens(test_id):
+def ingest_specimens(test_id, is_admin=False):
     specimen_data = [
         {
             "submitter_donor_id": test_id,
@@ -448,18 +473,25 @@ def ingest_specimens(test_id):
             "submitter_specimen_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/specimens",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=specimen_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_SPECIMEN Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_SPECIMEN Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_samples(test_id):
+def ingest_samples(test_id, is_admin=False):
     sample_data = [
         {
             "submitter_donor_id": test_id,
@@ -468,18 +500,25 @@ def ingest_samples(test_id):
             "submitter_sample_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/sample_registrations",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=sample_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_SAMPLE Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_SAMPLE Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_treatments(test_id):
+def ingest_treatments(test_id, is_admin=False):
     treatment_data = [
         {
             "submitter_donor_id": test_id,
@@ -488,18 +527,25 @@ def ingest_treatments(test_id):
             "submitter_treatment_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/treatments",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=treatment_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_TREATMENT Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_TREATMENT Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_chemotherapies(test_id):
+def ingest_chemotherapies(test_id, is_admin=False):
     chemotherapy_data = [
         {
             "submitter_donor_id": test_id,
@@ -507,18 +553,25 @@ def ingest_chemotherapies(test_id):
             "submitter_treatment_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/chemotherapies",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=chemotherapy_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_CHEMOTHERAPY Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_CHEMOTHERAPY Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_radiations(test_id):
+def ingest_radiations(test_id, is_admin=False):
     radiation_data = [
         {
             "submitter_donor_id": test_id,
@@ -526,18 +579,25 @@ def ingest_radiations(test_id):
             "submitter_treatment_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/radiations",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=radiation_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_RADIATION Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_RADIATION Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_hormonetherapies(test_id):
+def ingest_hormonetherapies(test_id, is_admin=False):
     hormonetherapy_data = [
         {
             "submitter_donor_id": test_id,
@@ -545,18 +605,25 @@ def ingest_hormonetherapies(test_id):
             "submitter_treatment_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/hormone_therapies",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=hormonetherapy_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_HORMONE Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_HORMONE Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_immunotherapies(test_id):
+def ingest_immunotherapies(test_id, is_admin=False):
     immunotherapy_data = [
         {
             "submitter_donor_id": test_id,
@@ -564,18 +631,25 @@ def ingest_immunotherapies(test_id):
             "submitter_treatment_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/immunotherapies",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=immunotherapy_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_IMMUNOTHERAPY Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_IMMUNOTHERAPY Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_surgeries(test_id):
+def ingest_surgeries(test_id, is_admin=False):
     surgery_data = [
         {
             "submitter_donor_id": test_id,
@@ -586,18 +660,25 @@ def ingest_surgeries(test_id):
             "margin_types_not_assessed": [],
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/surgeries",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=surgery_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_SURGERY Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_SURGERY Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_follow_ups(test_id):
+def ingest_follow_ups(test_id, is_admin=False):
     follow_up_data = [
         {
             "submitter_donor_id": test_id,
@@ -607,67 +688,95 @@ def ingest_follow_ups(test_id):
             "submitter_follow_up_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/follow_ups",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=follow_up_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_FOLLOW_UP Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_FOLLOW_UP Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_biomarkers(test_id):
+def ingest_biomarkers(test_id, is_admin=False):
     biomarker_data = [
         {
             "submitter_donor_id": test_id,
             "program_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/biomarkers",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=biomarker_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_BIOMARKER Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_BIOMARKER Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_comorbidities(test_id):
+def ingest_comorbidities(test_id, is_admin=False):
     comorbidity_data = [
         {
             "submitter_donor_id": test_id,
             "program_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/comorbidities",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=comorbidity_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_COMORBIDITY Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_COMORBIDITY Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
 
-def ingest_exposures(test_id):
+def ingest_exposures(test_id, is_admin=False):
     exposure_data = [
         {
             "submitter_donor_id": test_id,
             "program_id": test_id,
         },
     ]
+    headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/exposures",
-        headers=get_katsu_headers(),
+        headers=headers,
         json=exposure_data,
     )
-    assert response.status_code == HTTPStatus.CREATED, (
-        f"INGEST_EXPOSURE Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+
+    if is_admin:
+        expected_status = HTTPStatus.CREATED
+    else:
+        expected_status = HTTPStatus.FORBIDDEN
+
+    assert response.status_code == expected_status, (
+        f"INGEST_EXPOSURE Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
     )
 
@@ -675,7 +784,7 @@ def ingest_exposures(test_id):
 def cleanup_program(test_id):
     delete_response = requests.delete(
         f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{test_id}/",
-        headers=get_katsu_headers(),
+        headers=get_headers(True),
     )
 
     assert (
@@ -689,22 +798,21 @@ def test_authorized_ingests():
     test_id = "TEST-" + str(uuid.uuid4())
     # run ingest in order and clean up afterward
     try:
-        ingest_programs(test_id)
-        ingest_donors(test_id)
-        ingest_diagnoses(test_id)
-        ingest_specimens(test_id)
-        ingest_samples(test_id)
-        ingest_treatments(test_id)
-        ingest_chemotherapies(test_id)
-        ingest_hormonetherapies(test_id)
-        ingest_radiations(test_id)
-        ingest_immunotherapies(test_id)
-        ingest_surgeries(test_id)
-        ingest_follow_ups(test_id)
-        ingest_biomarkers(test_id)
-        ingest_comorbidities(test_id)
-        ingest_exposures(test_id)
-
+        ingest_programs(test_id, is_admin=True)
+        ingest_donors(test_id, is_admin=True)
+        ingest_diagnoses(test_id, is_admin=True)
+        ingest_specimens(test_id, is_admin=True)
+        ingest_samples(test_id, is_admin=True)
+        ingest_treatments(test_id, is_admin=True)
+        ingest_chemotherapies(test_id, is_admin=True)
+        ingest_hormonetherapies(test_id, is_admin=True)
+        ingest_radiations(test_id, is_admin=True)
+        ingest_immunotherapies(test_id, is_admin=True)
+        ingest_surgeries(test_id, is_admin=True)
+        ingest_follow_ups(test_id, is_admin=True)
+        ingest_biomarkers(test_id, is_admin=True)
+        ingest_comorbidities(test_id, is_admin=True)
+        ingest_exposures(test_id, is_admin=True)
     finally:
         cleanup_program(test_id)
 
