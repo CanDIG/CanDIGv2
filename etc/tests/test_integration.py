@@ -2,6 +2,7 @@ import json
 import os
 import re
 import sys
+import uuid
 from http import HTTPStatus
 from pathlib import Path
 
@@ -347,31 +348,6 @@ def test_beacon(user, search, can_access, cannot_access):
 
 
 # ===========================|| KATSU ||========================================#
-@pytest.fixture
-def katsu_headers():
-    admin_user = ENV.get("CANDIG_SITE_ADMIN_USER")
-    admin_pass = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
-
-    if not admin_user or not admin_pass:
-        pytest.skip("Site admin credentials not provided")
-
-    site_admin_token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    if not site_admin_token:
-        pytest.fail("Failed to authenticate site admin")
-
-    headers = {
-        "Authorization": f"Bearer {site_admin_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
-    yield headers
-
-    # Teardown code (if needed) can be added here
-
-
 def test_katsu_online(katsu_headers):
     """
     Verify that Katsu is online and responding as expected.
@@ -387,8 +363,283 @@ def test_katsu_online(katsu_headers):
     )
     assert (
         response.status_code == HTTPStatus.OK
-    ), f"Expected status code {HTTPStatus.OK}, but got {response.status_code}. "
-    f"Response content: {response.content}"
+    ), f"Expected status code {HTTPStatus.OK}, but got {response.status_code}."
+    f" Response content: {response.content}"
+
+
+@pytest.fixture
+def katsu_headers():
+    admin_user = ENV.get("CANDIG_SITE_ADMIN_USER")
+    admin_pass = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
+
+    if not admin_user or not admin_pass:
+        pytest.skip("Site admin credentials not provided")
+
+    site_admin_token = get_token(
+        username=admin_user,
+        password=admin_pass,
+    )
+    if not site_admin_token:
+        pytest.fail("Failed to authenticate site admin")
+
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    yield headers
+
+
+def cleanup_program(program_id, katsu_headers, name):
+    delete_response = requests.delete(
+        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{program_id}/",
+        headers=katsu_headers,
+    )
+
+    assert (
+        delete_response.status_code == HTTPStatus.NO_CONTENT
+    ), f"{name} expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
+    f" Response content: {delete_response.content}"
+
+
+# def test_authorized_ingest_program(katsu_headers):
+#     program_id = "TEST-" + str(uuid.uuid4())
+#     ingest_data = [
+#         {"program_id": program_id},
+#     ]
+
+#     try:
+#         response = requests.post(
+#             f"{ENV['CANDIG_URL']}/katsu/v2/ingest/programs",
+#             headers=katsu_headers,
+#             json=ingest_data,
+#         )
+
+#         assert (
+#             response.status_code == HTTPStatus.CREATED
+#         ), f"Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+#         f" Response content: {response.content}"
+#     finally:
+#         cleanup_program(program_id, katsu_headers, "test_authorized_ingest_program")
+
+
+# def test_authorized_ingest_donor(katsu_headers):
+#     program_id = "TEST-" + str(uuid.uuid4())
+#     donor_id = "TEST-" + str(uuid.uuid4())
+#     program_data = [
+#         {"program_id": program_id},
+#     ]
+#     donor_data = [
+#         {
+#             "submitter_donor_id": donor_id,
+#             "program_id": program_id,
+#         },
+#     ]
+
+#     try:
+#         requests.post(
+#             f"{ENV['CANDIG_URL']}/katsu/v2/ingest/programs",
+#             headers=katsu_headers,
+#             json=program_data,
+#         )
+#         response = requests.post(
+#             f"{ENV['CANDIG_URL']}/katsu/v2/ingest/donors",
+#             headers=katsu_headers,
+#             json=donor_data,
+#         )
+
+#         assert (
+#             response.status_code == HTTPStatus.CREATED
+#         ), f"Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+#         f" Response content: {response.content}"
+
+#     finally:
+#         cleanup_program(program_id, katsu_headers, "test_authorized_ingest_donor")
+
+
+def test_authorized_ingest(katsu_headers):
+    # to simplify the test data, only 1 unique id is needed
+    test_id = "TEST-" + str(uuid.uuid4())
+
+    chemotherapy_data = [
+        {
+            "submitter_donor_id": test_id,
+            "program_id": test_id,
+            "submitter_treatment_id": test_id,
+        },
+    ]
+    hormonetherapy_data = [
+        {
+            "submitter_donor_id": test_id,
+            "program_id": test_id,
+            "submitter_treatment_id": test_id,
+        },
+    ]
+    radiation_data = [
+        {
+            "submitter_donor_id": test_id,
+            "program_id": test_id,
+            "submitter_treatment_id": test_id,
+        },
+    ]
+    immunotherapy_data = [
+        {
+            "submitter_donor_id": test_id,
+            "program_id": test_id,
+            "submitter_treatment_id": test_id,
+        },
+    ]
+    surgery_data = [
+        {
+            "submitter_donor_id": test_id,
+            "program_id": test_id,
+            "submitter_treatment_id": test_id,
+        },
+    ]
+    follow_up_data = [
+        {
+            "submitter_donor_id": test_id,
+            "program_id": test_id,
+            "submitter_primary_diagnosis_id": test_id,
+            "submitter_treatment_id": test_id,
+            "submitter_follow_up_id": test_id,
+        },
+    ]
+    biomarker_data = [
+        {
+            "submitter_donor_id": test_id,
+            "program_id": test_id,
+        },
+    ]
+    comorbidity_data = [
+        {
+            "submitter_donor_id": test_id,
+            "program_id": test_id,
+        },
+    ]
+    exposure_data = [
+        {
+            "submitter_donor_id": test_id,
+            "program_id": test_id,
+        },
+    ]
+
+    try:
+        # Ingest program
+        program_data = [{"program_id": test_id}]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/programs",
+            headers=katsu_headers,
+            json=program_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_PROGRAM Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest donor
+        donor_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/donors",
+            headers=katsu_headers,
+            json=donor_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_DONOR Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest primary diagnosis
+        diagnosis_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+                "submitter_primary_diagnosis_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/primary_diagnoses",
+            headers=katsu_headers,
+            json=diagnosis_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_PRIMARY Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest specimen
+        specimen_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+                "submitter_primary_diagnosis_id": test_id,
+                "submitter_specimen_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/specimens",
+            headers=katsu_headers,
+            json=specimen_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_SPECIMEN Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest sample registration
+        sample_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+                "submitter_specimen_id": test_id,
+                "submitter_sample_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/sample_registrations",
+            headers=katsu_headers,
+            json=sample_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_SAMPLE Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+        # Ingest treatment
+        treatment_data = [
+            {
+                "submitter_donor_id": test_id,
+                "program_id": test_id,
+                "submitter_primary_diagnosis_id": test_id,
+                "submitter_treatment_id": test_id,
+            },
+        ]
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/katsu/v2/ingest/treatments",
+            headers=katsu_headers,
+            json=treatment_data,
+        )
+        assert response.status_code == HTTPStatus.CREATED, (
+            f"INGEST_TREATMENT Expected status code {HTTPStatus.CREATED}, but got {response.status_code}."
+            f" Response content: {response.content}"
+        )
+
+    finally:
+        # cleanup_program(program_id, katsu_headers, "test_authorized_ingest_donor")
+        delete_response = requests.delete(
+            f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{test_id}/",
+            headers=katsu_headers,
+        )
+
+        assert (
+            delete_response.status_code == HTTPStatus.NO_CONTENT
+        ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
+        f" Response content: {delete_response.content}"
 
 
 def test_setup_katsu():
