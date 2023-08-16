@@ -781,18 +781,6 @@ def ingest_exposures(test_id, is_admin=False):
     )
 
 
-def cleanup_program(test_id):
-    delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{test_id}/",
-        headers=get_headers(True),
-    )
-
-    assert (
-        delete_response.status_code == HTTPStatus.NO_CONTENT
-    ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
-    f" Response content: {delete_response.content}"
-
-
 def test_authorized_ingests():
     # to simplify the test data, only 1 unique id is needed
     test_id = "TEST-" + str(uuid.uuid4())
@@ -814,7 +802,45 @@ def test_authorized_ingests():
         ingest_comorbidities(test_id, is_admin=True)
         ingest_exposures(test_id, is_admin=True)
     finally:
-        cleanup_program(test_id)
+        delete_response = requests.delete(
+            f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{test_id}/",
+            headers=get_headers(True),
+        )
+        assert (
+            delete_response.status_code == HTTPStatus.NO_CONTENT
+        ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
+    f" Response content: {delete_response.content}"
+
+
+def test_unauthorized_ingests():
+    # to simplify the test data, only 1 unique id is needed
+    test_id = "TEST-" + str(uuid.uuid4())
+    try:
+        ingest_programs(test_id, is_admin=False)
+        ingest_donors(test_id, is_admin=False)
+        ingest_diagnoses(test_id, is_admin=False)
+        ingest_specimens(test_id, is_admin=False)
+        ingest_samples(test_id, is_admin=False)
+        ingest_treatments(test_id, is_admin=False)
+        ingest_chemotherapies(test_id, is_admin=False)
+        ingest_hormonetherapies(test_id, is_admin=False)
+        ingest_radiations(test_id, is_admin=False)
+        ingest_immunotherapies(test_id, is_admin=False)
+        ingest_surgeries(test_id, is_admin=False)
+        ingest_follow_ups(test_id, is_admin=False)
+        ingest_biomarkers(test_id, is_admin=False)
+        ingest_comorbidities(test_id, is_admin=False)
+        ingest_exposures(test_id, is_admin=False)
+    finally:
+        # still try to clean up, but expected None
+        delete_response = requests.delete(
+            f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{test_id}/",
+            headers=get_headers(True),
+        )
+        assert (
+            delete_response.status_code == HTTPStatus.NOT_FOUND
+        ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NOT_FOUND}, but got {delete_response.status_code}."
+    f" Response content: {delete_response.content}"
 
 
 def test_setup_katsu():
