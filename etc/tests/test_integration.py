@@ -372,7 +372,7 @@ def test_setup_katsu():
         "Content-Type": "application/json; charset=utf-8",
     }
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/programs",
+        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/programs/",
         headers=headers,
         json=response.json(),
     )
@@ -389,7 +389,7 @@ def test_setup_katsu():
     response = requests.get(test_loc)
     assert response.status_code == 200
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/donors",
+        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/donors/",
         headers=headers,
         json=response.json(),
     )
