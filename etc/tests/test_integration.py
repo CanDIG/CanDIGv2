@@ -402,7 +402,7 @@ def test_katsu_online():
     f" Response content: {response.content}"
 
 
-def test_datasets_should_not_exist(datasets):
+def assert_datasets_should_not_exist(datasets):
     """
     Retrieve a list of dataset names from discovery donor.
     If any of the dataset names is found, the assertion will fail.
@@ -421,7 +421,7 @@ def test_datasets_should_not_exist(datasets):
 def ingest_data(endpoint, data, is_admin=False):
     headers = get_headers(is_admin)
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/{endpoint}",
+        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/{endpoint}/",
         headers=headers,
         json=data,
     )
@@ -747,7 +747,7 @@ def test_katsu_users_data_access():
 
     # Check if datasets already exist or not
     # If found, skip the test since it could lead to unexpected results
-    test_datasets_should_not_exist(synthetic_data)
+    assert_datasets_should_not_exist(synthetic_data)
 
     try:
         # create synthetic datasets that matches OPA access
