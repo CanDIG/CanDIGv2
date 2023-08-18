@@ -356,8 +356,13 @@ def test_beacon(user, search, can_access, cannot_access):
     print(response.json())
 
 
-# ===========================|| KATSU ||====================================== #
+# =========================|| KATSU TEST BEGIN ||============================= #
+# HELPER FUNCTIONS
+# -----------------
 def get_headers(is_admin=False):
+    """
+    Returns either admin or non-admin HTTP headers for making requests API.
+    """
     if is_admin:
         user = ENV.get("CANDIG_SITE_ADMIN_USER")
         password = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
@@ -383,28 +388,9 @@ def get_headers(is_admin=False):
     return headers
 
 
-def test_katsu_online():
-    """
-    Verify that Katsu is online and responding as expected.
-
-    Testing Strategy:
-    - Send a GET request to health check endpoint with authentication headers.
-
-    Expected result:
-    - HTTP 200 OK status
-    """
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/version_check", headers=get_headers()
-    )
-    assert (
-        response.status_code == HTTPStatus.OK
-    ), f"Expected status code {HTTPStatus.OK}, but got {response.status_code}."
-    f" Response content: {response.content}"
-
-
 def assert_datasets_should_not_exist(datasets):
     """
-    Retrieve a list of dataset names from discovery donor.
+    Retrieve a list of dataset names from discovery donor api.
     If any of the dataset names is found, the assertion will fail.
     """
     response = requests.get(
@@ -419,6 +405,9 @@ def assert_datasets_should_not_exist(datasets):
 
 
 def ingest_data(endpoint, data, is_admin=False):
+    """
+    Ingests data into the katsu API at the specified endpoint using a POST request.
+    """
     headers = get_headers(is_admin)
     response = requests.post(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/{endpoint}/",
@@ -429,6 +418,9 @@ def ingest_data(endpoint, data, is_admin=False):
 
 
 def assert_ingest_response_status(response, expected_status, endpoint):
+    """
+    Asserts that the response status code matches the expected status code for an ingest operation.
+    """
     assert response.status_code == expected_status, (
         f"INGEST_{endpoint.upper()} Expected status code {expected_status}, but got {response.status_code}."
         f" Response content: {response.content}"
@@ -436,12 +428,18 @@ def assert_ingest_response_status(response, expected_status, endpoint):
 
 
 def perform_ingest_and_assert_status(endpoint, data, is_admin=False):
+    """
+    Performs data ingest and asserts the response status code depend on permission
+    """
     response = ingest_data(endpoint, data, is_admin)
     expected_status = HTTPStatus.CREATED if is_admin else HTTPStatus.FORBIDDEN
     assert_ingest_response_status(response, expected_status, endpoint)
 
 
 def clean_up_program(test_id):
+    """
+    Deletes a dataset and all related objects. Expected 204
+    """
     delete_response = requests.delete(
         f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{test_id}/",
         headers=get_headers(is_admin=True),
@@ -630,6 +628,48 @@ def check_exposure_ingest(test_id, is_admin=False):
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
+def check_datasets_access(is_admin, authorized_datasets, unauthorized_datasets):
+    """
+    Checks access to datasets depend on user permission and asserts dataset presence.
+    """
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
+        headers=get_headers(is_admin=is_admin),
+    )
+    programs = list(map(lambda x: x["program_id"], response.json()["results"]))
+
+    # Assert that all authorized datasets are present in programs
+    assert all(
+        program in programs for program in authorized_datasets
+    ), "Authorized datasets missing."
+
+    # Assert that no unauthorized datasets are present in programs
+    assert all(
+        program not in programs for program in unauthorized_datasets
+    ), "Unauthorized datasets present."
+
+
+# TEST FUNCTIONS
+# --------------
+def test_katsu_online():
+    """
+    Verify that Katsu is online and responding as expected.
+
+    Testing Strategy:
+    - Send a GET request to health check endpoint with authentication headers.
+
+    Expected result:
+    - HTTP 200 OK status
+    """
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/katsu/v2/version_check", headers=get_headers()
+    )
+    assert (
+        response.status_code == HTTPStatus.OK
+    ), f"Expected status code {HTTPStatus.OK}, but got {response.status_code}."
+    f" Response content: {response.content}"
+
+
 def test_authorized_ingests():
     """
     Call authorized ingests (admin) for various objects in subsequent order.
@@ -695,47 +735,17 @@ def test_unauthorized_ingests():
     f" Response content: {delete_response.content}"
 
 
-def user_auth_datasets():
-    """
-    Define user authorization datasets for testing.
-
-    Each dataset is a tuple containing three elements:
-    - A user role (CANDIG_SITE_ADMIN or CANDIG_NOT_ADMIN)
-    - A dataset name that the user should have access to
-    - A dataset name that the user should not have access to
-
-    NOTE: this datasets depend on OPA defined user access.
-    If the tests fails, check with OPA first
-
-    """
-    return [
-        ("CANDIG_SITE_ADMIN", "SYNTHETIC-2", "SYNTHETIC-1"),
-        ("CANDIG_NOT_ADMIN", "SYNTHETIC-1", "SYNTHETIC-2"),
-    ]
-
-
-def check_datasets_access(is_admin, authorized_datasets, unauthorized_datasets):
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
-        headers=get_headers(is_admin=is_admin),
-    )
-    programs = list(map(lambda x: x["program_id"], response.json()["results"]))
-
-    # Assert that all authorized datasets are present in programs
-    assert all(
-        program in programs for program in authorized_datasets
-    ), "Authorized datasets missing."
-
-    # Assert that no unauthorized datasets are present in programs
-    assert all(
-        program not in programs for program in unauthorized_datasets
-    ), "Unauthorized datasets present."
-
-
 def test_katsu_users_data_access():
     """
     Verifies that a user with a specific role has access to authorized datasets
     and does not have access to unauthorized datasets accordingly.
+
+    Testing Strategy:
+    - Send a GET request to authorized program endpoint
+
+    Expected result:
+    - List of programs that match OPA datasets
+
     """
     # NOTE: this values are predefined in OPA
     # if the test fails, check with OPA first
@@ -772,6 +782,9 @@ def test_katsu_users_data_access():
     finally:
         for program_id in synthetic_data:
             clean_up_program(program_id)
+
+
+# =========================|| KATSU TEST END ||=============================== #
 
 
 ## HTSGet + katsu:
