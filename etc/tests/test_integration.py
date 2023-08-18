@@ -749,38 +749,40 @@ def test_katsu_users_data_access():
     """
     # NOTE: this values are predefined in OPA
     # if the test fails, check with OPA first
-    synthetic_data = ["SYNTHETIC-1", "SYNTHETIC-2"]
-    authorized_datasets_admin = ["SYNTHETIC-2"]
-    unauthorized_datasets_admin = ["SYNTHETIC-1"]
-    authorized_datasets_non_admin = ["SYNTHETIC-1"]
-    unauthorized_datasets_non_admin = ["SYNTHETIC-2"]
+    synthetic_datasets = ["SYNTHETIC-1", "SYNTHETIC-2"]
+    admin_authorized_datasets = ["SYNTHETIC-2"]
+    admin_unauthorized_datasets = [
+        "SYNTHETIC-1"
+    ]  # even admin does not have read acccess to all
+    non_admin_authorized_datasets = ["SYNTHETIC-1"]
+    non_admin_unauthorized_datasets = ["SYNTHETIC-2"]
 
     # Check if datasets already exist or not
     # If found, skip the test since it could lead to unexpected results
-    assert_datasets_should_not_exist(synthetic_data)
+    assert_datasets_should_not_exist(synthetic_datasets)
 
     try:
         # create synthetic datasets that matches OPA access
         endpoint = "programs"
-        program_data = [{"program_id": dataset_id} for dataset_id in synthetic_data]
+        program_data = [{"program_id": dataset_id} for dataset_id in synthetic_datasets]
         response = ingest_data(endpoint, program_data, is_admin=True)
         assert response.status_code == HTTPStatus.CREATED, "Failed to create programs."
 
         # Assert access for admin user
         check_datasets_access(
             is_admin=True,
-            authorized_datasets=authorized_datasets_admin,
-            unauthorized_datasets=unauthorized_datasets_admin,
+            authorized_datasets=admin_authorized_datasets,
+            unauthorized_datasets=admin_unauthorized_datasets,
         )
 
         # Assert access for non-admin user
         check_datasets_access(
             is_admin=False,
-            authorized_datasets=authorized_datasets_non_admin,
-            unauthorized_datasets=unauthorized_datasets_non_admin,
+            authorized_datasets=non_admin_authorized_datasets,
+            unauthorized_datasets=non_admin_unauthorized_datasets,
         )
     finally:
-        for program_id in synthetic_data:
+        for program_id in synthetic_datasets:
             clean_up_program(program_id)
 
 
