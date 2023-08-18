@@ -747,61 +747,100 @@ def user_auth_datasets():
     ]
 
 
-def check_admin_datasets_access():
-    authorized_dataset = ["SYNTHETIC-2"]
-    unauthorized_dataset = ["SYNTHETIC-1"]
+# def check_admin_datasets_access():
+#     authorized_dataset = ["SYNTHETIC-2"]
+#     unauthorized_dataset = ["SYNTHETIC-1"]
+#     response = requests.get(
+#         f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
+#         headers=get_headers(is_admin=True),
+#     )
+#     programs = list(map(lambda x: x["program_id"], response.json()["results"]))
+
+#     # Assert that all authorized datasets are present in programs
+#     assert all(
+#         program in programs for program in authorized_dataset
+#     ), "Authorized datasets missing."
+
+#     # Assert that no unauthorized datasets are present in programs
+#     assert all(
+#         program not in programs for program in unauthorized_dataset
+#     ), "Unauthorized datasets present."
+
+
+# def check_non_admin_datasets_access():
+#     authorized_dataset = ["SYNTHETIC-1"]
+#     unauthorized_dataset = ["SYNTHETIC-2"]
+#     response = requests.get(
+#         f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
+#         headers=get_headers(is_admin=False),
+#     )
+#     programs = list(map(lambda x: x["program_id"], response.json()["results"]))
+
+#     # Assert that all authorized datasets are present in programs
+#     assert all(
+#         program in programs for program in authorized_dataset
+#     ), "Authorized datasets missing."
+
+#     # Assert that no unauthorized datasets are present in programs
+#     assert all(
+#         program not in programs for program in unauthorized_dataset
+#     ), "Unauthorized datasets present."
+
+
+def check_datasets_access(is_admin, authorized_datasets, unauthorized_datasets):
     response = requests.get(
         f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
-        headers=get_headers(is_admin=True),
+        headers=get_headers(is_admin=is_admin),
     )
     programs = list(map(lambda x: x["program_id"], response.json()["results"]))
 
     # Assert that all authorized datasets are present in programs
     assert all(
-        program in programs for program in authorized_dataset
+        program in programs for program in authorized_datasets
     ), "Authorized datasets missing."
 
     # Assert that no unauthorized datasets are present in programs
     assert all(
-        program not in programs for program in unauthorized_dataset
+        program not in programs for program in unauthorized_datasets
     ), "Unauthorized datasets present."
 
 
-def check_admin_datasets_access():
-    authorized_dataset = ["SYNTHETIC-1"]
-    unauthorized_dataset = ["SYNTHETIC-2"]
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
-        headers=get_headers(is_admin=False),
-    )
-    programs = list(map(lambda x: x["program_id"], response.json()["results"]))
-
-    # Assert that all authorized datasets are present in programs
-    assert all(
-        program in programs for program in authorized_dataset
-    ), "Authorized datasets missing."
-
-    # Assert that no unauthorized datasets are present in programs
-    assert all(
-        program not in programs for program in unauthorized_dataset
-    ), "Unauthorized datasets present."
-
-
-def test_katsu_users_access():
+def test_katsu_users_data_access():
     """
     Verifies that a user with a specific role has access to authorized datasets
     and does not have access to unauthorized datasets accordingly.
     """
-    # first, check if datasets already exist or not
+
+    # Check if datasets already exist or not
     test_synthetic_datasets_not_exist()
+
     try:
-        # create synthetic datasets
+        # create synthetic datasets that matches OPA access
         endpoint = "programs"
-        data = [{"program_id": "SYNTHETIC-1"}, {"program_id": "SYNTHETIC-2"}]
-        response = ingest_data(endpoint, data, is_admin=True)
-        if response == HTTPStatus.CREATED:
-            check_admin_datasets_access()
-            check_non_admin_datasets_access()
+        program_data = [{"program_id": "SYNTHETIC-1"}, {"program_id": "SYNTHETIC-2"}]
+        response = ingest_data(endpoint, program_data, is_admin=True)
+        assert response.status_code == HTTPStatus.CREATED, "Failed to create programs."
+
+        # NOTE: this values are predefined in OPA
+        # if the test fails, check with OPA first
+        authorized_datasets_admin = ["SYNTHETIC-2"]
+        unauthorized_datasets_admin = ["SYNTHETIC-1"]
+        authorized_datasets_non_admin = ["SYNTHETIC-1"]
+        unauthorized_datasets_non_admin = ["SYNTHETIC-2"]
+
+        # Assert access for admin user
+        check_datasets_access(
+            is_admin=True,
+            authorized_datasets=authorized_datasets_admin,
+            unauthorized_datasets=unauthorized_datasets_admin,
+        )
+
+        # Assert access for non-admin user
+        check_datasets_access(
+            is_admin=False,
+            authorized_datasets=authorized_datasets_non_admin,
+            unauthorized_datasets=unauthorized_datasets_non_admin,
+        )
     finally:
         requests.delete(
             f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/SYNTHETIC-1/",
