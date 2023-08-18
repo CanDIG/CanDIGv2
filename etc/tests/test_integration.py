@@ -737,6 +737,7 @@ def test_katsu_users_data_access():
     unauthorized_datasets_non_admin = ["SYNTHETIC-2"]
 
     # Check if datasets already exist or not
+    # If found, skip the test since it could lead to unexpected results
     test_datasets_should_not_exist(synthetic_data)
 
     try:
