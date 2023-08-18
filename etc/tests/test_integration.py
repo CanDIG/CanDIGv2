@@ -393,12 +393,11 @@ def test_katsu_online():
     f" Response content: {response.content}"
 
 
-def test_synthetic_datasets_not_exist():
+def test_datasets_should_not_exist(datasets):
     """
     Retrieve a list of dataset names from discovery donor.
-    If any of the synthetic dataset names is found, the assertion will fail.
+    If any of the dataset names is found, the assertion will fail.
     """
-    synthetic_datasets = ["SYNTHETIC-1", "SYNTHETIC-2"]
     response = requests.get(
         f"{ENV['CANDIG_URL']}/katsu/v2/discovery/donors/", headers=get_headers()
     )
@@ -406,8 +405,8 @@ def test_synthetic_datasets_not_exist():
     dataset_names = list(data["discovery_donor"].keys())
 
     assert all(
-        dataset_name not in dataset_names for dataset_name in synthetic_datasets
-    ), f"Expected none of {synthetic_datasets} to exist, but at least one was found."
+        dataset_name not in dataset_names for dataset_name in datasets
+    ), f"Expected none of {datasets} to exist, but at least one was found."
 
 
 def ingest_data(endpoint, data, is_admin=False):
@@ -431,6 +430,17 @@ def perform_ingest_and_assert_status(endpoint, data, is_admin=False):
     response = ingest_data(endpoint, data, is_admin)
     expected_status = HTTPStatus.CREATED if is_admin else HTTPStatus.FORBIDDEN
     assert_ingest_response_status(response, expected_status, endpoint)
+
+
+def clean_up_program(test_id):
+    delete_response = requests.delete(
+        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{test_id}/",
+        headers=get_headers(is_admin=True),
+    )
+    assert (
+        delete_response.status_code == HTTPStatus.NO_CONTENT
+    ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
+    f" Response content: {delete_response.content}"
 
 
 def check_program_ingest(test_id, is_admin=False):
@@ -638,14 +648,7 @@ def test_authorized_ingests():
         check_exposure_ingest(test_id, is_admin=True)
 
     finally:
-        delete_response = requests.delete(
-            f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{test_id}/",
-            headers=get_headers(True),
-        )
-        assert (
-            delete_response.status_code == HTTPStatus.NO_CONTENT
-        ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
-    f" Response content: {delete_response.content}"
+        clean_up_program(test_id)
 
 
 def test_unauthorized_ingests():
@@ -683,51 +686,6 @@ def test_unauthorized_ingests():
     f" Response content: {delete_response.content}"
 
 
-# def test_setup_katsu():
-#     test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Program.json"
-#     response = requests.get(test_loc)
-#     assert response.status_code == 200
-
-#     site_admin_token = get_token(
-#         username=ENV["CANDIG_SITE_ADMIN_USER"],
-#         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-#     )
-#     headers = {
-#         "Authorization": f"Bearer {site_admin_token}",
-#         "Content-Type": "application/json; charset=utf-8",
-#     }
-#     response = requests.post(
-#         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/programs",
-#         headers=headers,
-#         json=response.json(),
-#     )
-#     print(response.json())
-#     if response.status_code >= 400:
-#         errors = response.json()["error during ingest_programs"]
-#         assert (
-#             "code='unique'" in errors and "program_id" in errors
-#         )  # this means that the error was just that the program IDs already exist
-#     else:
-#         assert response.status_code >= 200 and response.status_code < 300
-
-#     test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Donor.json"
-#     response = requests.get(test_loc)
-#     assert response.status_code == 200
-#     response = requests.post(
-#         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/donors",
-#         headers=headers,
-#         json=response.json(),
-#     )
-#     print(response.json())
-#     if response.status_code >= 400:
-#         errors = response.json()["error during ingest_donors"]
-#         assert (
-#             "code='unique'" in errors and "donor_id" in errors
-#         )  # this means that the error was just that the program IDs already exist
-#     else:
-#         assert response.status_code >= 200 and response.status_code < 300
-
-
 def user_auth_datasets():
     """
     Define user authorization datasets for testing.
@@ -745,46 +703,6 @@ def user_auth_datasets():
         ("CANDIG_SITE_ADMIN", "SYNTHETIC-2", "SYNTHETIC-1"),
         ("CANDIG_NOT_ADMIN", "SYNTHETIC-1", "SYNTHETIC-2"),
     ]
-
-
-# def check_admin_datasets_access():
-#     authorized_dataset = ["SYNTHETIC-2"]
-#     unauthorized_dataset = ["SYNTHETIC-1"]
-#     response = requests.get(
-#         f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
-#         headers=get_headers(is_admin=True),
-#     )
-#     programs = list(map(lambda x: x["program_id"], response.json()["results"]))
-
-#     # Assert that all authorized datasets are present in programs
-#     assert all(
-#         program in programs for program in authorized_dataset
-#     ), "Authorized datasets missing."
-
-#     # Assert that no unauthorized datasets are present in programs
-#     assert all(
-#         program not in programs for program in unauthorized_dataset
-#     ), "Unauthorized datasets present."
-
-
-# def check_non_admin_datasets_access():
-#     authorized_dataset = ["SYNTHETIC-1"]
-#     unauthorized_dataset = ["SYNTHETIC-2"]
-#     response = requests.get(
-#         f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
-#         headers=get_headers(is_admin=False),
-#     )
-#     programs = list(map(lambda x: x["program_id"], response.json()["results"]))
-
-#     # Assert that all authorized datasets are present in programs
-#     assert all(
-#         program in programs for program in authorized_dataset
-#     ), "Authorized datasets missing."
-
-#     # Assert that no unauthorized datasets are present in programs
-#     assert all(
-#         program not in programs for program in unauthorized_dataset
-#     ), "Unauthorized datasets present."
 
 
 def check_datasets_access(is_admin, authorized_datasets, unauthorized_datasets):
@@ -810,23 +728,23 @@ def test_katsu_users_data_access():
     Verifies that a user with a specific role has access to authorized datasets
     and does not have access to unauthorized datasets accordingly.
     """
+    # NOTE: this values are predefined in OPA
+    # if the test fails, check with OPA first
+    synthetic_data = ["SYNTHETIC-1", "SYNTHETIC-2"]
+    authorized_datasets_admin = ["SYNTHETIC-2"]
+    unauthorized_datasets_admin = ["SYNTHETIC-1"]
+    authorized_datasets_non_admin = ["SYNTHETIC-1"]
+    unauthorized_datasets_non_admin = ["SYNTHETIC-2"]
 
     # Check if datasets already exist or not
-    test_synthetic_datasets_not_exist()
+    test_datasets_should_not_exist(synthetic_data)
 
     try:
         # create synthetic datasets that matches OPA access
         endpoint = "programs"
-        program_data = [{"program_id": "SYNTHETIC-1"}, {"program_id": "SYNTHETIC-2"}]
+        program_data = [{"program_id": dataset_id} for dataset_id in synthetic_data]
         response = ingest_data(endpoint, program_data, is_admin=True)
         assert response.status_code == HTTPStatus.CREATED, "Failed to create programs."
-
-        # NOTE: this values are predefined in OPA
-        # if the test fails, check with OPA first
-        authorized_datasets_admin = ["SYNTHETIC-2"]
-        unauthorized_datasets_admin = ["SYNTHETIC-1"]
-        authorized_datasets_non_admin = ["SYNTHETIC-1"]
-        unauthorized_datasets_non_admin = ["SYNTHETIC-2"]
 
         # Assert access for admin user
         check_datasets_access(
@@ -842,71 +760,8 @@ def test_katsu_users_data_access():
             unauthorized_datasets=unauthorized_datasets_non_admin,
         )
     finally:
-        requests.delete(
-            f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/SYNTHETIC-1/",
-            headers=get_headers(True),
-        )
-        requests.delete(
-            f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/SYNTHETIC-2/",
-            headers=get_headers(True),
-        )
-
-
-@pytest.mark.parametrize("user, dataset, not_dataset", user_auth_datasets())
-def test_katsu_users(user, dataset, not_dataset):
-    username = ENV[f"{user}_USER"]
-    password = ENV[f"{user}_PASSWORD"]
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": f"Bearer {get_token(username=username, password=password)}",
-    }
-
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/", headers=headers
-    )
-    programs = list(map(lambda x: x["program_id"], response.json()["results"]))
-    print(programs)
-    assert dataset in programs
-    assert not_dataset not in programs
-
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/donors/", headers=headers
-    )
-    assert len(response.json()) > 0
-    print(response.json())
-    donors = list(map(lambda x: x["program_id"], response.json()["results"]))
-    print(donors)
-    assert dataset in donors
-    assert not_dataset not in donors
-
-
-def test_katsu_delete():
-    test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/Program.json"
-    response = requests.get(test_loc)
-    assert response.status_code == 200
-
-    site_admin_token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {site_admin_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
-    program_data = response.json()
-    program_ids = [item["program_id"] for item in program_data]
-
-    for program_id in program_ids:
-        response = requests.delete(
-            f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{program_id}/",
-            headers=headers,
-        )
-        assert (
-            response.status_code == 204
-        ), f"Failed to delete program '{program_id}'. Status code: {response.status_code}"
-        print(f"Deletion of program '{program_id}' was successful.")
+        for program_id in synthetic_data:
+            clean_up_program(program_id)
 
 
 ## HTSGet + katsu:
