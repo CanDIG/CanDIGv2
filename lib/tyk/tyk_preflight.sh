@@ -76,6 +76,9 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/api_katsu.json.tpl > ${CONFIG_
 echo "Working on api_candig_data_portal.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_mcode_candig_data_portal.json.tpl > ${CONFIG_DIR}/apps/${TYK_CANDIG_DATA_PORTAL_API_ID}.json
 
+echo "Working on api_ingest.json"
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_ingest.json.tpl > ${CONFIG_DIR}/apps/${TYK_INGEST_API_ID}.json
+
 echo "Working on api_graphql.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_graphql.json.tpl > ${CONFIG_DIR}/apps/${TYK_GRAPHQL_API_ID}.json
 
