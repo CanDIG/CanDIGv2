@@ -672,10 +672,15 @@ def test_katsu_online():
 
 def test_authorized_ingests():
     """
-    Call authorized ingests (admin) for various objects in subsequent order.
-    Expected 201 with valid data.
-    If any of ingests fail, the following ingests will not run.
-    Clean up after the test is completed or if any exception occurs.
+    Verify that ingest apis work as expected for admin
+
+    Testing Strategy:
+    - Call ingest apis with admin header in subsequent order.
+    - If any of ingests fail, the following ingests will not run.
+    - Clean up after the test is completed or if any exception occurs.
+
+    Expected result:
+    - HTTP 201 CREATED with valid ingest data.
     """
     # to simplify the test data, only 1 unique id is needed
     test_id = "TEST-" + str(uuid.uuid4())
@@ -702,9 +707,14 @@ def test_authorized_ingests():
 
 def test_unauthorized_ingests():
     """
-    Call unauthorized ingests (non-admin) for various objects in subsequent order.
-    Expected 403 even with valid data.
-    Attempt to clean up after in case ingests go through but expected None
+    Verify that ingest apis will not work for non-admin user
+
+    Testing Strategy:
+    - Call ingest apis with non-admin header in subsequent order.
+    - Attempt to clean up after in case any ingests go through but expected None
+
+    Expected result:
+    - HTTP 403 even with valid ingest data.
     """
     # to simplify the test data, only 1 unique id is needed
     test_id = "TEST-" + str(uuid.uuid4())
@@ -737,11 +747,10 @@ def test_unauthorized_ingests():
 
 def test_katsu_users_data_access():
     """
-    Verifies that a user with a specific role has access to authorized datasets
-    and does not have access to unauthorized datasets accordingly.
+    Verifies user access to authorized datasets while denying access to unauthorized datasets.
 
     Testing Strategy:
-    - Send a GET request to authorized program endpoint
+    - Send a GET request to authorized program endpoint as an admin and non-admin user
 
     Expected result:
     - List of programs that match OPA datasets
