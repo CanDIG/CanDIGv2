@@ -56,6 +56,14 @@
                 "versions": [
                     "Default"
                 ]
+            },
+            "${TYK_INGEST_API_ID}": {
+                "allowed_urls": [],
+                "api_id": "${TYK_INGEST_API_ID}",
+                "api_name": "${TYK_INGEST_API_SLUG}",
+                "versions": [
+                    "Default"
+                ]
             }
         },
         "active": true,

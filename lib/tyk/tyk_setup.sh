@@ -71,6 +71,11 @@ generate_key() {
               "api_id": "'"${TYK_VAULT_API_ID}"'",
               "api_name": "'"${TYK_VAULT_API_SLUG}"'",
               "Versions": ["Default"]
+          },
+          "'"${TYK_INGEST_API_ID}"'": {
+              "api_id": "'"${TYK_INGEST_API_ID}"'",
+              "api_name": "'"${TYK_INGEST_API_SLUG}"'",
+              "Versions": ["Default"]
           }
       }
   }'
