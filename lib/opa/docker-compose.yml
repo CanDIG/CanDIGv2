@@ -6,44 +6,39 @@ services:
       args:
         venv_python: "${VENV_PYTHON}"
         alpine_version: "${ALPINE_VERSION}"
-        katsu_url: "${CHORD_METADATA_PUBLIC_URL}"
+        katsu_url: "${KATSU_PUBLIC_URL}"
         idp: "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
-        client_id: "${KEYCLOAK_CLIENT_ID}"
         opa_site_admin_key: "${OPA_SITE_ADMIN_KEY}"
-    networks:
-      - ${DOCKER_NET}
-    deploy:
-      placement:
-        constraints:
-          - node.role == worker
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    logging: *default-logging
+    image: ${DOCKER_REGISTRY}/opa-runner:${OPA_VERSION:-latest}
+    labels:
+      - "candigv2=opa"
     volumes:
       - opa-data:/app
     secrets:
       - source: keycloak-client-local-candig-secret
         target: idp_client_secret
+      - source: opa-root-token
+        target: opa-root-token
+      - source: opa-service-token
+        target: opa-service-token
     environment:
       IDP_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
-      CLIENT_SECRET_ROOT: ${CANDIG_OPA_SECRET}
-      CLIENT_SECRET_SERVICE: ${CANDIG_OPA_SECRET_SERVICE}
+      OPA_SITE_ADMIN_KEY: ${OPA_SITE_ADMIN_KEY}
       OPA_URL: ${OPA_URL}
       IDP: "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
-      KATSU_URL: "${CHORD_METADATA_PUBLIC_URL}"
+      KATSU_URL: "${KATSU_PUBLIC_URL}"
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
 
   opa:
     image: openpolicyagent/opa:latest
+    labels:
+      - "candigv2=opa"
     ports:
       - "${OPA_PORT}:8181"
     volumes:
       - opa-data:/app
     environment:
-      CLIENT_SECRET_ROOT: ${CANDIG_OPA_SECRET}
-      CLIENT_SECRET_SERVICE: ${CANDIG_OPA_SECRET_SERVICE}
       IDP: ${KEYCLOAK_REALM_URL}
     command:
       - "run"
@@ -53,20 +48,10 @@ services:
       - "--authorization=basic"
       - "app/data.json"
       - "app/permissions_engine/"
-    networks:
-      - bridge-net
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    logging: *default-logging
     healthcheck:
       test: [ "CMD", "curl", "-f", "${OPA_URL}" ]
       interval: 30s
       timeout: 20s
       retries: 3
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"

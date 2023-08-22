@@ -1,0 +1,75 @@
+name: Test-CanDIG-build
+run-name: Build Validation
+on: 
+  push:
+    branches: [develop]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      module:
+        type: string
+jobs:
+  Build-CanDIG:
+    runs-on: [ubuntu-latest]
+    defaults:
+      run:
+       shell: bash -l {0}
+    steps:
+      - name: Install conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          channels: conda-forge, defaults
+          use-only-tar-bz2: true
+          auto-update-conda: true
+          auto-activate-base: true
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Setup environment file
+        run: | 
+            cp etc/env/example.env example.env
+            sed "s@CONDA_INSTALL=.*@CONDA_INSTALL=$CONDA@" example.env > .env
+      - name: Display environment file
+        run: cat ".env"
+      - name: Add CanDIG local domain redirection to hosts
+        run: echo "::1 candig.docker.internal" | sudo tee -a /etc/hosts
+      - name: Install submodules
+        run: |
+             git submodule update --init --recursive
+             make mkdir
+      - name: Restore Conda environment cache
+        id: cache-conda
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CONDA }}
+          key: ${{ runner.os }}-conda-${{ hashFiles('etc/venv/requirements.txt') }}
+      - name: Install CanDIG conda environment
+        if: ${{ steps.cache-conda.outputs.cache-hit != 'true' }}
+        id: install-conda
+        run: |
+              make init-conda
+      - name: Save Conda cache
+        uses: actions/cache/save@v3
+        if: steps.install-conda.outcome == 'success'
+        with:
+          path: ${{ env.CONDA }}
+          key: ${{ runner.os }}-conda-${{ hashFiles('etc/venv/requirements.txt') }}
+      - name: Build stack
+        run: |
+              conda activate candig
+              (yes || true) | make build-all
+      - name: Integration testing
+        run: |
+              conda activate candig
+              make test-integration
+      - name: Save docker container logs
+        if: always()
+        run: ./print_logs.sh > tmp/container_logs.txt 2>&1
+      - name: Save container and error logs as artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Post-build error log
+          path: |
+                tmp/error.txt
+                tmp/container_logs.txt 

@@ -2,38 +2,31 @@ version: '3.7'
 
 services:
   candig-data-portal:
+    labels:
+      - "candigv2=candig-data-portal"
     build:
-      context: $PWD/lib/candig-data-portal
+      context: $PWD/lib/candig-data-portal/candig-data-portal
       args:
         katsu_api_target_url: "${TYK_KATSU_API_TARGET}"
     image: ${DOCKER_REGISTRY}/candig-data-portal:${CANDIG_DATA_PORTAL_VERSION:-latest}
-    networks:
-      - ${DOCKER_NET}
     ports:
-      - "${CANDIG_DATA_PORTAL_PORT}:3000"
-    deploy:
-      placement:
-        constraints:
-          - node.role == worker
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.lbswarm=true"
-        - "traefik.http.routers.candig-data-portal.rule=Host(`candig-data-portal.${CANDIG_DOMAIN}`)"
-        - "traefik.http.services.candig-data-portal.loadbalancer.server.port=${CANDIG_DATA_PORTAL_PORT}"
-    logging: *default-logging
+      - "${CANDIG_DATA_PORTAL_PORT}:2543"
+    secrets:
+      - source: vault-s3-token
+        target: vault-s3-token
+      - source: opa-service-token
+        target: opa-service-token
+    extra_hosts:
+        - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     environment:
-      - REACT_APP_KATSU_API_SERVER=${CHORD_METADATA_PUBLIC_URL}
-      - REACT_APP_CANDIG_SERVER=${CANDIG_PUBLIC_URL}
-        #- REACT_APP_FEDERATION_API_SERVER=http://${CANDIG_DOMAIN}:${FEDERATION_PORT}
-        #- REACT_APP_BASE_NAME='/'
+      - REACT_APP_KATSU_API_SERVER=${KATSU_PUBLIC_URL}
+      - REACT_APP_HTSGET_SERVER=${HTSGET_PUBLIC_URL}
+      - REACT_APP_FEDERATION_API_SERVER=${FEDERATION_PUBLIC_URL}
+      - REACT_APP_BASE_NAME=
       - REACT_APP_SITE_LOCATION=${CANDIG_SITE_LOCATION}
+      - WDS_SOCKET_PORT=0
     healthcheck:
-      test: [ "CMD", "curl", "http://localhost:3000" ]
+      test: [ "CMD", "curl", "http://localhost:2543" ]
       interval: 30s
       timeout: 20s
       retries: 3

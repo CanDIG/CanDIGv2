@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  htsget:
+    build:
+      context: $PWD/lib/htsget/htsget_app
+      args:
+        venv_python: "${VENV_PYTHON}"
+        alpine_version: "${ALPINE_VERSION}"
+    image: ${DOCKER_REGISTRY}/htsget:${HTSGET_VERSION:-latest}
+    labels:
+      - "candigv2=htsget"
+    volumes:
+      - htsget-data:/data
+    ports:
+      - "${HTSGET_PORT}:3000"
+    secrets:
+      - source: vault-s3-token
+        target: vault-s3-token
+      - source: opa-service-token
+        target: opa-service-token
+      - source: minio-access-key
+        target: minio-access-key
+      - source: minio-secret-key
+        target: minio-secret-key
+    environment:
+      HTSGET_TEST_KEY: "hoodlebug"
+      HTSGET_URL: ${TYK_LOGIN_TARGET_URL}/${TYK_HTSGET_API_LISTEN_PATH}
+      OPA_URL: ${OPA_PRIVATE_URL}
+      OPA_SITE_ADMIN_KEY: ${OPA_SITE_ADMIN_KEY} # only required if not equal to "site_admin"
+      CANDIG_VAULT_URL: ${VAULT_SERVICE_URL}
+      MINIO_URL: ${MINIO_PRIVATE_URL}
+      DEBUG_MODE: ${CANDIG_DEBUG_MODE}
+      DB_PATH: /data/files.db
+      SERVER_LOCAL_DATA: /app/htsget_server/data
+      TESTENV_URL: ${HTSGET_PRIVATE_URL}
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"

@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  federation:
+    build:
+      context: $PWD/lib/federation/federation
+      args:
+        venv_python: "${VENV_PYTHON}"
+        alpine_version: "${ALPINE_VERSION}"
+    image: ${DOCKER_REGISTRY}/federation:${FEDERATION_VERSION:-latest}
+    labels:
+      - "candigv2=federation"
+    ports:
+      - "${FEDERATION_PORT}:4232"
+    secrets:
+      - source: opa-service-token
+        target: opa-service-token
+      - source: tyk-secret-key
+        target: tyk-secret-key
+    environment:
+        TEST_KEY: "hoodlebug"
+        CANDIG_OPA_URL: ${OPA_PRIVATE_URL}
+        KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
+        KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
+        TYK_LOGIN_TARGET_URL: ${TYK_LOGIN_TARGET_URL}
+        TYK_POLICY_ID: ${TYK_POLICY_ID}
+        OPA_URL: ${OPA_URL}
+        TYK_FEDERATION_API_ID: ${TYK_FEDERATION_API_ID}
+        TYK_PRIVATE_URL: ${TYK_PRIVATE_URL}
+        CONFIG_DIR: "/app/config"
+    extra_hosts:
+        - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"

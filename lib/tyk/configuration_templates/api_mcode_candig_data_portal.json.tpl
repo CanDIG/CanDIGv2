@@ -87,6 +87,10 @@
             "/data-portal"
         ],
         "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
+        "KEYCLOAK_SECRET": "${KEYCLOAK_SECRET}",
+        "KEYCLOAK_REALM": "${KEYCLOAK_REALM}",
+        "KEYCLOAK_CLIENT_ID": "${KEYCLOAK_CLIENT_ID}",
+        "KEYCLOAK_PRIVATE_URL": "${KEYCLOAK_PRIVATE_URL}",
         "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
         "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",
         "VAULT_ROLE":"researcher"
@@ -94,6 +98,12 @@
     "openid_options": {
     "segregate_by_client": false,
     "providers": [
+            {
+                "issuer": "${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/${KEYCLOAK_REALM}",
+                "client_ids": {
+                    "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
+                }
+            },
             {
                 "issuer": "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}",
                 "client_ids": {
