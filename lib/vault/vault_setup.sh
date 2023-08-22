@@ -147,11 +147,6 @@ docker exec $vault sh -c "echo 'path \"opa/access\" {capabilities = [\"update\",
 # Federation needs access to the opa store's data path (to add servers):
 docker exec $vault sh -c "echo 'path \"opa/data\" {capabilities = [\"update\", \"read\", \"delete\"]}' >> federation-policy.hcl; vault policy write federation federation-policy.hcl"
 
-
-echo
-echo ">> setting up aws policy"
-docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"read\"]}' >> vault-policy.hcl; vault policy write aws vault-policy.hcl"
-
 # user claims
 echo
 echo ">> setting up user claims"
