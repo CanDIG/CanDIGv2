@@ -361,7 +361,6 @@ docker-secrets: mkdir katsu-secrets #minio-secrets
 	$(MAKE) secret-redis-secret-key
 
 
-
 #>>>
 # create persistant volumes for docker containers
 # make docker-volumes

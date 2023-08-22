@@ -80,4 +80,4 @@ python katsu_ingest.py --input tests/clinical_ingest.json
 ```
 You should now see the ingested data in the [data portal](http://candig.docker.internal:5080).
 
-[Clinical data](https://github.com/CanDIG/candigv2-ingest#1-clinical-data) and [Genomic data](https://github.com/CanDIG/candigv2-ingest#2-genomic-data) describe the data ingestion process and include descriptions of ingestable test datasets. 
+[Clinical data](https://github.com/CanDIG/candigv2-ingest#1-clinical-data) and [Genomic data](https://github.com/CanDIG/candigv2-ingest#2-genomic-data) describe the data ingestion process and include descriptions of ingestable test datasets.

@@ -7,7 +7,7 @@
 The CanDIG v2 project is a collection of heterogeneous services designed to work together to facilitate end to end
 dataflow for genomic data.
 
-## Installation 
+## Installation
 
 CanDIG uses a make-based deployment process, with services containerized in Docker. To deploy CanDIGv2, follow the installation guide in `docs/`:
 
@@ -44,6 +44,21 @@ services:
     network_mode: ${DOCKER_MODE}
 ...
 ```
+### Configuring CanDIG modules
+
+Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` and `CANDIG_AUTH_MODULES` define which modules are included in the deployment.
+
+By default (if you copy the sample file from `etc/env/example.env`) the installation includes the minimal list of modules:
+
+  CANDIG_MODULES=minio htsget-server katsu candig-data-portal
+
+Optional modules follow the `#` and include federation service, various monitoring components, workflow execution, and some older modules not generally installed.
+
+For federated installations, you will need `federation-service`.
+
+For production deployments, you will probably want to include  `federation-service weavescope logging monitoring`. Be aware that the last three require more resources, includeing storage.
+
+Authorization and authentication modules defined in  `CANDIG_AUTH_MODULES` are only installed if you run `make init-authx` during deployment.
 
 ### Configuring CanDIG modules
 
