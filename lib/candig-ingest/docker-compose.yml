@@ -7,7 +7,6 @@ services:
             args:
                 venv_python: "${VENV_PYTHON}"
                 alpine_version: "${ALPINE_VERSION}"
-                katsu_trailing_slash: "TRUE"
         image: ${DOCKER_REGISTRY}/candig-ingest:${CANDIG_INGEST_VERSION:-latest}
         labels:
             - "candigv2=candig-ingest"
