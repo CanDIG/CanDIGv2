@@ -6,7 +6,12 @@ services:
       - "candigv2=query"
     build:
       context: $PWD/lib/query/query
-    image: ${DOCKER_REGISTRY}/query:${CANDIG_QUERY_VERSION:-latest}
+      args:
+        venv_python: "${VENV_PYTHON}"
+        alpine_version: "${ALPINE_VERSION}"
+    image: candig/query:${CANDIG_QUERY_VERSION:-latest}
+    volumes:
+      - query-data:/app
     ports:
       - "${CANDIG_QUERY_PORT}:2543"
     extra_hosts:
