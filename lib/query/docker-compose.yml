@@ -13,11 +13,11 @@ services:
     volumes:
       - query-data:/app
     ports:
-      - "${CANDIG_QUERY_PORT}:2543"
+      - "${CANDIG_QUERY_PORT}:3000"
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
-      test: [ "CMD", "curl", "http://localhost:2543" ]
+      test: [ "CMD", "curl", "http://localhost:${CANDIG_QUERY_PORT}" ]
       interval: 30s
       timeout: 20s
       retries: 3
