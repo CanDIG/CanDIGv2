@@ -14,8 +14,11 @@ services:
       - query-data:/app
     ports:
       - "${CANDIG_QUERY_PORT}:3000"
+    environment:
+      CANDIG_KATSU_URL: ${KATSU_PRIVATE_URL}
+      CANDIG_HTSGET_URL: ${HTSGET_PRIVATE_URL}
     extra_hosts:
-        - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:${CANDIG_QUERY_PORT}" ]
       interval: 30s
