@@ -766,11 +766,11 @@ def test_katsu_users_data_access():
     non_admin_authorized_datasets = ["SYNTHETIC-1"]
     non_admin_unauthorized_datasets = ["SYNTHETIC-2"]
 
-    # Check if datasets already exist or not
-    # If found, skip the test since it could lead to unexpected results
-    assert_datasets_should_not_exist(synthetic_datasets)
-
     try:
+        # Check if datasets already exist or not
+        # If found, skip the test since it could lead to unexpected results
+        assert_datasets_should_not_exist(synthetic_datasets)
+
         # create synthetic datasets that matches OPA access
         endpoint = "programs"
         program_data = [{"program_id": dataset_id} for dataset_id in synthetic_datasets]
