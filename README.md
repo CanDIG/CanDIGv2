@@ -41,7 +41,7 @@ The following table lists the individual repos for each service and helper libra
 |---------------------------|-----------------------------------------------------------------------|------------------------------|
 | authx                     | [`candigv2-authx`](https://github.com/CanDIG/candigv2-authx)          | Library to facilitate interacting with AuthZ/AuthN services, Keycloak, Tyk, Opa, Vault & Access to minIO S3 objects | 
 | CanDIG Data Portal        | [`candig-data-portal`](https://github.com/CanDIG/candig-data-portal)  | Front-end User interface for CanDIG Services |
-| CanDIG Ingest Service     | [`candig-ingest`](https://github.com/CanDIG/candig-ingest)            | Ingests clinical and genomic data into the CanDIG infrastructure. As at September 2023, still being integrated into the stack. |
+| CanDIGv2 Ingest Service     | [`candig-ingest`](https://github.com/CanDIG/candigv2-ingest)        | Ingests clinical and genomic data into the CanDIG infrastructure. As at September 2023, still being integrated into the stack. |
 | Clinical ETL Code         | [`clinical_ETL_code`](https://github.com/CanDIG/clinical_ETL_code)    | Code to convert spreadsheet format into the MoH data model in preparation for ingest into `katsu` |
 | Federation Service        | [`federation-service`](https://github.com/CanDIG/federation_service)  | Distributes requests across each federated node of the distributed infrastructure   |
 | HTSGet                    | [`htsget_app`](https://github.com/CanDIG/htsget_app)                  | Implementation of GA4GH htsget API which ingests and indexes VCF files and stores GA4GH DRS objects for retrieval |
