@@ -101,7 +101,7 @@ Optional modules follow the `#` and include federation service, various monitori
 
 For federated installations, you will need `federation-service`.
 
-For production deployments, you will probably want to include  `federation-service`. Be aware that the last three require more resources, includeing storage.
+For production deployments, you will probably want to include  `federation-service`.
 
 Authorization and authentication modules defined in  `CANDIG_AUTH_MODULES` are only installed if you run `make init-authx` during deployment.
 
