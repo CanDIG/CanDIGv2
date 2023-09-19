@@ -662,7 +662,7 @@ def test_katsu_online():
     - HTTP 200 OK status
     """
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/version_check", headers=get_headers()
+        f"{ENV['CANDIG_URL']}/katsu/v2/service-info", headers=get_headers()
     )
     assert (
         response.status_code == HTTPStatus.OK
