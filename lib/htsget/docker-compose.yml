@@ -6,7 +6,6 @@ services:
       context: $PWD/lib/htsget/htsget_app
       args:
         venv_python: "${VENV_PYTHON}"
-        alpine_version: "${ALPINE_VERSION}"
     image: ${DOCKER_REGISTRY}/htsget:${HTSGET_VERSION:-latest}
     labels:
       - "candigv2=htsget"
