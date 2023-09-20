@@ -21,4 +21,4 @@
 	url = https://github.com/CanDIG/candigv2-ingest
 [submodule "lib/query/query"]
 	path = lib/query/query
-	url = git@github.com:CanDIG/query.git
+	url = https://github.com/CanDIG/query.git
