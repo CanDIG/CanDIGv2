@@ -147,8 +147,8 @@ build-%:
 
 #<<<
 .PHONY: clean-all
-clean-all: clean-logs clean-authx clean-compose clean-containers clean-secrets \
-	clean-volumes clean-images clean-bin
+clean-all: clean-logs clean-authx clean-compose clean-containers \
+	clean-volumes clean-images # clean-bin clean-secrets
 	
 	
 # Empties error and progress logs
