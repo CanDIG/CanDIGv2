@@ -1,0 +1,27 @@
+
+version: '3.7'
+services:
+  traefik:
+      image: traefik:v2.5.4
+      command:
+        - "--log.level=DEBUG"
+        - "--api.dashboard=true"
+        - "--metrics.prometheus=true"
+        - "--metrics.prometheus.buckets=0.1,0.3,1.2,5.0"
+        - "--providers.docker=true"
+        - "--providers.docker.watch"
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+      ports:
+        - 80:80
+      labels:
+        - "traefik.http.routers.traefik-ui.rule=Host(`traefik-ui.localhost`)"
+        - "traefik.http.routers.traefik-ui.service=api@internal"
+        - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$gaS8tVEe$$MjqM8IlBvz2PRFEWcwha1/"
+        - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
+        - "traefik.http.routers.traefik-ui.middlewares=traefik-auth"   
+      restart: unless-stopped
+      logging:
+        options:
+          max-size: "10m"
+          max-file: "3"

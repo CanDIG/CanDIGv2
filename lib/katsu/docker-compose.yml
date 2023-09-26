@@ -36,6 +36,10 @@ services:
         target: katsu_secret
     labels:
       - "candigv2=chord-metadata"
+      ####
+      # - "traefik.http.routers.backend.rule=Host(`candig.docker.internal`)"
+      # - "traefik.http.routers.backend.service=backend"
+      # - "traefik.http.services.backend.loadbalancer.server.port=8000"
 
   metadata-db:
     image: postgres:15-alpine
