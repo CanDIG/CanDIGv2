@@ -13,8 +13,6 @@ alerting:
  
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
   - "django.rules"
  
 # A scrape configuration containing exactly one endpoint to scrape:
@@ -42,14 +40,7 @@ scrape_configs:
   #   static_configs:
   #     - targets:
   #       - http://prometheus.io    # Target to probe with http.
-  #       # - http://candig.docker.internal:8008   
-  #       # - http://localhost:8008
-  #       - 192.168.4.69:8008
-  #       - candigv2_katsu_1:8008
-  #       # - http://localhost:9090
-  #       # - http://candig.docker.internal:9090
-  #       - 192.168.4.69:9090
-  #       - candigv2_prometheus_1:9090
+  #       # - candig.docker.internal:8008  
 
   #   relabel_configs:
   #     - source_labels: [__address__]
