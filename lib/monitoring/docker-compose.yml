@@ -1,9 +1,5 @@
 version: '3'
- 
-# networks:
-#   monitoring:
-#     driver: bridge
- 
+
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -16,8 +12,6 @@ services:
       - --web.console.templates=/usr/share/prometheus/consoles
     ports:
       - '9090:9090'
-    # networks: 
-    #   - monitoring 
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
  
@@ -28,8 +22,6 @@ services:
   #     - /Users/sonchau/Documents/GitHub/CANDIG/CanDIGv2/lib/monitoring/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml
   #   ports:
   #     - '9115:9115'
-  #   # networks: 
-  #   #   - monitoring 
   #   extra_hosts:
   #     - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
  
