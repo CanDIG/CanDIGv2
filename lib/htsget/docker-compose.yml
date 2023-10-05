@@ -22,6 +22,10 @@ services:
         target: minio-access-key
       - source: minio-secret-key
         target: minio-secret-key
+      - source: metadata-db-secret
+        target: metadata-db-secret
+      - source: metadata-db-user
+        target: metadata-db-user
     environment:
       HTSGET_TEST_KEY: "hoodlebug"
       HTSGET_URL: ${TYK_LOGIN_TARGET_URL}/${TYK_HTSGET_API_LISTEN_PATH}
@@ -33,5 +37,10 @@ services:
       DB_PATH: /data/files.db
       SERVER_LOCAL_DATA: /app/htsget_server/data
       TESTENV_URL: ${HTSGET_PRIVATE_URL}
+      POSTGRES_DATABASE: "genomic"
+      POSTGRES_HOST_FILE: "metadata-db"
+      POSTGRES_POST: 5433
+      POSTGRES_USERNAME_FILE: "/run/secrets/metadata-db-user"
+      POSTGRES_PASSWORD_FILE: "/run/secrets/metadata-db-secret"
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
