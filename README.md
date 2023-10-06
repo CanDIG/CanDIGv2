@@ -47,7 +47,7 @@ The following table lists the individual repos for each service and helper libra
 | HTSGet                    | [`htsget_app`](https://github.com/CanDIG/htsget_app)                  | Implementation of GA4GH htsget API which ingests and indexes VCF files and stores GA4GH DRS objects for retrieval |
 | Katsu                     | [`katsu`](https://github.com/CanDIG/katsu)                            | Manages the clinical metadata in a PostgreSQL database |
 | CanDIG OPA                | [`candig-opa`](https://github.com/CanDIG/candig-opa)                  | Manages role-based access policies   |
-| Query service             | [`query`](https://github.com/CanDIG/candig-opa)                       | as at September 2023, still being integrated into the stack |
+| Query service             | [`query`](https://github.com/CanDIG/query)                            | as at September 2023, still being integrated into the stack |
 
 As well as in-house developed services, the CanDIG stack relies on external software which is configured to work within the stack, configurations are found in the [`/lib`](/lib) folder for each software, these include:
 
