@@ -72,7 +72,9 @@ def get_env():
         vars["MINIO_SECRET_KEY"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/tyk-secret-key") as f:
         vars["TYK_SECRET_KEY"] = f.read().splitlines().pop()
+    vars["POSTGRES_PASSWORD_FILE"] = f"tmp/secrets/metadata-db-secret"
     vars["CANDIG_ENV"] = INTERPOLATED_ENV
+    vars["DB_PATH"] = "metadata-db"
     return vars
 
 
