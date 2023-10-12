@@ -225,50 +225,50 @@ def test_htsget_add_sample_to_dataset():
         .replace("http://", "drs://")
         .replace("https://", "drs://")
     )
-    # Delete dataset SYNTHETIC-1
+    # Delete cohort SYNTHETIC-1
     response = requests.delete(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-1",
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-1",
         headers=headers,
     )
 
-    # Add NA18537 and multisample_1 to dataset SYNTHETIC-1, which is only authorized for user1:
+    # Add NA18537 and multisample_1 to cohort SYNTHETIC-1, which is only authorized for user1:
     payload = {
         "id": "SYNTHETIC-1",
         "drsobjects": [f"{TESTENV_URL}/NA18537", f"{TESTENV_URL}/multisample_1"],
     }
 
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets",
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts",
         headers=headers,
         json=payload,
     )
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-1",
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-1",
         headers=headers,
     )
     print(response.json())
     assert f"{TESTENV_URL}/multisample_1" in response.json()["drsobjects"]
     assert f"{TESTENV_URL}/multisample_2" not in response.json()["drsobjects"]
 
-    # Delete dataset SYNTHETIC-2
+    # Delete cohort SYNTHETIC-2
     response = requests.delete(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-2",
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-2",
         headers=headers,
     )
 
-    # Add NA20787 and multisample_2 to dataset SYNTHETIC-2, which is only authorized for user2:
+    # Add NA20787 and multisample_2 to cohort SYNTHETIC-2, which is only authorized for user2:
     payload = {
         "id": "SYNTHETIC-2",
         "drsobjects": [f"{TESTENV_URL}/NA20787", f"{TESTENV_URL}/multisample_2"],
     }
 
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets",
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts",
         headers=headers,
         json=payload,
     )
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/SYNTHETIC-2",
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-2",
         headers=headers,
     )
     print(response.json())
@@ -814,7 +814,7 @@ def test_add_sample_to_genomic():
     }
 
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/datasets/{first_sample['program_id']}",
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{first_sample['program_id']}",
         headers=headers,
     )
 
@@ -827,7 +827,7 @@ def test_add_sample_to_genomic():
         host = drs_obj_match.group(1)
         drs_obj_name = drs_obj_match.group(2)
 
-        # assign the first member of this dataset to the sample
+        # assign the first member of this cohort to the sample
         sample_drs_obj = {
             "id": first_sample["submitter_sample_id"],
             "contents": [{"drs_uri": [drs_obj], "name": drs_obj_name, "id": "genomic"}],
