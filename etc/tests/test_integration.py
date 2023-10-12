@@ -307,7 +307,7 @@ def test_htsget_access_data(user, obj, access):
         headers=headers,
         params=params,
     )
-    print(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/v1/variants/data/{obj}")
+    print(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/data/{obj}")
     assert (response.status_code == 200) == access
 
 
