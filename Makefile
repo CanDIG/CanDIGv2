@@ -272,7 +272,7 @@ down-%:
 	printf "\nOutput of down-$*: \n" >> $(ERRORLOG)
 	echo "    started down-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility down 2>&1 | tee -a $(ERRORLOG)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility down 2>&1
 	echo "    finished down-$*" >> $(LOGFILE)
 
 
