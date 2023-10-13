@@ -19,3 +19,6 @@
 [submodule "lib/candig-ingest/candigv2-ingest"]
 	path = lib/candig-ingest/candigv2-ingest
 	url = https://github.com/CanDIG/candigv2-ingest
+[submodule "lib/query/query"]
+	path = lib/query/query
+	url = https://github.com/CanDIG/query

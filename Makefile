@@ -263,6 +263,20 @@ compose-%:
 
 
 #>>>
+# take down individual modules using docker-compose
+# $module is the name of the sub-folder in lib/
+# make down-$module
+
+#<<<
+down-%:
+	printf "\nOutput of down-$*: \n" >> $(ERRORLOG)
+	echo "    started down-$*" >> $(LOGFILE)
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility down 2>&1
+	echo "    finished down-$*" >> $(LOGFILE)
+
+
+#>>>
 # pull images from $DOCKER_REGISTRY
 # make docker-pull
 
@@ -332,6 +346,7 @@ docker-volumes:
 	docker volume create opa-data --label candigv2=volume
 	docker volume create htsget-data --label candigv2=volume
 	docker volume create postgres-data --label candigv2=volume
+	docker volume create query-data --label candigv2=volume
 
 
 #>>>
