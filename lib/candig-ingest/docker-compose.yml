@@ -22,5 +22,5 @@ services:
         extra_hosts:
               - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
         secrets:
-          - source: "keycloak-client-${KEYCLOAK_CLIENT_ID}-secret"
+          - source: keycloak-client-local-candig-secret
             target: keycloak-secret
