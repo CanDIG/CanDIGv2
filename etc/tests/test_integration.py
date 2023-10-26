@@ -832,6 +832,7 @@ def test_add_sample_to_genomic():
             "id": first_sample["submitter_sample_id"],
             "contents": [{"drs_uri": [drs_obj], "name": drs_obj_name, "id": "genomic"}],
             "version": "v1",
+            "description": "sample"
         }
 
         url = f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects"
