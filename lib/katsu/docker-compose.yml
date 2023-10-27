@@ -6,7 +6,6 @@ services:
       context: $PWD/lib/katsu/katsu_service
       args:
         venv_python: "${VENV_PYTHON}"
-        alpine_version: "${ALPINE_VERSION}"
         katsu_env: "dev"
     image: ${DOCKER_REGISTRY}/katsu:${KATSU_VERSION:-latest}
     ports:
