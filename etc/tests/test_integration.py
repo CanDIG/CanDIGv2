@@ -830,8 +830,9 @@ def test_add_sample_to_genomic():
         # assign the first member of this cohort to the sample
         sample_drs_obj = {
             "id": first_sample["submitter_sample_id"],
-            "contents": [{"drs_uri": [drs_obj], "name": drs_obj_name, "id": "genomic"}],
+            "contents": [{"drs_uri": [drs_obj], "name": drs_obj_name, "id": drs_obj_name}],
             "version": "v1",
+            "cohort": first_sample['program_id'],
             "description": "sample"
         }
 
