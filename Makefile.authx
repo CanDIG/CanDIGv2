@@ -4,13 +4,13 @@
 
 #<<<
 clean-keycloak:
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		$(DIR)/lib/keycloak/docker-compose.yml | docker-compose -f - down
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/keycloak/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'keycloak' | xargs -I{} docker rmi --force {}
 
-	docker volume rm keycloak-data
+	-docker volume rm keycloak-data
 
 #>>>
 # close vault services
@@ -18,13 +18,13 @@ clean-keycloak:
 
 #<<<
 clean-vault:
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		$(DIR)/lib/vault/docker-compose.yml | docker-compose -f - down
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/vault/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'vault' | xargs -I{} docker rmi --force {}
 
-	docker volume rm vault-data
+	-docker volume rm vault-data
 
 
 #>>>
@@ -33,14 +33,14 @@ clean-vault:
 
 #<<<
 clean-opa:
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		$(DIR)/lib/opa/docker-compose.yml | docker-compose -f - down
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/opa/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'openpolicyagent/opa' | xargs -I{} docker rmi --force {}
 	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'opa-runner' | xargs -I{} docker rmi --force {}
 
-	docker volume rm opa-data
+	-docker volume rm opa-data
 
 
 #>>>
@@ -49,17 +49,29 @@ clean-opa:
 
 #<<<
 clean-tyk:
-	cat $(DIR)/lib/compose/docker-compose.yml $(DIR)/lib/logging/$(DOCKER_LOG_DRIVER)/docker-compose.yml \
-		$(DIR)/lib/tyk/docker-compose.yml | docker-compose -f - down
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/tyk/docker-compose.yml down || true
 
 	# - remove intermittent docker images
 	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'tyk|redis' |  xargs -I{} docker rmi --force {}
 
 	# - clean tmp dir inside lib/tyk
-	rm -r $(DIR)/lib/tyk/tmp || true
+	rm -r lib/tyk/tmp || true
 
-	docker volume rm tyk-data
-	docker volume rm tyk-redis-data
+	-docker volume rm tyk-data
+	-docker volume rm tyk-redis-data
+
+
+#>>>
+# close federation service
+# make clean-federation
+#<<<
+clean-federation:
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/federation/docker-compose.yml down || true
+
+	# - remove intermittent docker images
+	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'federation' |  xargs -I{} docker rmi --force {}
 
 
 #>>>
@@ -67,7 +79,7 @@ clean-tyk:
 # make clean-authx
 
 #<<<
-clean-authx: clean-keycloak clean-tyk clean-vault clean-opa
+clean-authx: clean-keycloak clean-tyk clean-vault clean-opa clean-federation
 
 
 #>>>
@@ -76,27 +88,9 @@ clean-authx: clean-keycloak clean-tyk clean-vault clean-opa
 
 #<<<
 init-authx: mkdir
-	# Generate dynamic environment variables
-	# ==========  HACK ALERT ==============
-	# This setup with backslashes (\) is required because Make runs each command
-	# in its own shell.  So to pass the environment from previous commands, one has
-	# to do this backslash dance. This could have been resolved but we decided to
-	# move to a better solution so Aman made a decision to keep this hack as-is.
 	$(MAKE) docker-volumes
-	echo "Setting up Keycloak"; \
-	source ${PWD}/lib/keycloak/keycloak_setup.sh; \
-	echo "Setting up Tyk"; \
-	${PWD}/lib/tyk/tyk_setup.sh; \
-	echo ; \
-	$(MAKE) compose-tyk; \
-	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
-	echo "Setting up Vault"; \
-	source ${PWD}/lib/vault/vault_setup.sh; \
-	echo "Setting up Opa"; \
-	$(MAKE) build-opa; \
-	$(MAKE) compose-opa; \
-	source ${PWD}/lib/opa/opa_setup.sh; \
-	echo ;
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE);)
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) compose-$(MODULE);)
 
 
 #>>>
@@ -107,17 +101,7 @@ init-authx: mkdir
 redeploy-tyk: mkdir
 	$(MAKE) clean-tyk
 	$(MAKE) docker-volumes
-	# Generate dynamic environment variables
-	# ==========  HACK ALERT ==============
-	# This setup with backslashes (\) is required because Make runs each command
-	# in its own shell.  So to pass the environment from previous commands, one has
-	# to do this backslash dance. This could have been resolved but we decided to
-	# move to a better solution so Aman made a decision to keep this hack as-is.
-	source ${PWD}/lib/tyk/tyk_setup.sh; \
-	echo ; \
-	$(MAKE) compose-tyk; \
-	source ${PWD}/lib/tyk/tyk_key_generation.sh; \
-	echo ;
+	$(MAKE) compose-tyk
 
 
 #>>>
@@ -128,5 +112,4 @@ redeploy-tyk: mkdir
 #<<<
 setup-%:
 	echo "Setting up $*"
-	source ${PWD}/lib/$*/$*_setup.sh
-
+	source lib/$*/$*_setup.sh

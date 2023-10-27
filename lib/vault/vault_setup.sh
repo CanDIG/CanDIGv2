@@ -2,6 +2,10 @@
 
 set -Euo pipefail
 
+LOGFILE=tmp/progress.txt
+
+# This script runs after the container is composed.
+
 # This script will set up a full vault environment on your local CanDIGv2 cluster
 
 # Automates instructions written at
@@ -13,29 +17,24 @@ set -Euo pipefail
 # https://stackoverflow.com/questions/35703317/docker-exec-write-text-to-file-in-container
 # https://www.vaultproject.io/api-docs/secret/identity/entity#batch-delete-entities
 
-mkdir -p ${PWD}/lib/vault/tmp
+vault=$(docker ps -a --format "{{.Names}}" | grep vault_1 | awk '{print $1}')
+docker cp lib/vault/tmp/vault-config.json $vault:/vault/config/
 
-# vault-config.json
-echo "Working on vault-config.json .."
-envsubst < ${PWD}/lib/vault/configuration_templates/vault-config.json.tpl > ${PWD}/lib/vault/tmp/vault-config.json
-
-# boot container
-make build-vault
-make compose-vault
+# if vault isn't started, start it:
+docker restart $vault
 
 echo ">> waiting for vault to start"
-docker ps | grep vault
+docker ps --format "{{.Names}}" | grep vault_1
 while [ $? -ne 0 ]
 do
   echo "..."
   sleep 1
-  docker ps | grep vault
+  docker ps --format "{{.Names}}" | grep vault_1
 done
 sleep 5
 
 # gather keys and login token
 echo ">> gathering keys"
-vault=$(docker ps | grep vault_1 | awk '{print $1}')
 stuff=$(docker exec $vault sh -c "vault operator init") # | head -7 | rev | cut -d " " -f1 | rev)
 echo "found stuff as ${stuff}"
 
@@ -54,15 +53,15 @@ echo "found key5: ${key_5}"
 echo "found root: ${key_root}"
 
 # save keys
-touch ${PWD}/tmp/vault/keys.txt
-echo -e "keys: \n${key_1}" > ${PWD}/tmp/vault/keys.txt
-echo -e "${key_2}" >> ${PWD}/tmp/vault/keys.txt
-echo -e "${key_3}" >> ${PWD}/tmp/vault/keys.txt
-echo -e "${key_4}" >> ${PWD}/tmp/vault/keys.txt
-echo -e "${key_5}" >> ${PWD}/tmp/vault/keys.txt
-echo -e "root: \n${key_root}" >> ${PWD}/tmp/vault/keys.txt
+touch tmp/vault/keys.txt
+echo -e "keys: \n${key_1}" > tmp/vault/keys.txt
+echo -e "${key_2}" >> tmp/vault/keys.txt
+echo -e "${key_3}" >> tmp/vault/keys.txt
+echo -e "${key_4}" >> tmp/vault/keys.txt
+echo -e "${key_5}" >> tmp/vault/keys.txt
+echo -e "root: \n${key_root}" >> tmp/vault/keys.txt
 
-docker cp ${PWD}/tmp/vault/keys.txt $vault:/vault/config/
+docker cp tmp/vault/keys.txt $vault:/vault/config/
 
 echo ">> attempting to automatically unseal vault:"
 docker exec $vault sh -c "vault operator unseal ${key_1}"
@@ -93,7 +92,7 @@ docker exec $vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [
 
 echo
 echo ">> setting up aws policy"
-docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"read\"]}' >> vault-policy.hcl; vault policy write aws vault-policy.hcl"
+docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> vault-policy.hcl; vault policy write aws vault-policy.hcl"
 
 # user claims
 echo
@@ -112,7 +111,7 @@ echo
 KEYCLOAK_TEST_USER="$(cat tmp/secrets/keycloak-test-user)"
 echo ">> creating user $KEYCLOAK_TEST_USER"
 export TEMPLATE_DATASET_PERMISSIONS=4
-TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/lib/vault/configuration_templates/vault-entity-entitlements.json.tpl)
+TEST_USER_PERMISSIONS_DATASTRUCTURE=$(envsubst < lib/vault/configuration_templates/vault-entity-entitlements.json.tpl)
 
 test_user_output=$(docker exec $vault sh -c "echo '${TEST_USER_PERMISSIONS_DATASTRUCTURE}' > ${KEYCLOAK_TEST_USER}.json; vault write identity/entity @${KEYCLOAK_TEST_USER}.json; rm ${KEYCLOAK_TEST_USER}.json;")
 
@@ -123,7 +122,7 @@ echo ">>> found entity id : ${ENTITY_ID}"
 KEYCLOAK_TEST_USER_TWO="$(cat tmp/secrets/keycloak-test-user2)"
 echo ">> creating user $KEYCLOAK_TEST_USER_TWO"
 export TEMPLATE_DATASET_PERMISSIONS=1
-TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE=$(envsubst < ${PWD}/lib/vault/configuration_templates/vault-entity-entitlements.json.tpl)
+TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE=$(envsubst < lib/vault/configuration_templates/vault-entity-entitlements.json.tpl)
 
 test_user_output_two=$(docker exec $vault sh -c "echo '${TEST_USER_TWO_PERMISSIONS_DATASTRUCTURE}' > ${KEYCLOAK_TEST_USER_TWO}.json; vault write identity/entity @${KEYCLOAK_TEST_USER_TWO}.json; rm ${KEYCLOAK_TEST_USER_TWO}.json;")
 
@@ -166,7 +165,7 @@ echo ">> matching key and inserting custom info into the jwt"
 # json escaped or base64 escaped string and the braces have to be spaced apart
 # because templating code requres {{}} which when followed by another brace
 # messes up Vault and it complains that there is a mismatch in balance of braces
-VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < ${PWD}/lib/vault/configuration_templates/vault-datastructure.json.tpl)
+VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < lib/vault/configuration_templates/vault-datastructure.json.tpl)
 docker exec $vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > researcher.json; vault write identity/oidc/role/researcher @researcher.json; rm researcher.json;"
 
 echo
@@ -174,4 +173,5 @@ echo "enable kv store for aws secrets"
 docker exec $vault vault secrets enable -path="aws" -description="AWS-style ID/secret pairs" kv
 
 vault_runner=$(docker ps | grep vault-runner | awk '{print $1}')
-docker restart $vault_runner 
+docker restart $vault_runner
+docker exec $vault_runner bash /vault/create_token.sh

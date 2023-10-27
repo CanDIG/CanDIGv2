@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  query:
+    labels:
+      - "candigv2=query"
+    build:
+      context: $PWD/lib/query/query
+      args:
+        venv_python: "${VENV_PYTHON}"
+        alpine_version: "${ALPINE_VERSION}"
+    image: candig/query:${QUERY_VERSION:-latest}
+    volumes:
+      - query-data:/app
+    ports:
+      - "${QUERY_PORT}:3000"
+    environment:
+      CANDIG_KATSU_URL: ${KATSU_PRIVATE_URL}
+      CANDIG_HTSGET_URL: ${HTSGET_PRIVATE_URL}
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:${QUERY_PORT}" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3

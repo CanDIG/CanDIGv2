@@ -8,11 +8,11 @@ services:
         toil_version: "${TOIL_VERSION}"
         wes_version: "${WES_VERSION}"
     image: ${DOCKER_REGISTRY}/wes-server:${WES_VERSION:-latest}
+    labels:
+      - "candigv2=wes-server"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - toil-jobstore:/jobStoreParentDir
-    networks:
-      - ${DOCKER_NET}
     ports:
       - "${TOIL_PORT}:5050"
       - "${TOIL_UI_PORT}:3000"
@@ -21,27 +21,12 @@ services:
     # 3903 - mtail service
     # 9100 - node exporter
     # 9090 - prometheus service
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.lbswarm=true"
-        - "traefik.http.routers.wes-server.rule=Host(`wes-server.${CANDIG_DOMAIN}`)"
-        - "traefik.http.services.wes-server.loadbalancer.server.port=${TOIL_UI_PORT}"
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
       #- AWS_ACCESS_KEY_ID=toil
       #- AWS_SECRET_ACCESS_KEY=toilsecretkey
       - AWS_DEFAULT_REGION=${MINIO_REGION}
       - AWS_DEFAULT_OUTPUT=json
-    logging: *default-logging
     secrets:
       - source: wes-dependency-resolver
         target: /root/dependency_resolver.yml
@@ -61,30 +46,24 @@ services:
       #- --opt=extra=--batchSystem=Mesos
       #- --opt=extra=--mesosMaster=wes-server:5050
       #- --opt=extra=--beta-dependency-resolvers-configuration=dependency_resolver.yml
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
 
   wes-worker:
     image: ${DOCKER_REGISTRY}/wes-server:${WES_VERSION:-latest}
+    labels:
+      - "candigv2=wes-server"
     volumes:
       - toil-jobstore:/jobStoreParentDir
       - /var/run/docker.sock:/var/run/docker.sock:rw
-    networks:
-      - ${DOCKER_NET}
     ports:
       - "${TOIL_WORKER_PORT}:5051"
-    deploy:
-      mode: global
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
     environment:
       - MESOS_SYSTEMD_ENABLE_SUPPORT=false
       #- AWS_ACCESS_KEY_ID=toil
       #- AWS_SECRET_ACCESS_KEY=toilsecretkey
       - AWS_DEFAULT_REGION=${MINIO_REGION}
       - AWS_DEFAULT_OUTPUT=json
-    logging: *default-logging
     secrets:
       - source: minio-access-key
         target: access_key
@@ -103,3 +82,5 @@ services:
       #- --image_providers=appc,docker
       #- --isolation=filesystem/linux,docker/runtime
       #- --resources=cpus:4
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"

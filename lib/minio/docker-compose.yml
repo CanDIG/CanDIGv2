@@ -1,69 +1,26 @@
 version: '3.7'
 
 services:
-  minio-runner:
-    build:
-      context: $PWD/lib/minio/minio
-      args:
-        venv_python: "${VENV_PYTHON}"
-        alpine_version: "${ALPINE_VERSION}"
-        candig_domain: "${CANDIG_DOMAIN}"
-    networks:
-      - ${DOCKER_NET}
-    deploy:
-      placement:
-        constraints:
-          - node.role == worker
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    secrets:
-      - source: selfsigned-site-crt
-        target: public.crt
-      - source: selfsigned-site-key
-        target: private.key
-    environment:
-      - CANDIG_DOMAIN=${CANDIG_DOMAIN}
-      - MINIO_SELF_CERT=${MINIO_SELF_CERT}
-    logging: *default-logging
-    volumes:
-      - minio-data:/data
-      - minio-config:/root/.minio
   minio:
     image: minio/minio:${MINIO_VERSION:-latest}
+    labels:
+      - "candigv2=minio"
     volumes:
       - minio-data:/data
       - minio-config:/root/.minio
-    networks:
-      - ${DOCKER_NET}
     ports:
-      - "${MINIO_UI_PORT}:9090"
+      - "${MINIO_UI_PORT}:9001"
       - "${MINIO_PORT}:9000"
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.minio.rule=Host(`minio.${CANDIG_DOMAIN}`)"
-        - "traefik.http.services.minio.loadbalancer.server.port=${MINIO_UI_PORT}"
-    logging: *default-logging
     environment:
       - MINIO_REGION=${MINIO_REGION}
-      - CANDIG_DOMAIN="${CANDIG_DOMAIN}"
-      - MINIO_SERVER_URL=${MINIO_PUBLIC_URL}
+      - MINIO_ADDRESS=:${MINIO_PORT}
     secrets:
       - source: minio-access-key
         target: access_key
       - source: minio-secret-key
         target: secret_key
+    extra_hosts:
+        - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     command: ["server", "/data","--console-address", ":${MINIO_UI_PORT}"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]

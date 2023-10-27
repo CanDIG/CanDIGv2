@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -Eeuo pipefail
+set -Euo pipefail
 
 LOGFILE=$PWD/tmp/progress.txt
 
@@ -8,10 +8,7 @@ LOGFILE=$PWD/tmp/progress.txt
 # Verify if keycloak container is running
 KEYCLOAK_CONTAINERS=$(echo "$(docker ps | grep keycloak | wc -l)")
 echo "Number of keycloak containers running: ${KEYCLOAK_CONTAINERS}" | tee -a $LOGFILE
-if [[ $KEYCLOAK_CONTAINERS -eq 0 ]]; then
-  echo "Booting keycloak container!" | tee -a $LOGFILE
-  make compose-keycloak
-  sleep 5
+if [[ $KEYCLOAK_CONTAINERS -eq 1 ]]; then
   echo "Waiting for keycloak to start" | tee -a $LOGFILE
   while ! docker logs --tail 1000 "$(docker ps | grep keycloak | awk '{print $1}')" | grep "Undertow HTTPS listener https listening on 0.0.0.0"; do sleep 1; done
   echo "Keycloak container started." | tee -a $LOGFILE
@@ -26,6 +23,7 @@ add_user() {
 
   local JSON='  {
     "username": "'${username}'",
+    "email": "'${username}'@test.ca",
     "enabled": true,
     "attributes": {
       "'${attribute}'": [
@@ -185,7 +183,7 @@ set_client() {
     | sed -E s/.*client-scopes.\([a-z0-9-]+\).*/\\\\1/`
 
   echo "Created client scope ${new_scope}" | tee -a $LOGFILE
-  
+
   # Will add / to listen only if it is present
 
   local client_json='{
@@ -242,7 +240,7 @@ set_role() {
     -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X POST -H "Content-Type: application/json" -d "${JSON}" \
     "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${realm}/roles" -k`
-  
+
   echo "Created role ${role}" | tee -a $LOGFILE
 }
 

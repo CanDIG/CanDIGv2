@@ -5,29 +5,17 @@ services:
     build:
       context: ${PWD}/lib/keycloak
       args:
-        - BASE_IMAGE=candig/keycloak:${KEYCLOAK_VERSION}
+        #- BASE_IMAGE=candig/keycloak:${KEYCLOAK_VERSION}
+        - BASE_IMAGE=${KEYCLOAK_BASE_IMAGE}
+    labels:
+      - "candigv2=keycloak"
     command: [ "-b", "${KEYCLOAK_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING" ]
     ports:
       - "${KEYCLOAK_CONTAINER_PORT}:8080"
-    networks:
-      - ${DOCKER_NET}
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     volumes:
       - keycloak-data:/opt/jboss/keycloak/standalone
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.lbswarm=true"
-        - "traefik.http.routers.keycloak.rule=Host(`auth.${CANDIG_DOMAIN}`)"
-        - "traefik.http.services.keycloak.loadbalancer.server.port=${KEYCLOAK_CONTAINER_PORT}"
-    logging: *default-logging
     environment:
       - KEYCLOAK_USER_FILE=/run/secrets/keycloak-admin-user
       - KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak-admin-password
