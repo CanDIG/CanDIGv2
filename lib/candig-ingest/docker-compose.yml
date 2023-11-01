@@ -6,7 +6,6 @@ services:
             context: $PWD/lib/candig-ingest/candigv2-ingest
             args:
                 venv_python: "${VENV_PYTHON}"
-                alpine_version: "${ALPINE_VERSION}"
         image: ${DOCKER_REGISTRY}/candig-ingest:${CANDIG_INGEST_VERSION:-latest}
         labels:
             - "candigv2=candig-ingest"
