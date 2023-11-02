@@ -102,14 +102,3 @@ redeploy-tyk: mkdir
 	$(MAKE) clean-tyk
 	$(MAKE) docker-volumes
 	$(MAKE) compose-tyk
-
-
-#>>>
-# run setup script for service (if available)
-# SERVICE=keycloak
-# make setup-$SERVICE
-
-#<<<
-setup-%:
-	echo "Setting up $*"
-	source lib/$*/$*_setup.sh
