@@ -373,6 +373,18 @@ docker-volumes:
 
 
 #>>>
+# authx, common settings
+# make init-authx
+
+#<<<
+.PHONY: init-authx
+init-authx: mkdir
+	$(MAKE) docker-volumes
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE);)
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) compose-$(MODULE);)
+
+
+#>>>
 # initialize conda environment
 # make init-conda
 
