@@ -1,77 +1,14 @@
 #>>>
-# close keycloak services
-# make clean-keycloak
+# clean target: remove container, volumes, tempfiles
+# make clean-%
 
 #<<<
-clean-keycloak:
-	source setup_hosts.sh; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/keycloak/docker-compose.yml down || true
-
-	# - remove intermittent docker images
-	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'keycloak' | xargs -I{} docker rmi --force {}
-
-	-docker volume rm keycloak-data
-
-#>>>
-# close vault services
-# make clean-vault
-
-#<<<
-clean-vault:
-	source setup_hosts.sh; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/vault/docker-compose.yml down || true
-
-	# - remove intermittent docker images
-	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'vault' | xargs -I{} docker rmi --force {}
-
-	-docker volume rm vault-data
-
-
-#>>>
-# close opa services
-# make clean-opa
-
-#<<<
-clean-opa:
-	source setup_hosts.sh; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/opa/docker-compose.yml down || true
-
-	# - remove intermittent docker images
-	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'openpolicyagent/opa' | xargs -I{} docker rmi --force {}
-	@eval docker images --format '{{.Repository}}:{{.Tag}}' | grep 'opa-runner' | xargs -I{} docker rmi --force {}
-
-	-docker volume rm opa-data
-
-
-#>>>
-# close tyk services
-# make clean-tyk
-
-#<<<
-clean-tyk:
-	source setup_hosts.sh; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/tyk/docker-compose.yml down || true
-
-	# - remove intermittent docker images
-	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'tyk|redis' |  xargs -I{} docker rmi --force {}
-
-	# - clean tmp dir inside lib/tyk
-	rm -r lib/tyk/tmp || true
-
-	-docker volume rm tyk-data
-	-docker volume rm tyk-redis-data
-
-
-#>>>
-# close federation service
-# make clean-federation
-#<<<
-clean-federation:
-	source setup_hosts.sh; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/federation/docker-compose.yml down || true
-
-	# - remove intermittent docker images
-	docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'federation' |  xargs -I{} docker rmi --force {}
+clean-%:
+	echo "    started clean-$*"
+	source setup_hosts.sh
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
+	docker volume rm `docker volume ls --filter name=$* -q`
+	rm -Rf lib/$*/tmp
 
 
 #>>>
@@ -79,7 +16,8 @@ clean-federation:
 # make clean-authx
 
 #<<<
-clean-authx: clean-keycloak clean-tyk clean-vault clean-opa clean-federation
+clean-authx:
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
 
 
 #>>>
