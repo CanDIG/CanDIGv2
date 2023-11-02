@@ -1,26 +1,4 @@
 #>>>
-# clean target: remove container, volumes, tempfiles
-# make clean-%
-
-#<<<
-clean-%:
-	echo "    started clean-$*"
-	source setup_hosts.sh
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
-	docker volume rm `docker volume ls --filter name=$* -q`
-	rm -Rf lib/$*/tmp
-
-
-#>>>
-# close all authentication and authorization services
-# make clean-authx
-
-#<<<
-clean-authx:
-	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
-
-
-#>>>
 # authx, common settings
 # make init-authx
 

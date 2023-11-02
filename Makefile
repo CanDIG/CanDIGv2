@@ -142,6 +142,19 @@ build-%:
 
 
 #>>>
+# clean target: remove container, volumes, tempfiles
+# make clean-%
+
+#<<<
+clean-%:
+	echo "    started clean-$*"
+	source setup_hosts.sh
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
+	docker volume rm `docker volume ls --filter name=$* -q`
+	rm -Rf lib/$*/tmp
+
+
+#>>>
 # run all cleanup functions
 # WARNING: these are distructive steps, read through instructions before using
 # make clean-all
@@ -150,8 +163,18 @@ build-%:
 .PHONY: clean-all
 clean-all: clean-logs clean-authx clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images clean-bin
-	
-	
+
+
+#>>>
+# close all authentication and authorization services
+# make clean-authx
+
+#<<<
+.PHONY: clean-authx
+clean-authx:
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
+
+
 # Empties error and progress logs
 .PHONY: clean-logs
 clean-logs:
