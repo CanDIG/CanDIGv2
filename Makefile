@@ -4,7 +4,6 @@
 env ?= .env
 
 include $(env)
-include Makefile.authx
 export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
