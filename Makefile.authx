@@ -91,14 +91,3 @@ init-authx: mkdir
 	$(MAKE) docker-volumes
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE);)
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) compose-$(MODULE);)
-
-
-#>>>
-# authx, redeploy tyk
-# make redeploy-tyk
-
-#<<<
-redeploy-tyk: mkdir
-	$(MAKE) clean-tyk
-	$(MAKE) docker-volumes
-	$(MAKE) compose-tyk
