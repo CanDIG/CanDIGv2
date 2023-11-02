@@ -134,7 +134,8 @@ build-images: #toil-docker
 build-%:
 	printf "\nOutput of build-$*: \n" >> $(ERRORLOG)
 	echo "    started build-$*" >> $(LOGFILE)
-	source setup_hosts.sh; \
+	source setup_hosts.sh
+	-source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG)
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(ERRORLOG)
 	echo "    finished build-$*" >> $(LOGFILE)
@@ -255,7 +256,6 @@ compose:
 compose-%:
 	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
-	-source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG)
 	source setup_hosts.sh; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
 	-source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG)
