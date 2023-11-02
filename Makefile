@@ -149,7 +149,7 @@ clean-%:
 	echo "    started clean-$*"
 	source setup_hosts.sh
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
-	docker volume rm `docker volume ls --filter name=$* -q`
+	-docker volume rm `docker volume ls --filter name=$* -q`
 	rm -Rf lib/$*/tmp
 
 
