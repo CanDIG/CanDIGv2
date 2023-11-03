@@ -134,7 +134,9 @@ build-%:
 	printf "\nOutput of build-$*: \n" >> $(ERRORLOG)
 	echo "    started build-$*" >> $(LOGFILE)
 	source setup_hosts.sh
-	-source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG)
+	if [ -f lib/$*/$*_preflight.sh ]; then \
+	source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG); \
+	fi
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(ERRORLOG)
 	echo "    finished build-$*" >> $(LOGFILE)
@@ -280,7 +282,9 @@ compose-%:
 	echo "    started compose-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
-	-source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG)
+	if [ -f lib/$*/$*_setup.sh ]; then \
+	source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG); \
+	fi
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
