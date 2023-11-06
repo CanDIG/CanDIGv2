@@ -12,8 +12,9 @@ services:
       - "candigv2=template"
     #volumes:
       #- {{service_name}}-data:/data
-      #add volume name to lib/{compose,swarm,kubernetes}
-      #add volume name to docker-volumes in Makefile
+      # volume name must start with the name of the service!
+      # add volume name to lib/candigv2/docker-compose.yml
+      # add volume name to docker-volumes in Makefile
     ports:
       - "${{{service_port}}}:{{service_default_port}}"
     depends_on:

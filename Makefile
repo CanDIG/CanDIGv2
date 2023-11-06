@@ -4,7 +4,6 @@
 env ?= .env
 
 include $(env)
-include Makefile.authx
 export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
@@ -134,10 +133,26 @@ build-images: #toil-docker
 build-%:
 	printf "\nOutput of build-$*: \n" >> $(ERRORLOG)
 	echo "    started build-$*" >> $(LOGFILE)
-	source setup_hosts.sh; \
+	source setup_hosts.sh
+	if [ -f lib/$*/$*_preflight.sh ]; then \
+	source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG); \
+	fi
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(ERRORLOG)
 	echo "    finished build-$*" >> $(LOGFILE)
+
+
+#>>>
+# clean target: remove container, volumes, tempfiles
+# make clean-%
+
+#<<<
+clean-%:
+	echo "    started clean-$*"
+	source setup_hosts.sh
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
+	-docker volume rm `docker volume ls --filter name=$* -q`
+	rm -Rf lib/$*/tmp
 
 
 #>>>
@@ -149,8 +164,18 @@ build-%:
 .PHONY: clean-all
 clean-all: clean-logs clean-authx clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images clean-bin
-	
-	
+
+
+#>>>
+# close all authentication and authorization services
+# make clean-authx
+
+#<<<
+.PHONY: clean-authx
+clean-authx:
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
+
+
 # Empties error and progress logs
 .PHONY: clean-logs
 clean-logs:
@@ -255,10 +280,11 @@ compose:
 compose-%:
 	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
-	-source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG)
 	source setup_hosts.sh; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
-	-source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG)
+	if [ -f lib/$*/$*_setup.sh ]; then \
+	source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG); \
+	fi
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
@@ -347,6 +373,17 @@ docker-volumes:
 	docker volume create htsget-data --label candigv2=volume
 	docker volume create postgres-data --label candigv2=volume
 	docker volume create query-data --label candigv2=volume
+
+
+#>>>
+# authx, common settings
+# make init-authx
+
+#<<<
+.PHONY: init-authx
+init-authx: mkdir
+	$(MAKE) docker-volumes
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 
 
 #>>>

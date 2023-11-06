@@ -31,11 +31,15 @@ do
   sleep 1
   docker ps --format "{{.Names}}" | grep vault_1
 done
-sleep 5
+sleep 10
 
 # gather keys and login token
 echo ">> gathering keys"
 stuff=$(docker exec $vault sh -c "vault operator init") # | head -7 | rev | cut -d " " -f1 | rev)
+if [ -z ${stuff} ]; then
+  echo "Vault could not initialize"
+  exit 1
+fi
 echo "found stuff as ${stuff}"
 
 key_1=$(echo -n "${stuff}" | grep 'Unseal Key 1: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
