@@ -797,6 +797,46 @@ def test_katsu_users_data_access():
 
 # =========================|| KATSU TEST END ||=============================== #
 
+def test_ingest_permissions():
+    clean_up_program("SYNTHETIC-2")
+    clean_up_program("TEST_2")
+
+    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/single_ingest.json"
+    test_data = requests.get(test_loc).json()
+
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest/clinical_donors", headers=headers, json=test_data)
+    # when the user has no admin access, they should not be allowed
+    assert response.status_code == 403
+
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest/clinical_donors", headers=headers, json=test_data)
+    # when the user has admin access, they should be allowed
+    print(response.json())
+    assert response.status_code == 201
+    assert len(response.json()["SYNTHETIC-2"]["errors"]) == 0
+    assert len(response.json()["TEST_2"]["errors"]) == 0
+    assert len(response.json()["SYNTHETIC-2"]["results"]) == 12
+    assert len(response.json()["TEST_2"]["results"]) == 5
+
+    clean_up_program("SYNTHETIC-2")
+    clean_up_program("TEST_2")
+
 
 ## HTSGet + katsu:
 def test_add_sample_to_genomic():
