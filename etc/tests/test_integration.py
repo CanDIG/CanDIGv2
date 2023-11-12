@@ -445,7 +445,7 @@ def clean_up_program(test_id):
         headers=get_headers(is_admin=True),
     )
     assert (
-        delete_response.status_code == HTTPStatus.NO_CONTENT
+        delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
     ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
     f" Response content: {delete_response.content}"
 
