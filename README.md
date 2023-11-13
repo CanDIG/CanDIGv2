@@ -50,13 +50,15 @@ Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODU
 
 By default (if you copy the sample file from `etc/env/example.env`) the installation includes the minimal list of modules:
 
+```
   CANDIG_MODULES=minio htsget-server katsu candig-data-portal
+```
 
 Optional modules follow the `#` and include federation service, various monitoring components, workflow execution, and some older modules not generally installed.
 
 For federated installations, you will need `federation-service`.
 
-For production deployments, you will probably want to include  `federation-service weavescope logging monitoring`. Be aware that the last three require more resources, includeing storage.
+For production deployments, you will probably want to include  `federation-service`.
 
 Authorization and authentication modules defined in  `CANDIG_AUTH_MODULES` are only installed if you run `make init-authx` during deployment.
 

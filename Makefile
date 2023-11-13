@@ -176,6 +176,16 @@ clean-authx:
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
 
 
+#>>>
+# close all authentication and authorization services
+# make clean-authx
+
+#<<<
+.PHONY: clean-authx
+clean-authx:
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
+
+
 # Empties error and progress logs
 .PHONY: clean-logs
 clean-logs:
