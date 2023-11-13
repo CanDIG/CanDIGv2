@@ -65,8 +65,10 @@ SERVICE_COUNT=$(awk -v modules_raw="$ALL_MODULES" 'BEGIN {
 	mcounts["toil"]=2
 	mcounts["tyk"]=2
 	mcounts["vault"]=2
+	mcounts["candig-ingest"]=1
 	mcounts["wes-server"]=1
 	mcounts["drs-server"]=0
+	mcounts["query"]=1
 	split(modules_raw, modules, " ")
 	service_count = 0
 	for (module in modules) {

@@ -10,3 +10,4 @@ dask-jobqueue
 dask-ml
 dask-xgboost
 distributed
+pycryptodome>=3.6.6 # not directly required, pinned by Snyk to avoid a vulnerability

@@ -6,6 +6,9 @@ These instructions work for server deployments or local linux deployments. For l
 
 Before beginning, you should set up your environment variables as described in the [README](README.md).
 
+Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
+
+
 ## Install OS Dependencies
 
 ### Debian
@@ -52,7 +55,41 @@ sudo systemctl start docker
 sudo usermod -aG docker $(whoami)
 ```
 
-Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
+### Ubuntu
+
+1. Update system/install dependencies
+```bash
+sudo apt-get update
+
+sudo apt-get install \
+  apt-transport-https \
+  ca-certificates \
+  curl \
+  gnupg2 \
+  software-properties-common \
+  apt-transport-https \
+  ca-certificates curl \
+  software-properties-common
+```
+
+2. Install Docker
+
+```bash
+sudo apt-get update
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+sudo systemctl enable docker
+
+sudo systemctl start docker
+
+sudo usermod -aG docker $(whoami)
+```
+
 
 ### CentOS 7
 

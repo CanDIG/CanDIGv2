@@ -25,6 +25,8 @@ volumes:
     external: true
   postgres-data:
     external: true
+  query-data:
+    external: true
 
 secrets:
   aws-credentials:

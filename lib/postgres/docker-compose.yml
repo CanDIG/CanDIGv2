@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  metadata-db:
+    image: postgres:16
+    #volumes:
+      #- katsu-db:/var/lib/postgresql/data
+      #add volume name to lib/{compose,swarm,kubernetes}
+      #add volume name to docker-volumes in Makefile
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=metadata
+      - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
+      - POSTGRES_HOST_AUTH_METHOD=password
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    secrets:
+      - source: metadata-db-secret
+        target: metadata_db_secret
+    labels:
+      - "candigv2=chord-metadata"
+

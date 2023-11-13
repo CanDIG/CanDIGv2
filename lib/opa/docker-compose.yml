@@ -15,31 +15,27 @@ services:
     volumes:
       - opa-data:/app
     secrets:
-      - source: keycloak-client-local-candig-secret
-        target: idp_client_secret
       - source: opa-root-token
         target: opa-root-token
       - source: opa-service-token
         target: opa-service-token
     environment:
-      IDP_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
       OPA_SITE_ADMIN_KEY: ${OPA_SITE_ADMIN_KEY}
       OPA_URL: ${OPA_URL}
-      IDP: "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
-      KATSU_URL: "${KATSU_PUBLIC_URL}"
+      KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
+      KATSU_URL: ${KATSU_PUBLIC_URL}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
 
   opa:
-    image: openpolicyagent/opa:latest
+    image: openpolicyagent/opa:latest-static
     labels:
       - "candigv2=opa"
     ports:
       - "${OPA_PORT}:8181"
     volumes:
       - opa-data:/app
-    environment:
-      IDP: ${KEYCLOAK_REALM_URL}
     command:
       - "run"
       - "--server"

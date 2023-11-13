@@ -12,6 +12,9 @@ if [[ $KEYCLOAK_CONTAINERS -eq 1 ]]; then
   echo "Waiting for keycloak to start" | tee -a $LOGFILE
   while ! docker logs --tail 1000 "$(docker ps | grep keycloak | awk '{print $1}')" | grep "Undertow HTTPS listener https listening on 0.0.0.0"; do sleep 1; done
   echo "Keycloak container started." | tee -a $LOGFILE
+else
+  echo "Too many (or too few) keycloak containers! Shut down all keycloak containers and then re-run make compose-keycloak."
+  exit 1
 fi
 
 KEYCLOAK_CONTAINER=$(docker ps | grep keycloak | awk '{print $1}')
@@ -98,10 +101,16 @@ set_realm() {
     "enabled": true
   }'
 
-  curl \
+  local RESULT=$(curl \
     -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X POST -H "Content-Type: application/json" -d "${JSON}" \
-    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms" -k
+    "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms" -k)
+
+  echo ${RESULT} | grep errorMessage
+  if [[ $? == 0 ]]; then
+    echo "Realm cannot be set: ${RESULT}"
+    exit 1
+  fi
 }
 
 get_realm() {

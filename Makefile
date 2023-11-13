@@ -4,7 +4,6 @@
 env ?= .env
 
 include $(env)
-include Makefile.authx
 export $(shell sed 's/=.*//' $(env))
 
 SHELL = bash
@@ -25,7 +24,7 @@ all:
 	@echo "CanDIGv2 Makefile Deployment"
 	@echo "Type 'make help' to view available options"
 	@echo "View README.md for additional information"
-
+	
 #>>>
 # create non-repo directories
 # make mkdir
@@ -101,9 +100,9 @@ build-all:
 	$(MAKE) build-images
 	$(MAKE) compose
 	$(MAKE) init-authx
-
+	
 	./post_build.sh
-
+	
 .PHONY: install-all
 install-all:
 	$(MAKE) bin-conda
@@ -134,10 +133,26 @@ build-images: #toil-docker
 build-%:
 	printf "\nOutput of build-$*: \n" >> $(ERRORLOG)
 	echo "    started build-$*" >> $(LOGFILE)
-	source setup_hosts.sh; \
+	source setup_hosts.sh
+	if [ -f lib/$*/$*_preflight.sh ]; then \
+	source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG); \
+	fi
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(ERRORLOG)
 	echo "    finished build-$*" >> $(LOGFILE)
+
+
+#>>>
+# clean target: remove container, volumes, tempfiles
+# make clean-%
+
+#<<<
+clean-%:
+	echo "    started clean-$*"
+	source setup_hosts.sh
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
+	-docker volume rm `docker volume ls --filter name=$* -q`
+	rm -Rf lib/$*/tmp
 
 
 #>>>
@@ -149,6 +164,16 @@ build-%:
 .PHONY: clean-all
 clean-all: clean-logs clean-authx clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images clean-bin
+
+
+#>>>
+# close all authentication and authorization services
+# make clean-authx
+
+#<<<
+.PHONY: clean-authx
+clean-authx:
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
 
 
 # Empties error and progress logs
@@ -255,11 +280,26 @@ compose:
 compose-%:
 	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
-	-source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG)
 	source setup_hosts.sh; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
-	-source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG)
+	if [ -f lib/$*/$*_setup.sh ]; then \
+	source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG); \
+	fi
 	echo "    finished compose-$*" >> $(LOGFILE)
+
+
+#>>>
+# take down individual modules using docker-compose
+# $module is the name of the sub-folder in lib/
+# make down-$module
+
+#<<<
+down-%:
+	printf "\nOutput of down-$*: \n" >> $(ERRORLOG)
+	echo "    started down-$*" >> $(LOGFILE)
+	source setup_hosts.sh; \
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility down 2>&1
+	echo "    finished down-$*" >> $(LOGFILE)
 
 
 #>>>
@@ -332,6 +372,18 @@ docker-volumes:
 	docker volume create opa-data --label candigv2=volume
 	docker volume create htsget-data --label candigv2=volume
 	docker volume create postgres-data --label candigv2=volume
+	docker volume create query-data --label candigv2=volume
+
+
+#>>>
+# authx, common settings
+# make init-authx
+
+#<<<
+.PHONY: init-authx
+init-authx: mkdir
+	$(MAKE) docker-volumes
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 
 
 #>>>
@@ -385,7 +437,7 @@ katsu-secrets:
 	@echo admin > tmp/secrets/katsu-secret-key
 	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
 		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
-
+	
 	@echo admin > tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-app-secret
 	$(MAKE) secret-metadata-db-secret

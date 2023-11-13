@@ -1,9 +1,9 @@
 {
-    "api_id": "${TYK_VAULT_API_ID}",
-    "name": "${TYK_VAULT_API_SLUG}",
+    "api_id": "${TYK_INGEST_API_ID}",
+    "name": "${TYK_INGEST_API_SLUG}",
     "use_openid": true,
     "active": true,
-    "slug": "${TYK_VAULT_API_SLUG}",
+    "slug": "${TYK_INGEST_API_SLUG}",
 
     "enable_signature_checking": false,
 
@@ -15,10 +15,10 @@
     "base_identity_provided_by": "",
     
     "proxy": {
-        "target_url": "${TYK_VAULT_API_TARGET}",
+        "target_url": "${TYK_INGEST_API_TARGET}",
         "strip_listen_path": true,
         "disable_strip_slash": false,
-        "listen_path": "/${TYK_VAULT_API_LISTEN_PATH}",
+        "listen_path": "/${TYK_INGEST_API_LISTEN_PATH}",
         "transport": {
             "ssl_insecure_skip_verify": false,
             "ssl_ciphers": [],
@@ -53,7 +53,13 @@
         }
     },
     "custom_middleware": {
-        "pre": [],
+        "pre": [
+                {
+                "name": "backendAuthMiddleware",
+                "path": "/opt/tyk-gateway/middleware/backendAuthMiddleware.js",
+                "require_session": false
+            }
+            ],
         "post": [],
         "id_extractor": {
             "extract_with": "",

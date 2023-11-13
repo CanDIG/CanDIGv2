@@ -1,0 +1,25 @@
+version: 1.0.1
+
+services:
+    candig-ingest:
+        build:
+            context: $PWD/lib/candig-ingest/candigv2-ingest
+            args:
+                venv_python: "${VENV_PYTHON}"
+        image: ${DOCKER_REGISTRY}/candig-ingest:${CANDIG_INGEST_VERSION:-latest}
+        labels:
+            - "candigv2=candig-ingest"
+        ports:
+            - "${CANDIG_INGEST_PORT}:1235"
+        environment:
+            KEYCLOAK_PUBLIC_URL: "${KEYCLOAK_PUBLIC_URL}"
+            CANDIG_URL: "http://${CANDIG_DOMAIN}:5080"
+            VAULT_URL: "http://${CANDIG_DOMAIN}:${VAULT_SERVICE_PORT}"
+            CANDIG_CLIENT_ID: "${KEYCLOAK_CLIENT_ID}"
+            CANDIG_SECRET_FILE: "/run/secrets/keycloak-secret"
+            OPA_URL: "${OPA_URL}"
+        extra_hosts:
+              - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+        secrets:
+          - source: keycloak-client-local-candig-secret
+            target: keycloak-secret
