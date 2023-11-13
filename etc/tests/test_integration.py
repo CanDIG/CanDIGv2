@@ -445,7 +445,7 @@ def clean_up_program(test_id):
         headers=get_headers(is_admin=True),
     )
     assert (
-        delete_response.status_code == HTTPStatus.NO_CONTENT
+        delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
     ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
     f" Response content: {delete_response.content}"
 
@@ -796,6 +796,46 @@ def test_katsu_users_data_access():
 
 
 # =========================|| KATSU TEST END ||=============================== #
+
+def test_ingest_permissions():
+    clean_up_program("SYNTHETIC-2")
+    clean_up_program("TEST_2")
+
+    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/tests/single_ingest.json"
+    test_data = requests.get(test_loc).json()
+
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest/clinical_donors", headers=headers, json=test_data)
+    # when the user has no admin access, they should not be allowed
+    assert response.status_code == 403
+
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest/clinical_donors", headers=headers, json=test_data)
+    # when the user has admin access, they should be allowed
+    print(response.json())
+    assert response.status_code == 201
+    assert len(response.json()["SYNTHETIC-2"]["errors"]) == 0
+    assert len(response.json()["TEST_2"]["errors"]) == 0
+    assert len(response.json()["SYNTHETIC-2"]["results"]) == 12
+    assert len(response.json()["TEST_2"]["results"]) == 5
+
+    clean_up_program("SYNTHETIC-2")
+    clean_up_program("TEST_2")
 
 
 ## HTSGet + katsu:
