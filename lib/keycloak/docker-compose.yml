@@ -20,7 +20,7 @@ services:
       - KEYCLOAK_USER_FILE=/run/secrets/keycloak-admin-user
       - KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak-admin-password
       - PROXY_ADDRESS_FORWARDING=${KEYCLOAK_ENABLE_PROXY}
-      #- KEYCLOAK_FRONTEND_URL=${KEYCLOAK_PUBLIC_URL_PROD}
+      #- KEYCLOAK_FRONTEND_URL=${KEYCLOAK_PUBLIC_URL_PROD}/auth
     secrets:
       - source: keycloak-admin-user
         target: /run/secrets/keycloak-admin-user
