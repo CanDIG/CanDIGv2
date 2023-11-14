@@ -13,7 +13,7 @@
     "use_keyless": false,
     "enable_coprocess_auth": false,
     "base_identity_provided_by": "",
-
+    
     "proxy": {
         "target_url": "${TYK_OPA_API_TARGET}",
         "strip_listen_path": true,
@@ -61,13 +61,18 @@
             }
             ],
         "post": [
+            {
+                "name": "permissionsStoreMiddleware",
+                "path": "/opt/tyk-gateway/middleware/permissionsStoreMiddleware.js",
+                "require_session": false
+            }
         ],
         "id_extractor": {
             "extract_with": "",
             "extract_from": "",
             "extractor_config": {}
         },
-        "driver": "otto",
+        "driver": "",
         "auth_check": {
             "path": "",
             "require_session": false,
@@ -76,15 +81,14 @@
         "post_key_auth": [],
         "response": []
     },
-
+    
     "config_data": {
         "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
         "KEYCLOAK_SECRET": "${KEYCLOAK_SECRET}",
         "KEYCLOAK_REALM": "${KEYCLOAK_REALM}",
-        "KEYCLOAK_AUTH_PREFIX": "${KEYCLOAK_AUTH_PREFIX}",
         "KEYCLOAK_CLIENT_ID": "${KEYCLOAK_CLIENT_ID}",
         "KEYCLOAK_PRIVATE_URL": "${KEYCLOAK_PRIVATE_URL}",
-        "VAULT_SERVICE_URL":"${VAULT_PRIVATE_URL}",
+        "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
         "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",
         "VAULT_ROLE":"researcher"
     },
@@ -92,7 +96,13 @@
     "segregate_by_client": false,
     "providers": [
             {
-                "issuer": "${KEYCLOAK_ISSUER_URL}",
+                "issuer": "${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/${KEYCLOAK_REALM}",
+                "client_ids": {
+                    "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
+                }
+            },
+            {
+                "issuer": "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}",
                 "client_ids": {
                     "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
                 }
