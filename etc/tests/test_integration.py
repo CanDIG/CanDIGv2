@@ -837,29 +837,54 @@ def test_beacon(user, search, can_access, cannot_access):
     print(response.json())
 
 
+## HTSGet + katsu:
+def test_ingest_htsget():
+    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/daisieh/new-htsget-ingest/tests/genomic_ingest.json"
+    test_data = requests.get(test_loc).json()
+
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
+    # when the user has no admin access, they should not be allowed
+    print(response.json())
+    assert response.status_code == 403
+
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
+    # when the user has admin access, they should be allowed
+    print(response.json())
     assert response.status_code == 200
+    for id in response.json():
+        assert "genomic" in response.json()[id]
+        assert "sample" in response.json()[id]
 
-    assert len(response.json()["drsobjects"]) > 0
-    drs_obj = response.json()["drsobjects"].pop(0)
-    drs_obj_match = re.match(r"^(.+)\/(.+?)$", drs_obj)
-    if drs_obj_match is not None:
-        host = drs_obj_match.group(1)
-        drs_obj_name = drs_obj_match.group(2)
 
-        # assign the first member of this cohort to the sample
-        sample_drs_obj = {
-            "id": first_sample["submitter_sample_id"],
-            "contents": [{"drs_uri": [drs_obj], "name": drs_obj_name, "id": drs_obj_name}],
-            "version": "v1",
-            "cohort": first_sample['program_id'],
-            "description": "sample"
-        }
-
-        url = f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects"
-        response = requests.request("POST", url, json=sample_drs_obj, headers=headers)
-        print(response.text)
-        assert response.status_code == 200
-
+def test_sample_metadata():
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_REGISTRATION_1", headers=headers)
+    assert "genomes" in response.json()
+    assert "HG00096.cnv.vcf" in response.json()["genomes"]
 
 ## Federation tests:
 
