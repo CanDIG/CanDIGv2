@@ -911,7 +911,7 @@ def test_ingest_permissions():
     clean_up_program("SYNTHETIC-2")
     clean_up_program("TEST_2")
 
-    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/tests/single_ingest.json"
+    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/tests/clinical_ingest.json"
     test_data = requests.get(test_loc).json()
 
     token = get_token(
@@ -923,7 +923,7 @@ def test_ingest_permissions():
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest/clinical_donors", headers=headers, json=test_data)
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     # when the user has no admin access, they should not be allowed
     assert response.status_code == 403
 
@@ -935,7 +935,7 @@ def test_ingest_permissions():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest/clinical_donors", headers=headers, json=test_data)
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     # when the user has admin access, they should be allowed
     print(response.json())
     assert response.status_code == 201
@@ -947,14 +947,189 @@ def test_ingest_permissions():
     clean_up_program("SYNTHETIC-2")
     clean_up_program("TEST_2")
 
+## Htsget tests:
+
+
+## Run the main htsget test suite
+def test_htsget():
+    old_val = os.environ.get("TESTENV_URL")
+    os.environ[
+        "TESTENV_URL"
+    ] = f"http://{ENV['CANDIG_ENV']['CANDIG_DOMAIN']}:{ENV['CANDIG_ENV']['HTSGET_PORT']}"
+    retcode = pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py", "-k", "test_remove_objects or test_post_objects or test_index_variantfile"])
+    if old_val is not None:
+        os.environ["TESTENV_URL"] = old_val
+    print(retcode)
+    assert retcode == pytest.ExitCode.OK
+
+
+## Can we add samples to Opa-controlled dataset?
+def test_htsget_add_sample_to_dataset():
+    site_admin_token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    TESTENV_URL = (
+        ENV["CANDIG_ENV"]["HTSGET_PUBLIC_URL"]
+        .replace("http://", "drs://")
+        .replace("https://", "drs://")
+    )
+    # Delete cohort SYNTHETIC-1
+    response = requests.delete(
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-1",
+        headers=headers,
+    )
+
+    # Add NA18537 and multisample_1 to cohort SYNTHETIC-1, which is only authorized for user1:
+    payload = {
+        "id": "SYNTHETIC-1",
+        "drsobjects": [f"{TESTENV_URL}/NA18537", f"{TESTENV_URL}/multisample_1"],
+    }
+
+    response = requests.post(
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts",
+        headers=headers,
+        json=payload,
+    )
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-1",
+        headers=headers,
+    )
+    print(response.json())
+    assert f"{TESTENV_URL}/multisample_1" in response.json()["drsobjects"]
+    assert f"{TESTENV_URL}/multisample_2" not in response.json()["drsobjects"]
+
+    # Delete cohort SYNTHETIC-2
+    response = requests.delete(
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-2",
+        headers=headers,
+    )
+
+    # Add NA20787 and multisample_2 to cohort SYNTHETIC-2, which is only authorized for user2:
+    payload = {
+        "id": "SYNTHETIC-2",
+        "drsobjects": [f"{TESTENV_URL}/NA20787", f"{TESTENV_URL}/multisample_2"],
+    }
+
+    response = requests.post(
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts",
+        headers=headers,
+        json=payload,
+    )
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-2",
+        headers=headers,
+    )
+    print(response.json())
+    assert f"{TESTENV_URL}/multisample_2" in response.json()["drsobjects"]
+    assert f"{TESTENV_URL}/multisample_1" not in response.json()["drsobjects"]
+
+
+## Can we access the data when authorized to do so?
+def user_access():
+    return [
+        (
+            "CANDIG_SITE_ADMIN",
+            "NA18537",
+            True,
+        ),  # site admin can access all data, even if not specified by dataset
+        (
+            "CANDIG_NOT_ADMIN",
+            "NA18537",
+            True,
+        ),  # user1 can access NA18537 as part of SYNTHETIC-1
+        ("CANDIG_NOT_ADMIN", "NA20787", False),  # user1 cannot access NA20787
+    ]
+
+
+@pytest.mark.parametrize("user, obj, access", user_access())
+def test_htsget_access_data(user, obj, access):
+    username = ENV[f"{user}_USER"]
+    password = ENV[f"{user}_PASSWORD"]
+    headers = {
+        "Authorization": f"Bearer {get_token(username=username, password=password)}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    params = {"class": "header"}
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/data/{obj}",
+        headers=headers,
+        params=params,
+    )
+    print(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/data/{obj}")
+    assert (response.status_code == 200) == access
+
+
+## Does Beacon return the correct level of authorized results?
+def beacon_access():
+    return [
+        (
+            "CANDIG_SITE_ADMIN",
+            "NC_000021.8:g.5030847T>A",
+            ["multisample_1", "multisample_2"],
+            ["test"],
+        ),  # site admin can access all data, even if not specified by dataset
+        (
+            "CANDIG_NOT_ADMIN",
+            "NC_000021.8:g.5030847T>A",
+            ["multisample_1"],
+            ["multisample_2", "test"],
+        ),  # user1 can access NA18537 as part of SYNTHETIC-1
+        (
+            "CANDIG_NOT_ADMIN",
+            "NC_000001.11:g.16565782G>A",
+            [],
+            ["multisample_1", "multisample_2", "test"],
+        ),  # user1 cannot access test
+    ]
+
+
+@pytest.mark.parametrize("user, search, can_access, cannot_access", beacon_access())
+def test_beacon(user, search, can_access, cannot_access):
+    username = ENV[f"{user}_USER"]
+    password = ENV[f"{user}_PASSWORD"]
+    headers = {
+        "Authorization": f"Bearer {get_token(username=username, password=password)}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    params = {"allele": search}
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/genomics/beacon/v2/g_variants",
+        headers=headers,
+        params=params,
+    )
+    for c in can_access:
+        assert c in str(response.json())
+    for c in cannot_access:
+        assert c not in str(response.json())
+    print(response.json())
+
 
 ## HTSGet + katsu:
-def test_add_sample_to_genomic():
-    test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/SampleRegistration.json"
-    response = requests.get(test_loc)
-    first_sample = response.json().pop(0)
+def test_ingest_htsget():
+    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/tests/genomic_ingest.json"
+    test_data = requests.get(test_loc).json()
 
-    site_admin_token = get_token(
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
+    # when the user has no admin access, they should not be allowed
+    print(response.json())
+    assert response.status_code == 403
+
+    token = get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
