@@ -638,7 +638,7 @@ def test_ingest_permissions():
     clean_up_program("SYNTHETIC-2")
     clean_up_program("TEST_2")
 
-    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/tests/single_ingest.json"
+    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/daisieh/new-htsget-ingest/tests/clinical_ingest.json"
     test_data = requests.get(test_loc).json()
 
     token = get_token(
