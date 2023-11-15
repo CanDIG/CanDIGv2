@@ -650,7 +650,7 @@ def test_ingest_permissions():
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest/clinical_donors", headers=headers, json=test_data)
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     # when the user has no admin access, they should not be allowed
     assert response.status_code == 403
 
@@ -662,7 +662,7 @@ def test_ingest_permissions():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest/clinical_donors", headers=headers, json=test_data)
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     # when the user has admin access, they should be allowed
     print(response.json())
     assert response.status_code == 201
