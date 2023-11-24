@@ -124,14 +124,16 @@ def test_add_opa_dataset():
         "program": "OPA-TEST"
     }
 
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/user-access", headers=headers, json=test_data)
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
     # when the user has admin access, they should be allowed
     print(response.json())
     assert response.status_code == 200
 
     test_opa_datasets("CANDIG_SITE_ADMIN", test_data["program"])
 
-    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/user-access", headers=headers, json=test_data)
+    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
+    assert response.status_code == 200
+    assert test_data['program'] not in response.json()["access"]["controlled_access_list"][test_data["email"]]
 
 
 ## Is the user a site admin?
