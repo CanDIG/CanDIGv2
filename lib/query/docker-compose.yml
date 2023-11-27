@@ -12,6 +12,9 @@ services:
     image: candig/query:${QUERY_VERSION:-latest}
     volumes:
       - query-data:/app
+    secrets:
+      - source: query-service-token
+        target: query-service-token
     ports:
       - "${QUERY_PORT}:3000"
     environment:

@@ -350,6 +350,7 @@ docker-secrets: mkdir minio-secrets katsu-secrets
 	$(MAKE) secret-opa-root-token
 	$(MAKE) secret-opa-service-token
 
+	$(MAKE) secret-query-service-token
 
 
 #>>>
