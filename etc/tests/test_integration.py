@@ -108,6 +108,34 @@ def test_opa_datasets(user, dataset):
     assert dataset in response.json()["result"]
 
 
+## Can we add a dataset to one of the users?
+def test_add_opa_dataset():
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    test_data = {
+        "email": ENV["CANDIG_SITE_ADMIN_USER"] + "@test.ca",
+        "program": "OPA-TEST"
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
+    # when the user has admin access, they should be allowed
+    print(response.json())
+    assert response.status_code == 200
+
+    test_opa_datasets("CANDIG_SITE_ADMIN", test_data["program"])
+
+    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
+    assert response.status_code == 200
+    assert test_data['program'] not in response.json()["access"]["controlled_access_list"][test_data["email"]]
+
+
 ## Is the user a site admin?
 def user_admin():
     return [
