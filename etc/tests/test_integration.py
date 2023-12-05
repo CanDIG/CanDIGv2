@@ -259,14 +259,14 @@ def assert_datasets_should_not_exist(datasets):
     If any of the dataset names is found, the assertion will fail.
     """
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/discovery/donors/", headers=get_headers()
+        f"{ENV['CANDIG_URL']}/katsu/v2/discovery/programs/", headers=get_headers()
     )
     data = response.json()
-    dataset_names = list(data["discovery_donor"].keys())
+    dataset_names = data["cohort_list"]
 
     assert all(
         dataset_name not in dataset_names for dataset_name in datasets
-    ), f"Expected none of {datasets} to exist, but at least one was found."
+    ), f"Expected none of {datasets} to exist, but at least one was found. Attempt to clean up. Please run the test again"
 
 
 def ingest_data(endpoint, data, is_admin=False):
@@ -297,7 +297,7 @@ def perform_ingest_and_assert_status(endpoint, data, is_admin=False):
     Performs data ingest and asserts the response status code depend on permission
     """
     response = ingest_data(endpoint, data, is_admin)
-    expected_status = HTTPStatus.CREATED if is_admin else HTTPStatus.FORBIDDEN
+    expected_status = HTTPStatus.CREATED if is_admin else HTTPStatus.UNAUTHORIZED
     assert_ingest_response_status(response, expected_status, endpoint)
 
 
@@ -306,7 +306,7 @@ def clean_up_program(test_id):
     Deletes a dataset and all related objects. Expected 204
     """
     delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{test_id}/",
+        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/program/{test_id}/",
         headers=get_headers(is_admin=True),
     )
     assert (
@@ -316,180 +316,152 @@ def clean_up_program(test_id):
 
 
 def check_program_ingest(test_id, is_admin=False):
-    endpoint = "programs"
-    data = [{"program_id": test_id}]
+    endpoint = "program"
+    data = {"program_id": test_id}
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_donor_ingest(test_id, is_admin=False):
-    endpoint = "donors"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-        },
-    ]
+    endpoint = "donor"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_diagnosis_ingest(test_id, is_admin=False):
-    endpoint = "primary_diagnoses"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_primary_diagnosis_id": test_id,
-        },
-    ]
+    endpoint = "primary_diagnosis"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+        "submitter_primary_diagnosis_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_specimen_ingest(test_id, is_admin=False):
-    endpoint = "specimens"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_primary_diagnosis_id": test_id,
-            "submitter_specimen_id": test_id,
-        },
-    ]
+    endpoint = "specimen"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+        "submitter_primary_diagnosis_id": test_id,
+        "submitter_specimen_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_sample_ingest(test_id, is_admin=False):
-    endpoint = "sample_registrations"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_specimen_id": test_id,
-            "submitter_sample_id": test_id,
-        },
-    ]
+    endpoint = "sample_registration"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+        "submitter_specimen_id": test_id,
+        "submitter_sample_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_treatment_ingest(test_id, is_admin=False):
-    endpoint = "treatments"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_primary_diagnosis_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
+    endpoint = "treatment"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+        "submitter_primary_diagnosis_id": test_id,
+        "submitter_treatment_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_chemotherapy_ingest(test_id, is_admin=False):
-    endpoint = "chemotherapies"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
+    endpoint = "chemotherapy"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+        "submitter_treatment_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_radiation_ingest(test_id, is_admin=False):
-    endpoint = "radiations"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
+    endpoint = "radiation"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+        "submitter_treatment_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_hormonetherapy_ingest(test_id, is_admin=False):
-    endpoint = "hormone_therapies"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
+    endpoint = "hormone_therapy"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+        "submitter_treatment_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_immunotherapy_ingest(test_id, is_admin=False):
-    endpoint = "immunotherapies"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
+    endpoint = "immunotherapy"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+        "submitter_treatment_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_surgery_ingest(test_id, is_admin=False):
-    endpoint = "surgeries"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-            "margin_types_involved": [],
-            "margin_types_not_involved": [],
-            "margin_types_not_assessed": [],
-        },
-    ]
+    endpoint = "surgery"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+        "submitter_treatment_id": test_id,
+        "margin_types_involved": [],
+        "margin_types_not_involved": [],
+        "margin_types_not_assessed": [],
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_follow_up_ingest(test_id, is_admin=False):
-    endpoint = "follow_ups"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_primary_diagnosis_id": test_id,
-            "submitter_treatment_id": test_id,
-            "submitter_follow_up_id": test_id,
-        },
-    ]
+    endpoint = "follow_up"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+        "submitter_primary_diagnosis_id": test_id,
+        "submitter_treatment_id": test_id,
+        "submitter_follow_up_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_biomarker_ingest(test_id, is_admin=False):
-    endpoint = "biomarkers"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-        },
-    ]
+    endpoint = "biomarker"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_comorbidity_ingest(test_id, is_admin=False):
-    endpoint = "comorbidities"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-        },
-    ]
+    endpoint = "comorbidity"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
 def check_exposure_ingest(test_id, is_admin=False):
-    endpoint = "exposures"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-        },
-    ]
+    endpoint = "exposure"
+    data = {
+        "submitter_donor_id": test_id,
+        "program_id": test_id,
+    }
     perform_ingest_and_assert_status(endpoint, data, is_admin)
 
 
@@ -501,7 +473,7 @@ def check_datasets_access(is_admin, authorized_datasets, unauthorized_datasets):
         f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
         headers=get_headers(is_admin=is_admin),
     )
-    programs = list(map(lambda x: x["program_id"], response.json()["results"]))
+    programs = list(map(lambda x: x["program_id"], response.json()["items"]))
 
     # Assert that all authorized datasets are present in programs
     assert all(
@@ -579,7 +551,7 @@ def test_unauthorized_ingests():
     - Attempt to clean up after in case any ingests go through but expected None
 
     Expected result:
-    - HTTP 403 even with valid ingest data.
+    - HTTP 401 even with valid ingest data.
     """
     # to simplify the test data, only 1 unique id is needed
     test_id = "TEST-" + str(uuid.uuid4())
@@ -637,10 +609,12 @@ def test_katsu_users_data_access():
         assert_datasets_should_not_exist(synthetic_datasets)
 
         # create synthetic datasets that matches OPA access
-        endpoint = "programs"
-        program_data = [{"program_id": dataset_id} for dataset_id in synthetic_datasets]
-        response = ingest_data(endpoint, program_data, is_admin=True)
-        assert response.status_code == HTTPStatus.CREATED, "Failed to create programs."
+        endpoint = "program"
+        program_data_list = [{"program_id": dataset_id} for dataset_id in synthetic_datasets]
+        for program_data in program_data_list:
+            response = ingest_data(endpoint, program_data, is_admin=True)
+            assert response.status_code == HTTPStatus.CREATED, "Failed to create program."
+
 
         # Assert access for admin user
         check_datasets_access(
@@ -680,7 +654,7 @@ def test_ingest_permissions():
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     # when the user has no admin access, they should not be allowed
-    assert response.status_code == 403
+    assert response.status_code == 401
 
     token = get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
