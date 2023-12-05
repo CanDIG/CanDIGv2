@@ -586,7 +586,7 @@ def test_katsu_users_data_access():
         for program_data in program_data_list:
             response = ingest_data(endpoint, program_data, is_admin=True)
             assert response.status_code == HTTPStatus.CREATED, "Failed to create program."
-            
+
 
         # Assert access for admin user
         check_datasets_access(
@@ -626,7 +626,7 @@ def test_ingest_permissions():
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     # when the user has no admin access, they should not be allowed
-    assert response.status_code == 403
+    assert response.status_code == 401
 
     token = get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
