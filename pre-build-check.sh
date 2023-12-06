@@ -7,7 +7,12 @@ elif command -v dscacheutil >/dev/null 2>&1; then
     CANDIG_HOST=`dscacheutil -q host -a name candig-dev`
 fi
 
-if [ ! -z "$CANDIG_HOST" ]; then
+SILENT_MODE=0
+if [[ $* == *-s* ]]; then
+    SILENT_MODE=1
+fi
+
+if [[ ! -z "$CANDIG_HOST" ]] && [[ "$SILENT_MODE" != 1 ]]; then
     printf "Please disable the UHN VPN, as it causes errors with the build process"
     exit 1
 fi
@@ -47,7 +52,7 @@ if [ "$DIFF_OUT" == "" ]; then
 else
     echo "Your .env differs from etc/env/example.env:"
     echo "$DIFF_OUT"
-    while true
+    while [[ "$SILENT_MODE" != 1 ]]
     do
         read -r -p 'Do you want to continue? (y/n)' choice
         case "$choice" in

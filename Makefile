@@ -93,7 +93,7 @@ endif
 .PHONY: build-all
 build-all:
 	printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG)
-	./pre-build-check.sh
+	./pre-build-check.sh $(ARGS)
 
 # Setup the entire stack
 	$(MAKE) init-docker

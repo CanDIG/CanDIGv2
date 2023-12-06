@@ -3,11 +3,13 @@
 PostToSlack () {
     SAFE_TEXT=${1@Q}
     SAFE_TEXT=${SAFE_TEXT//\"/\\\"}
-    echo -X POST -H 'Content-type: application/json' --data "{\"text\":\"$SAFE_TEXT\"}" $HOOK_URL
+    curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$SAFE_TEXT\"}" $HOOK_URL
 }
 
 
 # Make sure all of our necessary configuration works
+HOOK_URL=$(cat hook_url.txt)
+BOT_TOKEN=$(cat bot_token.txt)
 if [ -z "$HOOK_URL" ] || [ -z "$BOT_TOKEN" ]; then
     echo "Nightly build cannot work without the following settings set: \$HOOK_URL and \$BOT_TOKEN"
     exit
@@ -34,6 +36,7 @@ make bin-conda
 
 # Restart shell?
 make init-conda
+source bin/miniconda3/etc/profile.d/conda.sh
 conda activate candig
 make build-all ARGS="-s" 2<&1 >lastbuild.txt
 
@@ -57,11 +60,16 @@ if [ $? -ne 0 ]; then
 fi
 
 # Run the ingestion
-cd $INGESTION_PATH
+python settings.py
+source env.sh
+export INGEST_PATH=$(cat ingestion_path.txt)
+cd $INGEST_PATH
+export CLINICAL_DATA_LOCATION=$INGEST_PATH/tests/clinical_ingest.json
+pip install dateparser
+pip install openapi_spec_validator
+python katsu_ingest.py
 
-source get-token.sh
-# Todo: edit the 
-PostToSlack "Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat tmp/secrets/keycloak-test-user2-password)\ntoken $TOKEN"
+PostToSlack "Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\ntoken $TOKEN"
 
 # # Listen for a token posted to Slack, posted at most 20 hours ago
 # OTHER_TOKEN=""
