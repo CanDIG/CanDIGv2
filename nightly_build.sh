@@ -63,18 +63,18 @@ source get-token.sh
 # Todo: edit the 
 PostToSlack "Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat tmp/secrets/keycloak-test-user2-password)\ntoken $TOKEN"
 
-# Listen for a token posted to Slack, posted at most 20 hours ago
-OTHER_TOKEN=""
-let "OLDEST_DATE=$(date +%s) - 20*60*60" # 20 hours ago in unix timestamp
-while [ -z "$OTHER_TOKEN" ];
-do
-    # Look for a thing that has a token
-    # NB: Parsing JSON in bash is painful, so I'm offloading this to a python script
-    OTHER_TOKEN=$(python nightly_build_token.py --token $BOT_TOKEN)
-    if [ $? -eq 0 ]; then
-        OTHER_TOKEN=""
-    fi
-    sleep 30
-done
-
-python add-federated-server.py -token $OTHER_TOKEN -id token -url url -keycloak keycloak -name federation-2 -province Ontario -code ON
+# # Listen for a token posted to Slack, posted at most 20 hours ago
+# OTHER_TOKEN=""
+# let "OLDEST_DATE=$(date +%s) - 20*60*60" # 20 hours ago in unix timestamp
+# while [ -z "$OTHER_TOKEN" ];
+# do
+#     # Look for a thing that has a token
+#     # NB: Parsing JSON in bash is painful, so I'm offloading this to a python script
+#     OTHER_TOKEN=$(python nightly_build_token.py --token $BOT_TOKEN)
+#     if [ $? -eq 0 ]; then
+#         OTHER_TOKEN=""
+#     fi
+#     sleep 30
+# done
+# 
+# python add-federated-server.py -token $OTHER_TOKEN -id token -url url -keycloak keycloak -name federation-2 -province Ontario -code ON
