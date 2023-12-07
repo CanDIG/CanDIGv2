@@ -8,8 +8,7 @@ PostToSlack () {
 
 
 # Make sure all of our necessary configuration works
-HOOK_URL=$(cat hook_url.txt)
-BOT_TOKEN=$(cat bot_token.txt)
+source nightly_env.sh
 if [ -z "$HOOK_URL" ] || [ -z "$BOT_TOKEN" ]; then
     echo "Nightly build cannot work without the following settings set: \$HOOK_URL and \$BOT_TOKEN"
     exit
@@ -21,22 +20,22 @@ docker system prune -af
 
 # Double check that the .env file works?
 # But also we need to check that we can't just merge the .env file
-git stash
-git pull
-git submodule update --recursive --init
-git stash apply 2<&1 >stashapply.txt
+if [[ $SKIP_GIT -ne 1 ]]; then
+    git stash
+    git pull
+    git submodule update --recursive --init
+    git stash apply 2<&1 >stashapply.txt
 
-if [ $? -ne 0 ]; then
-    PostToSlack "Could not automatically merge git repo: $(tail stashapply.txt)"
-    exit
+    if [ $? -ne 0 ]; then
+        PostToSlack "Could not automatically merge git repo: $(tail stashapply.txt)"
+        exit
+    fi
 fi
 
-# How do we handle prod-specific changes?
+# Re-initialize conda
 make bin-conda
-
-# Restart shell?
-make init-conda
 source bin/miniconda3/etc/profile.d/conda.sh
+make init-conda
 conda activate candig
 make build-all ARGS="-s" 2<&1 >lastbuild.txt
 
@@ -45,12 +44,18 @@ if [ $? -ne 0 ]; then
     exit
 fi
 
-# Don't run integration tests until we see that HTSGet has completed setup
-HTSGET_TEST=""
-while [ -z "$HTSGET_TEST" ];
+# Don't run integration tests until we see that every service has completed setup
+TYK_TESTS=""
+TRIES=0
+while [ -z "$TYK_TESTS" ];
 do
-    HTSGET_TEST=$(curl -s http://candig-dev.hpc4healthlocal:3333/ga4gh/drs/v1/service-info | grep "DRS")
-    sleep 5
+    TYK_TESTS=$(pytest -k "test_tyk" etc/tests/test_integration.py | grep "1 passed")
+    sleep 15
+    TRIES=$TRIES+1
+    if [[ $TRIES -gt 120 ]]; then
+        PostToSlack "Tyk did not go live after 30 minutes"
+        exit
+    fi
 done
 
 make test-integration 2<&1 >integration-build.txt
@@ -62,14 +67,15 @@ fi
 # Run the ingestion
 python settings.py
 source env.sh
-export INGEST_PATH=$(cat ingestion_path.txt)
 cd $INGEST_PATH
 export CLINICAL_DATA_LOCATION=$INGEST_PATH/tests/clinical_ingest.json
+# should be pip install -r requirements.txt, but that didn't seem to work last I checked -- dependency errors?
 pip install dateparser
 pip install openapi_spec_validator
 python katsu_ingest.py
+cd $BUILD_PATH
 
-PostToSlack "Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\ntoken $TOKEN"
+PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\ntoken $TOKEN\`\`\`"
 
 # # Listen for a token posted to Slack, posted at most 20 hours ago
 # OTHER_TOKEN=""
