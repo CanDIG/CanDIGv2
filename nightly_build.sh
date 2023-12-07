@@ -24,10 +24,10 @@ if [[ $SKIP_GIT -ne 1 ]]; then
     git stash
     git pull
     git submodule update --recursive --init
-    git stash apply 2<&1 >stashapply.txt
+    git stash apply 2<&1 >tmp/stashapply.txt
 
     if [ $? -ne 0 ]; then
-        PostToSlack "Could not automatically merge git repo: $(tail stashapply.txt)"
+        PostToSlack "Could not automatically merge git repo: $(cat tmp/stashapply.txt)"
         exit
     fi
 fi
@@ -37,10 +37,10 @@ make bin-conda
 source bin/miniconda3/etc/profile.d/conda.sh
 make init-conda
 conda activate candig
-make build-all ARGS="-s" 2<&1 >lastbuild.txt
+make build-all ARGS="-s" 2<&1 >tmp/lastbuild.txt
 
 if [ $? -ne 0 ]; then
-    PostToSlack "Build failed:\n $(tail lastbuild.txt)"
+    PostToSlack "Build failed:\n $(tail tmp/lastbuild.txt)"
     exit
 fi
 
@@ -58,9 +58,9 @@ do
     fi
 done
 
-make test-integration 2<&1 >integration-build.txt
+make test-integration 2<&1 >tmp/integration-build.txt
 if [ $? -ne 0 ]; then
-    PostToSlack "Integration tests failed:\n $(tail integration-build.txt)"
+    PostToSlack "Integration tests failed:\n $(tail tmp/integration-build.txt)"
     exit
 fi
 
