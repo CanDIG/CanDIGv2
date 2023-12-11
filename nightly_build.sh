@@ -21,14 +21,25 @@ docker system prune -af
 # Double check that the .env file works?
 # But also we need to check that we can't just merge the .env file
 if [[ $SKIP_GIT -ne 1 ]]; then
-    git stash
-    git pull
-    git submodule update --recursive --init
-    git stash apply 2<&1 >tmp/stashapply.txt
+    git stash push -m "NIGHTLY_STASH"
+    git pull >tmp/gitpull.txt
 
     if [ $? -ne 0 ]; then
-        PostToSlack "Could not automatically merge git repo: $(cat tmp/stashapply.txt)"
+        PostToSlack "Could not automatically pull git repo: $(cat tmp/gitpull.txt)"
         exit
+    fi
+
+    git submodule update --recursive --init
+
+    # Figure out the index of the stash we applied
+    STASH_TEXT=$(git stash list | grep "NIGHTLY_STASH")
+    if [[ ! -z $STASH_TEXT ]]; then
+        [[ $STASH_TEXT =~ \{([[:digit:]]+)\} ]]
+        git stash pop ${BASH_REMATCH[1]} 2<&1 >tmp/stashapply.txt
+        if [ $? -ne 0 ]; then
+            PostToSlack "Could not automatically merge git repo: $(cat tmp/stashapply.txt)"
+            exit
+        fi
     fi
 fi
 
@@ -75,20 +86,5 @@ pip install openapi_spec_validator
 python katsu_ingest.py
 cd $BUILD_PATH
 
-PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\ntoken $TOKEN\`\`\`"
+PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\`\`\`"
 
-# # Listen for a token posted to Slack, posted at most 20 hours ago
-# OTHER_TOKEN=""
-# let "OLDEST_DATE=$(date +%s) - 20*60*60" # 20 hours ago in unix timestamp
-# while [ -z "$OTHER_TOKEN" ];
-# do
-#     # Look for a thing that has a token
-#     # NB: Parsing JSON in bash is painful, so I'm offloading this to a python script
-#     OTHER_TOKEN=$(python nightly_build_token.py --token $BOT_TOKEN)
-#     if [ $? -eq 0 ]; then
-#         OTHER_TOKEN=""
-#     fi
-#     sleep 30
-# done
-# 
-# python add-federated-server.py -token $OTHER_TOKEN -id token -url url -keycloak keycloak -name federation-2 -province Ontario -code ON
