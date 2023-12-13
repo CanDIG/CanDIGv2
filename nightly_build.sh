@@ -24,10 +24,10 @@ docker system prune -af
 # But also we need to check that we can't just merge the .env file
 if [[ $SKIP_GIT -ne 1 ]]; then
     git stash push -m "NIGHTLY_STASH"
-    git pull >tmp/gitpull.txt 2<&1
+    git pull >tmp/gitpull.txt
 
     if [ $? -ne 0 ]; then
-        PostToSlack "Could not automatically pull git repo:\n\`\`\`$(cat tmp/gitpull.txt)\`\`\`"
+        PostToSlack "Could not automatically pull git repo: $(cat tmp/gitpull.txt)"
         exit
     fi
 
@@ -37,9 +37,9 @@ if [[ $SKIP_GIT -ne 1 ]]; then
     STASH_TEXT=$(git stash list | grep "NIGHTLY_STASH")
     if [[ ! -z $STASH_TEXT ]]; then
         [[ $STASH_TEXT =~ \{([[:digit:]]+)\} ]]
-        git stash pop ${BASH_REMATCH[1]} >tmp/stashapply.txt 2<&1
+        git stash pop ${BASH_REMATCH[1]} 2<&1 >tmp/stashapply.txt
         if [ $? -ne 0 ]; then
-            PostToSlack "Could not automatically merge git repo:\n\`\`\`$(cat tmp/stashapply.txt)\`\`\`"
+            PostToSlack "Could not automatically merge git repo: $(cat tmp/stashapply.txt)"
             exit
         fi
     fi
@@ -53,10 +53,10 @@ make bin-conda
 source bin/miniconda3/etc/profile.d/conda.sh
 make init-conda
 conda activate candig
-make build-all BUILD_OPTS="--no-cache" ARGS="-s" >tmp/lastbuild.txt 2<&1
+make build-all ARGS="-s" 2<&1 >tmp/lastbuild.txt
 
 if [ $? -ne 0 ]; then
-    PostToSlack "Build failed:\n\`\`\`$(tail tmp/lastbuild.txt)\`\`\`"
+    PostToSlack "Build failed:\n $(tail tmp/lastbuild.txt)"
     exit
 fi
 
@@ -65,7 +65,7 @@ TYK_TESTS=""
 TRIES=0
 while [ -z "$TYK_TESTS" ];
 do
-    TYK_TESTS=$(make test-integration ARGS='-k "test_tyk" etc/tests/integration/test_integration.py' | grep "1 passed")
+    TYK_TESTS=$(pytest -k "test_tyk" etc/tests/test_integration.py | grep "1 passed")
     sleep 15
     TRIES=$TRIES+1
     if [[ $TRIES -gt 120 ]]; then
@@ -74,18 +74,21 @@ do
     fi
 done
 
-make test-integration ARGS="--color=no" >tmp/integration-build.txt 2<&1
+make test-integration 2<&1 >tmp/integration-build.txt
 if [ $? -ne 0 ]; then
-    PostToSlack "Integration tests failed:\n\`\`\`$(tail tmp/integration-build.txt)\`\`\`"
+    PostToSlack "Integration tests failed:\n $(tail tmp/integration-build.txt)"
     exit
 fi
 
+# Run the ingestion
+python settings.py
 source env.sh
-
-export TOKEN=$(python site_admin_token.py)
-
+cd $INGEST_PATH
+export CLINICAL_DATA_LOCATION=$INGEST_PATH/tests/clinical_ingest.json
+# should be pip install -r requirements.txt, but that didn't seem to work last I checked -- dependency errors?
+pip install dateparser
+pip install openapi_spec_validator
+python katsu_ingest.py
 cd $BUILD_PATH
 
-PostToSlack "\`\`\`\nBuild success:\n$TYK_LOGIN_TARGET_URL\nusername: $CANDIG_SITE_ADMIN_USER\npassword $CANDIG_SITE_ADMIN_PASSWORD\nusername: $CANDIG_NOT_ADMIN_USER\npassword $CANDIG_NOT_ADMIN_PASSWORD\nusername: $CANDIG_NOT_ADMIN2_USER\npassword $CANDIG_NOT_ADMIN2_PASSWORD\n\`\`\`"
-FEDERATE_STRING="federate $TOKEN|$CANDIG_CLIENT_ID|$CANDIG_URL|$CANDIG_CLIENT_ID|ON|ca-on|$FEDERATION_SELF_SERVER_ID|$KEYCLOAK_PUBLIC_URL/auth/realms/$KEYCLOAK_REALM"
-PostToSlack "\`\`\`$FEDERATE_STRING\`\`\`"
+PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\`\`\`"
