@@ -90,5 +90,4 @@ echo "  starting candig pip install" | tee -a $LOGFILE
 source $PWD/bin/miniconda3/etc/profile.d/conda.sh
 conda activate candig
 pip install -U -r $PWD/etc/venv/requirements.txt
-#pip install -U -r $PWD/etc/venv/requirements-dev.txt
 echo "finished provision.sh" | tee -a $LOGFILE
