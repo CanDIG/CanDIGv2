@@ -185,7 +185,21 @@ make install-all
 make build-all
 ```
 
-On some machines (MacOS), it may be necessary to add the following to /etc/hosts:
+On some machines (MacOS), if you get an error something like:
+```
+Please ensure the value of $CANDIG_DOMAIN in your .env file points to this machine
+This should either be: 1) your local IP address, as assigned by your local network, or
+2) a domain name that resolves to this IP address
+```
+it may be necessary to add the following to `/etc/hosts`:
+
+In a terminal, run the following commands
+```
+sudo nano /etc/hosts
+```
+
+Then add the following line at the bottom of the file and save the changes:
+
 ```
 ::1	candig.docker.internal
 ```
