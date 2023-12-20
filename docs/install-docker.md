@@ -204,7 +204,17 @@ Then add the following line at the bottom of the file and save the changes:
 ::1	candig.docker.internal
 ```
 
-In some other cases, it may be necessary to add your local (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, edit your .env file with:
+In some other cases, it may be necessary to add your local/internal (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, find out what your local IP address is 
+
+```bash
+# on mac
+ifconfig en0 | awk '$1 == "inet" {print $2}'
+# on linux
+ifconfig eth0 | awk '/inet addr/ {gsub("addr:", "", $2); print $2}'
+```
+
+Then edit your .env file with:
+
 ```bash
 LOCAL_IP_ADDR=<your local IP>
 ```
