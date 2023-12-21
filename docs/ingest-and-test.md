@@ -80,4 +80,4 @@ python settings.py
 source env.sh
 ```
 
-Follow the instructions for [Clinical data](https://github.com/CanDIG/candigv2-ingest#ingest-clinical-data) and [Genomic data](https://github.com/CanDIG/candigv2-ingest#ingest-genomic-files)
+Follow the instructions for [Clinical data](https://github.com/CanDIG/candigv2-ingest#1-clinical-data) and [Genomic data](https://github.com/CanDIG/candigv2-ingest#2-genomic-data)
