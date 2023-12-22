@@ -10,6 +10,12 @@ The easiest way to test your local installation is to run the integration tests.
 make test-integration
 ```
 
+If you get an error about missing python requirements such as `dotenv` try:
+
+```commandline
+pip install -r etc/venv/requirements.txt
+```
+
 If you want to run the tests manually, follow the instructions below.
 ## Initial tests
 
