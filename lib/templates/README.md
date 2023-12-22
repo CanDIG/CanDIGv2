@@ -1,8 +1,13 @@
 # Adding a new service to CanDIGv2
 
+For detailed instructions, see https://candig.atlassian.net/wiki/spaces/CA/pages/807731227/Creating+a+New+Microservice
+
 If you've got a service to add from a separately-maintained repo, use these template instructions.
 
-* Create a standalone Docker container for your service, using the Dockerfile template. Verify that your repo can spin up in a Docker container successfully.
+Start by creating a repo inside the CanDIG organisation from the [repository-template](https://github.com/new?template_name=repository-template&template_owner=CanDIG)
+
+Brief instructions:
+* Edit the provided [Dockerfile template](https://github.com/CanDIG/repository-template/blob/develop/Dockerfile). Verify that your repo can spin up in a Docker container successfully.
 * Create a new directory under `lib` for your service.
 * Add your repo as a submodule in this directory.
 * Add a docker-compose file in this directory, based on the provided template.
