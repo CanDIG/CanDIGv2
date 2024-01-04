@@ -24,7 +24,7 @@ all:
 	@echo "CanDIGv2 Makefile Deployment"
 	@echo "Type 'make help' to view available options"
 	@echo "View README.md for additional information"
-	
+
 #>>>
 # create non-repo directories
 # make mkdir
@@ -100,9 +100,9 @@ build-all:
 	$(MAKE) build-images
 	$(MAKE) compose
 	$(MAKE) init-authx
-	
+
 	./post_build.sh
-	
+
 .PHONY: install-all
 install-all:
 	$(MAKE) bin-conda
@@ -346,6 +346,7 @@ docker-secrets: mkdir minio-secrets katsu-secrets
 	$(MAKE) secret-tyk-analytics-admin-key
 
 	$(MAKE) secret-vault-s3-token
+	$(MAKE) secret-vault-approle-token
 
 	$(MAKE) secret-opa-root-token
 	$(MAKE) secret-opa-service-token
@@ -437,7 +438,7 @@ katsu-secrets:
 	@echo admin > tmp/secrets/katsu-secret-key
 	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
 		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
-	
+
 	@echo admin > tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-app-secret
 	$(MAKE) secret-metadata-db-secret
