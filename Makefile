@@ -218,7 +218,7 @@ clean-conda:
 
 
 #>>>
-# stop all running containers and remove all stopped containers
+# remove all stopped containers - does not stop any running containers. 
 # make clean-containers
 
 #<<<

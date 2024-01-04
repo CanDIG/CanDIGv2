@@ -6,6 +6,13 @@ These instructions will lead you through some basic functionality tests, ingesti
 
 The easiest way to test your local installation is to run the integration tests.
 
+First, install some extra python requirements
+
+```bash
+cd CanDIGv2
+pip install -r etc/venv/requirements
+```
+
 ```bash
 make test-integration
 ```

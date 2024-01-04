@@ -72,7 +72,8 @@ sudo apt-get install \
   apt-transport-https \
   ca-certificates curl \
   software-properties-common \
-  make
+  make \
+  gcc
 ```
 
 2. Install Docker
