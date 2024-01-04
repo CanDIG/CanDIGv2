@@ -17,7 +17,16 @@ pip install -r etc/venv/requirements
 make test-integration
 ```
 
+If the 4 federation tests fail, restart the federation container with:
+```bash
+make clean-federation
+make build-federation
+make compose-federation
+```
+
+
 If you want to run the tests manually, follow the instructions below.
+
 ## Initial tests
 
 Check that you can see the data portal in your browser at `http://candig.docker.internal:5080/`. If not, you may need to follow the instructions in the [Docker Deployment Guide](./install-docker.md)
