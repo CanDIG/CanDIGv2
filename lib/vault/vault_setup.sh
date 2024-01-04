@@ -4,6 +4,9 @@ set -Euo pipefail
 
 LOGFILE=tmp/progress.txt
 
+# make sure we have all the env vars:
+source env.sh
+
 # This script runs after the container is composed.
 
 # This script will set up a full vault environment on your local CanDIGv2 cluster
@@ -82,7 +85,7 @@ docker exec $vault sh -c "vault login ${key_root}"
 # audit file
 echo
 echo ">> enabling audit file"
-docker exec $vault sh -c "vault audit enable file file_path=/tmp/vault-audit.log"
+docker exec $vault sh -c "vault audit enable file file_path=/vault/vault-audit.log"
 
 # enable jwt
 echo
@@ -91,18 +94,23 @@ docker exec $vault sh -c "vault auth enable jwt"
 
 # tyk policy
 echo
-echo ">> setting up tyk policy"
-docker exec $vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [\"create\", \"read\"]}' >> vault-policy.hcl; vault policy write tyk vault-policy.hcl"
+echo ">> setting up tyk user-claims policy"
+docker exec $vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [\"create\", \"read\"]}' > tyk-claims-policy.hcl; vault policy write tyk-claims tyk-claims-policy.hcl"
 
 echo
 echo ">> setting up aws policy"
-docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> vault-policy.hcl; vault policy write aws vault-policy.hcl"
+docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' > aws-policy.hcl; vault policy write aws aws-policy.hcl"
+
+echo
+echo ">> enable kv store for aws secrets"
+docker exec $vault vault secrets enable -path="aws" -description="AWS-style ID/secret pairs" kv
 
 # user claims
 echo
 echo ">> setting up user claims"
-docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=preferred_username bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=tyk ttl=1h"
+docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=preferred_username bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=tyk-claims ttl=1h"
 
+# site admin should always be able to access aws secrets
 docker exec $vault sh -c "vault write auth/jwt/role/site_admin user_claim=site_admin bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=aws ttl=1h"
 
 # configure jwt
@@ -172,10 +180,3 @@ echo ">> matching key and inserting custom info into the jwt"
 VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < lib/vault/configuration_templates/vault-datastructure.json.tpl)
 docker exec $vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > researcher.json; vault write identity/oidc/role/researcher @researcher.json; rm researcher.json;"
 
-echo
-echo "enable kv store for aws secrets"
-docker exec $vault vault secrets enable -path="aws" -description="AWS-style ID/secret pairs" kv
-
-vault_runner=$(docker ps | grep vault-runner | awk '{print $1}')
-docker restart $vault_runner
-docker exec $vault_runner bash /vault/create_token.sh
