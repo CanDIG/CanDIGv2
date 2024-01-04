@@ -61,8 +61,9 @@ As well as in-house developed services, the CanDIG stack relies on external soft
 
 ## `.env` Environment File
 
-You need an `.env` file in the project root directory, which contains a set of global variables that are used as reference to
-the various parameters, plugins, and config options that operators can modify for testing purposes. This repo contains an example `.env` file in `etc/env/example.env`.
+You need an `.env` file in the project root directory, which contains a set of global variables that are used as reference to the various parameters, plugins, and config options that operators can modify for testing purposes. This repo contains an example `.env` file in `etc/env/example.env`.
+
+For a basic desktop sandbox setup, the example variable file needs very little (if any) modification.
 
 When deploying CanDIGv2
 using `make`, `.env` is imported by `make` and all uncommented variables are added as environment variables via

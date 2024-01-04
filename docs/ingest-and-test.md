@@ -35,9 +35,9 @@ Doing much else will require test data.
 
 Federation service is required to run most of CanDIG operations.
 
-- add `federation` to the list of `CANDIG_AUTH_MODULES` in .env
+- add `federation` to the list of `CANDIG_AUTH_MODULES` in .env (though it is present by default)
 
-If you already have federation running, delete the container then run
+If you already have federation running, delete the container (with `make clean-federation`) then run
 `make build-federation` and `make compose-federation` to recreate it.
 
 
