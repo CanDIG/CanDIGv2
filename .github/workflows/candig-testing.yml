@@ -61,7 +61,7 @@ jobs:
       - name: Integration testing
         run: |
               conda activate candig
-              sleep 10
+              export CANDIG_DEBUG_MODE=1
               make test-integration
       - name: Save docker container logs
         if: always()
