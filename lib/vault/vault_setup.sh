@@ -7,6 +7,9 @@ LOGFILE=tmp/progress.txt
 # make sure we have all the env vars:
 source env.sh
 
+# this is the name of the ingest service (in case it changes)
+ingest="candig-ingest"
+
 # This script runs after the container is composed.
 
 # This script will set up a full vault environment on your local CanDIGv2 cluster
@@ -128,6 +131,10 @@ approle_token=$(cat tmp/secrets/vault-approle-token)
 echo "{\"id\": \"${approle_token}\", \"policies\": [\"approle\"], \"periodic\": \"24h\"}" > lib/vault/tmp/temp.json
 curl --request POST --header "X-Vault-Token: ${key_root}" --data @lib/vault/tmp/temp.json $VAULT_SERVICE_PUBLIC_URL/v1/auth/token/create/approle
 rm lib/vault/tmp/temp.json
+
+## SPECIAL STORES ACCESS
+# Ingest needs access to the opa store's access path:
+docker exec $vault sh -c "echo 'path \"opa/access\" {capabilities = [\"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; vault policy write ${ingest} ${ingest}-policy.hcl"
 # user claims
 echo
 echo ">> setting up user claims"

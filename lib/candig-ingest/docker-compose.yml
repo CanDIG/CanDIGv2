@@ -18,8 +18,12 @@ services:
             CANDIG_CLIENT_ID: "${KEYCLOAK_CLIENT_ID}"
             CANDIG_SECRET_FILE: "/run/secrets/keycloak-secret"
             OPA_URL: "${OPA_URL}"
+            SERVICE_NAME: "${SERVICE_NAME}"
         extra_hosts:
               - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
         secrets:
           - source: keycloak-client-local-candig-secret
             target: keycloak-secret
+          - source: vault-approle-token
+            target: vault-approle-token
+
