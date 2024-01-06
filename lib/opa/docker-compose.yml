@@ -19,12 +19,16 @@ services:
         target: opa-root-token
       - source: opa-service-token
         target: opa-service-token
+      - source: vault-approle-token
+        target: vault-approle-token
     environment:
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
       OPA_SITE_ADMIN_KEY: ${OPA_SITE_ADMIN_KEY}
       OPA_URL: ${OPA_URL}
       KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
       KATSU_URL: ${KATSU_PUBLIC_URL}
+      VAULT_URL: ${VAULT_SERVICE_URL}
+      SERVICE_NAME: ${SERVICE_NAME}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
 
@@ -42,7 +46,6 @@ services:
       - "--log-level=debug"
       - "--authentication=token"
       - "--authorization=basic"
-      - "app/data.json"
       - "app/permissions_engine/"
     healthcheck:
       test: [ "CMD", "curl", "-f", "${OPA_URL}" ]
