@@ -4,6 +4,9 @@
 
 ### To access the secrets in the store, use the methods in the candigv2-authx package: set_service_store_secret and get_service_store_secret
 
+set -x
+
+source env.sh
 
 vault=$(docker ps -a --format "{{.Names}}" | grep vault_1 | awk '{print $1}')
 
@@ -26,7 +29,11 @@ create_service_store() {
             docker exec $vault sh -c "echo 'path \"auth/approle/role/${service}/role-id\" {capabilities = [\"read\"]}' >> ${service}-policy.hcl; echo 'path \"auth/approle/role/${service}/secret-id\" {capabilities = [\"update\"]}' >> ${service}-policy.hcl; vault policy write ${service} ${service}-policy.hcl"
 
             echo "create an approle for $service"
-            docker exec $vault sh -c "vault write auth/approle/role/${service} secret_id_bound_cidrs=${ips} secret_id_ttl=10m token_ttl=20m token_max_ttl=30m token_policies=${service} token_bound_cidrs=${ips}"
+            cmd="vault write auth/approle/role/${service} secret_id_ttl=10m token_ttl=20m token_max_ttl=30m token_policies=${service}"
+            if [ $CANDIG_DEBUG_MODE -eq 0 ]; then
+              cmd+=" secret_id_bound_cidrs=${ips} token_bound_cidrs=${ips}"
+            fi
+            docker exec $vault sh -c $cmd
 
             echo ">> setting up $service store policy"
             docker exec $vault sh -c "echo 'path \"${service}/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${service}-policy.hcl; vault policy write ${service} ${service}-policy.hcl"

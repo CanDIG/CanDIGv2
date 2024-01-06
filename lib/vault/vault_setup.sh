@@ -121,7 +121,11 @@ echo ">> setting up approle role"
 cidr_block=$(docker network inspect --format "{{json .IPAM.Config}}" candigv2_default | jq '.[0].Gateway')
 cidr_block=$(echo ${cidr_block} | tr -d '"')
 cidr_block="${cidr_block}/27"
-echo "{\"bound_cidrs\": [\"${cidr_block}\"]}" > lib/vault/tmp/temp.json
+if [ $CANDIG_DEBUG_MODE -eq 1 ]; then
+  echo "{}" > lib/vault/tmp/temp.json
+else
+  echo "{\"bound_cidrs\": [\"${cidr_block}\"]}" > lib/vault/tmp/temp.json
+fi
 curl --request POST --header "X-Vault-Token: ${key_root}" --data @lib/vault/tmp/temp.json $VAULT_SERVICE_PUBLIC_URL/v1/auth/token/roles/approle
 rm lib/vault/tmp/temp.json
 
