@@ -1,6 +1,6 @@
 name: Test-CanDIG-build
 run-name: Build Validation
-on: 
+on:
   push:
     branches: [develop]
   pull_request:
@@ -26,7 +26,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Setup environment file
-        run: | 
+        run: |
             cp etc/env/example.env example.env
             sed "s@CONDA_INSTALL=.*@CONDA_INSTALL=$CONDA@" example.env > .env
       - name: Display environment file
@@ -61,6 +61,7 @@ jobs:
       - name: Integration testing
         run: |
               conda activate candig
+              sleep 10
               make test-integration
       - name: Save docker container logs
         if: always()
@@ -72,4 +73,4 @@ jobs:
           name: Post-build error log
           path: |
                 tmp/error.txt
-                tmp/container_logs.txt 
+                tmp/container_logs.txt
