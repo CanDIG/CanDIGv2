@@ -33,7 +33,7 @@ create_service_store() {
             if [ $CANDIG_DEBUG_MODE -eq 0 ]; then
               cmd+=" secret_id_bound_cidrs=${ips} token_bound_cidrs=${ips}"
             fi
-            docker exec $vault sh -c $cmd
+            docker exec $vault sh -c "${cmd}"
 
             echo ">> setting up $service store policy"
             docker exec $vault sh -c "echo 'path \"${service}/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${service}-policy.hcl; vault policy write ${service} ${service}-policy.hcl"
