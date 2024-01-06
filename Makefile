@@ -150,6 +150,7 @@ build-%:
 clean-%:
 	echo "    started clean-$*"
 	source setup_hosts.sh
+	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
 	-docker volume rm `docker volume ls --filter name=$* -q`
 	rm -Rf lib/$*/tmp
@@ -281,6 +282,7 @@ compose-%:
 	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
+	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
 	if [ -f lib/$*/$*_setup.sh ]; then \
 	source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG); \
@@ -384,7 +386,7 @@ docker-volumes:
 .PHONY: init-authx
 init-authx: mkdir
 	$(MAKE) docker-volumes
-	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE); python settings.py;)
 
 
 #>>>
