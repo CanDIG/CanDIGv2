@@ -135,6 +135,11 @@ rm lib/vault/tmp/temp.json
 ## SPECIAL STORES ACCESS
 # Ingest needs access to the opa store's access path:
 docker exec $vault sh -c "echo 'path \"opa/access\" {capabilities = [\"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; vault policy write ${ingest} ${ingest}-policy.hcl"
+
+# Federation needs access to the opa store's data path (to add servers):
+docker exec $vault sh -c "echo 'path \"opa/data\" {capabilities = [\"update\", \"read\", \"delete\"]}' >> federation-policy.hcl; vault policy write federation federation-policy.hcl"
+
+
 # user claims
 echo
 echo ">> setting up user claims"
