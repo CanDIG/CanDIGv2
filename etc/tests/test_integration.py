@@ -105,7 +105,7 @@ def test_opa_datasets(user, dataset):
         json=payload,
         headers=headers,
     )
-    print(f"108 {datetime.now(tz='UTC').strftime('%Y-%m-%dT%H:%M:%SZ')} {json.dumps(payload)} {response.text}")
+    print(f"108 {datetime.datetime.now(tz='UTC').strftime('%Y-%m-%dT%H:%M:%SZ')} {json.dumps(payload)} {response.text}")
     assert dataset in response.json()["result"]
 
 
