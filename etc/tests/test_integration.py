@@ -99,13 +99,13 @@ def test_opa_datasets(user, dataset):
         "X-Opa": ENV["OPA_SECRET"],
     }
 
-    payload["input"]["body"]["token"] = get_token(username=username, password=password)
+    payload["input"]["token"] = get_token(username=username, password=password)
     response = requests.post(
         f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/permissions/datasets",
         json=payload,
         headers=headers,
     )
-    print(f"108 {response.text}")
+    print(f"108 {json.dumps(payload)} {response.text}")
     assert dataset in response.json()["result"]
 
 
