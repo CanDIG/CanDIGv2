@@ -101,6 +101,14 @@ def test_opa_datasets(user, dataset):
     }
 
     payload["input"]["token"] = token
+
+    response = requests.post(
+        f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/idp/site_admin",
+        json=payload,
+        headers=headers,
+    )
+    print(response.json())
+
     response = requests.post(
         f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/permissions/datasets",
         json=payload,
