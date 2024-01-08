@@ -105,6 +105,7 @@ def test_opa_datasets(user, dataset):
         json=payload,
         headers=headers,
     )
+    print(f"108 {response.text}")
     assert dataset in response.json()["result"]
 
 
