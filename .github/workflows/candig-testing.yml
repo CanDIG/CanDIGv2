@@ -66,6 +66,9 @@ jobs:
       - name: Save docker container logs
         if: always()
         run: ./print_logs.sh > tmp/container_logs.txt 2>&1
+      - name: Save vault audit logs
+        if: always()
+        run: docker cp candigv2_vault-runner_1:/vault/vault-audit.log tmp/vault_audit.log 2>&1
       - name: Save container and error logs as artifact
         if: always()
         uses: actions/upload-artifact@v3
@@ -74,3 +77,4 @@ jobs:
           path: |
                 tmp/error.txt
                 tmp/container_logs.txt
+                tmp/vault_audit.log
