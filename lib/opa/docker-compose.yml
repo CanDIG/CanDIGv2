@@ -29,7 +29,7 @@ services:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
 
   opa:
-    image: openpolicyagent/opa:latest-static
+    image: local-openpolicyagent/opa:latest-static
     labels:
       - "candigv2=opa"
     ports:
@@ -45,7 +45,7 @@ services:
       - "app/data.json"
       - "app/permissions_engine/"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "${OPA_URL}" ]
+      test: [ "CMD", "/gohttpcheck", "${OPA_URL}" ]
       interval: 30s
       timeout: 20s
       retries: 3
