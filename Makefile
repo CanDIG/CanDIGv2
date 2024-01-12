@@ -204,6 +204,7 @@ clean-bin:
 clean-compose:
 	source setup_hosts.sh; \
 	$(foreach MODULE, $(CANDIG_MODULES), \
+		export SERVICE_NAME=$(MODULE); \
 		docker compose -f lib/candigv2/docker-compose.yml -f lib/$(MODULE)/docker-compose.yml down || true;)
 
 
@@ -301,6 +302,7 @@ down-%:
 	printf "\nOutput of down-$*: \n" >> $(ERRORLOG)
 	echo "    started down-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
+	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility down 2>&1
 	echo "    finished down-$*" >> $(LOGFILE)
 
