@@ -4,9 +4,11 @@
 
 These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, there are [modification instructions](#modifications-for-apple-silicon-m1) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
 
-Before beginning, you should set up your environment variables as described in the [README](README.md).
+Before beginning, you should set up your environment variables as described in the [README](../README.md).
 
-Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
+Docker Engine (also known as Docker CE) is recommened over Docker Desktop for linux installations.
+
+Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
 
 
 ## Install OS Dependencies
@@ -69,27 +71,35 @@ sudo apt-get install \
   software-properties-common \
   apt-transport-https \
   ca-certificates curl \
-  software-properties-common
+  software-properties-common \
+  make \
+  gcc
 ```
 
 2. Install Docker
 
+Follow the [official Docker directions](https://docs.docker.com/engine/install/ubuntu/).  Installation using the [apt repository method](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) is recommended.
+
+Set docker to run as a service on startup.
 ```bash
-sudo apt-get update
-
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sudo apt-get install docker-ce docker-ce-cli containerd.io
-
-sudo systemctl enable docker
+sudo systemctl enable docker 
 
 sudo systemctl start docker
-
-sudo usermod -aG docker $(whoami)
 ```
+You may have to reboot (not just log out).
 
+Add yourself to the docker group rather than use sudo all the time.
+```bash
+sudo usermod -aG docker $(whoami) 
+```
+You may have to log out or restart your shell for this setting to take effect.
+
+Verify that you are a member of the `docker` group with:
+```bash
+groups
+# or
+getent group docker
+```
 
 ### CentOS 7
 
@@ -185,7 +195,7 @@ make install-all
 make build-all
 ```
 
-On some machines (MacOS), it may be necessary to add the following to /etc/hosts:
+On some machines (MacOS & Ubuntu), it may be necessary to add the following to /etc/hosts:
 ```
 ::1	candig.docker.internal
 ```
@@ -195,6 +205,11 @@ In some other cases, it may be necessary to add your local (network) IP manually
 LOCAL_IP_ADDR=<your local IP>
 ```
 Where `<your local IP>` is your local network IP (e.g. 192.168.x.x)
+
+If you can see the data portal at http://candig.docker.internal:5080/, your installation was successful.
+
+Confirm your installation with the [automatic tests](/docs/ingest-and-test.md).
+
 
 ### Old
 The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets.
