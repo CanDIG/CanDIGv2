@@ -90,5 +90,7 @@ collect_ips() {
     echo $ips
 }
 
-
-create_service_store $@
+grep -wq $@ tmp/vault/service_stores.txt
+if [[ $? -ne 0 ]]; then
+   echo $@ >> tmp/vault/service_stores.txt
+fi
