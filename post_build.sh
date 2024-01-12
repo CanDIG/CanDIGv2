@@ -47,8 +47,7 @@ function print_module_logs() {
 }
 
 MODULES=$(cat .env | grep CANDIG_MODULES | cut -c 16- | cut -d '#' -f 1)
-MODULES_AUTH=$(cat .env | grep CANDIG_AUTH_MODULES | cut -c 21- | cut -d '#' -f 1)
-ALL_MODULES="${MODULES}${MODULES_AUTH}"
+ALL_MODULES="${MODULES}"
 
 SERVICE_COUNT=0
 for MODULE in $ALL_MODULES; do
