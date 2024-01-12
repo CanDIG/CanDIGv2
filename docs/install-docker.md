@@ -286,56 +286,58 @@ make clean-images
 make clean-bin
 ```
 
-## Modifications for Apple Silicon M1
+## For Apple Silicon M1
 
-There are some modifications that you need to make to install on M1 architecture. These are not full instructions, but only the changes from the standard install.
+### 1. Install OS Dependencies
 
-### M1 environment variables
-
-- In your .env file, set the M1 architecture:
+- Install dependencies
 
 ```bash
-# options are [linux, darwin, arm64mac]
+brew install gettext
+```
+
+- Install [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/).
+
+### 2. Initialize CanDIGv2 Repo
+
+```bash
+git clone -b develop https://github.com/CanDIG/CanDIGv2.git
+cd CanDIGv2
+git submodule update --init --recursive
+cp -i etc/env/example.env .env
+```
+
+### 3. Update .env file
+
+```bash
+# find out your ip and add to LOCAL_IP_ADDR
+LOCAL_IP_ADDR=xxx.xx.x.x
+# change OS
 VENV_OS=arm64mac
-```
-
-- Replace the default KEYCLOAK_BASE_IMAGE from jboss and use a compatible version from c3genomics:
-
-```bash
-# keycloak service
-KEYCLOAK_VERSION=16.1.1
+# change keycloak
 KEYCLOAK_BASE_IMAGE=quay.io/c3genomics/keycloak:${KEYCLOAK_VERSION}.arm64
-# KEYCLOAK_BASE_IMAGE=jboss/keycloak:${KEYCLOAK_VERSION}
 ```
 
-
-### Step 1 mods: Install Docker and Dependencies
-
-Install [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/).
-
-**Optional**: Install the following packages with homebrew (or your favourite package manager). Depending on your local setup, you may also need rosetta and Docker Compose V2.
+Edit /etc/hosts on the machine (`sudo nano /etc/hosts`):
 
 ```bash
-# Install Homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Install md5sha1sum
-brew install md5sha1sum
-
-# Install PostgreSQL
-brew install postgresql
-
+::1 candig.docker.internal
 ```
 
-### Step 5: Create Auth Stack
-
-- Update the opa image in `lib/opa/docker-compose.yml` to something arm-compatible (most of the `static` ones are.
+### 4. Initialize conda
 
 ```bash
-    opa:
-        image: openpolicyagent/opa:edge-static
+make bin-all
+make init-conda
+conda activate candig
 ```
 
+### 5. Build and test
+
+```bash
+make build-all
+make test-integration
+```
 
 Once everything has run without errors, take a look at the documentation for
 [ingesting data and testing the deployment](ingest-and-test.md) as well as
