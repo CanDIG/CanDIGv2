@@ -137,6 +137,7 @@ build-%:
 	if [ -f lib/$*/$*_preflight.sh ]; then \
 	source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG); \
 	fi
+	export SERVICE_NAME=$*; \
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(ERRORLOG)
 	echo "    finished build-$*" >> $(LOGFILE)
