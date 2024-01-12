@@ -40,44 +40,48 @@ done
 sleep 10
 
 # gather keys and login token
-echo ">> gathering keys"
-stuff=$(docker exec $vault sh -c "vault operator init") # | head -7 | rev | cut -d " " -f1 | rev)
-if [ -z ${stuff} ]; then
-  echo "Vault could not initialize"
-  exit 1
+stuff=$(docker exec $vault vault operator init) # | head -7 | rev | cut -d " " -f1 | rev)
+if [[ $? -eq 0 ]]; then
+  echo ">> initialized vault, saving keys"
+
+  key_1=$(echo -n "${stuff}" | grep 'Unseal Key 1: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
+  key_2=$(echo -n "${stuff}" | grep 'Unseal Key 2: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
+  key_3=$(echo -n "${stuff}" | grep 'Unseal Key 3: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
+  key_4=$(echo -n "${stuff}" | grep 'Unseal Key 4: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
+  key_5=$(echo -n "${stuff}" | grep 'Unseal Key 5: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
+  key_root=$(echo -n "${stuff}" | grep 'Initial Root Token: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
+
+  echo "found key1: ${key_1}"
+  echo "found key2: ${key_2}"
+  echo "found key3: ${key_3}"
+  echo "found key4: ${key_4}"
+  echo "found key5: ${key_5}"
+  echo "found root: ${key_root}"
+
+  # save keys
+  touch tmp/vault/keys.txt
+  echo -e "keys: \n${key_1}" > tmp/vault/keys.txt
+  echo -e "${key_2}" >> tmp/vault/keys.txt
+  echo -e "${key_3}" >> tmp/vault/keys.txt
+  echo -e "${key_4}" >> tmp/vault/keys.txt
+  echo -e "${key_5}" >> tmp/vault/keys.txt
+  echo -e "root: \n${key_root}" >> tmp/vault/keys.txt
+
+  docker cp tmp/vault/keys.txt $vault:/vault/config/
+
+else
+  echo ">> retrieving keys"
+  key_1=$(head -n 2 tmp/vault/keys.txt | tail -n 1)
+  key_2=$(head -n 3 tmp/vault/keys.txt | tail -n 1)
+  key_3=$(head -n 4 tmp/vault/keys.txt | tail -n 1)
+
+  key_root=$(tail -n 1 tmp/vault/keys.txt)
 fi
-echo "found stuff as ${stuff}"
-
-key_1=$(echo -n "${stuff}" | grep 'Unseal Key 1: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
-key_2=$(echo -n "${stuff}" | grep 'Unseal Key 2: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
-key_3=$(echo -n "${stuff}" | grep 'Unseal Key 3: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
-key_4=$(echo -n "${stuff}" | grep 'Unseal Key 4: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
-key_5=$(echo -n "${stuff}" | grep 'Unseal Key 5: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
-key_root=$(echo -n "${stuff}" | grep 'Initial Root Token: ' | awk '{print $4}' | sed 's/[^a-zA-Z0-9\.\/\+]//g' | sed -e 's/\(0m\)*$//g' | tr -d '[:space:]')
-
-echo "found key1: ${key_1}"
-echo "found key2: ${key_2}"
-echo "found key3: ${key_3}"
-echo "found key4: ${key_4}"
-echo "found key5: ${key_5}"
-echo "found root: ${key_root}"
-
-# save keys
-touch tmp/vault/keys.txt
-echo -e "keys: \n${key_1}" > tmp/vault/keys.txt
-echo -e "${key_2}" >> tmp/vault/keys.txt
-echo -e "${key_3}" >> tmp/vault/keys.txt
-echo -e "${key_4}" >> tmp/vault/keys.txt
-echo -e "${key_5}" >> tmp/vault/keys.txt
-echo -e "root: \n${key_root}" >> tmp/vault/keys.txt
-
-docker cp tmp/vault/keys.txt $vault:/vault/config/
-
+echo $key_root
 echo ">> attempting to automatically unseal vault:"
 docker exec $vault sh -c "vault operator unseal ${key_1}"
 docker exec $vault sh -c "vault operator unseal ${key_2}"
 docker exec $vault sh -c "vault operator unseal ${key_3}"
-
 
 # login
 echo
