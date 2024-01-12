@@ -5,13 +5,13 @@
 ## Overview
 
 The CanDIG v2 project is a collection of heterogeneous services designed to work together to facilitate end to end
-dataflow for genomic data. 
+dataflow for genomic data.
 
 ## Branches
 
-The default `develop` branch is for developers. It undergoes nightly builds and integration testing, so should generally be deployable. 
+The default `develop` branch is for developers. It undergoes nightly builds and integration testing, so should generally be deployable.
 
-The `stable` branch is the latest stable release and is the one that you should use for production deployments. 
+The `stable` branch is the latest stable release and is the one that you should use for production deployments.
 
 ## Installation
 
@@ -74,7 +74,66 @@ As well as in-house developed services, the CanDIG stack relies on external soft
 | [Tyk](https://tyk.io/)                  | API management and redirection       |
 | [Vault](https://www.vaultproject.io/)   | Secret and password management       |
 
-## Adding a new service
+## `.env` Environment File
+
+You need an `.env` file in the project root directory, which contains a set of global variables that are used as reference to the various parameters, plugins, and config options that operators can modify for testing purposes. This repo contains an example `.env` file in `etc/env/example.env`.
+
+For a basic desktop sandbox setup, the example variable file needs very little (if any) modification.
+
+When deploying CanDIGv2
+using `make`, `.env` is imported by `make` and all uncommented variables are added as environment variables via
+`export`.
+
+Some of the functionality that is controlled through `.env` are:
+
+* operating system flags
+* change docker network, driver, and swarm host
+* modify ports, protocols, and plugins for various services
+* version control and app pinning
+* pre-defined defaults for turnkey deployment
+
+Environment variables defined in the `.env` file can be read in `docker-compose` scripts through the variable substitution operator
+`${VAR}`.
+
+```yaml
+# example compose YAML using variable substitution with default option
+services:
+  consul:
+    image: progrium/consul
+    network_mode: ${DOCKER_MODE}
+...
+```
+### Configuring CanDIG modules
+
+Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` and `CANDIG_AUTH_MODULES` define which modules are included in the deployment.
+
+By default (if you copy the sample file from `etc/env/example.env`) the installation includes the minimal list of modules:
+
+```
+  CANDIG_MODULES=minio htsget-server katsu candig-data-portal
+```
+
+Optional modules follow the `#` and include federation service, various monitoring components, workflow execution, and some older modules not generally installed.
+
+For federated installations, you will need `federation-service`.
+
+For production deployments, you will probably want to include  `federation-service`.
+
+Authorization and authentication modules defined in  `CANDIG_AUTH_MODULES` are only installed if you run `make init-authx` during deployment.
+
+## `make` Deployment
+
+To deploy CanDIGv2, follow the docker deployment guide in `docs/`:
+
+* [Docker Deployment Guide](./docs/install-docker.md)
+
+There are other deprecated deployment guides in `docs`, but there are no guarantees that these still function:
+
+* [Authentication and Authorization Deployment Guide](./docs/authx-setup.md)
+
+View additional Makefile options with `make help`.
+
+## Add new service
 
 New services can be added under `lib` directory.  Please refer to the
 [template for new services README](./lib/templates/README.md) for more details.
