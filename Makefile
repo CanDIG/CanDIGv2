@@ -249,6 +249,7 @@ clean-images:
 clean-secrets:
 	-docker secret rm `docker secret ls -q --filter label=candigv2`
 	rm -rf tmp/secrets
+	rm -rf tmp/vault
 
 
 #>>>
