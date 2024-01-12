@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # This script is meant to be run after make build-all, and checks whether
-# the number of currently running docker containers matches the number of 
-# containers that should be running based on enabled services specified in .env. 
-# Also prints out all relevant logs from the error logging file (i.e., all lines 
+# the number of currently running docker containers matches the number of
+# containers that should be running based on enabled services specified in .env.
+# Also prints out all relevant logs from the error logging file (i.e., all lines
 # that contain the phrases 'error' or 'warn').
 
 source <(grep --color=never "ERRORLOG" .env)
@@ -50,32 +50,11 @@ MODULES=$(cat .env | grep CANDIG_MODULES | cut -c 16- | cut -d '#' -f 1)
 MODULES_AUTH=$(cat .env | grep CANDIG_AUTH_MODULES | cut -c 21- | cut -d '#' -f 1)
 ALL_MODULES="${MODULES}${MODULES_AUTH}"
 
-# Note: drs-server is not currently built by the Makefile. Its values will need 
-# to be changed when this is no longer the case.
-SERVICE_COUNT=$(awk -v modules_raw="$ALL_MODULES" 'BEGIN {
-	mcounts["candig-data-portal"]=1
-	mcounts["federation"]=1
-	mcounts["htsget"]=1
-	mcounts["katsu"]=2
-	mcounts["keycloak"]=1
-	mcounts["logging"]=3
-	mcounts["minio"]=1
-	mcounts["monitoring"]=5
-	mcounts["opa"]=2
-	mcounts["toil"]=2
-	mcounts["tyk"]=2
-	mcounts["vault"]=2
-	mcounts["candig-ingest"]=1
-	mcounts["wes-server"]=1
-	mcounts["drs-server"]=0
-	mcounts["query"]=1
-	split(modules_raw, modules, " ")
-	service_count = 0
-	for (module in modules) {
-		service_count += mcounts[modules[module]]
-	}
-	print service_count
-}')
+SERVICE_COUNT=0
+for MODULE in $ALL_MODULES; do
+  sc=$(cat lib/$MODULE/docker-compose.yml | yq '.services' | jq  'keys' | jq -r @sh | wc -w | tr -d ' ')
+  SERVICE_COUNT=`expr $SERVICE_COUNT + $sc`
+done
 
 RUNNING_MODULES=$(docker ps --format "{{.Names}}")
 
