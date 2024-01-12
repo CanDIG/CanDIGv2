@@ -4,11 +4,12 @@
 
 ### To access the secrets in the store, use the methods in the candigv2-authx package: set_service_store_secret and get_service_store_secret
 
-set -x
+# uncomment the next line for debugging
+#set -x
 
 source env.sh
 
-vault=$(docker ps -a --format "{{.Names}}" | grep vault_1 | awk '{print $1}')
+vault=$(docker ps --format "{{.Names}}" | grep vault_1 | awk '{print $1}')
 
 create_service_store() {
     local services=$@
@@ -93,4 +94,8 @@ collect_ips() {
 grep -wq $@ tmp/vault/service_stores.txt
 if [[ $? -ne 0 ]]; then
    echo $@ >> tmp/vault/service_stores.txt
+fi
+echo $vault
+if [[ $vault != "" ]]; then
+    create_service_store $@
 fi
