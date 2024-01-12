@@ -97,10 +97,7 @@ build-all:
 
 # Setup the entire stack
 	$(MAKE) init-docker
-	$(MAKE) build-images
-	$(MAKE) compose
-	$(MAKE) init-authx
-
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE))
 	./post_build.sh
 
 .PHONY: install-all
@@ -159,7 +156,7 @@ clean-%:
 
 #>>>
 # run all cleanup functions
-# WARNING: these are distructive steps, read through instructions before using
+# WARNING: these are destructive steps, read through instructions before using
 # make clean-all
 
 #<<<
