@@ -210,7 +210,7 @@ In some other cases, it may be necessary to add your local/internal (network) IP
 # on mac
 ifconfig en0 | awk '$1 == "inet" {print $2}'
 # on linux
-ifconfig eth0 | awk '/inet addr/ {gsub("addr:", "", $2); print $2}'
+ip route | awk -F\  '/default/ {print $9}'
 ```
 
 Then edit your .env file with:
