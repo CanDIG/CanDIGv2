@@ -286,7 +286,7 @@ make clean-images
 make clean-bin
 ```
 
-## For Apple Silicon M1
+## For Apple Silicon
 
 ### 1. Install OS Dependencies
 
@@ -296,7 +296,7 @@ make clean-bin
 brew install gettext
 ```
 
-- Install [docker desktop](https://docs.docker.com/desktop/mac/apple-silicon/).
+- Get [Docker Desktop for Apple Silicon](https://docs.docker.com/desktop/install/mac-install/). Be sure to start it.
 
 ### 2. Initialize CanDIGv2 Repo
 
