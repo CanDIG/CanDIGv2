@@ -929,7 +929,7 @@ def test_htsget():
     old_val = os.environ.get("TESTENV_URL")
     os.environ[
         "TESTENV_URL"
-    ] = f"http://{ENV['CANDIG_ENV']['CANDIG_DOMAIN']}:{ENV['CANDIG_ENV']['HTSGET_PORT']}"
+    ] = f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}"
     retcode = pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py", "-k", "test_remove_objects or test_post_objects or test_index_variantfile"])
     if old_val is not None:
         os.environ["TESTENV_URL"] = old_val
