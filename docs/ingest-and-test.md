@@ -52,7 +52,7 @@ FAILED etc/tests/test_integration.py::test_federation_call - AssertionError: ass
 FAILED etc/tests/test_integration.py::test_add_server - IndexError: list index out of range
 ```
 
-You might need to rebuild federation service. First check whether `federation` is in the list of `CANDIG_AUTH_MODULES` in your `.env` file, if it isn't add it.
+You might need to rebuild federation service. First check whether `federation` is in the list of `CANDIG_AUTH_MODULES` in your `.env` file. If it isn't, add it.
 
 Then run
 ```commandline
