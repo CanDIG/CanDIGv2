@@ -21,12 +21,11 @@ services:
         target: vault-approle-token
     environment:
         TEST_KEY: "hoodlebug"
-        CANDIG_OPA_URL: ${OPA_PRIVATE_URL}
         KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
         KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
-        TYK_LOGIN_TARGET_URL: ${TYK_LOGIN_TARGET_URL}
+        TYK_LOGIN_TARGET_URL: ${TYK_PRIVATE_URL}
         TYK_POLICY_ID: ${TYK_POLICY_ID}
-        OPA_URL: ${OPA_URL}
+        OPA_URL: ${OPA_PRIVATE_URL}
         TYK_FEDERATION_API_ID: ${TYK_FEDERATION_API_ID}
         CONFIG_DIR: "/app/config"
         VAULT_URL: ${VAULT_SERVICE_URL}
