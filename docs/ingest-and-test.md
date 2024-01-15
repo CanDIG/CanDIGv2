@@ -17,13 +17,24 @@ pip install -r etc/venv/requirements
 make test-integration
 ```
 
+If you get an error about missing python requirements such as `dotenv` ensure the `candig` conda environment is activated, it should be in brackets beside your username. If it isn't run
+
+```commandline
+conda activate candig
+```
+
+If the error persists, try:
+
+```commandline
+pip install -r etc/venv/requirements.txt
+```
+
 If the 4 federation tests fail, restart the federation container with:
 ```bash
 make clean-federation
 make build-federation
 make compose-federation
 ```
-
 
 If you want to run the tests manually, follow the instructions below.
 
@@ -45,55 +56,48 @@ curl -X "POST" "http://candig.docker.internal:8080/auth/realms/candig/protocol/o
      --data-urlencode "scope=openid"
 ```
 
-Doing much else will require test data.
-
 ## Setup Federation Service
 
 Federation service is required to run most of CanDIG operations.
 
-- add `federation` to the list of `CANDIG_AUTH_MODULES` in .env (though it is present by default)
+- add `federation` to the list of `CANDIG_AUTH_MODULES` in `.env` (though it is present by default)
 
 If you already have federation running, delete the container (with `make clean-federation`) then run
 `make build-federation` and `make compose-federation` to recreate it.
 
+Federation service is required to run most of CanDIG operations. It should have gotten set up when you ran `make install-all`. But if you are getting errors such as the following:
 
-## Install test data
-
-Clone the [candigv2-ingest](https://github.com/CanDIG/candigv2-ingest) repo:
-
-```
-https://github.com/CanDIG/candigv2-ingest.git
-```
-
-Create a virtual environment named `.venv`:
-
-```bash
-# Linux
-sudo apt-get install python3-venv    # If needed
-python3 -m venv .venv
-source .venv/bin/activate
-
-# macOS
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Windows
-py -3 -m venv .venv
-.venv\scripts\activate
+```commandline
+FAILED etc/tests/test_integration.py::test_server_count - assert 0 > 0
+FAILED etc/tests/test_integration.py::test_services_count - assert 0 > 0
+FAILED etc/tests/test_integration.py::test_federation_call - AssertionError: assert 'results' in {'error': 'There was a problem proxying the request'}
+FAILED etc/tests/test_integration.py::test_add_server - IndexError: list index out of range
 ```
 
-Install the requirements:
+## Rebuild Federation Service
 
+You might need to rebuild federation service. First check whether `federation` is in the list of `CANDIG_AUTH_MODULES` in your `.env` file. If it isn't, add it.
+
+Then run
+```commandline
+make clean-federation
+make build-federation
+make compose-federation
 ```
-pip install -r requirements.txt
-```
 
-Generate a file env.sh:
 
-```bash
-cd CanDIGv2/
+## Ingest synthetic clinical data
+
+```commandline
 python settings.py
 source env.sh
-```
+cd lib/candig-ingest/candigv2-ingest
+# should be pip install -r requirements.txt, but that didn't seem to work last I checked -- dependency errors?
+pip install -r requirements.txt
+python katsu_ingest.py --input tests/clinical_ingest.json
 
-Follow the instructions for [Clinical data](https://github.com/CanDIG/candigv2-ingest#ingest-clinical-data) and [Genomic data](https://github.com/CanDIG/candigv2-ingest#ingest-genomic-files)
+```
+You should then be able to visit the data portal and view ingested data.
+
+
+Follow the instructions for [Clinical data](https://github.com/CanDIG/candigv2-ingest#1-clinical-data) and [Genomic data](https://github.com/CanDIG/candigv2-ingest#2-genomic-data)
