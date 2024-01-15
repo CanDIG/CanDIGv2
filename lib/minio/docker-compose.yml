@@ -2,7 +2,11 @@ version: '3.7'
 
 services:
   minio:
-    image: minio/minio:${MINIO_VERSION:-latest}
+    image: local-minio/minio:${MINIO_VERSION:-latest}
+    build:
+      context: .
+      args:
+        MINIO_VERSION: ${MINIO_VERSION}
     labels:
       - "candigv2=minio"
     volumes:
@@ -23,7 +27,7 @@ services:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     command: ["server", "/data","--console-address", ":${MINIO_UI_PORT}"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "gohttpcheck", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3

@@ -30,6 +30,7 @@ services:
 
   opa:
     image: local-openpolicyagent/opa:latest-static
+    build: ./
     labels:
       - "candigv2=opa"
     ports:
