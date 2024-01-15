@@ -73,7 +73,7 @@ pip install -r requirements.txt
 python katsu_ingest.py --input tests/clinical_ingest.json
 
 ```
-You should then be able to visit the data portal and ingested data.
+You should then be able to visit the data portal and view ingested data.
 
 
 
