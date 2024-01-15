@@ -91,15 +91,23 @@ def user_datasets():
 def test_opa_datasets(user, dataset):
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
-    payload = {"input": {"body": {"path": "/v2/discovery/", "method": "GET"}}}
+    token = get_token(username=username, password=password)
+    payload = {
+        "input": {
+            "body": {
+                "path": "/v2/discovery/", "method": "GET"
+            },
+            "token": token
+        }
+    }
 
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "X-Opa": ENV["OPA_SECRET"],
+        "Authorization": f"Bearer {token}"
     }
 
-    payload["input"]["token"] = get_token(username=username, password=password)
     response = requests.post(
         f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/permissions/datasets",
         json=payload,
@@ -147,16 +155,18 @@ def user_admin():
 @pytest.mark.parametrize("user, is_admin", user_admin())
 def test_site_admin(user, is_admin):
     payload = {"input": {}}
+    username = ENV[f"{user}_USER"]
+    password = ENV[f"{user}_PASSWORD"]
+    token = get_token(username=username, password=password)
 
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "X-Opa": ENV["OPA_SECRET"],
+        "Authorization": f"Bearer {token}"
     }
 
-    username = ENV[f"{user}_USER"]
-    password = ENV[f"{user}_PASSWORD"]
-    payload["input"]["token"] = get_token(username=username, password=password)
+    payload["input"]["token"] = token
     response = requests.post(
         f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/idp/site_admin",
         json=payload,
@@ -684,7 +694,7 @@ def test_htsget():
     old_val = os.environ.get("TESTENV_URL")
     os.environ[
         "TESTENV_URL"
-    ] = f"http://{ENV['CANDIG_ENV']['CANDIG_DOMAIN']}:{ENV['CANDIG_ENV']['HTSGET_PORT']}"
+    ] = f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}"
     retcode = pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py", "-k", "test_remove_objects or test_post_objects or test_index_variantfile"])
     if old_val is not None:
         os.environ["TESTENV_URL"] = old_val
