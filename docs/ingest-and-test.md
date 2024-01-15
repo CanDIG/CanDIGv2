@@ -10,7 +10,7 @@ The easiest way to test your local installation is to run the integration tests.
 make test-integration
 ```
 
-If you get an error about missing python requirements such as `dotenv` ensure the `candig` conda environment is activated, it should be in brackets beside your username, if it isn't run
+If you get an error about missing python requirements such as `dotenv` ensure the `candig` conda environment is activated, it should be in brackets beside your username. If it isn't run
 
 ```commandline
 conda activate candig
