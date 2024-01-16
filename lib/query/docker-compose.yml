@@ -17,6 +17,8 @@ services:
     environment:
       CANDIG_KATSU_URL: ${KATSU_PRIVATE_URL}
       CANDIG_HTSGET_URL: ${HTSGET_PRIVATE_URL}
+      VAULT_URL: ${VAULT_PRIVATE_URL}
+      SERVICE_NAME: ${SERVICE_NAME}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
@@ -24,3 +26,6 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    secrets:
+      - source: vault-approle-token
+        target: vault-approle-token
