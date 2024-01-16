@@ -24,7 +24,7 @@ services:
     environment:
       - MINIO_REGION="${MINIO_REGION}"
       - CANDIG_DOMAIN="${CANDIG_DOMAIN}"
-      - VAULT_URL="${VAULT_SERVICE_URL}"
+      - VAULT_URL="${VAULT_PRIVATE_URL}"
       - SERVICE_NAME="${SERVICE_NAME}"
     secrets:
       - source: minio-access-key

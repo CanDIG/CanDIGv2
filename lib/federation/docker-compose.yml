@@ -28,7 +28,7 @@ services:
         OPA_URL: ${OPA_PRIVATE_URL}
         TYK_FEDERATION_API_ID: ${TYK_FEDERATION_API_ID}
         CONFIG_DIR: "/app/config"
-        VAULT_URL: ${VAULT_SERVICE_URL}
+        VAULT_URL: ${VAULT_PRIVATE_URL}
         SERVICE_NAME: ${SERVICE_NAME}
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
