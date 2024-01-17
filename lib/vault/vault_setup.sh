@@ -225,3 +225,10 @@ docker exec $vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > researcher.js
 
 vault_runner=$(docker ps -a --format "{{.Names}}" | grep vault-runner_1 | awk '{print $1}')
 docker restart $vault_runner
+
+if [ -f tmp/vault/service_stores.txt ]; then
+    echo ">> creating service stores"
+    while read service; do
+        bash create_service_store.sh $service
+    done <tmp/vault/service_stores.txt
+fi
