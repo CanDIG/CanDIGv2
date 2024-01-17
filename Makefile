@@ -218,7 +218,7 @@ clean-conda:
 
 
 #>>>
-# remove all stopped containers - does not stop any running containers. 
+# remove all stopped containers - does not stop any running containers.
 # make clean-containers
 
 #<<<
@@ -523,3 +523,14 @@ print-%:
 test-integration:
 	python ./settings.py
 	source ./env.sh; pytest ./etc/tests
+
+# stop all docker containers
+.PHONY: stop-all
+stop-all:
+	CONTAINERS="$(shell docker ps --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker stop $$CONTAINER; done
+
+# start all docker containers
+.PHONY: start-all
+start-all:
+	CONTAINERS="$(shell docker ps -a --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker start $$CONTAINER; done
+
