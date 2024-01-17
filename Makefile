@@ -97,7 +97,7 @@ build-all:
 
 # Setup the entire stack
 	$(MAKE) init-docker
-	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE))
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
 
 .PHONY: install-all
