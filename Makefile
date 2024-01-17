@@ -24,7 +24,7 @@ all:
 	@echo "CanDIGv2 Makefile Deployment"
 	@echo "Type 'make help' to view available options"
 	@echo "View README.md for additional information"
-	
+
 #>>>
 # create non-repo directories
 # make mkdir
@@ -100,9 +100,9 @@ build-all:
 	$(MAKE) build-images
 	$(MAKE) compose
 	$(MAKE) init-authx
-	
+
 	./post_build.sh
-	
+
 .PHONY: install-all
 install-all:
 	$(MAKE) bin-conda
@@ -137,6 +137,7 @@ build-%:
 	if [ -f lib/$*/$*_preflight.sh ]; then \
 	source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG); \
 	fi
+	export SERVICE_NAME=$*; \
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(ERRORLOG)
 	echo "    finished build-$*" >> $(LOGFILE)
@@ -150,6 +151,7 @@ build-%:
 clean-%:
 	echo "    started clean-$*"
 	source setup_hosts.sh
+	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
 	-docker volume rm `docker volume ls --filter name=$* -q`
 	rm -Rf lib/$*/tmp
@@ -281,6 +283,7 @@ compose-%:
 	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
+	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
 	if [ -f lib/$*/$*_setup.sh ]; then \
 	source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG); \
@@ -346,6 +349,7 @@ docker-secrets: mkdir minio-secrets katsu-secrets
 	$(MAKE) secret-tyk-analytics-admin-key
 
 	$(MAKE) secret-vault-s3-token
+	$(MAKE) secret-vault-approle-token
 
 	$(MAKE) secret-opa-root-token
 	$(MAKE) secret-opa-service-token
@@ -383,7 +387,7 @@ docker-volumes:
 .PHONY: init-authx
 init-authx: mkdir
 	$(MAKE) docker-volumes
-	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE); python settings.py;)
 
 
 #>>>
@@ -437,7 +441,7 @@ katsu-secrets:
 	@echo admin > tmp/secrets/katsu-secret-key
 	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
 		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
-	
+
 	@echo admin > tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-app-secret
 	$(MAKE) secret-metadata-db-secret

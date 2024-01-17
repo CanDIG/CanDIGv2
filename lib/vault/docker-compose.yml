@@ -40,6 +40,8 @@ services:
     secrets:
       - source: vault-s3-token
         target: vault-s3-token
+      - source: vault-approle-token
+        target: vault-approle-token
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
 

@@ -5,7 +5,7 @@ import sys
 import uuid
 from http import HTTPStatus
 from pathlib import Path
-
+import datetime
 import pytest
 import requests
 from dotenv import dotenv_values
@@ -113,6 +113,7 @@ def test_opa_datasets(user, dataset):
         json=payload,
         headers=headers,
     )
+    print(f"108 {datetime.datetime.now(tz=datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')} {json.dumps(payload)} {response.text}")
     assert dataset in response.json()["result"]
 
 
@@ -134,7 +135,7 @@ def test_add_opa_dataset():
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
     # when the user has admin access, they should be allowed
-    print(response.json())
+    print(f"129 {response.json()}, {response.status_code}")
     assert response.status_code == 200
 
     test_opa_datasets("CANDIG_SITE_ADMIN", test_data["program"])

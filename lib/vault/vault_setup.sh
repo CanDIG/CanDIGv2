@@ -4,6 +4,12 @@ set -Euo pipefail
 
 LOGFILE=tmp/progress.txt
 
+# make sure we have all the env vars:
+source env.sh
+
+# this is the name of the ingest service (in case it changes)
+ingest="candig-ingest"
+
 # This script runs after the container is composed.
 
 # This script will set up a full vault environment on your local CanDIGv2 cluster
@@ -82,27 +88,68 @@ docker exec $vault sh -c "vault login ${key_root}"
 # audit file
 echo
 echo ">> enabling audit file"
-docker exec $vault sh -c "vault audit enable file file_path=/tmp/vault-audit.log"
+docker exec $vault sh -c "vault audit enable file file_path=/vault/vault-audit.log"
 
 # enable jwt
 echo
 echo ">> enabling jwt"
 docker exec $vault sh -c "vault auth enable jwt"
 
+# enable approle
+echo
+echo ">> enabling approle"
+docker exec $vault sh -c "vault auth enable approle"
+
 # tyk policy
 echo
-echo ">> setting up tyk policy"
-docker exec $vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [\"create\", \"read\"]}' >> vault-policy.hcl; vault policy write tyk vault-policy.hcl"
+echo ">> setting up tyk user-claims policy"
+docker exec $vault sh -c "echo 'path \"identity/oidc/token/*\" {capabilities = [\"create\", \"read\"]}' > tyk-claims-policy.hcl; vault policy write tyk-claims tyk-claims-policy.hcl"
 
 echo
 echo ">> setting up aws policy"
-docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> vault-policy.hcl; vault policy write aws vault-policy.hcl"
+docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' > aws-policy.hcl; vault policy write aws aws-policy.hcl"
+
+echo
+echo ">> enable kv store for aws secrets"
+docker exec $vault vault secrets enable -path="aws" -description="AWS-style ID/secret pairs" kv
+
+echo ">> setting up approle policy"
+docker exec $vault sh -c "echo 'path \"auth/approle/role/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' > approle-policy.hcl; vault policy write approle approle-policy.hcl"
+
+echo
+echo ">> setting up approle role"
+cidr_block=$(docker network inspect --format "{{json .IPAM.Config}}" candigv2_default | jq '.[0].Gateway')
+cidr_block=$(echo ${cidr_block} | tr -d '"')
+cidr_block="${cidr_block}/27"
+if [ $CANDIG_DEBUG_MODE -eq 1 ]; then
+  echo "{}" > lib/vault/tmp/temp.json
+else
+  echo "{\"bound_cidrs\": [\"${cidr_block}\"]}" > lib/vault/tmp/temp.json
+fi
+curl --request POST --header "X-Vault-Token: ${key_root}" --data @lib/vault/tmp/temp.json $VAULT_SERVICE_PUBLIC_URL/v1/auth/token/roles/approle
+rm lib/vault/tmp/temp.json
+
+echo
+echo ">> setting up approle token"
+approle_token=$(cat tmp/secrets/vault-approle-token)
+echo "{\"id\": \"${approle_token}\", \"policies\": [\"approle\"], \"periodic\": \"24h\"}" > lib/vault/tmp/temp.json
+curl --request POST --header "X-Vault-Token: ${key_root}" --data @lib/vault/tmp/temp.json $VAULT_SERVICE_PUBLIC_URL/v1/auth/token/create/approle
+rm lib/vault/tmp/temp.json
+
+## SPECIAL STORES ACCESS
+# Ingest needs access to the opa store's access path:
+docker exec $vault sh -c "echo 'path \"opa/access\" {capabilities = [\"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; vault policy write ${ingest} ${ingest}-policy.hcl"
+
+# Federation needs access to the opa store's data path (to add servers):
+docker exec $vault sh -c "echo 'path \"opa/data\" {capabilities = [\"update\", \"read\", \"delete\"]}' >> federation-policy.hcl; vault policy write federation federation-policy.hcl"
+
 
 # user claims
 echo
 echo ">> setting up user claims"
-docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=preferred_username bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=tyk ttl=1h"
+docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=preferred_username bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=tyk-claims ttl=1h"
 
+# site admin should always be able to access aws secrets
 docker exec $vault sh -c "vault write auth/jwt/role/site_admin user_claim=site_admin bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=aws ttl=1h"
 
 # configure jwt
@@ -172,10 +219,5 @@ echo ">> matching key and inserting custom info into the jwt"
 VAULT_IDENTITY_ROLE_TEMPLATE=$(envsubst < lib/vault/configuration_templates/vault-datastructure.json.tpl)
 docker exec $vault sh -c "echo '${VAULT_IDENTITY_ROLE_TEMPLATE}' > researcher.json; vault write identity/oidc/role/researcher @researcher.json; rm researcher.json;"
 
-echo
-echo "enable kv store for aws secrets"
-docker exec $vault vault secrets enable -path="aws" -description="AWS-style ID/secret pairs" kv
-
-vault_runner=$(docker ps | grep vault-runner | awk '{print $1}')
+vault_runner=$(docker ps -a --format "{{.Names}}" | grep vault-runner_1 | awk '{print $1}')
 docker restart $vault_runner
-docker exec $vault_runner bash /vault/create_token.sh

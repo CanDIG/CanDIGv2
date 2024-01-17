@@ -1,6 +1,6 @@
 name: Test-CanDIG-build
 run-name: Build Validation
-on: 
+on:
   push:
     branches: [develop]
   pull_request:
@@ -26,7 +26,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Setup environment file
-        run: | 
+        run: |
             cp etc/env/example.env example.env
             sed "s@CONDA_INSTALL=.*@CONDA_INSTALL=$CONDA@" example.env > .env
       - name: Display environment file
@@ -61,10 +61,14 @@ jobs:
       - name: Integration testing
         run: |
               conda activate candig
+              export CANDIG_DEBUG_MODE=1
               make test-integration
       - name: Save docker container logs
         if: always()
         run: ./print_logs.sh > tmp/container_logs.txt 2>&1
+      - name: Save vault audit logs
+        if: always()
+        run: docker cp candigv2_vault-runner_1:/vault/vault-audit.log tmp/vault_audit.log 2>&1
       - name: Save container and error logs as artifact
         if: always()
         uses: actions/upload-artifact@v3
@@ -72,4 +76,5 @@ jobs:
           name: Post-build error log
           path: |
                 tmp/error.txt
-                tmp/container_logs.txt 
+                tmp/container_logs.txt
+                tmp/vault_audit.log
