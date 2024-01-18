@@ -28,6 +28,8 @@ print(authx.auth.get_site_admin_token())" > bearer.txt
 docker cp bearer.txt $opa_runner:/app/
 rm bearer.txt
 
+docker exec $opa_runner touch /app/initial_setup
+
 docker restart $opa_runner
 docker restart $opa_container
 

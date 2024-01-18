@@ -14,7 +14,7 @@ services:
         environment:
             KEYCLOAK_PUBLIC_URL: "${KEYCLOAK_PUBLIC_URL}"
             CANDIG_URL: "http://${CANDIG_DOMAIN}:5080"
-            VAULT_URL: ${VAULT_SERVICE_URL}
+            VAULT_URL: ${VAULT_PRIVATE_URL}
             CANDIG_CLIENT_ID: "${KEYCLOAK_CLIENT_ID}"
             CANDIG_SECRET_FILE: "/run/secrets/keycloak-secret"
             OPA_URL: ${OPA_URL}

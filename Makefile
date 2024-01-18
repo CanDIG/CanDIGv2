@@ -97,10 +97,7 @@ build-all:
 
 # Setup the entire stack
 	$(MAKE) init-docker
-	$(MAKE) build-images
-	$(MAKE) compose
-	$(MAKE) init-authx
-
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
 
 .PHONY: install-all
@@ -159,13 +156,13 @@ clean-%:
 
 #>>>
 # run all cleanup functions
-# WARNING: these are distructive steps, read through instructions before using
+# WARNING: these are destructive steps, read through instructions before using
 # make clean-all
 
 #<<<
 .PHONY: clean-all
-clean-all: clean-logs clean-authx clean-compose clean-containers clean-secrets \
-	clean-volumes clean-images clean-bin
+clean-all: clean-logs clean-compose clean-containers clean-secrets \
+	clean-volumes clean-images# clean-bin
 
 
 #>>>
@@ -204,6 +201,7 @@ clean-bin:
 clean-compose:
 	source setup_hosts.sh; \
 	$(foreach MODULE, $(CANDIG_MODULES), \
+		export SERVICE_NAME=$(MODULE); \
 		docker compose -f lib/candigv2/docker-compose.yml -f lib/$(MODULE)/docker-compose.yml down || true;)
 
 
@@ -220,7 +218,7 @@ clean-conda:
 
 
 #>>>
-# remove all stopped containers - does not stop any running containers. 
+# remove all stopped containers - does not stop any running containers.
 # make clean-containers
 
 #<<<
@@ -248,6 +246,7 @@ clean-images:
 clean-secrets:
 	-docker secret rm `docker secret ls -q --filter label=candigv2`
 	rm -rf tmp/secrets
+	rm -rf tmp/vault
 
 
 #>>>
@@ -301,6 +300,7 @@ down-%:
 	printf "\nOutput of down-$*: \n" >> $(ERRORLOG)
 	echo "    started down-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
+	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility down 2>&1
 	echo "    finished down-$*" >> $(LOGFILE)
 
@@ -523,3 +523,14 @@ print-%:
 test-integration:
 	python ./settings.py
 	source ./env.sh; pytest ./etc/tests
+
+# stop all docker containers
+.PHONY: stop-all
+stop-all:
+	CONTAINERS="$(shell docker ps --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker stop $$CONTAINER; done
+
+# start all docker containers
+.PHONY: start-all
+start-all:
+	CONTAINERS="$(shell docker ps -a --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker start $$CONTAINER; done
+
