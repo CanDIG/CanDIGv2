@@ -24,6 +24,7 @@ services:
       - HOST_CONTAINER_NAME=${KATSU_CONTAINER}
       - CONN_MAX_AGE=60
       - DJANGO_SETTINGS_MODULE=config.settings.dev
+      - UWSGI_WORKERS=1
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret
