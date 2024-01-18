@@ -62,3 +62,21 @@ else
         esac
     done
 fi
+
+# Check 4: is envsubst installed?
+envsubst --version
+if [[ $? -ne 0 ]]; then
+    echo "envsubst/gettext is not installed on your machine. Install gettext with your package manager of choice."
+fi
+
+# Check 5: is jq installed?
+jq --version
+if [[ $? -ne 0 ]]; then
+    echo "jq is not installed on your machine. Follow instructions at https://jqlang.github.io/jq/download/"
+fi
+
+# Check 6: is yq installed?
+yq --version
+if [[ $? -ne 0 ]]; then
+    echo "yq is not installed on your machine. Follow instructions at https://github.com/mikefarah/yq/#install"
+fi

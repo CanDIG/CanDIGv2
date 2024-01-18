@@ -94,6 +94,9 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/api_vault.json.tpl > ${CONFIG_
 echo "Working on api_federation.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_federation.json.tpl > ${CONFIG_DIR}/apps/${TYK_FEDERATION_API_ID}.json
 
+echo "Working on api_query.json" | tee -a $LOGFILE
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_query.json.tpl > ${CONFIG_DIR}/apps/${TYK_QUERY_API_ID}.json
+
 # Extra APIs can be added here
 #echo "Working on api_example.json"
 #envsubst < ${PWD}/lib/tyk/configuration_templates/api_example.json.tpl > ${CONFIG_DIR}/apps/api_example.json

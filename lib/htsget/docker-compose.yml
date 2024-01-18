@@ -31,7 +31,7 @@ services:
       HTSGET_URL: ${TYK_LOGIN_TARGET_URL}/${TYK_HTSGET_API_LISTEN_PATH}
       OPA_URL: ${OPA_PRIVATE_URL}
       OPA_SITE_ADMIN_KEY: ${OPA_SITE_ADMIN_KEY} # only required if not equal to "site_admin"
-      VAULT_URL: ${VAULT_SERVICE_URL}
+      VAULT_URL: ${VAULT_PRIVATE_URL}
       MINIO_URL: ${MINIO_PRIVATE_URL}
       DEBUG_MODE: ${CANDIG_DEBUG_MODE}
       DB_PATH: "metadata-db"

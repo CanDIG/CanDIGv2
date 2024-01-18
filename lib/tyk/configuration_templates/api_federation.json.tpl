@@ -82,7 +82,7 @@
         "KEYCLOAK_REALM": "${KEYCLOAK_REALM}",
         "KEYCLOAK_CLIENT_ID": "${KEYCLOAK_CLIENT_ID}",
         "KEYCLOAK_PRIVATE_URL": "${KEYCLOAK_PRIVATE_URL}",
-        "VAULT_SERVICE_URL":"${VAULT_SERVICE_URL}",
+        "VAULT_SERVICE_URL":"${VAULT_PRIVATE_URL}",
         "VAULT_SERVICE_RESOURCE":"/v1/auth/jwt/login",
         "VAULT_ROLE":"researcher"
     },
