@@ -17,4 +17,5 @@ Brief instructions:
   - add another clause to example.env (and your own .env), based on TYK_EXAMPLE_API
   - copy tyk/configuration_templates/api_template.json.tpl and update the TEMPLATE values
   - add a clause to tyk_preflight.sh, based on "Working on api_example.json"
+  - add a clause to tyk_setup.sh
 * Create a pull request!
