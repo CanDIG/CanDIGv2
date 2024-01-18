@@ -49,9 +49,6 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/backendAuthMiddleware.js > ${C
 echo "Working on frontendAuthMiddleware.js" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/frontendAuthMiddleware.js > ${CONFIG_DIR}/middleware/frontendAuthMiddleware.js
 
-echo "Working on policies.json" | tee -a $LOGFILE
-envsubst < ${PWD}/lib/tyk/configuration_templates/policies.json.tpl > ${CONFIG_DIR}/policies/policies.json
-
 echo "Working on tyk_analytics" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/tyk_analytics.conf.tpl > ${CONFIG_DIR}/tyk_analytics.conf
 
@@ -70,33 +67,146 @@ cp ${PWD}/lib/tyk/configuration_templates/permissionsStoreMiddleware.js ${CONFIG
 echo "Working on api_auth.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_auth.json.tpl > ${CONFIG_DIR}/apps/${TYK_AUTH_API_ID}.json
 
+echo "Creating policies.json.tpl"
+cp lib/tyk/configuration_templates/policies.json.tpl lib/tyk/tmp/policies.json.tpl
+
 echo "Working on api_katsu.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_katsu.json.tpl > ${CONFIG_DIR}/apps/${TYK_KATSU_API_ID}.json
+cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
+{"${TYK_KATSU_API_ID}": {
+    "allowed_urls": [],
+    "api_id": "${TYK_KATSU_API_ID}",
+    "api_name": "${TYK_KATSU_API_SLUG}",
+    "versions": [
+        "Default"
+    ]
+}
+}
+' > lib/tyk/tmp/tmp_policies.json.tpl
+mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
 echo "Working on api_candig_data_portal.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_mcode_candig_data_portal.json.tpl > ${CONFIG_DIR}/apps/${TYK_CANDIG_DATA_PORTAL_API_ID}.json
+cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
+{"${TYK_CANDIG_DATA_PORTAL_API_ID}": {
+    "allowed_urls": [],
+    "api_id": "${TYK_CANDIG_DATA_PORTAL_API_ID}",
+    "api_name": "${TYK_CANDIG_DATA_PORTAL_API_SLUG}",
+    "versions": [
+        "Default"
+    ]
+}
+}
+' > lib/tyk/tmp/tmp_policies.json.tpl
+mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
 echo "Working on api_ingest.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_ingest.json.tpl > ${CONFIG_DIR}/apps/${TYK_INGEST_API_ID}.json
+cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
+{"${TYK_INGEST_API_ID}": {
+    "allowed_urls": [],
+    "api_id": "${TYK_INGEST_API_ID}",
+    "api_name": "${TYK_INGEST_API_SLUG}",
+    "versions": [
+        "Default"
+    ]
+}
+}
+' > lib/tyk/tmp/tmp_policies.json.tpl
+mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
 echo "Working on api_graphql.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_graphql.json.tpl > ${CONFIG_DIR}/apps/${TYK_GRAPHQL_API_ID}.json
+cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
+{"${TYK_GRAPHQL_API_ID}": {
+    "allowed_urls": [],
+    "api_id": "${TYK_GRAPHQL_API_ID}",
+    "api_name": "${TYK_GRAPHQL_API_SLUG}",
+    "versions": [
+        "Default"
+    ]
+}
+}
+' > lib/tyk/tmp/tmp_policies.json.tpl
+mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
 echo "Working on api_htsget.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_htsget.json.tpl > ${CONFIG_DIR}/apps/${TYK_HTSGET_API_ID}.json
+cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
+{"${TYK_HTSGET_API_ID}": {
+    "allowed_urls": [],
+    "api_id": "${TYK_HTSGET_API_ID}",
+    "api_name": "${TYK_HTSGET_API_SLUG}",
+    "versions": [
+        "Default"
+    ]
+}
+}
+' > lib/tyk/tmp/tmp_policies.json.tpl
+mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
 echo "Working on api_opa.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_opa.json.tpl > ${CONFIG_DIR}/apps/${TYK_OPA_API_ID}.json
+cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
+{"${TYK_OPA_API_ID}": {
+    "allowed_urls": [],
+    "api_id": "${TYK_OPA_API_ID}",
+    "api_name": "${TYK_OPA_API_SLUG}",
+    "versions": [
+        "Default"
+    ]
+}
+}
+' > lib/tyk/tmp/tmp_policies.json.tpl
+mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
 echo "Working on api_vault.json"
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_vault.json.tpl > ${CONFIG_DIR}/apps/${TYK_VAULT_API_ID}.json
+cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
+{"${TYK_VAULT_API_ID}": {
+    "allowed_urls": [],
+    "api_id": "${TYK_VAULT_API_ID}",
+    "api_name": "${TYK_VAULT_API_SLUG}",
+    "versions": [
+        "Default"
+    ]
+}
+}
+' > lib/tyk/tmp/tmp_policies.json.tpl
+mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
 echo "Working on api_federation.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_federation.json.tpl > ${CONFIG_DIR}/apps/${TYK_FEDERATION_API_ID}.json
+cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
+{"${TYK_FEDERATION_API_ID}": {
+    "allowed_urls": [],
+    "api_id": "${TYK_FEDERATION_API_ID}",
+    "api_name": "${TYK_FEDERATION_API_SLUG}",
+    "versions": [
+        "Default"
+    ]
+}
+}
+' > lib/tyk/tmp/tmp_policies.json.tpl
+mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
 # Extra APIs can be added here
-#echo "Working on api_example.json"
-#envsubst < ${PWD}/lib/tyk/configuration_templates/api_example.json.tpl > ${CONFIG_DIR}/apps/api_example.json
+# echo "Working on api_example.json"
+# envsubst < ${PWD}/lib/tyk/configuration_templates/api_example.json.tpl > ${CONFIG_DIR}/apps/${TYK_EXAMPLE_API_ID}.json
+# cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
+# {"${TYK_EXAMPLE_API_ID}": {
+#     "allowed_urls": [],
+#     "api_id": "${TYK_EXAMPLE_API_ID}",
+#     "api_name": "${TYK_EXAMPLE_API_SLUG}",
+#     "versions": [
+#         "Default"
+#     ]
+# }
+# }
+# ' > lib/tyk/tmp/tmp_policies.json.tpl
+mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
+echo "Working on policies.json" | tee -a $LOGFILE
+envsubst < ${PWD}/lib/tyk/tmp/policies.json.tpl > ${CONFIG_DIR}/policies/policies.json
 
 echo "Tyk configuration generated!" | tee -a $LOGFILE
