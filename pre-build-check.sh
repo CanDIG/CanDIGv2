@@ -78,8 +78,17 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # Check 6: is yq installed?
-yq --version
+YQ_VER=$(yq --version)  # e.g. "yq (https://github.com/mikefarah/yq/) version v4.40.5"
 if [[ $? -ne 0 ]]; then
     echo "yq is not installed on your machine. Follow instructions at https://github.com/mikefarah/yq/#install"
     exit 1
+else
+    # Check the major version
+    YQ_VER=${YQ_VER##*v}    # Everything after the last lowercase v e.g. "4.40.5"
+    YQ_MAJ=${YQ_VER%%.*}    # Everything before the first period e.g. "4"
+    if [[ $YQ_MAJ -lt 4 ]]; then
+        echo "The installed version of yq on your machine is out of date ($YQ_VER). Follow instructions at https://github.com/mikefarah/yq/#install"
+        exit 1
+    fi
 fi
+
