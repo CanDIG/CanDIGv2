@@ -84,9 +84,9 @@ if [[ $? -ne 0 ]]; then
     exit 1
 else
     # Check the major version
-    YQ_VER=${YQ_VER##* }    # Everything after the last space e.g. "4.40.5" or "3.2.3"
-    YQ_MAJ=${YQ_VER%%.*}    # Everything before the first period e.g. "4" or "3"
-    if [[ $YQ_MAJ -lt 4 ]]; then
+    YQ_TRUNC=${YQ_VER##* }    # Everything after the last space e.g. "4.40.5" or "3.2.3"
+    YQ_MAJ=${YQ_TRUNC%%.*}    # Everything before the first period e.g. "4" or "3"
+    if [[ "$YQ_MAJ" -lt "4" ]]; then
         echo "The installed version of yq on your machine is out of date ($YQ_VER). Follow instructions at https://github.com/mikefarah/yq/#install"
         exit 1
     fi
