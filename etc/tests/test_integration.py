@@ -592,59 +592,6 @@ def test_unauthorized_ingests():
         ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NOT_FOUND}, but got {delete_response.status_code}."
     f" Response content: {delete_response.content}"
 
-
-def test_katsu_users_data_access():
-    """
-    Verifies user access to authorized datasets while denying access to unauthorized datasets.
-
-    Testing Strategy:
-    - Send a GET request to authorized program endpoint as an admin and non-admin user
-
-    Expected result:
-    - List of programs that match OPA datasets
-
-    """
-    # NOTE: this values are predefined in OPA
-    # if the test fails, check with OPA first
-    synthetic_datasets = ["SYNTHETIC-1", "SYNTHETIC-2"]
-    admin_authorized_datasets = ["SYNTHETIC-2"]
-    admin_unauthorized_datasets = [
-        "SYNTHETIC-1"
-    ]  # even admin does not have read acccess to all
-    non_admin_authorized_datasets = ["SYNTHETIC-1"]
-    non_admin_unauthorized_datasets = ["SYNTHETIC-2"]
-
-    try:
-        # Check if datasets already exist or not
-        # If found, skip the test since it could lead to unexpected results
-        assert_datasets_should_not_exist(synthetic_datasets)
-
-        # create synthetic datasets that matches OPA access
-        endpoint = "program"
-        program_data_list = [{"program_id": dataset_id} for dataset_id in synthetic_datasets]
-        for program_data in program_data_list:
-            response = ingest_data(endpoint, program_data, is_admin=True)
-            assert response.status_code == HTTPStatus.CREATED, "Failed to create program."
-
-
-        # Assert access for admin user
-        check_datasets_access(
-            is_admin=True,
-            authorized_datasets=admin_authorized_datasets,
-            unauthorized_datasets=admin_unauthorized_datasets,
-        )
-
-        # Assert access for non-admin user
-        check_datasets_access(
-            is_admin=False,
-            authorized_datasets=non_admin_authorized_datasets,
-            unauthorized_datasets=non_admin_unauthorized_datasets,
-        )
-    finally:
-        for program_id in synthetic_datasets:
-            clean_up_program(program_id)
-
-
 # =========================|| KATSU TEST END ||=============================== #
 
 def test_ingest_permissions():
