@@ -13,4 +13,9 @@ Brief instructions:
 * Add a docker-compose file in this directory, based on the provided template.
 * If there are files that need to be processed BEFORE the container is created, add a %_preflight.sh script based on the template.
 * If there are steps that need to be performed AFTER the container is created, add a %_setup.sh script based on the template.
+* To add your new service to Tyk:
+  - add another clause to [example.env](etc/env/example.env) (and your own .env), based on [TYK_EXAMPLE_API](etc/env/example.env#L257) and replace `EXAMPLE` with your new `SERVICE_NAME`
+  - copy [lib/tyk/configuration_templates/api_template.json.tpl](lib/tyk/configuration_templates/api_template.json.tpl) to `api_<SERVICE_NAME>.json.tpl` and update the TEMPLATE values
+  - add a clause to [tyk_preflight.sh](lib/tyk/tyk_preflight.sh), based on ["Working on api_example.json"](lib/tyk/tyk_preflight.sh#L193)
+  - add a clause to [tyk_setup.sh](lib/tyk/tyk_setup.sh#L84)
 * Create a pull request!
