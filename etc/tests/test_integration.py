@@ -684,8 +684,6 @@ def test_ingest_permissions():
     assert len(response.json()["SYNTHETIC-2"]["results"]) == 12
     assert len(response.json()["TEST_2"]["results"]) == 5
 
-    clean_up_program("SYNTHETIC-2")
-    clean_up_program("TEST_2")
 
 ## Htsget tests:
 
@@ -1016,3 +1014,8 @@ def test_add_server():
     )
     print(response.text)
     assert response.status_code == 200
+
+
+def test_clean_up():
+    clean_up_program("SYNTHETIC-2")
+    clean_up_program("TEST_2")
