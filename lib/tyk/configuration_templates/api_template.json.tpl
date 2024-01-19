@@ -1,9 +1,9 @@
 {
-    "api_id": "${TYK_CANDIG_API_ID}",
-    "name": "${TYK_CANDIG_API_SLUG}",
+    "api_id": "${TYK_TEMPLATE_API_ID}",
+    "name": "${TYK_TEMPLATE_API_SLUG}",
     "use_openid": true,
     "active": true,
-    "slug": "${TYK_CANDIG_API_SLUG}",
+    "slug": "${TYK_TEMPLATE_API_SLUG}",
 
     "enable_signature_checking": false,
 
