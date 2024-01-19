@@ -1016,3 +1016,22 @@ def test_add_server():
     )
     print(response.text)
     assert response.status_code == 200
+
+def test_query_info():
+    # tests that a request sent via query to htsget-beacon will have genomic_query_info in the response. This should be updated when the real response is designed.
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    params = {
+        "chrom": "chr21:5030630-5030640",
+        "assembly": "hg37"
+    }
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
+    )
+    assert "genomic_query_info" in response.json()
