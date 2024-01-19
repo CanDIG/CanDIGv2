@@ -87,7 +87,7 @@ else
     YQ_TRUNC=${YQ_VER##* }    # Everything after the last space e.g. "4.40.5" or "3.2.3"
     YQ_MAJ=${YQ_TRUNC%%.*}    # Everything before the first period e.g. "4" or "3"
     if [[ "$YQ_MAJ" -lt "4" ]]; then
-        echo "The installed version of yq on your machine is out of date ($YQ_VER). Please update to version 4 or later by following instructions at https://github.com/mikefarah/yq/#install"
+        echo "Either yq is not installed, or the installed version of yq on your machine is out of date ($YQ_VER). Please update to version 4 or later by following instructions at https://github.com/mikefarah/yq/#install"
         exit 1
     fi
 fi
