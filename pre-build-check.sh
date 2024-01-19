@@ -57,7 +57,7 @@ else
         read -r -p 'Do you want to continue? (y/n)' choice
         case "$choice" in
           n|N) exit 1;;
-          y|Y) exit 0;;
+          y|Y) break;;
           *) echo 'Response not valid';;
         esac
     done
