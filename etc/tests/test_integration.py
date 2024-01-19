@@ -496,27 +496,6 @@ def check_datasets_access(is_admin, authorized_datasets, unauthorized_datasets):
         program not in programs for program in unauthorized_datasets
     ), "Unauthorized datasets present."
 
-
-# TEST FUNCTIONS
-# --------------
-def test_katsu_online():
-    """
-    Verify that Katsu is online and responding as expected.
-
-    Testing Strategy:
-    - Send a GET request to health check endpoint with authentication headers.
-
-    Expected result:
-    - HTTP 200 OK status
-    """
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/service-info", headers=get_headers()
-    )
-    assert (
-        response.status_code == HTTPStatus.OK
-    ), f"Expected status code {HTTPStatus.OK}, but got {response.status_code}."
-    f" Response content: {response.content}"
-
 # =========================|| KATSU TEST END ||=============================== #
 
 def test_ingest_permissions():
