@@ -311,6 +311,8 @@ make clean-bin
 ```bash
 brew install gettext
 brew link --force gettext 
+brew install jq
+brew install yq
 ```
 
 - Get [Docker Desktop for Apple Silicon](https://docs.docker.com/desktop/install/mac-install/). Be sure to start it.
