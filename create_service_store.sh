@@ -52,7 +52,7 @@ create_service_store() {
         fi
 
         # get names of containers for service:
-        local containers=$(cat lib/$service/docker-compose.yml | yq '.services' | jq  'keys' | jq -r @sh)
+        local containers=$(cat lib/$service/docker-compose.yml | yq -ojson '.services' | jq  'keys' | jq -r @sh)
         for container in $containers
         do
             # copy roleid to container
@@ -74,7 +74,7 @@ collect_ips() {
     for service in $services
     do
         # get names of containers for service:
-        local containers=$(cat lib/$service/docker-compose.yml | yq '.services' | jq  'keys' | jq -r @sh)
+        local containers=$(cat lib/$service/docker-compose.yml | yq -ojson '.services' | jq  'keys' | jq -r @sh)
 
         # get service's container IPs:
         local network_containers=$(docker network inspect candigv2_default | jq '.[0].Containers' | jq '[map(.Name), map(.IPv4Address)] | transpose | map( {(.[0]): .[1]}) | add')

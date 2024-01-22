@@ -51,7 +51,7 @@ ALL_MODULES="${MODULES}"
 
 SERVICE_COUNT=0
 for MODULE in $ALL_MODULES; do
-  sc=$(cat lib/$MODULE/docker-compose.yml | yq '.services' | jq  'keys' | jq -r @sh | wc -w | tr -d ' ')
+  sc=$(cat lib/$MODULE/docker-compose.yml | yq -ojson '.services' | jq  'keys' | jq -r @sh | wc -w | tr -d ' ')
   SERVICE_COUNT=`expr $SERVICE_COUNT + $sc`
 done
 
