@@ -646,6 +646,7 @@ def test_add_server():
     print(response.text)
     assert response.status_code == 200
 
+
 def test_query_info():
     # tests that a request sent via query to htsget-beacon will have genomic_query_info in the response. This should be updated when the real response is designed.
     token = get_token(
