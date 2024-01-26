@@ -145,6 +145,14 @@ sudo systemctl start docker
 sudo usermod -aG docker $(whoami)
 ```
 
+### Note for WSL Systems
+Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop. Add `CONDA_INSTALL = ~/miniconda3`  above `CONDA = $(CONDA_INSTALL)/bin/conda` in the Makefile to avoid this issue. You can also use the below command to move the miniconda3 installation to the correct location.
+
+
+```bash
+bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
+```
+
 ## Initialize CanDIGv2 Repo
 
 ```bash
@@ -168,13 +176,6 @@ make init-conda
 
 # 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
 conda activate candig
-```
-
-### Note for WSL Systems
-Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop:
-
-```bash
-bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 ```
 
 ## Deploy CanDIGv2 Services with Compose
@@ -310,6 +311,8 @@ make clean-bin
 ```bash
 brew install gettext
 brew link --force gettext 
+brew install jq
+brew install yq
 ```
 
 - Get [Docker Desktop for Apple Silicon](https://docs.docker.com/desktop/install/mac-install/). Be sure to start it.
