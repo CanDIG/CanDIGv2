@@ -44,3 +44,8 @@ services:
       POSTGRES_PASSWORD_FILE: "/run/secrets/metadata-db-secret"
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://${CANDIG_DOMAIN}:3333"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
