@@ -34,4 +34,9 @@ services:
         target: katsu_secret
     labels:
       - "candigv2=chord-metadata"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://${CANDIG_DOMAIN}:8008"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
