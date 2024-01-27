@@ -23,9 +23,10 @@ services:
         target: vault-approle-token
     environment:
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
+      KEYCLOAK_URL: ${KEYCLOAK_PRIVATE_URL}
       OPA_SITE_ADMIN_KEY: ${OPA_SITE_ADMIN_KEY}
       OPA_URL: ${OPA_PRIVATE_URL}
-      KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
       VAULT_URL: ${VAULT_PRIVATE_URL}
       SERVICE_NAME: ${SERVICE_NAME}
     extra_hosts:
