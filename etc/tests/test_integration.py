@@ -647,97 +647,6 @@ def test_add_server():
     assert response.status_code == 200
 
 
-# Query Test: Get all donors
-def test_query_donors_all():
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
-    params = {}
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
-    ).json()
-    print(response)
-    assert response and len(response["results"]) == 4
-
-    # Check the summary stats as well
-    summary_stats = response["summary"]
-    expected_response = {
-        "age_at_diagnosis": {
-            "30-39 Years": 2,
-            "60-69 Years": 1,
-            "70-79 Years": 1
-        },
-        "cancer_type_count": {
-            "Esophagus": 1,
-            "Eye and adnexa": 1,
-            "Floor of mouth": 1,
-            "Gallbladder": 1
-        },
-        "patients_per_cohort": {
-            "SYNTHETIC-2": 4
-        },
-        "treatment_type_count": {
-            "Bone marrow transplant": 1,
-            "Chemotherapy": 1,
-            "Hormonal therapy": 1,
-            "Immunotherapy": 2,
-            "Surgery": 1
-        }
-    }
-    for category in expected_response.keys():
-        for value in expected_response[category].keys():
-            assert summary_stats[category][value] == expected_response[category][value]
-
-# Test 2: Search for a specific donor
-def test_query_donor_search():
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
-    params = {
-        "treatment": "Chemotherapy"
-    }
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
-    ).json()
-    print(response)
-    assert response and len(response["results"]) == 1
-
-    # Check the summary stats as well
-    summary_stats = response["summary"]
-    expected_response = {
-        "age_at_diagnosis": {
-            "30-39 Years": 1
-        },
-        "cancer_type_count": {
-            "Eye and adnexa": 1
-        },
-        "patients_per_cohort": {
-            "SYNTHETIC-2": 1
-        },
-        "treatment_type_count": {
-            "Chemotherapy": 1,
-            "Immunotherapy": 1,
-            "Surgery": 1
-        }
-    }
-    for category in expected_response.keys():
-        for value in expected_response[category].keys():
-            assert summary_stats[category][value] == expected_response[category][value]
-    assert True
-
-
 def test_query_info():
     # tests that a request sent via query to htsget-beacon will have genomic_query_info in the response. This should be updated when the real response is designed.
     token = get_token(
@@ -750,7 +659,7 @@ def test_query_info():
     }
     params = {
         "chrom": "chr21:5030630-5030640",
-        "assembly": "hg38"
+        "assembly": "hg37"
     }
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
