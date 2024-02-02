@@ -13,7 +13,7 @@
     "use_keyless": false,
     "enable_coprocess_auth": false,
     "base_identity_provided_by": "",
-    
+
     "proxy": {
         "target_url": "${TYK_VAULT_API_TARGET}",
         "strip_listen_path": true,
@@ -69,7 +69,7 @@
         "post_key_auth": [],
         "response": []
     },
-    
+
     "config_data": {
         "TYK_SERVER": "${TYK_LOGIN_TARGET_URL}",
         "KEYCLOAK_SECRET": "${KEYCLOAK_SECRET}",

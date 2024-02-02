@@ -694,6 +694,18 @@ def test_cohort_status():
     assert "index_complete" in response.json()
     assert len(response.json()['index_complete']) > 0
 
+def test_sample_metadata():
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_REGISTRATION_1", headers=headers)
+    assert "genomes" in response.json()
+    assert "HG00096.cnv.vcf" in response.json()["genomes"]
 
 ## Federation tests:
 
