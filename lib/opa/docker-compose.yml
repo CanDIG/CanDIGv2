@@ -26,6 +26,7 @@ services:
       - source: keycloak-test-user2-password
         target: /run/secrets/password
     environment:
+      KEYCLOAK_PUBLIC_URL: "${KEYCLOAK_PUBLIC_URL}"
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
       KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
       KEYCLOAK_URL: ${KEYCLOAK_PRIVATE_URL}
