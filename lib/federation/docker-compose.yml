@@ -17,15 +17,18 @@ services:
         target: opa-service-token
       - source: tyk-secret-key
         target: tyk-secret-key
+      - source: vault-approle-token
+        target: vault-approle-token
     environment:
         TEST_KEY: "hoodlebug"
-        CANDIG_OPA_URL: ${OPA_PRIVATE_URL}
         KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
         KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
-        TYK_LOGIN_TARGET_URL: ${TYK_LOGIN_TARGET_URL}
+        TYK_LOGIN_TARGET_URL: ${TYK_PRIVATE_URL}
         TYK_POLICY_ID: ${TYK_POLICY_ID}
-        OPA_URL: ${OPA_URL}
+        OPA_URL: ${OPA_PRIVATE_URL}
         TYK_FEDERATION_API_ID: ${TYK_FEDERATION_API_ID}
         CONFIG_DIR: "/app/config"
+        VAULT_URL: ${VAULT_PRIVATE_URL}
+        SERVICE_NAME: ${SERVICE_NAME}
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"

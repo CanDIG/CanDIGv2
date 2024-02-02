@@ -12,6 +12,7 @@
 #project files
 .venv
 .env
+/nightly_env.sh
 /bin
 /etc/ssl/selfsigned-*
 */miniconda3

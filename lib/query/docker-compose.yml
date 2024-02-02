@@ -20,7 +20,7 @@ services:
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
-      test: [ "CMD", "curl", "http://localhost:${QUERY_PORT}" ]
+      test: [ "CMD", "curl", "http://${CANDIG_DOMAIN}:${QUERY_PORT}/service-info" ]
       interval: 30s
       timeout: 20s
       retries: 3

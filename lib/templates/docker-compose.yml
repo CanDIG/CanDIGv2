@@ -24,11 +24,15 @@ services:
     environment:
       - MINIO_REGION="${MINIO_REGION}"
       - CANDIG_DOMAIN="${CANDIG_DOMAIN}"
+      - VAULT_URL="${VAULT_PRIVATE_URL}"
+      - SERVICE_NAME="${SERVICE_NAME}"
     secrets:
       - source: minio-access-key
         target: access_key
       - source: minio-secret-key
         target: secret_key
+      - source: vault-approle-token
+        target: vault-approle-token
     # use entrypoint if you want to override default entrypoint
     #entrypoint: []
     # use command if you want to add arguments to entrypoint

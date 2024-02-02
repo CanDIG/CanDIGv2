@@ -24,7 +24,7 @@ all:
 	@echo "CanDIGv2 Makefile Deployment"
 	@echo "Type 'make help' to view available options"
 	@echo "View README.md for additional information"
-	
+
 #>>>
 # create non-repo directories
 # make mkdir
@@ -93,16 +93,13 @@ endif
 .PHONY: build-all
 build-all:
 	printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG)
-	./pre-build-check.sh
+	./pre-build-check.sh $(ARGS)
 
 # Setup the entire stack
 	$(MAKE) init-docker
-	$(MAKE) build-images
-	$(MAKE) compose
-	$(MAKE) init-authx
-	
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
-	
+
 .PHONY: install-all
 install-all:
 	$(MAKE) bin-conda
@@ -137,6 +134,7 @@ build-%:
 	if [ -f lib/$*/$*_preflight.sh ]; then \
 	source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG); \
 	fi
+	export SERVICE_NAME=$*; \
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(ERRORLOG)
 	echo "    finished build-$*" >> $(LOGFILE)
@@ -150,20 +148,22 @@ build-%:
 clean-%:
 	echo "    started clean-$*"
 	source setup_hosts.sh
+	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
 	-docker volume rm `docker volume ls --filter name=$* -q`
+	docker image rm `docker image ls --format "{{.Repository}}" | grep $*`
 	rm -Rf lib/$*/tmp
 
 
 #>>>
 # run all cleanup functions
-# WARNING: these are distructive steps, read through instructions before using
+# WARNING: these are destructive steps, read through instructions before using
 # make clean-all
 
 #<<<
 .PHONY: clean-all
-clean-all: clean-logs clean-authx clean-compose clean-containers clean-secrets \
-	clean-volumes clean-images clean-bin
+clean-all: clean-logs clean-compose clean-containers clean-secrets \
+	clean-volumes clean-images# clean-bin
 
 
 #>>>
@@ -202,6 +202,7 @@ clean-bin:
 clean-compose:
 	source setup_hosts.sh; \
 	$(foreach MODULE, $(CANDIG_MODULES), \
+		export SERVICE_NAME=$(MODULE); \
 		docker compose -f lib/candigv2/docker-compose.yml -f lib/$(MODULE)/docker-compose.yml down || true;)
 
 
@@ -218,7 +219,7 @@ clean-conda:
 
 
 #>>>
-# stop all running containers and remove all stopped containers
+# remove all stopped containers - does not stop any running containers.
 # make clean-containers
 
 #<<<
@@ -246,6 +247,7 @@ clean-images:
 clean-secrets:
 	-docker secret rm `docker secret ls -q --filter label=candigv2`
 	rm -rf tmp/secrets
+	rm -rf tmp/vault
 
 
 #>>>
@@ -281,6 +283,7 @@ compose-%:
 	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
+	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
 	if [ -f lib/$*/$*_setup.sh ]; then \
 	source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG); \
@@ -298,6 +301,7 @@ down-%:
 	printf "\nOutput of down-$*: \n" >> $(ERRORLOG)
 	echo "    started down-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
+	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility down 2>&1
 	echo "    finished down-$*" >> $(LOGFILE)
 
@@ -346,6 +350,7 @@ docker-secrets: mkdir minio-secrets katsu-secrets
 	$(MAKE) secret-tyk-analytics-admin-key
 
 	$(MAKE) secret-vault-s3-token
+	$(MAKE) secret-vault-approle-token
 
 	$(MAKE) secret-opa-root-token
 	$(MAKE) secret-opa-service-token
@@ -383,7 +388,7 @@ docker-volumes:
 .PHONY: init-authx
 init-authx: mkdir
 	$(MAKE) docker-volumes
-	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
+	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE); python settings.py;)
 
 
 #>>>
@@ -437,7 +442,7 @@ katsu-secrets:
 	@echo admin > tmp/secrets/katsu-secret-key
 	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
 		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
-	
+
 	@echo admin > tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-app-secret
 	$(MAKE) secret-metadata-db-secret
@@ -519,3 +524,14 @@ print-%:
 test-integration:
 	python ./settings.py
 	source ./env.sh; pytest ./etc/tests
+
+# stop all docker containers
+.PHONY: stop-all
+stop-all:
+	CONTAINERS="$(shell docker ps --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker stop $$CONTAINER; done
+
+# start all docker containers
+.PHONY: start-all
+start-all:
+	CONTAINERS="$(shell docker ps -a --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker start $$CONTAINER; done
+

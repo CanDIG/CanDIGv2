@@ -48,6 +48,7 @@ def get_env():
     vars["MINIO_URL"] = get_env_value("MINIO_PUBLIC_URL")
     vars["TYK_LOGIN_TARGET_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
     vars["TYK_POLICY_ID"] = get_env_value("TYK_POLICY_ID")
+    vars["CANDIG_DEBUG_MODE"] = get_env_value("CANDIG_DEBUG_MODE")
 
     # vars that come from files:
     with open(f"tmp/secrets/opa-root-token") as f:

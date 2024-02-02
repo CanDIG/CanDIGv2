@@ -24,15 +24,8 @@ else
 
 fi
 
-bash /vault/create_token.sh
-# set up crontab
-crontab -l > cron_bkp
-echo -e "0\t*/5\t*\t*\t*\tbash /vault/create_token.sh" >> cron_bkp
-crontab cron_bkp
-rm cron_bkp
-crond
-
 while [ 0 -eq 0 ]
 do
-  sleep 60
+  bash /vault/renew_token.sh
+  sleep 600
 done

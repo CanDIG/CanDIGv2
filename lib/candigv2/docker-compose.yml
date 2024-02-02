@@ -117,6 +117,10 @@ secrets:
     file: $PWD/tmp/secrets/vault-s3-token
     labels:
       - "candigv2=secret"
+  vault-approle-token:
+      file: $PWD/tmp/secrets/vault-approle-token
+      labels:
+        - "candigv2=secret"
   opa-root-token:
     file: $PWD/tmp/secrets/opa-root-token
     labels:

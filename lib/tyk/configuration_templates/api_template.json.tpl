@@ -1,9 +1,9 @@
 {
-    "api_id": "${TYK_FEDERATION_API_ID}",
-    "name": "${TYK_FEDERATION_API_SLUG}",
+    "api_id": "${TYK_TEMPLATE_API_ID}",
+    "name": "${TYK_TEMPLATE_API_SLUG}",
     "use_openid": true,
     "active": true,
-    "slug": "${TYK_FEDERATION_API_SLUG}",
+    "slug": "${TYK_TEMPLATE_API_SLUG}",
 
     "enable_signature_checking": false,
 
@@ -15,10 +15,10 @@
     "base_identity_provided_by": "",
 
     "proxy": {
-        "target_url": "${TYK_FEDERATION_API_TARGET}",
-        "strip_listen_path": false,
+        "target_url": "${TYK_TEMPLATE_API_TARGET}",
+        "strip_listen_path": true,
         "disable_strip_slash": false,
-        "listen_path": "/${TYK_FEDERATION_API_LISTEN_PATH}",
+        "listen_path": "/${TYK_TEMPLATE_API_LISTEN_PATH}",
         "transport": {
             "ssl_insecure_skip_verify": false,
             "ssl_ciphers": [],
@@ -59,8 +59,14 @@
                 "path": "/opt/tyk-gateway/middleware/backendAuthMiddleware.js",
                 "require_session": false
             }
+            ],
+        "post": [
+            {
+                "name": "permissionsStoreMiddleware",
+                "path": "/opt/tyk-gateway/middleware/permissionsStoreMiddleware.js",
+                "require_session": false
+            }
         ],
-        "post": [],
         "id_extractor": {
             "extract_with": "",
             "extract_from": "",
@@ -89,6 +95,12 @@
     "openid_options": {
     "segregate_by_client": false,
     "providers": [
+            {
+                "issuer": "${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/${KEYCLOAK_REALM}",
+                "client_ids": {
+                    "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
+                }
+            },
             {
                 "issuer": "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}",
                 "client_ids": {
