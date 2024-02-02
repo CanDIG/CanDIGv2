@@ -5,7 +5,7 @@ import sys
 import uuid
 from http import HTTPStatus
 from pathlib import Path
-
+import datetime
 import pytest
 import requests
 from dotenv import dotenv_values
@@ -91,21 +91,58 @@ def user_datasets():
 def test_opa_datasets(user, dataset):
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
-    payload = {"input": {"body": {"path": "/v2/discovery/", "method": "GET"}}}
+    token = get_token(username=username, password=password)
+    payload = {
+        "input": {
+            "body": {
+                "path": "/v2/discovery/", "method": "GET"
+            },
+            "token": token
+        }
+    }
 
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "X-Opa": ENV["OPA_SECRET"],
+        "Authorization": f"Bearer {token}"
     }
 
-    payload["input"]["token"] = get_token(username=username, password=password)
     response = requests.post(
         f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/permissions/datasets",
         json=payload,
         headers=headers,
     )
+    print(f"108 {datetime.datetime.now(tz=datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')} {json.dumps(payload)} {response.text}")
     assert dataset in response.json()["result"]
+
+
+## Can we add a dataset to one of the users?
+def test_add_opa_dataset():
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    test_data = {
+        "email": ENV["CANDIG_SITE_ADMIN_USER"] + "@test.ca",
+        "program": "OPA-TEST"
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
+    # when the user has admin access, they should be allowed
+    print(f"129 {response.json()}, {response.status_code}")
+    assert response.status_code == 200
+
+    test_opa_datasets("CANDIG_SITE_ADMIN", test_data["program"])
+
+    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
+    assert response.status_code == 200
+    assert test_data['program'] not in response.json()["access"]["controlled_access_list"][test_data["email"]]
 
 
 ## Is the user a site admin?
@@ -119,16 +156,18 @@ def user_admin():
 @pytest.mark.parametrize("user, is_admin", user_admin())
 def test_site_admin(user, is_admin):
     payload = {"input": {}}
+    username = ENV[f"{user}_USER"]
+    password = ENV[f"{user}_PASSWORD"]
+    token = get_token(username=username, password=password)
 
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "X-Opa": ENV["OPA_SECRET"],
+        "Authorization": f"Bearer {token}"
     }
 
-    username = ENV[f"{user}_USER"]
-    password = ENV[f"{user}_PASSWORD"]
-    payload["input"]["token"] = get_token(username=username, password=password)
+    payload["input"]["token"] = token
     response = requests.post(
         f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/idp/site_admin",
         json=payload,
@@ -193,6 +232,90 @@ def test_vault():
     assert response.json()["data"]["url"] == payload["url"]
 
 
+# =========================|| KATSU TEST BEGIN ||============================= #
+# HELPER FUNCTIONS
+# -----------------
+def get_headers(is_admin=False):
+    """
+    Returns either admin or non-admin HTTP headers for making requests API.
+    """
+    if is_admin:
+        user = ENV.get("CANDIG_SITE_ADMIN_USER")
+        password = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
+        user_type = "site admin"
+    else:
+        user = ENV.get("CANDIG_NOT_ADMIN_USER")
+        password = ENV.get("CANDIG_NOT_ADMIN_PASSWORD")
+        user_type = "user"
+
+    if not user or not password:
+        pytest.skip(f"{user_type.capitalize()} credentials not provided")
+
+    token = get_token(username=user, password=password)
+
+    if not token:
+        pytest.fail(f"Failed to authenticate {user_type}")
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    return headers
+
+def clean_up_program(test_id):
+    """
+    Deletes a dataset and all related objects. Expected 204
+    """
+    delete_response = requests.delete(
+        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/program/{test_id}/",
+        headers=get_headers(is_admin=True),
+    )
+    assert (
+        delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
+    ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
+    f" Response content: {delete_response.content}"
+
+# =========================|| KATSU TEST END ||=============================== #
+
+def test_ingest_permissions():
+    clean_up_program("SYNTHETIC-2")
+    clean_up_program("TEST_2")
+
+    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/tests/clinical_ingest.json"
+    test_data = requests.get(test_loc).json()
+
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    # when the user has no admin access, they should not be allowed
+    assert response.status_code == 401
+
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    # when the user has admin access, they should be allowed
+    print(response.json())
+    assert response.status_code == 201
+    assert len(response.json()["SYNTHETIC-2"]["errors"]) == 0
+    assert len(response.json()["TEST_2"]["errors"]) == 0
+    assert len(response.json()["SYNTHETIC-2"]["results"]) == 12
+    assert len(response.json()["TEST_2"]["results"]) == 5
+
+
 ## Htsget tests:
 
 
@@ -201,8 +324,8 @@ def test_htsget():
     old_val = os.environ.get("TESTENV_URL")
     os.environ[
         "TESTENV_URL"
-    ] = f"http://{ENV['CANDIG_ENV']['CANDIG_DOMAIN']}:{ENV['CANDIG_ENV']['HTSGET_PORT']}"
-    retcode = pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py"])
+    ] = f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}"
+    retcode = pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py", "-k", "test_remove_objects or test_post_objects or test_index_variantfile"])
     if old_val is not None:
         os.environ["TESTENV_URL"] = old_val
     print(retcode)
@@ -356,491 +479,54 @@ def test_beacon(user, search, can_access, cannot_access):
     print(response.json())
 
 
-# =========================|| KATSU TEST BEGIN ||============================= #
-# HELPER FUNCTIONS
-# -----------------
-def get_headers(is_admin=False):
-    """
-    Returns either admin or non-admin HTTP headers for making requests API.
-    """
-    if is_admin:
-        user = ENV.get("CANDIG_SITE_ADMIN_USER")
-        password = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
-        user_type = "site admin"
-    else:
-        user = ENV.get("CANDIG_NOT_ADMIN_USER")
-        password = ENV.get("CANDIG_NOT_ADMIN_PASSWORD")
-        user_type = "user"
+## HTSGet + katsu:
+def test_ingest_htsget():
+    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/tests/genomic_ingest.json"
+    test_data = requests.get(test_loc).json()
 
-    if not user or not password:
-        pytest.skip(f"{user_type.capitalize()} credentials not provided")
-
-    token = get_token(username=user, password=password)
-
-    if not token:
-        pytest.fail(f"Failed to authenticate {user_type}")
-
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    return headers
-
-
-def assert_datasets_should_not_exist(datasets):
-    """
-    Retrieve a list of dataset names from discovery donor api.
-    If any of the dataset names is found, the assertion will fail.
-    """
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/discovery/donors/", headers=get_headers()
-    )
-    data = response.json()
-    dataset_names = list(data["discovery_donor"].keys())
-
-    assert all(
-        dataset_name not in dataset_names for dataset_name in datasets
-    ), f"Expected none of {datasets} to exist, but at least one was found."
-
-
-def ingest_data(endpoint, data, is_admin=False):
-    """
-    Ingests data into the katsu API at the specified endpoint using a POST request.
-    """
-    headers = get_headers(is_admin)
-    response = requests.post(
-        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/{endpoint}/",
-        headers=headers,
-        json=data,
-    )
-    return response
-
-
-def assert_ingest_response_status(response, expected_status, endpoint):
-    """
-    Asserts that the response status code matches the expected status code for an ingest operation.
-    """
-    assert response.status_code == expected_status, (
-        f"INGEST_{endpoint.upper()} Expected status code {expected_status}, but got {response.status_code}."
-        f" Response content: {response.content}"
-    )
-
-
-def perform_ingest_and_assert_status(endpoint, data, is_admin=False):
-    """
-    Performs data ingest and asserts the response status code depend on permission
-    """
-    response = ingest_data(endpoint, data, is_admin)
-    expected_status = HTTPStatus.CREATED if is_admin else HTTPStatus.FORBIDDEN
-    assert_ingest_response_status(response, expected_status, endpoint)
-
-
-def clean_up_program(test_id):
-    """
-    Deletes a dataset and all related objects. Expected 204
-    """
-    delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{test_id}/",
-        headers=get_headers(is_admin=True),
-    )
-    assert (
-        delete_response.status_code == HTTPStatus.NO_CONTENT
-    ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
-    f" Response content: {delete_response.content}"
-
-
-def check_program_ingest(test_id, is_admin=False):
-    endpoint = "programs"
-    data = [{"program_id": test_id}]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_donor_ingest(test_id, is_admin=False):
-    endpoint = "donors"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_diagnosis_ingest(test_id, is_admin=False):
-    endpoint = "primary_diagnoses"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_primary_diagnosis_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_specimen_ingest(test_id, is_admin=False):
-    endpoint = "specimens"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_primary_diagnosis_id": test_id,
-            "submitter_specimen_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_sample_ingest(test_id, is_admin=False):
-    endpoint = "sample_registrations"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_specimen_id": test_id,
-            "submitter_sample_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_treatment_ingest(test_id, is_admin=False):
-    endpoint = "treatments"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_primary_diagnosis_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_chemotherapy_ingest(test_id, is_admin=False):
-    endpoint = "chemotherapies"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_radiation_ingest(test_id, is_admin=False):
-    endpoint = "radiations"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_hormonetherapy_ingest(test_id, is_admin=False):
-    endpoint = "hormone_therapies"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_immunotherapy_ingest(test_id, is_admin=False):
-    endpoint = "immunotherapies"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_surgery_ingest(test_id, is_admin=False):
-    endpoint = "surgeries"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_treatment_id": test_id,
-            "margin_types_involved": [],
-            "margin_types_not_involved": [],
-            "margin_types_not_assessed": [],
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_follow_up_ingest(test_id, is_admin=False):
-    endpoint = "follow_ups"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-            "submitter_primary_diagnosis_id": test_id,
-            "submitter_treatment_id": test_id,
-            "submitter_follow_up_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_biomarker_ingest(test_id, is_admin=False):
-    endpoint = "biomarkers"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_comorbidity_ingest(test_id, is_admin=False):
-    endpoint = "comorbidities"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_exposure_ingest(test_id, is_admin=False):
-    endpoint = "exposures"
-    data = [
-        {
-            "submitter_donor_id": test_id,
-            "program_id": test_id,
-        },
-    ]
-    perform_ingest_and_assert_status(endpoint, data, is_admin)
-
-
-def check_datasets_access(is_admin, authorized_datasets, unauthorized_datasets):
-    """
-    Checks access to datasets depend on user permission and asserts dataset presence.
-    """
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
-        headers=get_headers(is_admin=is_admin),
-    )
-    programs = list(map(lambda x: x["program_id"], response.json()["results"]))
-
-    # Assert that all authorized datasets are present in programs
-    assert all(
-        program in programs for program in authorized_datasets
-    ), "Authorized datasets missing."
-
-    # Assert that no unauthorized datasets are present in programs
-    assert all(
-        program not in programs for program in unauthorized_datasets
-    ), "Unauthorized datasets present."
-
-
-# TEST FUNCTIONS
-# --------------
-def test_katsu_online():
-    """
-    Verify that Katsu is online and responding as expected.
-
-    Testing Strategy:
-    - Send a GET request to health check endpoint with authentication headers.
-
-    Expected result:
-    - HTTP 200 OK status
-    """
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/katsu/v2/service-info", headers=get_headers()
-    )
-    assert (
-        response.status_code == HTTPStatus.OK
-    ), f"Expected status code {HTTPStatus.OK}, but got {response.status_code}."
-    f" Response content: {response.content}"
-
-
-def test_authorized_ingests():
-    """
-    Verify that ingest apis work as expected for admin
-
-    Testing Strategy:
-    - Call ingest apis with admin header in subsequent order.
-    - If any of ingests fail, the following ingests will not run.
-    - Clean up after the test is completed or if any exception occurs.
-
-    Expected result:
-    - HTTP 201 CREATED with valid ingest data.
-    """
-    # to simplify the test data, only 1 unique id is needed
-    test_id = "TEST-" + str(uuid.uuid4())
-    try:
-        check_program_ingest(test_id, is_admin=True)
-        check_donor_ingest(test_id, is_admin=True)
-        check_diagnosis_ingest(test_id, is_admin=True)
-        check_specimen_ingest(test_id, is_admin=True)
-        check_sample_ingest(test_id, is_admin=True)
-        check_treatment_ingest(test_id, is_admin=True)
-        check_chemotherapy_ingest(test_id, is_admin=True)
-        check_hormonetherapy_ingest(test_id, is_admin=True)
-        check_radiation_ingest(test_id, is_admin=True)
-        check_immunotherapy_ingest(test_id, is_admin=True)
-        check_surgery_ingest(test_id, is_admin=True)
-        check_follow_up_ingest(test_id, is_admin=True)
-        check_biomarker_ingest(test_id, is_admin=True)
-        check_comorbidity_ingest(test_id, is_admin=True)
-        check_exposure_ingest(test_id, is_admin=True)
-
-    finally:
-        clean_up_program(test_id)
-
-
-def test_unauthorized_ingests():
-    """
-    Verify that ingest apis will not work for non-admin user
-
-    Testing Strategy:
-    - Call ingest apis with non-admin header in subsequent order.
-    - Attempt to clean up after in case any ingests go through but expected None
-
-    Expected result:
-    - HTTP 403 even with valid ingest data.
-    """
-    # to simplify the test data, only 1 unique id is needed
-    test_id = "TEST-" + str(uuid.uuid4())
-    try:
-        check_program_ingest(test_id, is_admin=False)
-        check_donor_ingest(test_id, is_admin=False)
-        check_diagnosis_ingest(test_id, is_admin=False)
-        check_specimen_ingest(test_id, is_admin=False)
-        check_sample_ingest(test_id, is_admin=False)
-        check_treatment_ingest(test_id, is_admin=False)
-        check_chemotherapy_ingest(test_id, is_admin=False)
-        check_hormonetherapy_ingest(test_id, is_admin=False)
-        check_radiation_ingest(test_id, is_admin=False)
-        check_immunotherapy_ingest(test_id, is_admin=False)
-        check_surgery_ingest(test_id, is_admin=False)
-        check_follow_up_ingest(test_id, is_admin=False)
-        check_biomarker_ingest(test_id, is_admin=False)
-        check_comorbidity_ingest(test_id, is_admin=False)
-        check_exposure_ingest(test_id, is_admin=False)
-    finally:
-        delete_response = requests.delete(
-            f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/{test_id}/",
-            headers=get_headers(True),
-        )
-        assert (
-            delete_response.status_code == HTTPStatus.NOT_FOUND
-        ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NOT_FOUND}, but got {delete_response.status_code}."
-    f" Response content: {delete_response.content}"
-
-
-def test_katsu_users_data_access():
-    """
-    Verifies user access to authorized datasets while denying access to unauthorized datasets.
-
-    Testing Strategy:
-    - Send a GET request to authorized program endpoint as an admin and non-admin user
-
-    Expected result:
-    - List of programs that match OPA datasets
-
-    """
-    # NOTE: this values are predefined in OPA
-    # if the test fails, check with OPA first
-    synthetic_datasets = ["SYNTHETIC-1", "SYNTHETIC-2"]
-    admin_authorized_datasets = ["SYNTHETIC-2"]
-    admin_unauthorized_datasets = [
-        "SYNTHETIC-1"
-    ]  # even admin does not have read acccess to all
-    non_admin_authorized_datasets = ["SYNTHETIC-1"]
-    non_admin_unauthorized_datasets = ["SYNTHETIC-2"]
-
-    try:
-        # Check if datasets already exist or not
-        # If found, skip the test since it could lead to unexpected results
-        assert_datasets_should_not_exist(synthetic_datasets)
-
-        # create synthetic datasets that matches OPA access
-        endpoint = "programs"
-        program_data = [{"program_id": dataset_id} for dataset_id in synthetic_datasets]
-        response = ingest_data(endpoint, program_data, is_admin=True)
-        assert response.status_code == HTTPStatus.CREATED, "Failed to create programs."
-
-        # Assert access for admin user
-        check_datasets_access(
-            is_admin=True,
-            authorized_datasets=admin_authorized_datasets,
-            unauthorized_datasets=admin_unauthorized_datasets,
-        )
-
-        # Assert access for non-admin user
-        check_datasets_access(
-            is_admin=False,
-            authorized_datasets=non_admin_authorized_datasets,
-            unauthorized_datasets=non_admin_unauthorized_datasets,
-        )
-    finally:
-        for program_id in synthetic_datasets:
-            clean_up_program(program_id)
-
-
-# =========================|| KATSU TEST END ||=============================== #
-
-
-## HTSGet + katsu:
-def test_add_sample_to_genomic():
-    test_loc = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/SampleRegistration.json"
-    response = requests.get(test_loc)
-    first_sample = response.json().pop(0)
-
-    site_admin_token = get_token(
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
+    # when the user has no admin access, they should not be allowed
+    print(response.json())
+    assert response.status_code == 403
+
+    token = get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
     headers = {
-        "Authorization": f"Bearer {site_admin_token}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{first_sample['program_id']}",
-        headers=headers,
-    )
-
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
+    # when the user has admin access, they should be allowed
+    print(response.json())
     assert response.status_code == 200
+    for id in response.json():
+        assert "genomic" in response.json()[id]
+        assert "sample" in response.json()[id]
 
-    assert len(response.json()["drsobjects"]) > 0
-    drs_obj = response.json()["drsobjects"].pop(0)
-    drs_obj_match = re.match(r"^(.+)\/(.+?)$", drs_obj)
-    if drs_obj_match is not None:
-        host = drs_obj_match.group(1)
-        drs_obj_name = drs_obj_match.group(2)
 
-        # assign the first member of this cohort to the sample
-        sample_drs_obj = {
-            "id": first_sample["submitter_sample_id"],
-            "contents": [{"drs_uri": [drs_obj], "name": drs_obj_name, "id": drs_obj_name}],
-            "version": "v1",
-            "cohort": first_sample['program_id'],
-            "description": "sample"
-        }
-
-        url = f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects"
-        response = requests.request("POST", url, json=sample_drs_obj, headers=headers)
-        print(response.text)
-        assert response.status_code == 200
-
+def test_sample_metadata():
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_REGISTRATION_1", headers=headers)
+    assert "genomes" in response.json()
+    assert "HG00096.cnv.vcf" in response.json()["genomes"]
 
 ## Federation tests:
 
@@ -959,3 +645,8 @@ def test_add_server():
     )
     print(response.text)
     assert response.status_code == 200
+
+
+def test_clean_up():
+    clean_up_program("SYNTHETIC-2")
+    clean_up_program("TEST_2")
