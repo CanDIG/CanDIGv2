@@ -339,7 +339,7 @@ def test_htsget_add_sample_to_dataset():
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
     headers = {
-        "Authorization": f"Bearer {token}",
+        "Authorization": f"Bearer {site_admin_token}",
         "Content-Type": "application/json; charset=utf-8",
     }
 
