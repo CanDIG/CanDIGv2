@@ -155,8 +155,6 @@ docker exec $vault sh -c "vault write auth/jwt/role/researcher user_claim=prefer
 # site admin should always be able to access aws secrets
 docker exec $vault sh -c "vault write auth/jwt/role/site_admin user_claim=site_admin bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=aws ttl=1h"
 
-docker exec $vault sh -c "vault write auth/jwt/role/site_admin user_claim=site_admin bound_audiences=${KEYCLOAK_CLIENT_ID} role_type=jwt policies=aws ttl=1h"
-
 # configure jwt
 echo
 echo ">> configuring jwt stuff"
