@@ -6,7 +6,7 @@ These instructions work for server deployments or local linux deployments. For l
 
 Before beginning, you should set up your environment variables as described in the [README](../README.md).
 
-Docker Engine (also known as Docker CE) is recommened over Docker Desktop for linux installations.
+Docker Engine (also known as Docker CE) is recommended over Docker Desktop for linux installations.
 
 Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
 
@@ -82,7 +82,7 @@ Follow the [official Docker directions](https://docs.docker.com/engine/install/u
 
 Set docker to run as a service on startup.
 ```bash
-sudo systemctl enable docker 
+sudo systemctl enable docker
 
 sudo systemctl start docker
 ```
@@ -90,7 +90,7 @@ You may have to reboot (not just log out).
 
 Add yourself to the docker group rather than use sudo all the time.
 ```bash
-sudo usermod -aG docker $(whoami) 
+sudo usermod -aG docker $(whoami)
 ```
 You may have to log out or restart your shell for this setting to take effect.
 
@@ -215,7 +215,7 @@ Then add the following line at the bottom of the file and save the changes:
 ::1	candig.docker.internal
 ```
 
-In some other cases, it may be necessary to add your local/internal (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, find out what your local IP address is 
+In some other cases, it may be necessary to add your local/internal (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, find out what your local IP address is
 
 ```bash
 # on mac
@@ -310,7 +310,7 @@ make clean-bin
 
 ```bash
 brew install gettext
-brew link --force gettext 
+brew link --force gettext
 brew install jq
 brew install yq
 ```
