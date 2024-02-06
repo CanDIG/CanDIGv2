@@ -147,7 +147,6 @@ docker exec $vault sh -c "echo 'path \"opa/access\" {capabilities = [\"update\",
 # Federation needs access to the opa store's data path (to add servers):
 docker exec $vault sh -c "echo 'path \"opa/data\" {capabilities = [\"update\", \"read\", \"delete\"]}' >> federation-policy.hcl; vault policy write federation federation-policy.hcl"
 
-
 # user claims
 echo
 echo ">> setting up user claims"
