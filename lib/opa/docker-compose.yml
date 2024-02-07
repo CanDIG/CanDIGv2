@@ -21,7 +21,12 @@ services:
         target: opa-service-token
       - source: vault-approle-token
         target: vault-approle-token
+      - source: keycloak-client-local-candig-secret
+        target: /run/secrets/client_secret
+      - source: keycloak-test-user2-password
+        target: /run/secrets/password
     environment:
+      KEYCLOAK_PUBLIC_URL: "${KEYCLOAK_PUBLIC_URL}"
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
       KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
       KEYCLOAK_URL: ${KEYCLOAK_PRIVATE_URL}
@@ -29,6 +34,11 @@ services:
       OPA_URL: ${OPA_PRIVATE_URL}
       VAULT_URL: ${VAULT_PRIVATE_URL}
       SERVICE_NAME: ${SERVICE_NAME}
+    healthcheck:
+      test: [ "CMD", "python", "/app/healthcheck.py"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
 
@@ -47,10 +57,5 @@ services:
       - "--authentication=token"
       - "--authorization=basic"
       - "app/permissions_engine/"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "${OPA_URL}" ]
-      interval: 30s
-      timeout: 20s
-      retries: 3
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"

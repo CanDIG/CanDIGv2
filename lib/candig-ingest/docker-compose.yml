@@ -26,4 +26,9 @@ services:
             target: keycloak-secret
           - source: vault-approle-token
             target: vault-approle-token
+        healthcheck:
+            test: ["CMD", "curl", "--fail", "http://${CANDIG_DOMAIN}:1235"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
 

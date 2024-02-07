@@ -27,7 +27,7 @@ services:
       - REACT_APP_CANDIG_VERSION=${CANDIG_VERSION}
       - WDS_SOCKET_PORT=0
     healthcheck:
-      test: [ "CMD", "curl", "http://localhost:2543" ]
+      test: [ "CMD", "curl", "http://${CANDIG_DOMAIN}:5080" ]
       interval: 30s
       timeout: 20s
       retries: 3
