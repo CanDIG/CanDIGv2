@@ -282,8 +282,8 @@ def test_ingest_permissions():
     clean_up_program("SYNTHETIC-2")
     clean_up_program("TEST_2")
 
-    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/tests/clinical_ingest.json"
-    test_data = requests.get(test_loc).json()
+    with open("lib/candig-ingest/candigv2-ingest/tests/clinical_ingest.json", 'r') as f:
+        test_data = json.load(f)
 
     token = get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
@@ -481,8 +481,8 @@ def test_beacon(user, search, can_access, cannot_access):
 
 ## HTSGet + katsu:
 def test_ingest_htsget():
-    test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/tests/genomic_ingest.json"
-    test_data = requests.get(test_loc).json()
+    with open("lib/candig-ingest/candigv2-ingest/tests/genomic_ingest.json", 'r') as f:
+        test_data = json.load(f)
 
     token = get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
