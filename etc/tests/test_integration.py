@@ -282,6 +282,15 @@ def test_ingest_permissions():
     clean_up_program("SYNTHETIC-2")
     clean_up_program("TEST_2")
 
+    result = ["SYNTHETIC-2"]
+    while len(result) > 0:
+        resp = requests.get(
+            f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
+            headers=get_headers(is_admin=True), params={"program_id": "SYNTHETIC-2"}
+        )
+        assert resp.status_code == 200
+        result = resp.json()["items"]
+
     test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/tests/clinical_ingest.json"
     test_data = requests.get(test_loc).json()
 
