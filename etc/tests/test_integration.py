@@ -279,8 +279,17 @@ def clean_up_program(test_id):
 # =========================|| KATSU TEST END ||=============================== #
 
 def test_ingest_permissions():
-    clean_up_program("SYNTHETIC-2")
-    clean_up_program("TEST_2")
+
+    for cohort in ["SYNTHETIC-2", "TEST_2"]:
+        clean_up_program(cohort)
+        result = [cohort]
+        while len(result) > 0:
+            resp = requests.get(
+                f"{ENV['CANDIG_URL']}/katsu/v2/authorized/programs/",
+                headers=get_headers(is_admin=True), params={"program_id": cohort}
+            )
+            assert resp.status_code == 200
+            result = resp.json()["items"]
 
     test_loc = "https://raw.githubusercontent.com/CanDIG/candigv2-ingest/develop/tests/clinical_ingest.json"
     test_data = requests.get(test_loc).json()
