@@ -6,7 +6,6 @@ PostToSlack () {
     curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$SAFE_TEXT\"}" $HOOK_URL
 }
 
-
 # Make sure all of our necessary configuration works
 source nightly_env.sh
 if [ -z "$HOOK_URL" ] || [ -z "$BOT_TOKEN" ]; then
@@ -16,6 +15,7 @@ fi
 
 # Clean all
 make clean-all
+make clean-bin
 docker system prune -af
 
 # Double check that the .env file works?
@@ -81,8 +81,11 @@ source env.sh
 cd $INGEST_PATH
 export CLINICAL_DATA_LOCATION=$INGEST_PATH/tests/clinical_ingest.json
 # should be pip install -r requirements.txt, but that didn't seem to work last I checked -- dependency errors?
+# `tox 4.12.1 requires colorama>=0.4.6, but you have colorama 0.4.4 which is incompatible.`
+git pull
 pip install dateparser
 pip install openapi_spec_validator
+pip install clinical_etl@git+https://github.com/CanDIG/clinical_ETL_code.git@v2.0.0
 python katsu_ingest.py
 cd $BUILD_PATH
 
