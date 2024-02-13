@@ -528,6 +528,21 @@ def test_sample_metadata():
     assert "genomes" in response.json()
     assert "HG00096.cnv.vcf" in response.json()["genomes"]
 
+
+def test_index_success():
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1", headers=headers)
+    assert "indexed" in response.json()
+    assert response.json()['indexed'] == 1
+
+
 ## Federation tests:
 
 
