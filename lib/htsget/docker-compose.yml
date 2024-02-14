@@ -36,6 +36,7 @@ services:
       DEBUG_MODE: ${CANDIG_DEBUG_MODE}
       DB_PATH: "metadata-db"
       SERVER_LOCAL_DATA: /app/htsget_server/data
+      INDEXING_PATH: /home/candig/tmp
       TESTENV_URL: ${HTSGET_PRIVATE_URL}
       POSTGRES_DATABASE: "genomic"
       POSTGRES_HOST_FILE: "metadata-db"
