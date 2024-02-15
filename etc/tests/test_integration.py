@@ -777,29 +777,30 @@ def test_query_info():
 
 def test_query_discovery():
     katsu_response = requests.get(
-        f"{ENV['CANDIG_URL']}/{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v2/discovery/programs/"
+        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/"
     ).json()
     query_response = requests.get(
-        f"{ENV['CANDIG_URL']}/{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/discovery/programs"
+        f"{ENV['CANDIG_ENV']['TYK_QUERY_API_TARGET']}/discovery/programs"
     ).json()
 
     # Ensure that each category in metadata corresponds to something in the site
-    print(query_response)
-    for category in query_response.site.required_but_missing:
-        for field in query_response.site.required_but_missing[category]:
-            total = query_response.site.required_but_missing[category][field]
-            for site in katsu_response:
-                total -= site.required_but_missing[category][field]
-            if total != 0:
-                print(f"{category}/{field} totals don't line up")
-                assert False
+    for category in query_response["site"]["required_but_missing"]:
+        for field in query_response["site"]["required_but_missing"][category]:
+            for total_type in query_response["site"]["required_but_missing"][category][field]:
+                total = query_response["site"]["required_but_missing"][category][field][total_type]
+                for program in katsu_response:
+                    if category in program["metadata"]['required_but_missing'] and field in program["metadata"]['required_but_missing'][category]:
+                        total -= program["metadata"]['required_but_missing'][category][field][total_type]
+                if total != 0:
+                    print(f"{category}/{field}/{total_type} totals don't line up")
+                    assert False
 
     # Ensure that every category & field in Katsu exists in the response
     for program in katsu_response:
-        for category in katsu_response[program]["metadata"]["required_but_missing"]:
-            assert category in query_response.site.required_but_missing
-            for field in katsu_response[program]["metadata"]["required_but_missing"][category]:
-                assert field in query_response.site.required_but_missing
+        for category in program["metadata"]["required_but_missing"]:
+            assert category in query_response["site"]["required_but_missing"]
+            for field in program["metadata"]["required_but_missing"][category]:
+                assert field in query_response["site"]["required_but_missing"][category]
 
 
 def test_clean_up():
