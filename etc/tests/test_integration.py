@@ -803,5 +803,5 @@ def test_query_discovery():
 
 
 def test_clean_up():
-    clean_up_program("SYNTHETIC-1")
+    clean_up_program("SYNTHETIC-2")
     clean_up_program("TEST_2")
