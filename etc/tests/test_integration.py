@@ -435,51 +435,6 @@ def test_htsget_access_data(user, obj, access):
     assert (response.status_code == 200) == access
 
 
-## Does Beacon return the correct level of authorized results?
-def beacon_access():
-    return [
-        (
-            "CANDIG_SITE_ADMIN",
-            "NC_000021.8:g.5030847T>A",
-            ["multisample_1", "multisample_2"],
-            ["test"],
-        ),  # site admin can access all data, even if not specified by dataset
-        (
-            "CANDIG_NOT_ADMIN",
-            "NC_000021.8:g.5030847T>A",
-            ["multisample_1"],
-            ["multisample_2", "test"],
-        ),  # user1 can access NA18537 as part of SYNTHETIC-1
-        (
-            "CANDIG_NOT_ADMIN",
-            "NC_000001.11:g.16565782G>A",
-            [],
-            ["multisample_1", "multisample_2", "test"],
-        ),  # user1 cannot access test
-    ]
-
-
-@pytest.mark.parametrize("user, search, can_access, cannot_access", beacon_access())
-def test_beacon(user, search, can_access, cannot_access):
-    username = ENV[f"{user}_USER"]
-    password = ENV[f"{user}_PASSWORD"]
-    headers = {
-        "Authorization": f"Bearer {get_token(username=username, password=password)}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-    params = {"allele": search}
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/genomics/beacon/v2/g_variants",
-        headers=headers,
-        params=params,
-    )
-    for c in can_access:
-        assert c in str(response.json())
-    for c in cannot_access:
-        assert c not in str(response.json())
-    print(response.json())
-
-
 ## HTSGet + katsu:
 def test_ingest_htsget():
     with open("lib/candig-ingest/candigv2-ingest/tests/genomic_ingest.json", 'r') as f:
@@ -544,6 +499,51 @@ def test_index_success():
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1", headers=headers)
     assert "indexed" in response.json()
     assert response.json()['indexed'] == 1
+
+
+## Does Beacon return the correct level of authorized results?
+def beacon_access():
+    return [
+        (
+            "CANDIG_SITE_ADMIN",
+            "NC_000021.8:g.5030847T>A",
+            ["multisample_1", "multisample_2"],
+            ["test"],
+        ),  # site admin can access all data, even if not specified by dataset
+        (
+            "CANDIG_NOT_ADMIN",
+            "NC_000021.8:g.5030847T>A",
+            ["multisample_1"],
+            ["multisample_2", "test"],
+        ),  # user1 can access NA18537 as part of SYNTHETIC-1
+        (
+            "CANDIG_NOT_ADMIN",
+            "NC_000001.11:g.16565782G>A",
+            [],
+            ["multisample_1", "multisample_2", "test"],
+        ),  # user1 cannot access test
+    ]
+
+
+@pytest.mark.parametrize("user, search, can_access, cannot_access", beacon_access())
+def test_beacon(user, search, can_access, cannot_access):
+    username = ENV[f"{user}_USER"]
+    password = ENV[f"{user}_PASSWORD"]
+    headers = {
+        "Authorization": f"Bearer {get_token(username=username, password=password)}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    params = {"allele": search}
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/genomics/beacon/v2/g_variants",
+        headers=headers,
+        params=params,
+    )
+    for c in can_access:
+        assert c in str(response.json())
+    for c in cannot_access:
+        assert c not in str(response.json())
+    print(response.json())
 
 
 def test_verify_htsget():
