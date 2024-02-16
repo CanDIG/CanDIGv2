@@ -9,6 +9,7 @@ import datetime
 import pytest
 import requests
 from dotenv import dotenv_values
+from copy import deepcopy
 
 REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
@@ -543,6 +544,41 @@ def test_index_success():
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1", headers=headers)
     assert "indexed" in response.json()
     assert response.json()['indexed'] == 1
+
+
+def test_verify_htsget():
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    # get a GenomicDataDrsObject
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1.vcf.gz", headers=headers)
+    assert response.status_code == 200
+    new_json = response.json()
+
+    # mess up its access_url
+    old_url = new_json["access_methods"][0]["access_url"]["url"]
+    new_json["access_methods"][0]["access_url"]["url"] += "test"
+    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=headers, json=new_json)
+
+    # verification should give us a False result
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/multisample_1/verify", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["result"] == False
+
+    # fix it back
+    new_json["access_methods"][0]["access_url"]["url"] = old_url
+    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=headers, json=new_json)
+
+    # verification should give us a True result
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/multisample_1/verify", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["result"] == True
+
 
 
 ## Federation tests:
