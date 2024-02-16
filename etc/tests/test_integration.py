@@ -506,13 +506,13 @@ def beacon_access():
     return [
         (
             "CANDIG_SITE_ADMIN",
-            "NC_000021.8:g.5030847T>A",
+            "NC_000021.9:g.5030847T>A",
             ["multisample_1", "multisample_2"],
             ["test"],
         ),  # site admin can access all data, even if not specified by dataset
         (
             "CANDIG_NOT_ADMIN",
-            "NC_000021.8:g.5030847T>A",
+            "NC_000021.9:g.5030847T>A",
             ["multisample_1"],
             ["multisample_2", "test"],
         ),  # user1 can access NA18537 as part of SYNTHETIC-1
