@@ -546,7 +546,23 @@ def test_beacon(user, search, can_access, cannot_access):
     print(response.json())
 
 
-def test_verify_htsget():
+def verify_samples():
+    return [
+        (
+            "multisample_1",
+            "multisample_1.vcf.gz",
+            "variant"
+        ),
+        (
+            "NA02102",
+            "NA02102.bam",
+            "read"
+        )
+    ]
+
+
+@pytest.mark.parametrize("object_id, file_name, file_type", verify_samples())
+def test_verify_htsget(object_id, file_name, file_type):
     token = get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
@@ -556,7 +572,7 @@ def test_verify_htsget():
         "Content-Type": "application/json; charset=utf-8",
     }
     # get a GenomicDataDrsObject
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1.vcf.gz", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{file_name}", headers=headers)
     assert response.status_code == 200
     new_json = response.json()
 
@@ -566,7 +582,7 @@ def test_verify_htsget():
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=headers, json=new_json)
 
     # verification should give us a False result
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/multisample_1/verify", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{file_type}s/{object_id}/verify", headers=headers)
     assert response.status_code == 200
     assert response.json()["result"] == False
 
@@ -575,10 +591,23 @@ def test_verify_htsget():
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=headers, json=new_json)
 
     # verification should give us a True result
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/multisample_1/verify", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{file_type}s/{object_id}/verify", headers=headers)
     assert response.status_code == 200
     assert response.json()["result"] == True
 
+
+def test_cohort_status():
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-1/status", headers=headers)
+    assert "index_complete" in response.json()
+    assert len(response.json()['index_complete']) > 0
 
 
 ## Federation tests:
