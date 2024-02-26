@@ -79,6 +79,7 @@ sudo apt-get install \
 
 yq >= 4 is required.  The apt version is outdated.  So:
 ```bash
+sudo apt install snapd
 sudo snap install yq
 ```
 
