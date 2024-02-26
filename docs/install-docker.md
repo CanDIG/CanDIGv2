@@ -79,7 +79,7 @@ sudo apt-get install \
 
 yq >= 4 is required.  The apt version is outdated.  So:
 ```bash
-snap install yq
+sudo snap install yq
 ```
 
 2. Install Docker
