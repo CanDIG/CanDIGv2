@@ -523,7 +523,11 @@ print-%:
 .PHONY: test-integration
 test-integration:
 	python ./settings.py
-	source ./env.sh; pytest ./etc/tests
+ifeq ($(KEEP_TEST_DATA),true)
+	source ./env.sh; pytest ./etc/tests -k 'not test_clean_up'
+else
+	source ./env.sh; pytest ./etc/tests $(ARGS)
+endif
 
 # stop all docker containers
 .PHONY: stop-all
