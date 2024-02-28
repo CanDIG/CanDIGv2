@@ -236,48 +236,34 @@ def test_vault():
 # =========================|| KATSU TEST BEGIN ||============================= #
 # HELPER FUNCTIONS
 # -----------------
-def get_headers(is_admin=False):
-    """
-    Returns either admin or non-admin HTTP headers for making requests API.
-    """
-    if is_admin:
-        user = ENV.get("CANDIG_SITE_ADMIN_USER")
-        password = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
-        user_type = "site admin"
-    else:
-        user = ENV.get("CANDIG_NOT_ADMIN_USER")
-        password = ENV.get("CANDIG_NOT_ADMIN_PASSWORD")
-        user_type = "user"
-
-    if not user or not password:
-        pytest.skip(f"{user_type.capitalize()} credentials not provided")
-
-    token = get_token(username=user, password=password)
-
-    if not token:
-        pytest.fail(f"Failed to authenticate {user_type}")
-
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
-    return headers
-
 def clean_up_program(test_id):
     """
     Deletes a dataset and all related objects. Expected 204
     """
+    site_admin_token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
     delete_response = requests.delete(
         f"{ENV['CANDIG_URL']}/katsu/v2/authorized/program/{test_id}/",
-        headers=get_headers(is_admin=True),
+        headers=headers,
     )
     assert (
         delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
     ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
     f" Response content: {delete_response.content}"
 
-# =========================|| KATSU TEST END ||=============================== #
+    delete_response = requests.delete(
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{test_id}",
+        headers=headers
+    )
+    assert delete_response.status_code == 200
+
 
 def test_ingest_permissions():
     clean_up_program("SYNTHETIC-2")
@@ -872,3 +858,11 @@ def test_clean_up():
     clean_up_program("SYNTHETIC-1")
     clean_up_program("SYNTHETIC-2")
     clean_up_program("TEST_2")
+
+    # clean up test_htsget
+    old_val = os.environ.get("TESTENV_URL")
+    os.environ["TESTENV_URL"] = f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}"
+    pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py", "-k", "test_remove_objects"])
+    if old_val is not None:
+        os.environ["TESTENV_URL"] = old_val
+
