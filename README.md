@@ -41,13 +41,13 @@ The following table lists the individual repos for each service and helper libra
 |---------------------------|-----------------------------------------------------------------------|------------------------------|
 | authx                     | [`candigv2-authx`](https://github.com/CanDIG/candigv2-authx)          | Library to facilitate interacting with AuthZ/AuthN services, Keycloak, Tyk, Opa, Vault & Access to minIO S3 objects |
 | CanDIG Data Portal        | [`candig-data-portal`](https://github.com/CanDIG/candig-data-portal)  | Front-end User interface for CanDIG Services |
-| CanDIGv2 Ingest Service     | [`candig-ingest`](https://github.com/CanDIG/candigv2-ingest)        | Ingests clinical and genomic data into the CanDIG infrastructure. As at September 2023, still being integrated into the stack. |
+| CanDIGv2 Ingest Service     | [`candigv2-ingest`](https://github.com/CanDIG/candigv2-ingest)        | Ingests clinical and genomic data into the CanDIG infrastructure. |
 | Clinical ETL Code         | [`clinical_ETL_code`](https://github.com/CanDIG/clinical_ETL_code)    | Code to convert spreadsheet format into the MoH data model in preparation for ingest into `katsu` |
 | Federation Service        | [`federation-service`](https://github.com/CanDIG/federation_service)  | Distributes requests across each federated node of the distributed infrastructure   |
 | HTSGet                    | [`htsget_app`](https://github.com/CanDIG/htsget_app)                  | Implementation of GA4GH htsget API which ingests and indexes VCF files and stores GA4GH DRS objects for retrieval |
 | Katsu                     | [`katsu`](https://github.com/CanDIG/katsu)                            | Manages the clinical metadata in a PostgreSQL database |
 | CanDIG OPA                | [`candig-opa`](https://github.com/CanDIG/candig-opa)                  | Manages role-based access policies   |
-| Query service             | [`query`](https://github.com/CanDIG/query)                            | as at September 2023, still being integrated into the stack |
+| Query service             | [`candigv2-query`](https://github.com/CanDIG/candigv2-query)                   | Manages front-end querying of services |
 
 As well as in-house developed services, the CanDIG stack relies on external software which is configured to work within the stack, configurations are found in the [`/lib`](/lib) folder for each software, these include:
 
@@ -90,21 +90,15 @@ services:
 ```
 ### Configuring CanDIG modules
 
-Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` and `CANDIG_AUTH_MODULES` define which modules are included in the deployment.
+Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` setting defines which modules are included in the deployment.
 
 By default (if you copy the sample file from `etc/env/example.env`) the installation includes the minimal list of modules:
 
 ```
-  CANDIG_MODULES=minio htsget-server katsu candig-data-portal
+  CANDIG_MODULES=keycloak vault minio postgres redis htsget katsu candig-data-portal query tyk opa federation candig-ingest
 ```
 
-Optional modules follow the `#` and include federation service, various monitoring components, workflow execution, and some older modules not generally installed.
-
-For federated installations, you will need `federation-service`.
-
-For production deployments, you will probably want to include  `federation-service`.
-
-Authorization and authentication modules defined in  `CANDIG_AUTH_MODULES` are only installed if you run `make init-authx` during deployment.
+Optional modules follow the `#` and include various monitoring components, workflow execution, and some older modules not generally installed.
 
 ## `make` Deployment
 
