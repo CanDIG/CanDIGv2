@@ -236,34 +236,6 @@ def test_vault():
 # =========================|| KATSU TEST BEGIN ||============================= #
 # HELPER FUNCTIONS
 # -----------------
-def get_headers(is_admin=False):
-    """
-    Returns either admin or non-admin HTTP headers for making requests API.
-    """
-    if is_admin:
-        user = ENV.get("CANDIG_SITE_ADMIN_USER")
-        password = ENV.get("CANDIG_SITE_ADMIN_PASSWORD")
-        user_type = "site admin"
-    else:
-        user = ENV.get("CANDIG_NOT_ADMIN_USER")
-        password = ENV.get("CANDIG_NOT_ADMIN_PASSWORD")
-        user_type = "user"
-
-    if not user or not password:
-        pytest.skip(f"{user_type.capitalize()} credentials not provided")
-
-    token = get_token(username=user, password=password)
-
-    if not token:
-        pytest.fail(f"Failed to authenticate {user_type}")
-
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
-    return headers
-
 def clean_up_program(test_id):
     """
     Deletes a dataset and all related objects. Expected 204
