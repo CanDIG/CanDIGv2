@@ -858,3 +858,11 @@ def test_clean_up():
     clean_up_program("SYNTHETIC-1")
     clean_up_program("SYNTHETIC-2")
     clean_up_program("TEST_2")
+
+    # clean up test_htsget
+    old_val = os.environ.get("TESTENV_URL")
+    os.environ["TESTENV_URL"] = f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}"
+    pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py", "-k", "test_remove_objects"])
+    if old_val is not None:
+        os.environ["TESTENV_URL"] = old_val
+
