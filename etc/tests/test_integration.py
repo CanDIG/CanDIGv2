@@ -268,16 +268,30 @@ def clean_up_program(test_id):
     """
     Deletes a dataset and all related objects. Expected 204
     """
+    site_admin_token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
     delete_response = requests.delete(
         f"{ENV['CANDIG_URL']}/katsu/v2/authorized/program/{test_id}/",
-        headers=get_headers(is_admin=True),
+        headers=headers,
     )
     assert (
         delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
     ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
     f" Response content: {delete_response.content}"
 
-# =========================|| KATSU TEST END ||=============================== #
+    delete_response = requests.delete(
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{test_id}",
+        headers=headers
+    )
+    assert delete_response.status_code == 200
+
 
 def test_ingest_permissions():
     clean_up_program("SYNTHETIC-2")
