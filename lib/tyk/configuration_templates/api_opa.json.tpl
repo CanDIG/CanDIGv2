@@ -72,7 +72,7 @@
             "extract_from": "",
             "extractor_config": {}
         },
-        "driver": "",
+        "driver": "otto",
         "auth_check": {
             "path": "",
             "require_session": false,
