@@ -390,11 +390,6 @@ def test_htsget_add_sample_to_dataset():
 def user_access():
     return [
         (
-            "CANDIG_SITE_ADMIN",
-            "NA18537",
-            True,
-        ),  # site admin can access all data, even if not specified by dataset
-        (
             "CANDIG_NOT_ADMIN",
             "NA18537",
             True,
@@ -473,8 +468,8 @@ def test_sample_metadata():
 
 def test_index_success():
     token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
     )
     headers = {
         "Authorization": f"Bearer {token}",
@@ -490,12 +485,6 @@ def test_index_success():
 ## Does Beacon return the correct level of authorized results?
 def beacon_access():
     return [
-        (
-            "CANDIG_SITE_ADMIN",
-            "NC_000021.9:g.5030847T>A",
-            ["multisample_1", "multisample_2"],
-            ["test"],
-        ),  # site admin can access all data, even if not specified by dataset
         (
             "CANDIG_NOT_ADMIN",
             "NC_000021.9:g.5030847T>A",
@@ -537,22 +526,31 @@ def verify_samples():
         (
             "multisample_1",
             "multisample_1.vcf.gz",
-            "variant"
+            "variant",
+            "user1"
         ),
         (
             "NA02102",
             "NA02102.bam",
-            "read"
+            "read",
+            "user1"
         )
     ]
 
 
-@pytest.mark.parametrize("object_id, file_name, file_type", verify_samples())
-def test_verify_htsget(object_id, file_name, file_type):
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+@pytest.mark.parametrize("object_id, file_name, file_type, user", verify_samples())
+def test_verify_htsget(object_id, file_name, file_type, user):
+    if user == "user1":
+        token = get_token(
+            username=ENV["CANDIG_NOT_ADMIN_USER"],
+            password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+        )
+    elif user == "user2":
+        token = get_token(
+            username=ENV["CANDIG_SITE_ADMIN_USER"],
+            password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+        )
+
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -565,7 +563,17 @@ def test_verify_htsget(object_id, file_name, file_type):
     # mess up its access_url
     old_url = new_json["access_methods"][0]["access_url"]["url"]
     new_json["access_methods"][0]["access_url"]["url"] += "test"
-    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=headers, json=new_json)
+
+    post_token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    post_headers = {
+        "Authorization": f"Bearer {post_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
 
     # verification should give us a False result
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{file_type}s/{object_id}/verify", headers=headers)
@@ -574,7 +582,7 @@ def test_verify_htsget(object_id, file_name, file_type):
 
     # fix it back
     new_json["access_methods"][0]["access_url"]["url"] = old_url
-    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=headers, json=new_json)
+    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
 
     # verification should give us a True result
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{file_type}s/{object_id}/verify", headers=headers)
@@ -591,7 +599,7 @@ def test_cohort_status():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-1/status", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-2/status", headers=headers)
     assert "index_complete" in response.json()
     assert len(response.json()['index_complete']) > 0
 
