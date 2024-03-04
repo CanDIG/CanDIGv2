@@ -806,8 +806,8 @@ def test_query_donor_search():
     assert True
 
 
-def test_query_info():
-    # tests that a request sent via query to htsget-beacon will have genomic_query_info in the response. This should be updated when the real response is designed.
+def test_query_genomic():
+    # tests that a request sent via query to htsget-beacon properly prunes the data
     token = get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
@@ -817,13 +817,14 @@ def test_query_info():
         "Content-Type": "application/json; charset=utf-8",
     }
     params = {
-        "chrom": "chr21:5030630-5030640",
+        "chrom": "chr21:5030000-5030847",
         "assembly": "hg38"
     }
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     )
-    assert "genomic_query_info" in response.json()
+    print(response.json()["results"])
+    assert response and len(response.json()["results"]) == 1
 
 
 def test_query_discovery():
