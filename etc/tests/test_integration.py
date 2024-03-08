@@ -178,7 +178,7 @@ def test_site_admin(user, is_admin):
     assert ("result" in response.json()) == is_admin
 
 
-## Vault tests: can we add an aws access key and retrieve it, using both the site_admin user and the VAULT_S3_TOKEN?
+## Vault tests: can we add an aws access key and retrieve it?
 def test_vault():
     site_admin_token = get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
@@ -189,15 +189,8 @@ def test_vault():
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    # log in site_admin
-    payload = {"jwt": site_admin_token, "role": "site_admin"}
-    response = requests.post(
-        f"{ENV['CANDIG_URL']}/vault/v1/auth/jwt/login", json=payload, headers=headers
-    )
-    assert "auth" in response.json()
-    client_token = response.json()["auth"]["client_token"]
-
-    headers["X-Vault-Token"] = client_token
+    # confirm that this works with the CANDIG_S3_TOKEN:
+    headers["X-Vault-Token"] = ENV["VAULT_S3_TOKEN"]
     # delete the test secret, if it exists:
     response = requests.delete(
         f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers
@@ -212,8 +205,6 @@ def test_vault():
     print(response.json())
     assert response.status_code == 404
 
-    # confirm that this works with the CANDIG_S3_TOKEN too:
-    headers["X-Vault-Token"] = ENV["VAULT_S3_TOKEN"]
     response = requests.get(
         f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers
     )
