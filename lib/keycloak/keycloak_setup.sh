@@ -22,17 +22,11 @@ add_user() {
   # CANDIG_AUTH_DOMAIN is the name of the keycloak server inside the compose network
   local username=$1
   local password=$2
-  local attribute=$3
 
   local JSON='  {
     "username": "'${username}'",
     "email": "'${username}'@test.ca",
     "enabled": true,
-    "attributes": {
-      "'${attribute}'": [
-        "true"
-      ]
-    },
     "access": {
       "manageGroupMembership": true,
       "view": true,
@@ -59,23 +53,6 @@ add_user() {
     -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
     -X PUT -H "Content-Type: application/json" -d "${password_json}" \
     "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/users/${user_id}/reset-password" -k
-
-  if [[ ${attribute} == ${OPA_SITE_ADMIN_KEY} ]]; then
-    role_id=$(curl \
-      -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
-      "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/roles" -k 2>/dev/null |
-      python3 -c 'import json,sys;obj=json.load(sys.stdin); print([l["id"] for l in obj if l["name"] ==
-      "'"site_admin"'" ][0])')
-    local realm='[{
-      "id": "'${role_id}'",
-      "name":"'${OPA_SITE_ADMIN_KEY}'"
-    }]'
-    curl \
-      -H "Authorization: bearer ${KEYCLOAK_TOKEN}" \
-      -X POST -H "Content-Type: application/json" -d "${realm}" \
-      "${KEYCLOAK_PUBLIC_URL}/auth/admin/realms/${KEYCLOAK_REALM}/users/${user_id}/role-mappings/realm" -k
-    echo "Set ${username} with role ${OPA_SITE_ADMIN_KEY}" | tee -a $LOGFILE
-  fi
 }
 
 get_token() {
@@ -152,34 +129,6 @@ set_client() {
             "included.client.audience": "'${client}'",
             "id.token.claim": "true",
             "access.token.claim": "true"
-          }
-        },
-        {
-          "name": "trusted_researcher",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-attribute-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "user.attribute": "trusted_researcher",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "trusted_researcher",
-            "jsonType.label": "String"
-          }
-        },
-        {
-          "name": "'${OPA_SITE_ADMIN_KEY}'",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-attribute-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "user.attribute": "'${OPA_SITE_ADMIN_KEY}'",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "'${OPA_SITE_ADMIN_KEY}'",
-            "jsonType.label": "String"
           }
         }
       ]
@@ -299,9 +248,6 @@ fi ;
 echo "Setting client ${KEYCLOAK_CLIENT_ID}" | tee -a $LOGFILE
 set_client "${KEYCLOAK_REALM}" "${KEYCLOAK_CLIENT_ID}" "${KEYCLOAK_LOGIN_REDIRECT_PATH}"
 
-echo "Setting role ${OPA_SITE_ADMIN_KEY}" | tee -a $LOGFILE
-set_role "${KEYCLOAK_REALM}" "${KEYCLOAK_CLIENT_ID}" "${OPA_SITE_ADMIN_KEY}"
-
 echo "Getting keycloak secret" | tee -a $LOGFILE
 KEYCLOAK_SECRET_RESPONSE=$(get_secret ${KEYCLOAK_REALM})
 export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_RESPONSE
@@ -315,11 +261,9 @@ echo $KEYCLOAK_PUBLIC_KEY > tmp/secrets/keycloak-public-key | tee -a $LOGFILE
 
 if [[ ${KEYCLOAK_GENERATE_TEST_USER} == 1 ]]; then
   echo "Adding test user" | tee -a $LOGFILE
-  add_user "$(cat tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)" "trusted_researcher"
-  add_user "$(cat tmp/secrets/keycloak-test-user2)" "$(cat tmp/secrets/keycloak-test-user2-password)" ${OPA_SITE_ADMIN_KEY}
+  add_user "$(cat tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)"
+  add_user "$(cat tmp/secrets/keycloak-test-user2)" "$(cat tmp/secrets/keycloak-test-user2-password)"
 fi
-
-#set_trusted_researcher "$(cat tmp/secrets/keycloak-test-user)"
 
 echo "Waiting for keycloak to restart" | tee -a $LOGFILE
 while ! docker logs --tail 5 ${KEYCLOAK_CONTAINER} | grep "Admin console listening on http://127.0.0.1:9990"; do sleep 1; done
