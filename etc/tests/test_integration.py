@@ -258,9 +258,9 @@ def clean_up_program(test_id):
 
 def test_ingest_permissions():
     clean_up_program("SYNTHETIC-2")
-    clean_up_program("TEST_2")
+    clean_up_program("SYNTHETIC-1")
 
-    with open("lib/candig-ingest/candigv2-ingest/tests/clinical_ingest.json", 'r') as f:
+    with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
         test_data = json.load(f)
 
     token = get_token(
@@ -289,9 +289,9 @@ def test_ingest_permissions():
     print(response.json())
     assert response.status_code == 201
     assert len(response.json()["SYNTHETIC-2"]["errors"]) == 0
-    assert len(response.json()["TEST_2"]["errors"]) == 0
-    assert len(response.json()["SYNTHETIC-2"]["results"]) == 12
-    assert len(response.json()["TEST_2"]["results"]) == 5
+    assert len(response.json()["SYNTHETIC-1"]["errors"]) == 0
+    assert len(response.json()["SYNTHETIC-2"]["results"]) == 15
+    assert len(response.json()["SYNTHETIC-1"]["results"]) == 14
 
 
 ## Htsget tests:
@@ -409,7 +409,7 @@ def test_htsget_access_data(user, obj, access):
 
 ## HTSGet + katsu:
 def test_ingest_htsget():
-    with open("lib/candig-ingest/candigv2-ingest/tests/genomic_ingest.json", 'r') as f:
+    with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_genomic_ingest.json", 'r') as f:
         test_data = json.load(f)
 
     token = get_token(
@@ -857,7 +857,6 @@ def test_query_discovery():
 def test_clean_up():
     clean_up_program("SYNTHETIC-1")
     clean_up_program("SYNTHETIC-2")
-    clean_up_program("TEST_2")
 
     # clean up test_htsget
     old_val = os.environ.get("TESTENV_URL")
