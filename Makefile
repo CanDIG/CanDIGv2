@@ -151,7 +151,7 @@ clean-%:
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
 	-docker volume rm `docker volume ls --filter name=$* -q`
-	docker image rm `docker image ls --format "{{.Repository}}" | grep $*`
+	docker image rm `docker image ls --format "{{.Repository}}:{{.Tag}}" | grep $*`
 	rm -Rf lib/$*/tmp
 
 
