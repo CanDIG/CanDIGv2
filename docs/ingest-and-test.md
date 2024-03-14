@@ -67,7 +67,10 @@ make compose-federation
 
 
 ## Ingest the synthetic clinical dataset
-From the CanDIGv2 directory:
+
+Synthetic data is ingested as part of the integration tests. By default, this data is deleted after tests are run. If you'd like to keep the data in the platform, ensure the [`KEEP_TEST_DATA`](https://github.com/CanDIG/CanDIGv2/blob/c2339c685720b327ca02ea6bb9d442e253cdb562/etc/env/example.env#L20) variable in your .env file is set to `true`.
+
+If you would like to ingest the data separately, from the CanDIGv2 directory:
 ```commandline
 python settings.py
 source env.sh
