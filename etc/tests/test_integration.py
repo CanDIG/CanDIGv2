@@ -730,31 +730,46 @@ def test_query_donors_all():
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     ).json()
     print(response)
-    assert response and len(response["results"]) == 4
+    assert response and len(response["results"]) == 7
 
     # Check the summary stats as well
     summary_stats = response["summary"]
+    print(summary_stats)
     expected_response = {
-        "age_at_diagnosis": {
-            "30-39 Years": 2,
-            "60-69 Years": 1,
-            "70-79 Years": 1
+        'age_at_diagnosis': {
+            '0-19 Years': 1,
+            '50-59 Years': 2,
+            '60-69 Years': 1
         },
-        "cancer_type_count": {
-            "Esophagus": 1,
-            "Eye and adnexa": 1,
-            "Floor of mouth": 1,
-            "Gallbladder": 1
+        'cancer_type_count': {
+            'Adrenal gland': 1,
+            'Base of tongue': 1,
+            'Floor of mouth': 2,
+            'Hypopharynx': 1,
+            'Other and unspecified female genital organs': 1,
+            'Other and unspecified major salivary glands': 1,
+            'Other and unspecified parts of biliary tract': 1,
+            'Other and unspecified parts of mouth': 3,
+            'Other endocrine glands and related structures': 2,
+            'Pancreas': 1,
+            'Penis': 1,
+            'Skin': 1,
+            'Testis': 2
         },
-        "patients_per_cohort": {
-            "SYNTHETIC-2": 4
+        'patients_per_cohort': {
+            'SYNTHETIC-2': 7
         },
-        "treatment_type_count": {
-            "Bone marrow transplant": 1,
-            "Chemotherapy": 1,
-            "Hormonal therapy": 1,
-            "Immunotherapy": 2,
-            "Surgery": 1
+        'treatment_type_count': {
+            'Bone marrow transplant': 1,
+            'Chemotherapy': 2,
+            'Hormonal therapy': 2,
+            'Immunotherapy': 2,
+            'No treatment': 1,
+            'Other targeting molecular therapy': 1,
+            'Photodynamic therapy': 2,
+            'Radiation therapy': 4,
+            'Stem cell transplant': 2,
+            'Surgery': 2
         }
     }
     for category in expected_response.keys():
@@ -779,24 +794,33 @@ def test_query_donor_search():
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     ).json()
     print(response)
-    assert response and len(response["results"]) == 1
+    assert response and len(response["results"]) == 2
 
     # Check the summary stats as well
     summary_stats = response["summary"]
+    print(summary_stats)
     expected_response = {
-        "age_at_diagnosis": {
-            "30-39 Years": 1
+        'age_at_diagnosis': {
+            '50-59 Years': 2
         },
-        "cancer_type_count": {
-            "Eye and adnexa": 1
+        'cancer_type_count': {
+            'Floor of mouth': 2,
+            'Other and unspecified parts of mouth': 2
         },
-        "patients_per_cohort": {
-            "SYNTHETIC-2": 1
+        'patients_per_cohort': {
+            'SYNTHETIC-2': 2
         },
-        "treatment_type_count": {
-            "Chemotherapy": 1,
-            "Immunotherapy": 1,
-            "Surgery": 1
+        'treatment_type_count': {
+            'Bone marrow transplant': 1,
+            'Chemotherapy': 2,
+            'Hormonal therapy': 2,
+            'Immunotherapy': 2,
+            'No treatment': 1,
+            'Other targeting molecular therapy': 1,
+            'Photodynamic therapy': 2,
+            'Radiation therapy': 3,
+            'Stem cell transplant': 2,
+            'Surgery': 2
         }
     }
     for category in expected_response.keys():
@@ -816,7 +840,26 @@ def test_query_genomic():
         "Content-Type": "application/json; charset=utf-8",
     }
     params = {
-        "chrom": "chr21:5030000-5030847",
+        "chrom": "chr22:16050000-16050600",
+        "assembly": "hg38"
+    }
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
+    )
+    print(response.json()["results"])
+    assert response and len(response.json()["results"]) == 1 
+    assert response.json()["results"][0]["submitter_donor_id"] == "DONOR_10"
+
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    params = {
+        "chrom": "chr22:51244000-51245000",
         "assembly": "hg38"
     }
     response = requests.get(
@@ -824,6 +867,7 @@ def test_query_genomic():
     )
     print(response.json()["results"])
     assert response and len(response.json()["results"]) == 1
+    assert response.json()["results"][0]["submitter_donor_id"] == "DONOR_10"
 
 
 def test_query_discovery():
