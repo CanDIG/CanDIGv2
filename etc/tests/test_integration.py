@@ -10,6 +10,7 @@ import pytest
 import requests
 from dotenv import dotenv_values
 from copy import deepcopy
+import helper_functions as helpers
 
 REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
@@ -21,7 +22,6 @@ ENV = get_env()
 
 ## Keycloak tests:
 
-
 ## Does Keycloak respond?
 def test_keycloak():
     response = requests.get(
@@ -32,25 +32,8 @@ def test_keycloak():
 
 
 ## Can we get an access token for a user?
-def get_token(username=None, password=None):
-    payload = {
-        "client_id": ENV["CANDIG_CLIENT_ID"],
-        "client_secret": ENV["CANDIG_CLIENT_SECRET"],
-        "grant_type": "password",
-        "username": username,
-        "password": password,
-        "scope": "openid",
-    }
-    response = requests.post(
-        f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/candig/protocol/openid-connect/token",
-        data=payload,
-    )
-    if response.status_code == 200:
-        return response.json()["access_token"]
-
-
 def test_get_token():
-    assert get_token(
+    assert helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -59,7 +42,7 @@ def test_get_token():
 ## Tyk test: can we get a response from Tyk for all of our services?
 def test_tyk():
     headers = {
-        "Authorization": f"Bearer {get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])}"
+        "Authorization": f"Bearer {helpers.get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])}"
     }
     endpoints = [
         f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
@@ -78,21 +61,28 @@ def test_tyk():
 
 
 ## Opa tests:
-
-
-## Can we get the correct dataset response for each user?
-def user_datasets():
+## Can we get the correct program response for each user?
+def user_programs():
     return [
         ("CANDIG_SITE_ADMIN", "SYNTHETIC-2"),
         ("CANDIG_NOT_ADMIN", "SYNTHETIC-1"),
     ]
 
 
-@pytest.mark.parametrize("user, dataset", user_datasets())
-def test_opa_datasets(user, dataset):
+@pytest.mark.parametrize("user, program", user_programs())
+def test_opa_programs(user, program):
+    """ Test that users have the expected authorization permissions in Opa
+
+    Args:
+        user: One of CANDIG_SITE_ADMIN or CANDIG_NOT_ADMIN
+        program: Name of the program that should be authorized
+
+    If passing asserts:
+        * The given user has authorization for the given program
+    """
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
-    token = get_token(username=username, password=password)
+    token = helpers.get_token(username=username, password=password)
     payload = {
         "input": {
             "body": {
@@ -115,12 +105,17 @@ def test_opa_datasets(user, dataset):
         headers=headers,
     )
     print(f"108 {datetime.datetime.now(tz=datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')} {json.dumps(payload)} {response.text}")
-    assert dataset in response.json()["result"]
+    assert program in response.json()["result"]
 
 
-## Can we add a dataset to one of the users?
-def test_add_opa_dataset():
-    token = get_token(
+## Can we add a program to one of the users?
+def test_add_opa_program():
+    """ Test that the site admin can add program authorization for a user
+    
+    If passing asserts:
+        * A site admin can add authorization to itself for a program
+    """
+    token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -139,7 +134,7 @@ def test_add_opa_dataset():
     print(f"129 {response.json()}, {response.status_code}")
     assert response.status_code == 200
 
-    test_opa_datasets("CANDIG_SITE_ADMIN", test_data["program"])
+    test_opa_programs("CANDIG_SITE_ADMIN", test_data["program"])
 
     response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
     assert response.status_code == 200
@@ -159,7 +154,7 @@ def test_site_admin(user, is_admin):
     payload = {"input": {}}
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
-    token = get_token(username=username, password=password)
+    token = helpers.get_token(username=username, password=password)
 
     headers = {
         "Content-Type": "application/json",
@@ -180,7 +175,7 @@ def test_site_admin(user, is_admin):
 
 ## Vault tests: can we add an aws access key and retrieve it?
 def test_vault():
-    site_admin_token = get_token(
+    site_admin_token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -223,15 +218,14 @@ def test_vault():
     print(response.json())
     assert response.json()["data"]["url"] == payload["url"]
 
-
-# =========================|| KATSU TEST BEGIN ||============================= #
+# ----------------
 # HELPER FUNCTIONS
 # -----------------
-def clean_up_program(test_id):
+def clean_up_program(program_id):
     """
     Deletes a dataset and all related objects. Expected 204
     """
-    site_admin_token = get_token(
+    site_admin_token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -241,7 +235,7 @@ def clean_up_program(test_id):
     }
 
     delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/program/{test_id}/",
+        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/program/{program_id}/",
         headers=headers,
     )
     assert (
@@ -250,20 +244,21 @@ def clean_up_program(test_id):
     f" Response content: {delete_response.content}"
 
     delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{test_id}",
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{program_id}",
         headers=headers
     )
     assert delete_response.status_code == 200
 
 
 def test_ingest_permissions():
+    """ Test ingesting synthetic data and that only admin user can ingest data """
     clean_up_program("SYNTHETIC-2")
     clean_up_program("SYNTHETIC-1")
 
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
         test_data = json.load(f)
 
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
         password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
     )
@@ -276,7 +271,7 @@ def test_ingest_permissions():
     # when the user has no admin access, they should not be allowed
     assert response.status_code == 401
 
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -312,7 +307,7 @@ def test_htsget():
 
 ## Can we add samples to Opa-controlled dataset?
 def test_htsget_add_sample_to_dataset():
-    site_admin_token = get_token(
+    site_admin_token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -394,7 +389,7 @@ def test_htsget_access_data(user, obj, access):
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
     headers = {
-        "Authorization": f"Bearer {get_token(username=username, password=password)}",
+        "Authorization": f"Bearer {helpers.get_token(username=username, password=password)}",
         "Content-Type": "application/json; charset=utf-8",
     }
     params = {"class": "header"}
@@ -412,7 +407,7 @@ def test_ingest_htsget():
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_genomic_ingest.json", 'r') as f:
         test_data = json.load(f)
 
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
         password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
     )
@@ -426,7 +421,7 @@ def test_ingest_htsget():
     print(response.json())
     assert response.status_code == 403
 
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -444,7 +439,7 @@ def test_ingest_htsget():
 
 
 def test_sample_metadata():
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -452,13 +447,14 @@ def test_sample_metadata():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_REGISTRATION_1", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_REGISTRATION_NULL_01", headers=headers)
+    print(response.json())
     assert "genomes" in response.json()
-    assert "HG00096.cnv.vcf" in response.json()["genomes"]
+    assert "HG00100-cram" in response.json()["genomes"]
 
 
 def test_index_success():
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
         password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
     )
@@ -468,7 +464,8 @@ def test_index_success():
     }
 
     # this has already been indexed in test_htsget, so it will def be indexed.
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/HG02102.vcf.gz", headers=headers)
+    print(response.json())
     assert "indexed" in response.json()
     assert response.json()['indexed'] == 1
 
@@ -496,7 +493,7 @@ def test_beacon(user, search, can_access, cannot_access):
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
     headers = {
-        "Authorization": f"Bearer {get_token(username=username, password=password)}",
+        "Authorization": f"Bearer {helpers.get_token(username=username, password=password)}",
         "Content-Type": "application/json; charset=utf-8",
     }
     params = {"allele": search}
@@ -512,32 +509,70 @@ def test_beacon(user, search, can_access, cannot_access):
     print(response.json())
 
 
-def verify_samples():
+def samples_to_verify() -> list:
+    """ Returns list of ingested genomic files and permission associations to test """
     return [
         (
-            "multisample_1",
-            "multisample_1.vcf.gz",
+            "NA02102-bam",
+            "NA02102.bam",
+            "read",
+            "user1"
+        ),
+        (
+            "HG02102",
+            "HG02102.vcf.gz",
             "variant",
             "user1"
         ),
         (
-            "NA02102",
-            "NA02102.bam",
-            "read",
+            "NA02102-cram",
+            "NA02102.chr1.cram",
+            "variant",
             "user1"
-        )
+        ),
+        (
+            "HG00100-cram",
+            "HG00100.mapped.ILLUMINA.bwa.GBR.exome.20121211.bam.cram",
+            "read",
+            "user2"
+        ),
+        (
+            "HG00100-chrom20-bam",
+            "HG00100.chrom20.ILLUMINA.bwa.GBR.exome.20121211.bam",
+            "read",
+            "user2"
+        ),
+        (
+            "chr22-v5a-phase3.vcf",
+            "ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
+            "variant",
+            "user2"
+        )  
     ]
 
 
-@pytest.mark.parametrize("object_id, file_name, file_type, user", verify_samples())
-def test_verify_htsget(object_id, file_name, file_type, user):
+@pytest.mark.parametrize("genomic_file_id, main_file_name, data_type, user", samples_to_verify())
+def test_verify_htsget(genomic_file_id: str, main_file_name: str, data_type: str, user: str):
+    """ Verify all genomic objects from the test data have been uploaded and have appropriate permissions 
+    
+    Args:
+        genomic_file_id: genomic_file_id specified in the genomic json
+        main_file_name: main.name specified in the genomic json
+        data_type: data type specified in the genomic json (read or variant)
+        user: user with access to the given genomic object (user1 or user2)
+    
+    If passing asserts:
+        * that the given user can retreive the given genomic object
+        * that calling the verify endpoint on an object with invalid url will return False
+        * that calling the verify endpoint on an object with valid url will return True
+    """
     if user == "user1":
-        token = get_token(
+        token = helpers.get_token(
             username=ENV["CANDIG_NOT_ADMIN_USER"],
             password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
         )
     elif user == "user2":
-        token = get_token(
+        token = helpers.get_token(
             username=ENV["CANDIG_SITE_ADMIN_USER"],
             password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
         )
@@ -547,15 +582,21 @@ def test_verify_htsget(object_id, file_name, file_type, user):
         "Content-Type": "application/json; charset=utf-8",
     }
     # get a GenomicDataDrsObject
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{file_name}", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{main_file_name}", headers=headers)
     assert response.status_code == 200
     new_json = response.json()
+    print(new_json)
 
     # mess up its access_url
-    old_url = new_json["access_methods"][0]["access_url"]["url"]
-    new_json["access_methods"][0]["access_url"]["url"] += "test"
+    if new_json['access_methods'][0]['type'] == 's3':
+        old_url = new_json["access_methods"][0]["access_id"]
+        new_json["access_methods"][0]["access_id"] = \
+        f"{new_json["access_methods"][0]["access_id"][:10]}/test/{new_json["access_methods"][0]["access_id"]}"
+    elif new_json['access_methods'][0]['type'] == 'file':
+        old_url = new_json["access_methods"][0]["access_url"]["url"]
+        new_json["access_methods"][0]["access_url"]["url"] += "test"
 
-    post_token = get_token(
+    post_token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -567,22 +608,26 @@ def test_verify_htsget(object_id, file_name, file_type, user):
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
 
     # verification should give us a False result
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{file_type}s/{object_id}/verify", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{data_type}s/{genomic_file_id}/verify", headers=headers)
+    print(response.json())
     assert response.status_code == 200
     assert response.json()["result"] == False
 
     # fix it back
-    new_json["access_methods"][0]["access_url"]["url"] = old_url
+    if new_json['access_methods'][0]['type'] == 's3':
+        new_json["access_methods"][0]["access_id"] = old_url
+    else:
+        new_json["access_methods"][0]["access_url"]["url"] = old_url
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
 
     # verification should give us a True result
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{file_type}s/{object_id}/verify", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{data_type}s/{genomic_file_id}/verify", headers=headers)
     assert response.status_code == 200
     assert response.json()["result"] == True
 
 
 def test_cohort_status():
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -600,7 +645,7 @@ def test_cohort_status():
 
 # Do we have at least one server present?
 def test_server_count():
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"], password=ENV["CANDIG_NOT_ADMIN_PASSWORD"]
     )
     headers = {
@@ -616,7 +661,7 @@ def test_server_count():
 
 # Do we have at least one service present?
 def test_services_count():
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"], password=ENV["CANDIG_NOT_ADMIN_PASSWORD"]
     )
     headers = {
@@ -641,7 +686,7 @@ def test_federation_call():
         "path": "beacon/v2/service-info",
     }
 
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -668,7 +713,7 @@ def test_federation_call():
 
 # Add a server, then test to see if federated calls now include that server in the results
 def test_add_server():
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -716,7 +761,14 @@ def test_add_server():
 
 # Query Test: Get all donors
 def test_query_donors_all():
-    token = get_token(
+    """ Test all ingested clinical data for expected summary counts
+    
+    If passing asserts:
+        * Query returns a valid response on the query/query endpoint (response: 200)
+        * The expected number of donors in authorised for CANDIG_SITE_ADMIN_USER is 7
+        * The expected counts of summary stats for CANDIG_SITE_ADMIN_USER matches the true counts
+    """
+    token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -778,7 +830,15 @@ def test_query_donors_all():
 
 # Test 2: Search for a specific donor
 def test_query_donor_search():
-    token = get_token(
+    """ Test specific query result
+    
+    If passing asserts:
+        * Query returns a valid response on the query/query endpoint with treatment param (response: 200)
+        * The expected number of donors with treatment.treatment_type == "Chemotherapy" for CANDIG_SITE_ADMIN_USER is 2
+        * The expected counts of summary stats for donors with treatment.treatment_type == "Chemotherapy" for 
+            CANDIG_SITE_ADMIN_USER matches the true counts
+    """
+    token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -831,7 +891,7 @@ def test_query_donor_search():
 
 def test_query_genomic():
     # tests that a request sent via query to htsget-beacon properly prunes the data
-    token = get_token(
+    token = helpers.get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
@@ -847,27 +907,7 @@ def test_query_genomic():
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     )
     print(response.json()["results"])
-    assert response and len(response.json()["results"]) == 1 
-    assert response.json()["results"][0]["submitter_donor_id"] == "DONOR_10"
-
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-    params = {
-        "chrom": "chr22:51244000-51245000",
-        "assembly": "hg38"
-    }
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
-    )
-    print(response.json()["results"])
     assert response and len(response.json()["results"]) == 1
-    assert response.json()["results"][0]["submitter_donor_id"] == "DONOR_10"
 
 
 def test_query_discovery():
@@ -899,6 +939,10 @@ def test_query_discovery():
 
 
 def test_clean_up():
+    """ Clean up all data ingested into the platform during the running of all tests in this file.
+    
+    Can be toggled on and off with the `KEEP_TEST_DATA` argument in the .env file
+    """
     clean_up_program("SYNTHETIC-1")
     clean_up_program("SYNTHETIC-2")
 
