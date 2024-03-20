@@ -529,6 +529,10 @@ else
 	source ./env.sh; pytest ./etc/tests $(ARGS)
 endif
 
+
+test-integration-%:
+	python ./settings.py; source ./env.sh; pytest ./etc/tests -rP -k '$*'
+
 # stop all docker containers
 .PHONY: stop-all
 stop-all:

@@ -11,6 +11,7 @@ import requests
 from dotenv import dotenv_values
 from copy import deepcopy
 import helper_functions as helpers
+import pprint
 
 REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
@@ -221,39 +222,27 @@ def test_vault():
 # ----------------
 # HELPER FUNCTIONS
 # -----------------
-def clean_up_program(program_id):
+def clean_up_program(program_id, genomic_object_id, user_type):
     """
     Deletes a dataset and all related objects. Expected 204
     """
-    site_admin_token = helpers.get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {site_admin_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
 
-    delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/program/{program_id}/",
-        headers=headers,
-    )
+    delete_response = helpers.clean_up_katsu_program(program_id, user_type)
     assert (
         delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
     ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
     f" Response content: {delete_response.content}"
+    # Check the deleted program has no items in katsu
+    assert(len(helpers.get_katsu_authorised_program(user_type, program_id)['items']) == 0)
 
-    delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{program_id}",
-        headers=headers
-    )
+    delete_response = helpers.clean_up_htsget_program(program_id, genomic_object_id, user_type)
     assert delete_response.status_code == 200
 
 
-def test_ingest_permissions():
+def test_ingest_katsu():
     """ Test ingesting synthetic data and that only admin user can ingest data """
-    clean_up_program("SYNTHETIC-2")
-    clean_up_program("SYNTHETIC-1")
+    helpers.clean_up_katsu_program("SYNTHETIC-2", "CANDIG_SITE_ADMIN")
+    helpers.clean_up_katsu_program("SYNTHETIC-1", "CANDIG_NOT_ADMIN")
 
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
         test_data = json.load(f)
@@ -404,13 +393,20 @@ def test_htsget_access_data(user, obj, access):
 
 ## HTSGet + katsu:
 def test_ingest_htsget():
+    """ Ingest genomic data that links to the clinical synthetic data already ingested in `test_ingest_permissions()`
+    
+    If passing asserts:
+        * Non site admin user cannot ingest genomic data
+        * Genomic data ingests as expected
+    
+    """
+    assert(helpers.clean_up_htsget_program('SYNTHETIC-1', "NA18537", "CANDIG_NOT_ADMIN").status_code == 200)
+    assert(helpers.clean_up_htsget_program('SYNTHETIC-2', "chr22-v5a-phase3.vcf", "CANDIG_SITE_ADMIN").status_code == 200)
+
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_genomic_ingest.json", 'r') as f:
         test_data = json.load(f)
 
-    token = helpers.get_token(
-        username=ENV["CANDIG_NOT_ADMIN_USER"],
-        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
-    )
+    token = helpers.get_user_type_token("CANDIG_NOT_ADMIN")
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -418,25 +414,25 @@ def test_ingest_htsget():
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
     # when the user has no admin access, they should not be allowed
-    print(response.json())
     assert response.status_code == 403
 
-    token = helpers.get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
     # when the user has admin access, they should be allowed
-    print(response.json())
     assert response.status_code == 200
-    for id in response.json():
-        assert "genomic" in response.json()[id]
-        assert "sample" in response.json()[id]
-
+    # For each file ingested, check for errors and correct object structure
+    for id, ingest_response in response.json().items():
+        if len(ingest_response['errors']) > 0:
+            print(id)
+            print(ingest_response['errors'])
+        assert len(ingest_response['errors']) == 0
+        assert "genomic" in ingest_response
+        assert "sample" in ingest_response
+    
 
 def test_sample_metadata():
     token = helpers.get_token(
@@ -455,8 +451,8 @@ def test_sample_metadata():
 
 def test_index_success():
     token = helpers.get_token(
-        username=ENV["CANDIG_NOT_ADMIN_USER"],
-        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
     )
     headers = {
         "Authorization": f"Bearer {token}",
@@ -464,7 +460,7 @@ def test_index_success():
     }
 
     # this has already been indexed in test_htsget, so it will def be indexed.
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/HG02102.vcf.gz", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/chr22-v5a-phase3.vcf", headers=headers)
     print(response.json())
     assert "indexed" in response.json()
     assert response.json()['indexed'] == 1
@@ -513,20 +509,8 @@ def samples_to_verify() -> list:
     """ Returns list of ingested genomic files and permission associations to test """
     return [
         (
-            "NA02102-bam",
-            "NA02102.bam",
-            "read",
-            "user1"
-        ),
-        (
-            "HG02102",
-            "HG02102.vcf.gz",
-            "variant",
-            "user1"
-        ),
-        (
-            "NA02102-cram",
-            "NA02102.chr1.cram",
+            "multisample_1",
+            "multisample_1.vcf.gz",
             "variant",
             "user1"
         ),
@@ -942,9 +926,14 @@ def test_clean_up():
     """ Clean up all data ingested into the platform during the running of all tests in this file.
     
     Can be toggled on and off with the `KEEP_TEST_DATA` argument in the .env file
+
+    If passing asserts:
+        * data was cleaned from katsu
+        * data was cleaned from htsget
     """
-    clean_up_program("SYNTHETIC-1")
-    clean_up_program("SYNTHETIC-2")
+
+    clean_up_program("SYNTHETIC-1", "HG00100-cram", "CANDIG_NOT_ADMIN")
+    clean_up_program("SYNTHETIC-2", "chr22-v5a-phase3.vcf", "CANDIG_SITE_ADMIN")
 
     # clean up test_htsget
     old_val = os.environ.get("TESTENV_URL")
