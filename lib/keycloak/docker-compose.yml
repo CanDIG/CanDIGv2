@@ -2,32 +2,30 @@ version: '3.7'
 
 services:
   keycloak:
-    build:
-      context: ${PWD}/lib/keycloak
-      args:
-        #- BASE_IMAGE=candig/keycloak:${KEYCLOAK_VERSION}
-        - BASE_IMAGE=${KEYCLOAK_BASE_IMAGE}
+    image: keycloak/keycloak:${KEYCLOAK_VERSION}
     labels:
       - "candigv2=keycloak"
-    command: [ "-b", "${KEYCLOAK_HOST}", "-Dkeycloak.migration.strategy=IGNORE_EXISTING" ]
+    volumes:
+      - ${PWD}/lib/keycloak/credential_loader.sh:/opt/keycloak/credential_loader.sh
+      - keycloak-data:/opt/keycloak/data
+    environment:
+      KC_HOSTNAME: ${KEYCLOAK_HOST}
+      PROXY_ADDRESS_FORWARDING: ${KEYCLOAK_ENABLE_PROXY}
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+      QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: true
+      KC_HTTP_RELATIVE_PATH: /auth
+    secrets:
+      - keycloak-admin-user
+      - keycloak-admin-password
     ports:
       - "${KEYCLOAK_CONTAINER_PORT}:8080"
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
-    volumes:
-      - keycloak-data:/opt/jboss/keycloak/standalone
-    environment:
-      - KEYCLOAK_USER_FILE=/run/secrets/keycloak-admin-user
-      - KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak-admin-password
-      - PROXY_ADDRESS_FORWARDING=${KEYCLOAK_ENABLE_PROXY}
-      #- KEYCLOAK_FRONTEND_URL=${KEYCLOAK_PUBLIC_URL_PROD}/auth
-    secrets:
-      - source: keycloak-admin-user
-        target: /run/secrets/keycloak-admin-user
-      - source: keycloak-admin-password
-        target: /run/secrets/keycloak-admin-password
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["chmod +x /opt/keycloak/credential_loader.sh && /opt/keycloak/credential_loader.sh start-dev"]
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://0.0.0.0:8080" ]
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e \"GET /auth/health HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3"]
       interval: 30s
-      timeout: 20s
+      timeout: 10s
       retries: 3
