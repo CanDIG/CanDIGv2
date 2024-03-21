@@ -12,10 +12,17 @@ BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 DEFAULT='\033[0m'
 
+handle_error() {
+    echo -e "🚨🚨🚨 ${RED}AN ERROR OCCURRED DURING KEYCLOAK SETUP PROCESS${DEFAULT} 🚨🚨🚨"
+    exit 1
+}
+
+# Trap ERR signal to call handle_error function
+trap handle_error ERR
+
 ####################################################
 #              VARIABLES CONFIGURATION             #
 ####################################################
-LOGFILE=$PWD/tmp/progress.txt
 KEYCLOAK_ADMIN=$(cat tmp/secrets/keycloak-admin-user)
 KEYCLOAK_ADMIN_PASSWORD=$(cat tmp/secrets/keycloak-admin-password)
 READY_CHECK_URL="http://${CANDIG_DOMAIN}:${KEYCLOAK_PORT}/auth/health/ready"
@@ -24,12 +31,12 @@ KC_ADMIN_URL="http://host.docker.internal:8080/auth"
 
 echo -e "🚧🚧🚧 ${YELLOW}KEYCLOAK SETUP BEGIN${DEFAULT} 🚧🚧🚧"
 echo -n ">> waiting for keycloak to start"
-# keycloak booting up before it can accept requests
+# keycloak is booting up before it can accept any requests
 until $(curl --output /dev/null --silent --fail --head "${READY_CHECK_URL}"); do
     printf '.'
     sleep 1
 done
-echo -e "\n${GREEN}Keycloak is ready!${DEFAULT}"
+echo -e "\n${GREEN}Keycloak is ready ✅${DEFAULT}"
 
 KCADM="docker run --rm --entrypoint /opt/keycloak/bin/kcadm.sh -v ${PWD}:/opt/keycloak/.keycloak quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}"
 # authenticate as admin
