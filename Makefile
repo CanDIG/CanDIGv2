@@ -530,6 +530,9 @@ else
 endif
 
 
+# Run a single test by using its name and print out results whether failing or passing
+# note some tests are dependent on others
+.PHONY: test-integration-%
 test-integration-%:
 	python ./settings.py; source ./env.sh; pytest ./etc/tests -rP -k '$*'
 

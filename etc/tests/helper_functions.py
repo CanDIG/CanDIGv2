@@ -45,6 +45,8 @@ def get_token(username: str=None, password: str=None) -> str:
     )
     if response.status_code == 200:
         return response.json()["access_token"]
+    else:
+        return None
     
 
 def get_user_type_token(user_type):
@@ -199,14 +201,14 @@ def ingest_test_data():
     print(response.json())
     
 
-def get_katsu_programs_info():
+def get_katsu_programs_info() -> dict:
     response = requests.get(
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/"
     ).json()
     return response
 
 
-def get_katsu_authorised_program(user_type, program):
+def get_katsu_authorised_program(user_type, program) -> dict:
     token = get_user_type_token(user_type)
     headers = {
         "Authorization": f"Bearer {token}",
@@ -229,11 +231,8 @@ def get_htsget_sample_metadata(sample_id, user_type):
     return response.json()
 
 
-def get_htsget_variant(chrom: str, start: int, end: int):
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+def get_beacon_variant(chrom: str, start: int, end: int, user_type: str) -> dict:
+    token = get_user_type_token(user_type)
     
     headers = {
         "Authorization": f"Bearer {token}",
@@ -253,11 +252,23 @@ def get_htsget_variant(chrom: str, start: int, end: int):
             'apiVersion': 'v2'
         }
     }
+    print(f"Querying: {ENV['CANDIG_URL']}/genomics/beacon/v2/g_variants")
+    print(f"with payload: {payload}")
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/beacon/v2/g_variants",
         headers=headers,
         json=payload)
-    
     print(response.json())
+    return response.json()
+
+
+def get_htsget_variant(chrom: str, start: int, end: int, user_type: str) -> dict:
+    token = get_user_type_token(user_type)
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    
 
 def clean_up_katsu_program(program_id, user_type):
     """
