@@ -1,20 +1,9 @@
-# This script creates and configures a realm within Keycloak:
-# 1. Checks if a realm exists. If not, it creates a new realm.
-# 2. Updates the realm's configuration to enable the storage of admin events and their details.
-# 3. Enables the storage of login events for the realm and sets their expiration.
-# 4. Defines a set of login event types to be stored for the realm.
+# This script creates and configures a realm within Keycloak
 
 echo
 echo -e "${BLUE}Creating realm: $KEYCLOAK_REALM${DEFAULT}"
 
-EXISTING_REALM=$($KCADM get realms | jq -r --arg REALM_NAME "$KEYCLOAK_REALM" '.[] | select(.realm==$REALM_NAME) | .id')
-if [ -z "$EXISTING_REALM" ]; then
-    $KCADM create realms -s realm="$KEYCLOAK_REALM" -s enabled=true
-else
-    echo "Realm $KEYCLOAK_REALM already exists."
-fi
-
-# realm configuration
+$KCADM create realms -s realm="$KEYCLOAK_REALM" -s enabled=true
 $KCADM update events/config -r ${KEYCLOAK_REALM} \
 -s adminEventsEnabled=true \
 -s adminEventsDetailsEnabled=true \
