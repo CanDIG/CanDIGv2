@@ -980,7 +980,6 @@ def test_query_genomic():
     print(helpers.get_beacon_variant("22", 16050000, 16050600, "CANDIG_SITE_ADMIN"))
 
 
-
 def test_query_discovery():
     katsu_response = requests.get(
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/"
