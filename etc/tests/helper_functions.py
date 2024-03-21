@@ -261,15 +261,6 @@ def get_beacon_variant(chrom: str, start: int, end: int, user_type: str) -> dict
     return response.json()
 
 
-def get_htsget_variant(chrom: str, start: int, end: int, user_type: str) -> dict:
-    token = get_user_type_token(user_type)
-    
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
-
 def get_beacon_gene(gene: str, user_type: str) -> dict:
     token = get_user_type_token(user_type)
     
