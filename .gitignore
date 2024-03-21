@@ -1,6 +1,8 @@
 #edit related
 *~
 .idea
+.DS_Store
+.env-bak
 
 #data files/directories
 *.bam
