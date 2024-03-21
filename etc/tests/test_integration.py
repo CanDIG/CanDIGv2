@@ -911,9 +911,7 @@ def test_query_donor_search():
             assert summary_stats[category][value] == expected_response[category][value]
     assert True
 
-
-def test_query_genomic():
-    # tests that a request sent via query to htsget-beacon properly prunes the data
+def test_htsget_genomic_search():
     token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -927,7 +925,60 @@ def test_query_genomic():
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     )
     print(response.json()["results"])
+
+def test_query_genomic():
+    # tests that a request sent via query to htsget-beacon properly prunes the data
+    token = helpers.get_user_type_token("CANDIG_NOT_ADMIN")
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    params = {
+        "chrom": "chr21:5030500-5031000",
+        "assembly": "hg38"
+    }
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
+    )
+    print("Query response:")
+    print(response.json())
     assert response and len(response.json()["results"]) == 1
+    print("Beacon response: ")
+    print(helpers.get_beacon_variant("21", 5030500, 5031000, "CANDIG_NOT_ADMIN"))
+
+    print("Search for gene SLC2A5")
+    params = {
+        "gene": ['SLC2A5']
+    }
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
+    )
+    print("Query response:")
+    print(response.json())
+    # should return results from test.vcf.gz
+    print("Beacon response:")
+    print(helpers.get_beacon_gene('SLC2A5', 'CANDIG_NOT_ADMIN'))
+    # assert response and len(response.json()["results"]) == 1
+
+    token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    params = {
+        "chrom": "chr22:16050000-16050600",
+        "assembly": "hg38"
+    }
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
+    )
+    # should return results from chr22-v5a-phase3.vcf
+    print("Query response:")
+    print(response.json()["results"])
+    # assert response and len(response.json()["results"]) == 1
+    print("Beacon response:")
+    print(helpers.get_beacon_variant("22", 16050000, 16050600, "CANDIG_SITE_ADMIN"))
+
 
 
 def test_query_discovery():

@@ -268,7 +268,35 @@ def get_htsget_variant(chrom: str, start: int, end: int, user_type: str) -> dict
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
+
+
+def get_beacon_gene(gene: str, user_type: str) -> dict:
+    token = get_user_type_token(user_type)
     
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    
+    payload = {
+        'query': {
+            'requestParameters': {
+                'assemblyId': 'hg38',
+                'geneId': gene
+            }
+        },
+        'meta': {
+            'apiVersion': 'v2'
+        }
+    }
+    print(f"Querying: {ENV['CANDIG_URL']}/genomics/beacon/v2/g_variants")
+    print(f"with payload: {payload}")
+    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/beacon/v2/g_variants",
+        headers=headers,
+        json=payload)
+    print(response.json())
+    return response.json()
+
 
 def clean_up_katsu_program(program_id, user_type):
     """
