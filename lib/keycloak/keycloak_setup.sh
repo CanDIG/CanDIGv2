@@ -29,8 +29,9 @@ READY_CHECK_URL="http://${CANDIG_DOMAIN}:${KEYCLOAK_PORT}/auth/health/ready"
 KC_ADMIN_URL="http://host.docker.internal:8080/auth"
 #####################################################
 
-echo -e "🚧🚧🚧 ${YELLOW}KEYCLOAK SETUP BEGIN${DEFAULT} 🚧🚧🚧"
-echo -n ">> waiting for keycloak to start"
+# echo -e "🚧🚧🚧 ${YELLOW}KEYCLOAK SETUP BEGIN${DEFAULT} 🚧🚧🚧"
+# echo -n ">> waiting for keycloak to start"
+echo ">> waiting for keycloak to start"
 # keycloak is booting up before it can accept any requests
 until $(curl --output /dev/null --silent --fail --head "${READY_CHECK_URL}"); do
     printf '.'
