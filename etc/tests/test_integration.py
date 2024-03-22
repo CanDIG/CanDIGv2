@@ -126,14 +126,8 @@ def test_add_opa_program():
     If passing asserts:
         * A site admin can add authorization to itself for a program
     """
-    token = helpers.get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
 
     test_data = {
         "email": ENV["CANDIG_SITE_ADMIN_USER"] + "@test.ca",
@@ -197,11 +191,8 @@ def test_vault():
         * The vault aws s3 token can be retreived and matches what was sent
 
     """
-    site_admin_token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
-    headers = {
-        "Authorization": f"Bearer {site_admin_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
 
     # confirm that this works with the CANDIG_S3_TOKEN:
     headers["X-Vault-Token"] = ENV["VAULT_S3_TOKEN"]
@@ -254,21 +245,14 @@ def test_ingest_katsu():
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
         test_data = json.load(f)
 
-    token = helpers.get_user_type_token("CANDIG_NOT_ADMIN")
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers("CANDIG_NOT_ADMIN")
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     # when the user has no admin access, they should not be allowed
     assert response.status_code == 401
 
-    token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
+
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     # when the user has admin access, they should be allowed
     print(response.json())
@@ -399,10 +383,7 @@ def test_htsget_access_data(user: str, obj: str, access: bool):
     If passing asserts:
         * The user has the expected access to the genomic object
     """
-    headers = {
-        "Authorization": f"Bearer {helpers.get_user_type_token(user)}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers(user)
     params = {"class": "header"}
     response = requests.get(
         f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/data/{obj}",
@@ -430,21 +411,13 @@ def test_ingest_htsget():
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_genomic_ingest.json", 'r') as f:
         test_data = json.load(f)
 
-    token = helpers.get_user_type_token("CANDIG_NOT_ADMIN")
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers("CANDIG_NOT_ADMIN")
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
     # when the user has no admin access, they should not be allowed to ingest
     assert response.status_code == 403
 
-    token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
     # when the user has admin access, they should be allowed to ingest
     assert response.status_code == 200
@@ -481,11 +454,7 @@ def test_sample_metadata():
         * Site admin can access SAMPLE_REGISTRATION_NULL_01 and gets a valid response
         * The expected genomic object is linked to the sample
     """
-    token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_REGISTRATION_NULL_01", headers=headers)
     print(response.json())
     assert "genomes" in response.json()
@@ -499,11 +468,7 @@ def test_index_success():
         * The response for the file `chr22-v5a-phase3.vcf` has the `indexed` item
         * The indexing for that file is complete
     """
-    token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
     time.sleep(60)
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/chr22-v5a-phase3.vcf", headers=headers)
     print(response.json())
@@ -512,7 +477,8 @@ def test_index_success():
 
 
 ## Does Beacon return the correct level of authorized results?
-def beacon_access():
+def beacon_access() -> list:
+    """ Returns list of users, alleles and programs they can and cannot access """
     return [
         (
             "CANDIG_NOT_ADMIN",
@@ -530,11 +496,21 @@ def beacon_access():
 
 
 @pytest.mark.parametrize("user, search, can_access, cannot_access", beacon_access())
-def test_beacon(user, search, can_access, cannot_access):
-    username = ENV[f"{user}_USER"]
-    password = ENV[f"{user}_PASSWORD"]
+def test_beacon(user: str, search: str, can_access: list, cannot_access: list):
+    """ Test a specific user can search for alleles based on their authorization
+    
+    Args:
+        user: one of CANDIG_SITE_ADMIN or CANDIG_NOT_ADMIN
+        search: the allele string to search
+        can_access: a list of program names the user can access
+        cannog_access: a list of program names the user cannot access
+
+    If passing asserts:
+        * the user can see the allele in the response for program it can access
+        * the user cannot see the allele in the response for programs it cannot access
+    """
     headers = {
-        "Authorization": f"Bearer {helpers.get_token(username=username, password=password)}",
+        "Authorization": f"Bearer {helpers.get_user_type_token(user)}",
         "Content-Type": "application/json; charset=utf-8",
     }
     params = {"allele": search}
@@ -590,20 +566,10 @@ def test_verify_htsget(genomic_file_id: str, main_file_name: str, data_type: str
         * that calling the verify endpoint on an object with valid url will return True
     """
     if user == "user1":
-        token = helpers.get_token(
-            username=ENV["CANDIG_NOT_ADMIN_USER"],
-            password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
-        )
+        headers = helpers.get_user_type_token_headers("CANDIG_NOT_ADMIN")
     elif user == "user2":
-        token = helpers.get_token(
-            username=ENV["CANDIG_SITE_ADMIN_USER"],
-            password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-        )
+        headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
     # get a GenomicDataDrsObject
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{main_file_name}", headers=headers)
     assert response.status_code == 200
@@ -619,14 +585,7 @@ def test_verify_htsget(genomic_file_id: str, main_file_name: str, data_type: str
         old_url = new_json["access_methods"][0]["access_url"]["url"]
         new_json["access_methods"][0]["access_url"]["url"] += "test"
 
-    post_token = helpers.get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    post_headers = {
-        "Authorization": f"Bearer {post_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    post_headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
 
     response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
 
@@ -650,14 +609,7 @@ def test_verify_htsget(genomic_file_id: str, main_file_name: str, data_type: str
 
 
 def test_cohort_status():
-    token = helpers.get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-2/status", headers=headers)
     assert "index_complete" in response.json()
     assert len(response.json()['index_complete']) > 0
@@ -668,13 +620,13 @@ def test_cohort_status():
 
 # Do we have at least one server present?
 def test_server_count():
-    token = helpers.get_token(
-        username=ENV["CANDIG_NOT_ADMIN_USER"], password=ENV["CANDIG_NOT_ADMIN_PASSWORD"]
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    """ Test that there is at least one server for servers endpoint
+    
+    If passing, asserts:
+        * federation can see at least one server running
+    """
+    headers = helpers.get_user_type_token_headers("CANDIG_NOT_ADMIN")
+
     response = requests.get(
         f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers
     )
@@ -684,13 +636,13 @@ def test_server_count():
 
 # Do we have at least one service present?
 def test_services_count():
-    token = helpers.get_token(
-        username=ENV["CANDIG_NOT_ADMIN_USER"], password=ENV["CANDIG_NOT_ADMIN_PASSWORD"]
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    """ Test if there is at least one service visible to federation
+    
+    If passing asserts:
+        * There is at lease one service running
+        * htsget service is running
+    """
+    headers = helpers.get_user_type_token_headers("CANDIG_NOT_ADMIN")
     response = requests.get(
         f"{ENV['CANDIG_URL']}/federation/v1/services", headers=headers
     )
@@ -700,8 +652,12 @@ def test_services_count():
     assert "htsget" in services
 
 
-# Do federated and non-federated calls look correct?
 def test_federation_call():
+    """ Test all federated and non-federated calls look correct
+    
+    If passing, asserts:
+        * return from fanout request has expected structure
+    """
     body = {
         "service": "htsget",
         "method": "GET",
@@ -709,10 +665,7 @@ def test_federation_call():
         "path": "beacon/v2/service-info",
     }
 
-    token = helpers.get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
     headers = {
         "Authorization": f"Bearer {token}",
         "content-type": "application/json",
@@ -736,14 +689,7 @@ def test_federation_call():
 
 # Add a server, then test to see if federated calls now include that server in the results
 def test_add_server():
-    token = helpers.get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
 
     response = requests.get(
         f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers
@@ -791,14 +737,7 @@ def test_query_donors_all():
         * The expected number of donors in authorised for CANDIG_SITE_ADMIN_USER is 7
         * The expected counts of summary stats for CANDIG_SITE_ADMIN_USER matches the true counts
     """
-    token = helpers.get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
 
     params = {}
     response = requests.get(
@@ -861,14 +800,8 @@ def test_query_donor_search():
         * The expected counts of summary stats for donors with treatment.treatment_type == "Chemotherapy" for 
             CANDIG_SITE_ADMIN_USER matches the true counts
     """
-    token = helpers.get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
 
     params = {
         "treatment": "Chemotherapy"
@@ -912,11 +845,10 @@ def test_query_donor_search():
     assert True
 
 def test_htsget_genomic_search():
-    token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    """
+    
+    """
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
     params = {
         "chrom": "chr22:16050000-16050600",
         "assembly": "hg38"
@@ -927,12 +859,15 @@ def test_htsget_genomic_search():
     print(response.json()["results"])
 
 def test_query_genomic():
+    """ Tests that query can make a genomic search and return expected results based on user type
+    
+    If passing asserts:
+        * Non-admin user returns a result for positional search chr21:5030500-5031000
+        * Non-admin user returns a result for gene search 'SLC2A5'
+        * Admin user returns a result for positional search chr22:16050000-16050600
+    """
     # tests that a request sent via query to htsget-beacon properly prunes the data
-    token = helpers.get_user_type_token("CANDIG_NOT_ADMIN")
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers("CANDIG_NOT_ADMIN")
     params = {
         "chrom": "chr21:5030500-5031000",
         "assembly": "hg38"
@@ -960,11 +895,7 @@ def test_query_genomic():
     print(helpers.get_beacon_gene('SLC2A5', 'CANDIG_NOT_ADMIN'))
     # assert response and len(response.json()["results"]) == 1
 
-    token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
     params = {
         "chrom": "chr22:16050000-16050600",
         "assembly": "hg38"
@@ -981,6 +912,11 @@ def test_query_genomic():
 
 
 def test_query_discovery():
+    """ Test the query response and katsu discovery response are congruent 
+    
+    If passing, asserts:
+        * Totals in program metadata from katsu and query discovery queries match
+    """
     katsu_response = requests.get(
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/"
     ).json()

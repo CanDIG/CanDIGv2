@@ -63,7 +63,27 @@ def get_user_type_token(user_type):
         password=ENV[f"{user_type}_PASSWORD"],
     )
     return token
+
+
+def get_user_type_token_headers(user_type):
+    """ Get a header containing a token for a particular CANDIG user type
     
+    Args:
+        user_type: one of CANDIG_SITE_ADMIN or CANDIG_NOT_ADMIN
+
+    Returns:
+        basic header with access token for that user type"""
+    
+    token = get_token(
+        username=ENV[f"{user_type}_USER"],
+        password=ENV[f"{user_type}_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    return headers
+
 
 def add_program_authorization(program_id, user_email=ENV["CANDIG_SITE_ADMIN_USER"] + "@test.ca"):
     """ Add program authorisation for a particular user_email
