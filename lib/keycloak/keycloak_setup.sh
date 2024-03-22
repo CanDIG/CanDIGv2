@@ -27,7 +27,7 @@ KEYCLOAK_ADMIN=$(cat tmp/secrets/keycloak-admin-user)
 KEYCLOAK_ADMIN_PASSWORD=$(cat tmp/secrets/keycloak-admin-password)
 READY_CHECK_URL="http://${CANDIG_DOMAIN}:${KEYCLOAK_PORT}/auth/health/ready"
 # KC_ADMIN_URL="http://host.docker.internal:8080/auth"
-KC_ADMIN_URL="http://172.17.0.1:${KEYCLOAK_PORT}/auth"
+KC_ADMIN_URL="http://${CANDIG_DOMAIN}:${KEYCLOAK_PORT}/auth"
 #####################################################
 
 echo -e "🚧🚧🚧 ${YELLOW}KEYCLOAK SETUP BEGIN${DEFAULT} 🚧🚧🚧"
@@ -39,9 +39,16 @@ until $(curl --output /dev/null --silent --fail --head "${READY_CHECK_URL}"); do
 done
 echo -e "\n${GREEN}Keycloak is ready ✅${DEFAULT}"
 
-KCADM="docker run --rm --entrypoint /opt/keycloak/bin/kcadm.sh -v ${PWD}:/opt/keycloak/.keycloak quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}"
+# Get the Keycloak container ID
+KEYCLOAK_CONTAINER_ID=$(docker ps | grep keycloak/keycloak | awk '{print $1}')
+
+# Define the KCADM function to run commands inside the Keycloak container
+function KCADM() {
+    docker exec -it "$KEYCLOAK_CONTAINER_ID" /opt/keycloak/bin/kcadm.sh "$@"
+}
+
 # authenticate as admin
-$KCADM config credentials --server $KC_ADMIN_URL --user $KEYCLOAK_ADMIN --password $KEYCLOAK_ADMIN_PASSWORD --realm master
+KCADM config credentials --server $KC_ADMIN_URL --user $KEYCLOAK_ADMIN --password $KEYCLOAK_ADMIN_PASSWORD --realm master
 
 # create realm
 source ./lib/keycloak/realm_setup.sh
