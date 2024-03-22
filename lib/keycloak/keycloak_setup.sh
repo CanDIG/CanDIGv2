@@ -44,7 +44,7 @@ KEYCLOAK_CONTAINER_ID=$(docker ps | grep keycloak/keycloak | awk '{print $1}')
 
 # Define the KCADM function to run commands inside the Keycloak container
 function KCADM() {
-    docker exec -it "$KEYCLOAK_CONTAINER_ID" /opt/keycloak/bin/kcadm.sh "$@"
+    docker exec "$KEYCLOAK_CONTAINER_ID" /opt/keycloak/bin/kcadm.sh "$@"
 }
 
 # authenticate as admin
