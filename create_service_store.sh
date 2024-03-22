@@ -83,7 +83,7 @@ collect_ips() {
             do
                 container=$(echo ${container} | tr -d "'")
                 local ip=$(echo $network_containers | jq --arg x "candigv2_${container}_1" -r '.[$x]')
-                ip="${ip%16}32"
+                ip="${ip%/*}/32"
                 ips+="\"$ip\","
             done
         fi
