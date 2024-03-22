@@ -27,7 +27,7 @@ KEYCLOAK_ADMIN=$(cat tmp/secrets/keycloak-admin-user)
 KEYCLOAK_ADMIN_PASSWORD=$(cat tmp/secrets/keycloak-admin-password)
 READY_CHECK_URL="http://${CANDIG_DOMAIN}:${KEYCLOAK_PORT}/auth/health/ready"
 # KC_ADMIN_URL="http://host.docker.internal:8080/auth"
-KC_ADMIN_URL="http://localhost:${KEYCLOAK_PORT}/auth"
+KC_ADMIN_URL="http://172.17.0.1:${KEYCLOAK_PORT}/auth"
 #####################################################
 
 echo -e "🚧🚧🚧 ${YELLOW}KEYCLOAK SETUP BEGIN${DEFAULT} 🚧🚧🚧"
