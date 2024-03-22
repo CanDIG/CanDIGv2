@@ -61,7 +61,7 @@ create_service_store() {
         done
         # if we're not in debug mode, delete the tmp roleid file
         if [[ ${CANDIG_DEBUG_MODE:-"0"} == "0" ]]; then
-            rm $PWD/tmp/vault/{service}-roleid
+            rm $PWD/tmp/vault/${service}-roleid
         fi
 
     done
