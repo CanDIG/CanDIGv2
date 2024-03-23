@@ -17,7 +17,7 @@ services:
             VAULT_URL: ${VAULT_PRIVATE_URL}
             CANDIG_CLIENT_ID: "${KEYCLOAK_CLIENT_ID}"
             CANDIG_SECRET_FILE: "/run/secrets/keycloak-secret"
-            OPA_URL: ${OPA_URL}
+            OPA_URL: ${OPA_PRIVATE_URL}
             SERVICE_NAME: "${SERVICE_NAME}"
         extra_hosts:
               - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
