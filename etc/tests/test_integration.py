@@ -689,6 +689,8 @@ def test_federation_call():
 
 # Add a server, then test to see if federated calls now include that server in the results
 def test_add_server():
+    
+    token = helpers.get_user_type_token("CANDIG_SITE_ADMIN")
     headers = helpers.get_user_type_token_headers("CANDIG_SITE_ADMIN")
 
     response = requests.get(
@@ -728,7 +730,6 @@ def test_add_server():
     assert response.status_code == 200
 
 
-# Query Test: Get all donors
 def test_query_donors_all():
     """ Test all ingested clinical data for expected summary counts
     
@@ -790,7 +791,7 @@ def test_query_donors_all():
         for value in expected_response[category].keys():
             assert summary_stats[category][value] == expected_response[category][value]
 
-# Test 2: Search for a specific donor
+
 def test_query_donor_search():
     """ Test specific query result
     

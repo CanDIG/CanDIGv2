@@ -74,10 +74,7 @@ def get_user_type_token_headers(user_type):
     Returns:
         basic header with access token for that user type"""
     
-    token = get_token(
-        username=ENV[f"{user_type}_USER"],
-        password=ENV[f"{user_type}_PASSWORD"],
-    )
+    token = get_user_type_token(user_type)
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -96,14 +93,8 @@ def add_program_authorization(program_id, user_email=ENV["CANDIG_SITE_ADMIN_USER
         The response from the API call showing updated authorization
     
     """
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+
+    headers = get_user_type_token_headers("CANDIG_SITE_ADMIN")
 
     test_data = {
         "email": user_email,
@@ -176,12 +167,6 @@ def clean_up_program(program_id):
     Args:
         program_id: The program identifier to be deleted
     """
-    site_admin_token = get_user_type_token("CANDIG_SITE_ADMIN")
-    headers = {
-        "Authorization": f"Bearer {site_admin_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
     clean_up_katsu_program(program_id)
     clean_up_htsget_program(program_id)
 
@@ -193,14 +178,7 @@ def ingest_test_data():
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
         test_data = json.load(f)
 
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = get_user_type_token_headers("CANDIG_SITE_ADMIN")
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     print(response.json())
@@ -208,14 +186,8 @@ def ingest_test_data():
     with open("lib/candig-ingest/candigv2-ingest/tests/genomic_ingest.json", 'r') as f:
         test_data = json.load(f)
 
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = get_user_type_token_headers("CANDIG_SITE_ADMIN")
+
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
     # when the user has admin access, they should be allowed
     print(response.json())
@@ -241,23 +213,15 @@ def get_katsu_authorised_program(user_type, program) -> dict:
 
 
 def get_htsget_sample_metadata(sample_id, user_type):
-    token = get_user_type_token(user_type)
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = headers = get_user_type_token_headers(user_type)
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/{sample_id}", headers=headers)
     print(response.json())
     return response.json()
 
 
 def get_beacon_variant(chrom: str, start: int, end: int, user_type: str) -> dict:
-    token = get_user_type_token(user_type)
-    
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+
+    headers = get_user_type_token_headers(user_type)
     
     payload = {
         'query': {
@@ -282,12 +246,8 @@ def get_beacon_variant(chrom: str, start: int, end: int, user_type: str) -> dict
 
 
 def get_beacon_gene(gene: str, user_type: str) -> dict:
-    token = get_user_type_token(user_type)
     
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+    headers = get_user_type_token_headers(user_type)
     
     payload = {
         'query': {
