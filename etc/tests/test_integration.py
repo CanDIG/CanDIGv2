@@ -707,6 +707,145 @@ def test_sample_metadata():
     assert "genomes" in response.json()
     assert "HG00096.cnv.vcf" in response.json()["genomes"]
 
+
+def test_index_success():
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    # this has already been indexed in test_htsget, so it will def be indexed.
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1", headers=headers)
+    assert "indexed" in response.json()
+    assert response.json()['indexed'] == 1
+
+
+## Does Beacon return the correct level of authorized results?
+def beacon_access():
+    return [
+        (
+            "CANDIG_NOT_ADMIN",
+            "NC_000021.9:g.5030847T>A",
+            ["multisample_1"],
+            ["multisample_2", "test"],
+        ),  # user1 can access NA18537 as part of SYNTHETIC-1
+        (
+            "CANDIG_NOT_ADMIN",
+            "NC_000001.11:g.16565782G>A",
+            [],
+            ["multisample_1", "multisample_2", "test"],
+        ),  # user1 cannot access test
+    ]
+
+
+@pytest.mark.parametrize("user, search, can_access, cannot_access", beacon_access())
+def test_beacon(user, search, can_access, cannot_access):
+    username = ENV[f"{user}_USER"]
+    password = ENV[f"{user}_PASSWORD"]
+    headers = {
+        "Authorization": f"Bearer {get_token(username=username, password=password)}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    params = {"allele": search}
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/genomics/beacon/v2/g_variants",
+        headers=headers,
+        params=params,
+    )
+    for c in can_access:
+        assert c in str(response.json())
+    for c in cannot_access:
+        assert c not in str(response.json())
+    print(response.json())
+
+
+def verify_samples():
+    return [
+        (
+            "multisample_1",
+            "multisample_1.vcf.gz",
+            "variant",
+            "user1"
+        ),
+        (
+            "NA02102",
+            "NA02102.bam",
+            "read",
+            "user1"
+        )
+    ]
+
+
+@pytest.mark.parametrize("object_id, file_name, file_type, user", verify_samples())
+def test_verify_htsget(object_id, file_name, file_type, user):
+    if user == "user1":
+        token = get_token(
+            username=ENV["CANDIG_NOT_ADMIN_USER"],
+            password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+        )
+    elif user == "user2":
+        token = get_token(
+            username=ENV["CANDIG_SITE_ADMIN_USER"],
+            password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+        )
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    # get a GenomicDataDrsObject
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{file_name}", headers=headers)
+    assert response.status_code == 200
+    new_json = response.json()
+
+    # mess up its access_url
+    old_url = new_json["access_methods"][0]["access_url"]["url"]
+    new_json["access_methods"][0]["access_url"]["url"] += "test"
+
+    post_token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    post_headers = {
+        "Authorization": f"Bearer {post_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
+
+    # verification should give us a False result
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{file_type}s/{object_id}/verify", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["result"] == False
+
+    # fix it back
+    new_json["access_methods"][0]["access_url"]["url"] = old_url
+    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
+
+    # verification should give us a True result
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{file_type}s/{object_id}/verify", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["result"] == True
+
+
+def test_cohort_status():
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-2/status", headers=headers)
+    assert "index_complete" in response.json()
+    assert len(response.json()['index_complete']) > 0
+
+
 ## Federation tests:
 
 

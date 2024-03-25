@@ -46,21 +46,15 @@ services:
 ```
 ### Configuring CanDIG modules
 
-Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` and `CANDIG_AUTH_MODULES` define which modules are included in the deployment.
+Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` setting defines which modules are included in the deployment.
 
 By default (if you copy the sample file from `etc/env/example.env`) the installation includes the minimal list of modules:
 
 ```
-  CANDIG_MODULES=minio htsget-server katsu candig-data-portal
+  CANDIG_MODULES=keycloak vault minio postgres redis htsget katsu candig-data-portal query tyk opa federation candig-ingest
 ```
 
-Optional modules follow the `#` and include federation service, various monitoring components, workflow execution, and some older modules not generally installed.
-
-For federated installations, you will need `federation-service`.
-
-For production deployments, you will probably want to include  `federation-service`.
-
-Authorization and authentication modules defined in  `CANDIG_AUTH_MODULES` are only installed if you run `make init-authx` during deployment.
+Optional modules follow the `#` and include various monitoring components, workflow execution, and some older modules not generally installed.
 
 ### Configuring CanDIG modules
 

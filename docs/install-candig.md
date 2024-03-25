@@ -177,6 +177,8 @@ Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infini
 bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 ```
 
+yq >= 4 is required, but the conda version is outdated.  Find a way to install it system-wide.
+
 ## Initialize CanDIGv2 Repo
 
 ```bash
