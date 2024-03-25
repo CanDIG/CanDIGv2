@@ -61,7 +61,7 @@ create_service_store() {
         done
         # if we're not in debug mode, delete the tmp roleid file
         if [[ ${CANDIG_DEBUG_MODE:-"0"} == "0" ]]; then
-            rm $PWD/tmp/vault/{service}-roleid
+            rm $PWD/tmp/vault/${service}-roleid
         fi
 
     done
@@ -83,7 +83,7 @@ collect_ips() {
             do
                 container=$(echo ${container} | tr -d "'")
                 local ip=$(echo $network_containers | jq --arg x "candigv2_${container}_1" -r '.[$x]')
-                ip="${ip%16}32"
+                ip="${ip%/*}/32"
                 ips+="\"$ip\","
             done
         fi
