@@ -19,6 +19,7 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
       - OPA_URL=${OPA_PRIVATE_URL}
+      - EXTERNAL_URL=${CANDIG_DOMAIN}
       - KATSU_AUTHORIZATION=${CANDIG_AUTHORIZATION}
       - OPA_SITE_ADMIN_KEY=${OPA_SITE_ADMIN_KEY}
       - HOST_CONTAINER_NAME=${KATSU_CONTAINER}
@@ -34,4 +35,9 @@ services:
         target: katsu_secret
     labels:
       - "candigv2=chord-metadata"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://${CANDIG_DOMAIN}:8008"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 

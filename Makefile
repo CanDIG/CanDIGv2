@@ -151,7 +151,7 @@ clean-%:
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
 	-docker volume rm `docker volume ls --filter name=$* -q`
-	docker image rm `docker image ls --format "{{.Repository}}" | grep $*`
+	docker image rm `docker image ls --format "{{.Repository}}:{{.Tag}}" | grep $*`
 	rm -Rf lib/$*/tmp
 
 
@@ -523,7 +523,11 @@ print-%:
 .PHONY: test-integration
 test-integration:
 	python ./settings.py
-	source ./env.sh; pytest ./etc/tests
+ifeq ($(KEEP_TEST_DATA),true)
+	source ./env.sh; pytest ./etc/tests -k 'not test_clean_up'
+else
+	source ./env.sh; pytest ./etc/tests $(ARGS)
+endif
 
 # stop all docker containers
 .PHONY: stop-all

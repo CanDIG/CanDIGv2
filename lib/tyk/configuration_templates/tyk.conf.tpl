@@ -4,7 +4,7 @@
     "policy_source": "file",
     "policy_record_name": "/opt/tyk-gateway/policies/policies.json"
   },
-  
+
   "Monitor": {
     "configuration": {
       "event_timeout": 0,
@@ -48,6 +48,9 @@
       "storage_engine": ""
     }
   },
+  "coprocess_options": {
+    "enable_coprocess": true
+  },
   "close_connections": false,
   "close_idle_connections": false,
   "control_api_hostname": "",
@@ -56,7 +59,6 @@
   "enable_analytics": false,
   "enable_api_segregation": false,
   "enable_bundle_downloader": true,
-  "enable_coprocess": false,
   "enable_custom_domains": true,
   "enable_jsvm": true,
   "enable_non_transactional_rate_limiter": true,
@@ -107,7 +109,7 @@
   "oauth_token_expire": 0,
   "optimisations_use_async_session_write": true,
   "pid_file_location": "./tyk-gateway.pid",
-  
+
   "public_key_path": "",
   "secret": "${TYK_SECRET_KEY}",
   "sentry_code": "",

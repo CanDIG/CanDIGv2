@@ -6,7 +6,7 @@ These instructions work for server deployments or local linux deployments. For l
 
 Before beginning, you should set up your environment variables as described in the [README](../README.md).
 
-Docker Engine (also known as Docker CE) is recommened over Docker Desktop for linux installations.
+Docker Engine (also known as Docker CE) is recommended over Docker Desktop for linux installations.
 
 Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
 
@@ -25,6 +25,7 @@ sudo apt update && \
 
 sudo apt install -y git-core build-essential
 ```
+yq >= 4 is required.  See [https://github.com/mikefarah/yq/#install](https://github.com/mikefarah/yq/#install) for install options.
 
 2. Install Docker
 
@@ -76,13 +77,19 @@ sudo apt-get install \
   gcc
 ```
 
+yq >= 4 is required.  The apt version is outdated.  So:
+```bash
+sudo apt install snapd
+sudo snap install yq
+```
+
 2. Install Docker
 
 Follow the [official Docker directions](https://docs.docker.com/engine/install/ubuntu/).  Installation using the [apt repository method](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) is recommended.
 
 Set docker to run as a service on startup.
 ```bash
-sudo systemctl enable docker 
+sudo systemctl enable docker
 
 sudo systemctl start docker
 ```
@@ -90,7 +97,7 @@ You may have to reboot (not just log out).
 
 Add yourself to the docker group rather than use sudo all the time.
 ```bash
-sudo usermod -aG docker $(whoami) 
+sudo usermod -aG docker $(whoami)
 ```
 You may have to log out or restart your shell for this setting to take effect.
 
@@ -144,6 +151,8 @@ sudo systemctl start docker
 
 sudo usermod -aG docker $(whoami)
 ```
+yq >= 4 is required.  See [https://github.com/mikefarah/yq/#install](https://github.com/mikefarah/yq/#install) for install options.
+
 
 ### Note for WSL Systems
 Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop. Add `CONDA_INSTALL = ~/miniconda3`  above `CONDA = $(CONDA_INSTALL)/bin/conda` in the Makefile to avoid this issue. You can also use the below command to move the miniconda3 installation to the correct location.
@@ -152,6 +161,8 @@ Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infini
 ```bash
 bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 ```
+
+yq >= 4 is required, but the conda version is outdated.  Find a way to install it system-wide.
 
 ## Initialize CanDIGv2 Repo
 
@@ -215,7 +226,7 @@ Then add the following line at the bottom of the file and save the changes:
 ::1	candig.docker.internal
 ```
 
-In some other cases, it may be necessary to add your local/internal (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, find out what your local IP address is 
+In some other cases, it may be necessary to add your local/internal (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, find out what your local IP address is
 
 ```bash
 # on mac
@@ -310,7 +321,7 @@ make clean-bin
 
 ```bash
 brew install gettext
-brew link --force gettext 
+brew link --force gettext
 brew install jq
 brew install yq
 ```
