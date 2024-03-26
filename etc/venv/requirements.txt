@@ -6,6 +6,6 @@ aiohttp
 requests
 pytest
 pytz
-candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v2.1.2
+candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v2.2.1
 minio==7.1.12
 werkzeug>=2.3.8 # not directly required, pinned by Snyk to avoid a vulnerability
