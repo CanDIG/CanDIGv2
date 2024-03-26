@@ -250,7 +250,7 @@ def test_user_authorizations(user, dataset):
 
 
 ## Can we add a dataset to one of the users?
-def test_add_opa_dataset():
+def test_add_remove_opa_dataset():
     token = get_token(
         username=ENV["CANDIG_SITE_ADMIN_USER"],
         password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
@@ -260,21 +260,41 @@ def test_add_opa_dataset():
         "Content-Type": "application/json; charset=utf-8",
     }
 
+    # create a program called OPA-TEST and its authorizations:
+    test_program = {
+        "program_id": "OPA-TEST",
+        "program_curators": [f"{ENV['CANDIG_SITE_ADMIN_USER']}@test.ca"],
+        "team_members": [f"{ENV['CANDIG_SITE_ADMIN_USER']}@test.ca"]
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program", headers=headers, json=test_program)
+    print(response.text)
+    assert response.status_code < 300
+
+    # try adding a user to the program:
     test_data = {
-        "email": ENV["CANDIG_SITE_ADMIN_USER"] + "@test.ca",
+        "email": ENV["CANDIG_NOT_ADMIN_USER"] + "@test.ca",
         "program": "OPA-TEST"
     }
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
     # when the user has admin access, they should be allowed
-    print(f"129 {response.json()}, {response.status_code}")
+    print(f"{response.json()}, {response.status_code}")
     assert response.status_code == 200
 
-    test_opa_datasets("CANDIG_SITE_ADMIN", test_data["program"])
+    test_opa_datasets("CANDIG_NOT_ADMIN", test_data["program"])
 
+    # remove the user
     response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
     assert response.status_code == 200
-    assert test_data['program'] not in response.json()["access"]["controlled_access_list"][test_data["email"]]
+    assert test_data["email"] not in response.json()[test_data["program"]]["team_members"]
+
+    # remove the program
+    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
+    assert response.status_code == 200
+
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
+    assert response.status_code == 404
 
 
 ## Is the user a site admin?
