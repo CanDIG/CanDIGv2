@@ -461,6 +461,7 @@ def test_ingest_htsget():
     for id in response.json():
         assert "genomic" in response.json()[id]
         assert "sample" in response.json()[id]
+        assert len(response.json()[id]['errors']) == 0
 
 
 def test_sample_metadata():
