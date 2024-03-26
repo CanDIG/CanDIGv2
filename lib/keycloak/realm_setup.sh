@@ -3,7 +3,10 @@
 echo
 echo -e "${BLUE}Creating realm: $KEYCLOAK_REALM${DEFAULT}"
 
-KCADM create realms -s realm="$KEYCLOAK_REALM" -s enabled=true
+CREATE_OUTPUT=$(KCADM create realms -s realm="$KEYCLOAK_REALM" -s enabled=true 2>&1)
+# uncomment the line beblow to see the output
+# echo $CREATE_OUTPUT
+
 KCADM update events/config -r ${KEYCLOAK_REALM} \
 -s adminEventsEnabled=true \
 -s adminEventsDetailsEnabled=true \
