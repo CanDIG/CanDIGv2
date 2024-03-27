@@ -12,7 +12,9 @@ services:
         ports:
             - "${CANDIG_INGEST_PORT}:1235"
         environment:
-            KEYCLOAK_PUBLIC_URL: "${KEYCLOAK_PUBLIC_URL}"
+            KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
+            KATSU_URL: ${KATSU_PRIVATE_URL}
+            HTSGET_URL: ${HTSGET_PRIVATE_URL}
             CANDIG_URL: "http://${CANDIG_DOMAIN}:5080"
             VAULT_URL: ${VAULT_PRIVATE_URL}
             CANDIG_CLIENT_ID: "${KEYCLOAK_CLIENT_ID}"
