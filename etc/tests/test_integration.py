@@ -458,10 +458,10 @@ def test_ingest_htsget():
     # when the user has admin access, they should be allowed
     print(response.json())
     assert response.status_code == 200
-    for id in response.json():
-        assert "genomic" in response.json()[id]
-        assert "sample" in response.json()[id]
-        assert len(response.json()[id]['errors']) == 0
+    for id in response.json()["results"]:
+        assert "genomic" in response.json()["results"][id]
+        assert "sample" in response.json()["results"][id]
+        assert "errors" not in response.json()
 
 
 def test_sample_metadata():
