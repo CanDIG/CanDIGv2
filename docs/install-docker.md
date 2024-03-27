@@ -344,8 +344,6 @@ cp -i etc/env/example.env .env
 LOCAL_IP_ADDR=xxx.xx.x.x
 # change OS
 VENV_OS=arm64mac
-# change keycloak
-KEYCLOAK_BASE_IMAGE=quay.io/c3genomics/keycloak:${KEYCLOAK_VERSION}.arm64
 ```
 
 Edit /etc/hosts on the machine (`sudo nano /etc/hosts`):
