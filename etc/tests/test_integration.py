@@ -140,6 +140,10 @@ def test_add_remove_opa_dataset():
     print(response.text)
     assert response.status_code < 300
 
+    # if the site user is the default user, there should be a warning
+    if ENV['CANDIG_SITE_ADMIN_USER'] == 'user2':
+        assert "warning" in response.json()
+
     # try adding a user to the program:
     test_data = {
         "email": ENV["CANDIG_NOT_ADMIN_USER"] + "@test.ca",
@@ -196,6 +200,35 @@ def test_site_admin(user, is_admin):
     )
     print(response.json())
     assert ("result" in response.json()) == is_admin
+
+
+def test_add_remove_site_admin():
+    token = get_token(
+        username=ENV["CANDIG_SITE_ADMIN_USER"],
+        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    # add user1 to site admins
+    response = requests.post(
+        f"{ENV['CANDIG_URL']}/ingest/site-role/site_admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}@test.ca",
+        headers=headers
+    )
+    print(response.text)
+    assert response.status_code == 200
+
+    test_site_admin("CANDIG_NOT_ADMIN", True)
+
+    # remove user1 from site admins
+    response = requests.delete(
+        f"{ENV['CANDIG_URL']}/ingest/site-role/site_admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}@test.ca",
+        headers=headers
+    )
+    assert response.status_code == 200
+
 
 
 ## Vault tests: can we add an aws access key and retrieve it?
