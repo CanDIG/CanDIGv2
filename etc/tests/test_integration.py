@@ -132,8 +132,8 @@ def test_add_remove_opa_dataset():
     # create a program called OPA-TEST and its authorizations:
     test_program = {
         "program_id": "OPA-TEST",
-        "program_curators": [f"{ENV['CANDIG_SITE_ADMIN_USER']}@test.ca"],
-        "team_members": [f"{ENV['CANDIG_SITE_ADMIN_USER']}@test.ca"]
+        "program_curators": [ENV['CANDIG_SITE_ADMIN_USER']],
+        "team_members": [ENV['CANDIG_SITE_ADMIN_USER']]
     }
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program", headers=headers, json=test_program)
@@ -146,7 +146,7 @@ def test_add_remove_opa_dataset():
 
     # try adding a user to the program:
     test_data = {
-        "email": ENV["CANDIG_NOT_ADMIN_USER"] + "@test.ca",
+        "email": ENV["CANDIG_NOT_ADMIN_USER"],
         "program": "OPA-TEST"
     }
 
@@ -214,7 +214,7 @@ def test_add_remove_site_admin():
 
     # add user1 to site admins
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/ingest/site-role/site_admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}@test.ca",
+        f"{ENV['CANDIG_URL']}/ingest/site-role/site_admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
         headers=headers
     )
     print(response.text)
@@ -224,7 +224,7 @@ def test_add_remove_site_admin():
 
     # remove user1 from site admins
     response = requests.delete(
-        f"{ENV['CANDIG_URL']}/ingest/site-role/site_admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}@test.ca",
+        f"{ENV['CANDIG_URL']}/ingest/site-role/site_admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
         headers=headers
     )
     assert response.status_code == 200
