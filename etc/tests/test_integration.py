@@ -271,6 +271,10 @@ def test_add_remove_opa_dataset():
     print(response.text)
     assert response.status_code < 300
 
+    # if the site user is the default user, there should be a warning
+    if ENV['CANDIG_SITE_ADMIN_USER'] == 'user2':
+        assert "warning" in response.json()
+
     # try adding a user to the program:
     test_data = {
         "email": ENV["CANDIG_NOT_ADMIN_USER"] + "@test.ca",
