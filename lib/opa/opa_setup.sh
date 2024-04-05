@@ -23,8 +23,8 @@ opa_runner=$(docker ps -a --format "{{.Names}}" | grep "opa-runner" | awk '{prin
 opa_container=$(docker ps -a --format "{{.Names}}" | grep "opa_" | awk '{print $1}')
 
 bash $PWD/create_service_store.sh "opa"
-python -c "import authx.auth
-print(authx.auth.get_site_admin_token())" > bearer.txt
+python -c "from site_admin_token import get_site_admin_token
+print(get_site_admin_token())" > bearer.txt
 docker cp bearer.txt $opa_runner:/app/
 rm bearer.txt
 
