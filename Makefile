@@ -339,6 +339,8 @@ docker-secrets: mkdir minio-secrets katsu-secrets
 	@echo admin > tmp/secrets/keycloak-admin-user
 	$(MAKE) secret-keycloak-admin-password
 
+	@echo $(DEFAULT_SITE_ADMIN_USER) > tmp/secrets/keycloak-test-site-admin
+	$(MAKE) secret-keycloak-test-site-admin-password
 
 	@echo user1@test.ca > tmp/secrets/keycloak-test-user
 	$(MAKE) secret-keycloak-test-user-password

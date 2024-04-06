@@ -20,8 +20,8 @@ services:
             CANDIG_CLIENT_ID: "${KEYCLOAK_CLIENT_ID}"
             CANDIG_SECRET_FILE: "/run/secrets/keycloak-secret"
             OPA_URL: ${OPA_PRIVATE_URL}
-            SERVICE_NAME: "${SERVICE_NAME}"
-            DEFAULT_SITE_ADMIN_USER: ${CANDIG_SITE_ADMIN_USER}
+            SERVICE_NAME: ${SERVICE_NAME}
+            DEFAULT_SITE_ADMIN_USER: ${DEFAULT_SITE_ADMIN_USER}
         extra_hosts:
               - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
         secrets:

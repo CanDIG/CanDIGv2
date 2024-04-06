@@ -136,7 +136,7 @@ def test_add_remove_opa_dataset():
     assert response.status_code < 300
 
     # if the site user is the default user, there should be a warning
-    if ENV['CANDIG_SITE_ADMIN_USER'] == 'user2':
+    if ENV['CANDIG_SITE_ADMIN_USER'] == ENV['CANDIG_ENV']['DEFAULT_SITE_ADMIN_USER']:
         assert "warning" in response.json()
 
     # try adding a user to the program:
