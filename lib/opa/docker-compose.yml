@@ -8,7 +8,6 @@ services:
         alpine_version: "${ALPINE_VERSION}"
         katsu_url: "${KATSU_PUBLIC_URL}"
         idp: "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}"
-        opa_site_admin_key: "${OPA_SITE_ADMIN_KEY}"
     image: ${DOCKER_REGISTRY}/opa-runner:${OPA_VERSION:-latest}
     labels:
       - "candigv2=opa"
@@ -30,7 +29,6 @@ services:
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
       KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
       KEYCLOAK_URL: ${KEYCLOAK_PRIVATE_URL}
-      OPA_SITE_ADMIN_KEY: ${OPA_SITE_ADMIN_KEY}
       OPA_URL: ${OPA_PRIVATE_URL}
       VAULT_URL: ${VAULT_PRIVATE_URL}
       SERVICE_NAME: ${SERVICE_NAME}
