@@ -20,10 +20,12 @@ services:
         target: opa-service-token
       - source: vault-approle-token
         target: vault-approle-token
-      - source: keycloak-client-local-candig-secret
-        target: /run/secrets/client_secret
-      - source: keycloak-test-user2-password
-        target: /run/secrets/password
+      - source: keycloak-test-site-admin
+        target: /run/secrets/site_admin_name
+      - source: keycloak-test-user
+        target: /run/secrets/user1_name
+      - source: keycloak-test-user2
+        target: /run/secrets/user2_name
     environment:
       KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
