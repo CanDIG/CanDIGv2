@@ -17,16 +17,12 @@ services:
             HTSGET_URL: ${HTSGET_PRIVATE_URL}
             CANDIG_URL: "http://${CANDIG_DOMAIN}:5080"
             VAULT_URL: ${VAULT_PRIVATE_URL}
-            CANDIG_CLIENT_ID: "${KEYCLOAK_CLIENT_ID}"
-            CANDIG_SECRET_FILE: "/run/secrets/keycloak-secret"
             OPA_URL: ${OPA_PRIVATE_URL}
             SERVICE_NAME: ${SERVICE_NAME}
             DEFAULT_SITE_ADMIN_USER: ${DEFAULT_SITE_ADMIN_USER}
         extra_hosts:
               - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
         secrets:
-          - source: keycloak-client-local-candig-secret
-            target: keycloak-secret
           - source: vault-approle-token
             target: vault-approle-token
         healthcheck:
