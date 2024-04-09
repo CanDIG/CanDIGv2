@@ -559,13 +559,10 @@ def verify_samples():
 
 @pytest.mark.parametrize("object_id, file_name, file_type, user", verify_samples())
 def test_verify_htsget(object_id, file_name, file_type, user):
-    if user == "user1":
-        token = get_token(
-            username=ENV["CANDIG_NOT_ADMIN_USER"],
-            password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
-        )
-    elif user == "user2":
-        token = get_site_admin_token()
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
 
     headers = {
         "Authorization": f"Bearer {token}",
