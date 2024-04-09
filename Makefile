@@ -524,7 +524,7 @@ print-%:
 test-integration:
 	python ./settings.py
 ifeq ($(KEEP_TEST_DATA),true)
-	source ./env.sh; pytest ./etc/tests -k 'not test_clean_up'
+	source ./env.sh; pytest ./etc/tests -k 'not test_clean_up' $(ARGS)
 else
 	source ./env.sh; pytest ./etc/tests $(ARGS)
 endif
