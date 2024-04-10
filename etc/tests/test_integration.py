@@ -251,10 +251,7 @@ def test_user_authorizations(user, dataset):
 
 ## Can we add a dataset to one of the users?
 def test_add_remove_opa_dataset():
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -263,8 +260,8 @@ def test_add_remove_opa_dataset():
     # create a program called OPA-TEST and its authorizations:
     test_program = {
         "program_id": "OPA-TEST",
-        "program_curators": [f"{ENV['CANDIG_SITE_ADMIN_USER']}@test.ca"],
-        "team_members": [f"{ENV['CANDIG_SITE_ADMIN_USER']}@test.ca"]
+        "program_curators": [ENV['CANDIG_SITE_ADMIN_USER']],
+        "team_members": [ENV['CANDIG_SITE_ADMIN_USER']]
     }
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program", headers=headers, json=test_program)
@@ -272,12 +269,12 @@ def test_add_remove_opa_dataset():
     assert response.status_code < 300
 
     # if the site user is the default user, there should be a warning
-    if ENV['CANDIG_SITE_ADMIN_USER'] == 'user2':
+    if ENV['CANDIG_SITE_ADMIN_USER'] == ENV['CANDIG_ENV']['DEFAULT_SITE_ADMIN_USER']:
         assert "warning" in response.json()
 
     # try adding a user to the program:
     test_data = {
-        "email": ENV["CANDIG_NOT_ADMIN_USER"] + "@test.ca",
+        "email": ENV["CANDIG_NOT_ADMIN_USER"],
         "program": "OPA-TEST"
     }
 
@@ -985,10 +982,7 @@ def test_verify_htsget(object_id, file_name, file_type, user):
     old_url = new_json["access_methods"][0]["access_url"]["url"]
     new_json["access_methods"][0]["access_url"]["url"] += "test"
 
-    post_token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    post_token = get_site_admin_token()
     post_headers = {
         "Authorization": f"Bearer {post_token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -1012,10 +1006,7 @@ def test_verify_htsget(object_id, file_name, file_type, user):
 
 
 def test_cohort_status():
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
