@@ -24,7 +24,7 @@ services:
     labels:
       - "candigv2=chord-metadata"
     healthcheck:
-      test: ["CMD", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: /usr/bin/pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
       interval: 60s
       timeout: 3s
       retries: 3
