@@ -89,5 +89,5 @@ pip install openapi_spec_validator
 python katsu_ingest.py
 cd $BUILD_PATH
 
-PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2@test.ca\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\`\`\`"
+PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: $(cat ./tmp/secrets/keycloak-test-user2)\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\`\`\`"
 
