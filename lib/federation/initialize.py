@@ -1,15 +1,13 @@
 import json
 import os
-import re
 import requests
 import sys
-from authx.auth import get_access_token
-import tempfile
 
 REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
 
 from settings import get_env_value
+from site_admin_token import get_site_admin_token
 
 
 def find_services():
@@ -27,7 +25,7 @@ def find_services():
     return services
 
 def main():
-    token = get_access_token(username=os.getenv("CANDIG_SITE_ADMIN_USER"), password=os.getenv("CANDIG_SITE_ADMIN_PASSWORD"))
+    token = get_site_admin_token()
 
     server = {
         "server": json.loads(get_env_value("FEDERATION_SELF_SERVER").replace('\'', '"')),
@@ -36,7 +34,6 @@ def main():
             "token": token
         }
     }
-    token = get_access_token(username=os.getenv("CANDIG_SITE_ADMIN_USER"), password=os.getenv("CANDIG_SITE_ADMIN_PASSWORD"))
     headers = {}
     headers["Authorization"] = f"Bearer {token}"
 
