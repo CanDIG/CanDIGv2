@@ -44,7 +44,6 @@ def get_env():
     vars["KEYCLOAK_REALM_URL"] = get_env_value("KEYCLOAK_REALM_URL")
     vars["VAULT_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
     vars["OPA_URL"] = get_env_value("OPA_URL")
-    vars["OPA_SITE_ADMIN_KEY"] = get_env_value("OPA_SITE_ADMIN_KEY")
     vars["MINIO_URL"] = get_env_value("MINIO_PUBLIC_URL")
     vars["TYK_LOGIN_TARGET_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
     vars["TYK_POLICY_ID"] = get_env_value("TYK_POLICY_ID")
@@ -55,14 +54,18 @@ def get_env():
         vars["OPA_SECRET"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-client-{vars['CANDIG_CLIENT_ID']}-secret") as f:
         vars["CANDIG_CLIENT_SECRET"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/keycloak-test-user2") as f:
+    with open(f"tmp/secrets/keycloak-test-site-admin") as f:
         vars["CANDIG_SITE_ADMIN_USER"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/keycloak-test-user2-password") as f:
+    with open(f"tmp/secrets/keycloak-test-site-admin-password") as f:
         vars["CANDIG_SITE_ADMIN_PASSWORD"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-test-user") as f:
         vars["CANDIG_NOT_ADMIN_USER"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-test-user-password") as f:
         vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
+    with open(f"tmp/secrets/keycloak-test-user2") as f:
+        vars["CANDIG_NOT_ADMIN_USER2"] = f.read().splitlines().pop()
+    with open(f"tmp/secrets/keycloak-test-user2-password") as f:
+        vars["CANDIG_NOT_ADMIN_PASSWORD2"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/vault-s3-token") as f:
         vars["VAULT_S3_TOKEN"] = f.read().splitlines().pop()
     with open(f"tmp/vault/keys.txt") as f:

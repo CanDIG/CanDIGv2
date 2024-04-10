@@ -89,6 +89,10 @@ secrets:
     file: $PWD/tmp/secrets/keycloak-admin-password
     labels:
       - "candigv2=secret"
+  keycloak-test-site-admin:
+    file: $PWD/tmp/secrets/keycloak-test-site-admin
+    labels:
+      - "candigv2=secret"
   keycloak-test-user:
     file: $PWD/tmp/secrets/keycloak-test-user
     labels:

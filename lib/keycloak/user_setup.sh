@@ -22,5 +22,6 @@ create_user_and_set_password() {
 }
 
 # params: username password email firstname lastname
-create_user_and_set_password "$(cat tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)" "user1@test.ca" "One" "User"
-create_user_and_set_password "$(cat tmp/secrets/keycloak-test-user2)" "$(cat tmp/secrets/keycloak-test-user2-password)" "user2@test.ca" "Two" "User"
+create_user_and_set_password "$(cat tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)" "$(cat tmp/secrets/keycloak-test-user)" "One" "User"
+create_user_and_set_password "$(cat tmp/secrets/keycloak-test-user2)" "$(cat tmp/secrets/keycloak-test-user2-password)" "$(cat tmp/secrets/keycloak-test-user2)" "Two" "User"
+create_user_and_set_password "$(cat tmp/secrets/keycloak-test-site-admin)" "$(cat tmp/secrets/keycloak-test-site-admin-password)" "$(cat tmp/secrets/keycloak-test-site-admin)" "Site" "Admin"
