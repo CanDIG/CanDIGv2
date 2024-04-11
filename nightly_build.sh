@@ -84,8 +84,7 @@ source env.sh
 cd $INGEST_PATH
 export CLINICAL_DATA_LOCATION=$INGEST_PATH/tests/clinical_ingest.json
 # should be pip install -r requirements.txt, but that didn't seem to work last I checked -- dependency errors?
-pip install dateparser
-pip install openapi_spec_validator
+pip install -r requirements.txt
 python katsu_ingest.py
 cd $BUILD_PATH
 
