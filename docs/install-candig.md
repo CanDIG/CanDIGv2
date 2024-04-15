@@ -354,9 +354,9 @@ Optional modules follow the `#` and include various monitoring components, workf
 
 ## Build and compose all the modules
 
-`install-all` will perform all of the steps to deploy CanDIG including the conda install, building images explicitly. 
+`install-all` will perform all of the steps to deploy CanDIG including the conda install, building images explicitly.
 
-> [!IMPORTANT] 
+> [!IMPORTANT]
 > On Mac M1, you will not be able to use make install-all; instead, use the conda installation instructions as described above. Build-all will then build and compose the containers for you.
 
 
