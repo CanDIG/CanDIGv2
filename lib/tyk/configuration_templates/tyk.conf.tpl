@@ -129,14 +129,14 @@
   "storage": {
     "database": 0,
     "enable_cluster": false,
-    "host": "tyk-redis",
+    "host": "redis",
     "hosts": null,
     "optimisation_max_active": 5000,
     "optimisation_max_idle": 3000,
-    "password": "",
+    "password": "${REDIS_SECRET_KEY}",
     "port": 6379,
     "type": "redis",
-    "username": ""
+    "username": "default"
   },
   "suppress_default_org_store": false,
   "suppress_redis_signal_reload": false,
