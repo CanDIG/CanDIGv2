@@ -63,7 +63,7 @@ def test_tyk():
         f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
         f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v2/service-info",
         f"{ENV['CANDIG_ENV']['TYK_FEDERATION_API_LISTEN_PATH']}/v1/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/permissions/paths",
+        f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/service/service-info",
         f"{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/service-info"]
     responses = []
     for endpoint in endpoints:
@@ -189,7 +189,7 @@ def test_site_admin(user, is_admin):
 
     payload["input"]["token"] = token
     response = requests.post(
-        f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/idp/site_admin",
+        f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/permissions/site_admin",
         json=payload,
         headers=headers,
     )
@@ -206,7 +206,7 @@ def test_add_remove_site_admin():
 
     # add user1 to site admins
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/ingest/site-role/site_admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
+        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
         headers=headers
     )
     print(response.text)
@@ -216,7 +216,7 @@ def test_add_remove_site_admin():
 
     # remove user1 from site admins
     response = requests.delete(
-        f"{ENV['CANDIG_URL']}/ingest/site-role/site_admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
+        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
         headers=headers
     )
     assert response.status_code == 200
