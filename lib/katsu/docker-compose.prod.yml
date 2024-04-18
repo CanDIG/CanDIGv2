@@ -8,7 +8,4 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.prod
       - CONN_MAX_AGE=60 # change on traffic and performance
-      - UWSGI_WORKERS=4
-  metadata-db:
-    ports:
-      - "5432:5432"
+      - UWSGI_WORKERS=4 # change on cpu cores and performance

@@ -47,3 +47,7 @@ secrets:
     file: $PWD/tmp/redis/secret-key
     labels:
       - "candigv2=secret"
+  redis-secret-key:
+    file: $PWD/tmp/secrets/redis-secret-key
+    labels:
+      - "candigv2=secret"

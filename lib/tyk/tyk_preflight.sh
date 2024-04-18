@@ -56,6 +56,9 @@ export KEYCLOAK_PUBLIC_KEY=$(curl ${KEYCLOAK_REALM_URL} -k 2>/dev/null | jq -r '
 REDIS_SECRET_KEY_VAL=$(cat $PWD/tmp/redis/secret-key)
 export REDIS_SECRET_KEY=$REDIS_SECRET_KEY_VAL
 
+REDIS_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/redis-secret-key)
+export REDIS_SECRET_KEY=$REDIS_SECRET_KEY_VAL
+
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
 
 # Copy files from template configs
