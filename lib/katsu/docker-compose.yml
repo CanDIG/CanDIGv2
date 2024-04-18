@@ -18,6 +18,7 @@ services:
       - POSTGRES_PORT=5432
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
+      - REDIS_PASSWORD_FILE=/run/secrets/redis_secret_key
       - OPA_URL=${OPA_PRIVATE_URL}
       - EXTERNAL_URL=${CANDIG_DOMAIN}
       - KATSU_AUTHORIZATION=${CANDIG_AUTHORIZATION}
@@ -25,9 +26,12 @@ services:
       - CONN_MAX_AGE=60
       - DJANGO_SETTINGS_MODULE=config.settings.dev
       - UWSGI_WORKERS=1
+      - CACHE_DURATION=86400
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret
+      - source: redis-secret-key
+        target: redis_secret_key
       - source: opa-root-token
         target: opa-root-token
       - source: katsu-secret-key

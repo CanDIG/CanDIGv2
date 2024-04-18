@@ -33,6 +33,9 @@ export TYK_ANALYTIC_ADMIN_SECRET=$TYK_ANALYTIC_ADMIN_SECRET_VAL
 KEYCLOAK_PUBLIC_KEY_VAL=$(cat $PWD/tmp/secrets/keycloak-public-key)
 export KEYCLOAK_PUBLIC_KEY=$KEYCLOAK_PUBLIC_KEY_VAL
 
+REDIS_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/redis-secret-key)
+export REDIS_SECRET_KEY=$REDIS_SECRET_KEY_VAL
+
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
 
 # Copy files from template configs

@@ -358,6 +358,8 @@ docker-secrets: mkdir minio-secrets katsu-secrets
 	$(MAKE) secret-opa-root-token
 	$(MAKE) secret-opa-service-token
 
+	$(MAKE) secret-redis-secret-key
+
 
 
 #>>>
@@ -375,7 +377,7 @@ docker-volumes:
 	docker volume create toil-jobstore --label candigv2=volume
 	docker volume create keycloak-data --label candigv2=volume
 	docker volume create tyk-data --label candigv2=volume
-	docker volume create tyk-redis-data --label candigv2=volume
+	docker volume create redis-data --label candigv2=volume
 	docker volume create vault-data --label candigv2=volume
 	docker volume create opa-data --label candigv2=volume
 	docker volume create htsget-data --label candigv2=volume
