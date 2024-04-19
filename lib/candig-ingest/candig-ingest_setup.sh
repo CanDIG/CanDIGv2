@@ -21,6 +21,6 @@ bash $PWD/create_service_store.sh "candig-ingest"
 
 docker restart $ingest
 
-bin/miniconda3/bin/python -m pip install GitPython
-bin/miniconda3/bin/python -m pip install clinical_etl@git+https://github.com/CanDIG/clinical_ETL_code.git@v2.2.0
-bin/miniconda3/bin/python $PWD/lib/candig-ingest/candigv2-ingest/generate_test_data.py --tmp tmp/data/synthdata
+python -m pip install GitPython
+python -m pip install clinical_etl@git+https://github.com/CanDIG/clinical_ETL_code.git@v2.2.0
+python $PWD/lib/candig-ingest/candigv2-ingest/generate_test_data.py --tmp tmp/data/synthdata
