@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   keycloak:
     image: keycloak/keycloak:${KEYCLOAK_VERSION}

@@ -1,5 +1,3 @@
-version: 1.0.1
-
 services:
     candig-ingest:
         build:
