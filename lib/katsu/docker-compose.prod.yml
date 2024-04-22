@@ -1,10 +1,8 @@
-version: '3.7'
-
 services:
   katsu:
     build:
-        args:
-          katsu_env: "prod"
+      args:
+        katsu_env: "prod"
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.prod
       - CONN_MAX_AGE=60 # change on traffic and performance
