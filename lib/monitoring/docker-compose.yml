@@ -1,8 +1,6 @@
 # references:
 # - https://github.com/Einsteinish/Docker-Compose-Prometheus-and-Grafana
 # - https://github.com/vegasbrianc/prometheus/blob/master/prometheus/prometheus.yml
-version: '3.7'
-
 services:
 
   prometheus:

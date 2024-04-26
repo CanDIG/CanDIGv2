@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   metadata-db:
     image: postgres:16

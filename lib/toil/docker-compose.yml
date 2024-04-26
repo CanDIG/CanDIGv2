@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   toil-server:
     image: ${DOCKER_REGISTRY}/toil:${TOIL_VERSION:-latest}

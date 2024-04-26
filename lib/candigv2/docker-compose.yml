@@ -1,5 +1,3 @@
-version: '3.7'
-
 volumes:
   minio-data:
     external: true
@@ -17,7 +15,7 @@ volumes:
     external: true
   tyk-data:
     external: true
-  tyk-redis-data:
+  redis-data:
     external: true
   vault-data:
     external: true
@@ -143,5 +141,9 @@ secrets:
       - "candigv2=secret"
   tyk-secret-key:
     file: $PWD/tmp/secrets/tyk-secret-key
+    labels:
+      - "candigv2=secret"
+  redis-secret-key:
+    file: $PWD/tmp/secrets/redis-secret-key
     labels:
       - "candigv2=secret"
