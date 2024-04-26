@@ -1,4 +1,3 @@
-version: '3.7'
 services:
   opa-runner:
     build:
@@ -42,6 +41,9 @@ services:
       retries: 3
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+    entrypoint:
+      - "bash"
+      - "/app/entrypoint.sh"
 
   opa:
     image: openpolicyagent/opa:latest-static
