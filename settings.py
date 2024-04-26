@@ -65,9 +65,9 @@ def get_env():
     with open(f"tmp/secrets/keycloak-test-user-password") as f:
         vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-test-user2") as f:
-        vars["CANDIG_NOT_ADMIN_USER2"] = f.read().splitlines().pop()
+        vars["CANDIG_NOT_ADMIN2_USER"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-test-user2-password") as f:
-        vars["CANDIG_NOT_ADMIN_PASSWORD2"] = f.read().splitlines().pop()
+        vars["CANDIG_NOT_ADMIN2_PASSWORD"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/vault-s3-token") as f:
         vars["VAULT_S3_TOKEN"] = f.read().splitlines().pop()
     with open(f"tmp/vault/keys.txt") as f:
