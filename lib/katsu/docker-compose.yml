@@ -28,10 +28,10 @@ services:
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret
+      - source: opa-service-token
+        target: opa-service-token
       - source: redis-secret-key
         target: redis_secret_key
-      - source: opa-root-token
-        target: opa-root-token
       - source: katsu-secret-key
         target: katsu_secret
     labels:

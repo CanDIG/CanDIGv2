@@ -27,3 +27,5 @@ services:
     secrets:
       - source: vault-approle-token
         target: vault-approle-token
+      - source: opa-service-token
+        target: opa-service-token
