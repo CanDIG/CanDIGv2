@@ -249,33 +249,43 @@ def test_user_authorizations(user, dataset):
     assert response.status_code == 200
 
 
-## Can we add a dataset to one of the users?
-def test_add_remove_opa_dataset():
+def add_program_authorization(dataset):
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    # create a program called OPA-TEST and its authorizations:
+    # create a program and its authorizations:
     test_program = {
-        "program_id": "OPA-TEST",
+        "program_id": dataset,
         "program_curators": [ENV['CANDIG_SITE_ADMIN_USER']],
         "team_members": [ENV['CANDIG_SITE_ADMIN_USER']]
     }
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program", headers=headers, json=test_program)
     print(response.text)
-    assert response.status_code < 300
-
     # if the site user is the default user, there should be a warning
     if ENV['CANDIG_SITE_ADMIN_USER'] == ENV['CANDIG_ENV']['DEFAULT_SITE_ADMIN_USER']:
         assert "warning" in response.json()
 
+    return response.json()
+
+
+## Can we add a program authorization and modify it?
+@pytest.mark.parametrize("user, dataset", user_auth_datasets())
+def test_add_remove_program_authorization(user, dataset):
+    add_program_authorization(dataset)
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
     # try adding a user to the program:
     test_data = {
         "email": ENV["CANDIG_NOT_ADMIN_USER"],
-        "program": "OPA-TEST"
+        "program": dataset
     }
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
@@ -283,7 +293,7 @@ def test_add_remove_opa_dataset():
     print(f"{response.json()}, {response.status_code}")
     assert response.status_code == 200
 
-    test_opa_datasets("CANDIG_NOT_ADMIN", test_data["program"])
+    assert test_data["program"] in get_katsu_datasets("CANDIG_NOT_ADMIN")
 
     # remove the user
     response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
@@ -296,6 +306,78 @@ def test_add_remove_opa_dataset():
 
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
     assert response.status_code == 404
+
+
+# @pytest.mark.parametrize("user, dataset", user_auth_datasets())
+# def test_user_authorizations(user, dataset):
+#     # set up these programs to exist at all:
+#     add_program_authorization(dataset)
+#
+#     # add user to pending users
+#     username = ENV[f"{user}_USER"]
+#     safe_name = urllib.parse.quote_plus(username)
+#     password = ENV[f"{user}_PASSWORD"]
+#     token = get_token(username=username, password=password)
+#     headers = {
+#         "Authorization": f"Bearer {token}",
+#         "Content-Type": "application/json; charset=utf-8"
+#     }
+#
+#     response = requests.post(
+#         f"{ENV['CANDIG_URL']}/ingest/user/pending/request",
+#         headers=headers
+#     )
+#     print(response.text)
+#     assert response.status_code == 200
+#
+#     headers = {
+#         "Authorization": f"Bearer {get_site_admin_token()}",
+#         "Content-Type": "application/json; charset=utf-8"
+#     }
+#
+#     # check to see that the user is in the pending queue
+#     response = requests.get(
+#         f"{ENV['CANDIG_URL']}/ingest/user/pending",
+#         headers=headers
+#     )
+#     print(response.text)
+#     assert username in response.json()['results']
+#
+#     # approve user
+#     response = requests.post(
+#         f"{ENV['CANDIG_URL']}/ingest/user/pending/{safe_name}",
+#         headers=headers
+#     )
+#     assert response.status_code == 200
+#
+#     # see if user can access dataset before authorizing
+#     katsu_datasets = get_katsu_datasets(user)
+#     assert dataset not in katsu_datasets
+#
+#     # add dataset to user's authz
+#     from datetime import date
+#
+#     TODAY = date.today()
+#     THE_FUTURE = str(date(TODAY.year + 1, TODAY.month, TODAY.day))
+#
+#     response = requests.post(
+#         f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/authorize",
+#         headers=headers,
+#         json={"program_id": dataset, "start_date": "2000-01-01", "end_date": THE_FUTURE}
+#     )
+#     print(f"hi {response.text}")
+#     assert response.status_code == 200
+#
+#     # see if user can access dataset now
+#     katsu_datasets = get_katsu_datasets(user)
+#     assert dataset in katsu_datasets
+#
+#     # remove the dataset
+#     response = requests.delete(
+#         f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/authorize/{dataset}",
+#         headers=headers
+#     )
+#     assert response.status_code == 200
 
 
 ## Is the user a site admin?
