@@ -544,3 +544,28 @@ stop-all:
 start-all:
 	CONTAINERS="$(shell docker ps -a --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker start $$CONTAINER; done
 
+#>>>
+# rebuild the entire stack without touching the postgres container
+
+#<<<
+.PHONY: rebuild-without-postgres
+rebuild-without-postgres:
+	# Back up postgres-related variables
+	mkdir -p tmp2
+	@cp tmp/secrets/metadata-* tmp2/
+	@cp tmp/secrets/katsu-secret-key tmp2/
+	# Remove Postgres from the .env
+	$(eval CANDIG_MODULES := $(filter-out postgres,$(CANDIG_MODULES)))
+	# Clean everything
+	$(MAKE) clean-all CANDIG_MODULES="$(CANDIG_MODULES)"
+	docker system prune -af
+	# Start build-all
+	./pre-build-check.sh $(ARGS)
+	$(MAKE) init-docker
+	# Copy back our secrets
+	@cp tmp2/* tmp/secrets/
+	rm -r tmp2/
+	# Rebuild everything
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
+	./post_build.sh
+
