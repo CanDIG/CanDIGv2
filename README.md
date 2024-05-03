@@ -7,7 +7,7 @@
 The CanDIG v2 project is a collection of heterogeneous services designed to work together to facilitate end to end
 dataflow for genomic data.
 
-## Installation 
+## Installation
 
 CanDIG uses a make-based deployment process, with services containerized in Docker. To deploy CanDIGv2, follow the installation guide in `docs/`:
 
