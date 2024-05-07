@@ -10,11 +10,13 @@ import pytest
 import requests
 from dotenv import dotenv_values
 from copy import deepcopy
+import urllib.parse
 
 REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
 
 from settings import get_env
+from site_admin_token import get_site_admin_token
 
 ENV = get_env()
 
@@ -50,22 +52,19 @@ def get_token(username=None, password=None):
 
 
 def test_get_token():
-    assert get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    assert get_site_admin_token()
 
 
 ## Tyk test: can we get a response from Tyk for all of our services?
 def test_tyk():
     headers = {
-        "Authorization": f"Bearer {get_token(username=ENV['CANDIG_SITE_ADMIN_USER'], password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])}"
+        "Authorization": f"Bearer {get_site_admin_token()}"
     }
     endpoints = [
         f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
         f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v2/service-info",
         f"{ENV['CANDIG_ENV']['TYK_FEDERATION_API_LISTEN_PATH']}/v1/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/paths",
+        f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/service/service-info",
         f"{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/service-info"]
     responses = []
     for endpoint in endpoints:
@@ -78,21 +77,23 @@ def test_tyk():
 
 
 ## Opa tests:
-
+## Test DAC user authorizations
 
 ## Can we get the correct dataset response for each user?
-def user_datasets():
+def user_auth_datasets():
     return [
-        ("CANDIG_SITE_ADMIN", "SYNTHETIC-2"),
-        ("CANDIG_NOT_ADMIN", "SYNTHETIC-1"),
+        ("CANDIG_NOT_ADMIN2", "PROGRAM-2"),
+        ("CANDIG_NOT_ADMIN", "PROGRAM-1"),
     ]
 
-
-@pytest.mark.parametrize("user, dataset", user_datasets())
-def test_opa_datasets(user, dataset):
+def get_katsu_datasets(user):
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
     token = get_token(username=username, password=password)
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8"
+    }
     payload = {
         "input": {
             "body": {
@@ -102,48 +103,150 @@ def test_opa_datasets(user, dataset):
         }
     }
 
-    headers = {
+    katsu_headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "X-Opa": ENV["OPA_SECRET"],
-        "Authorization": f"Bearer {token}"
+        "Authorization": f"Bearer {get_site_admin_token()}"
     }
 
     response = requests.post(
         f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/permissions/datasets",
         json=payload,
-        headers=headers,
+        headers=katsu_headers,
     )
-    print(f"108 {datetime.datetime.now(tz=datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')} {json.dumps(payload)} {response.text}")
-    assert dataset in response.json()["result"]
+    return response.json()["result"]
 
 
-## Can we add a dataset to one of the users?
-def test_add_opa_dataset():
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+def add_program_authorization(dataset):
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
 
+    # create a program and its authorizations:
+    test_program = {
+        "program_id": dataset,
+        "program_curators": [ENV['CANDIG_SITE_ADMIN_USER']],
+        "team_members": [ENV['CANDIG_SITE_ADMIN_USER']]
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program", headers=headers, json=test_program)
+    print(response.text)
+    # if the site user is the default user, there should be a warning
+    if ENV['CANDIG_SITE_ADMIN_USER'] == ENV['CANDIG_ENV']['DEFAULT_SITE_ADMIN_USER']:
+        assert "warning" in response.json()
+
+    return response.json()
+
+
+## Can we add a program authorization and modify it?
+@pytest.mark.parametrize("user, dataset", user_auth_datasets())
+def test_add_remove_program_authorization(user, dataset):
+    add_program_authorization(dataset)
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    # try adding a user to the program:
     test_data = {
-        "email": ENV["CANDIG_SITE_ADMIN_USER"] + "@test.ca",
-        "program": "OPA-TEST"
+        "email": ENV["CANDIG_NOT_ADMIN_USER"],
+        "program": dataset
     }
 
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
     # when the user has admin access, they should be allowed
-    print(f"129 {response.json()}, {response.status_code}")
+    print(f"{response.json()}, {response.status_code}")
     assert response.status_code == 200
 
-    test_opa_datasets("CANDIG_SITE_ADMIN", test_data["program"])
+    assert test_data["program"] in get_katsu_datasets("CANDIG_NOT_ADMIN")
 
+    # remove the user
     response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
     assert response.status_code == 200
-    assert test_data['program'] not in response.json()["access"]["controlled_access_list"][test_data["email"]]
+    assert test_data["email"] not in response.json()[test_data["program"]]["team_members"]
+
+    # remove the program
+    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
+    assert response.status_code == 200
+
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
+    assert response.status_code == 404
+
+
+@pytest.mark.parametrize("user, dataset", user_auth_datasets())
+def test_user_authorizations(user, dataset):
+    # set up these programs to exist at all:
+    add_program_authorization(dataset)
+
+    # add user to pending users
+    username = ENV[f"{user}_USER"]
+    safe_name = urllib.parse.quote_plus(username)
+    password = ENV[f"{user}_PASSWORD"]
+    token = get_token(username=username, password=password)
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8"
+    }
+
+    response = requests.post(
+        f"{ENV['CANDIG_URL']}/ingest/user/pending/request",
+        headers=headers
+    )
+    print(response.text)
+    assert response.status_code == 200
+
+    headers = {
+        "Authorization": f"Bearer {get_site_admin_token()}",
+        "Content-Type": "application/json; charset=utf-8"
+    }
+
+    # check to see that the user is in the pending queue
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/ingest/user/pending",
+        headers=headers
+    )
+    print(response.text)
+    assert username in response.json()['results']
+
+    # approve user
+    response = requests.post(
+        f"{ENV['CANDIG_URL']}/ingest/user/pending/{safe_name}",
+        headers=headers
+    )
+    assert response.status_code == 200
+
+    # see if user can access dataset before authorizing
+    katsu_datasets = get_katsu_datasets(user)
+    assert dataset not in katsu_datasets
+
+    # add dataset to user's authz
+    from datetime import date
+
+    TODAY = date.today()
+    THE_FUTURE = str(date(TODAY.year + 1, TODAY.month, TODAY.day))
+
+    response = requests.post(
+        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/authorize",
+        headers=headers,
+        json={"program_id": dataset, "start_date": "2000-01-01", "end_date": THE_FUTURE}
+    )
+    print(f"hi {response.text}")
+    assert response.status_code == 200
+
+    # see if user can access dataset now
+    katsu_datasets = get_katsu_datasets(user)
+    assert dataset in katsu_datasets
+
+    # remove the dataset
+    response = requests.delete(
+        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/authorize/{dataset}",
+        headers=headers
+    )
+    assert response.status_code == 200
 
 
 ## Is the user a site admin?
@@ -170,7 +273,7 @@ def test_site_admin(user, is_admin):
 
     payload["input"]["token"] = token
     response = requests.post(
-        f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/idp/site_admin",
+        f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/permissions/site_admin",
         json=payload,
         headers=headers,
     )
@@ -178,12 +281,35 @@ def test_site_admin(user, is_admin):
     assert ("result" in response.json()) == is_admin
 
 
+def test_add_remove_site_admin():
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    # add user1 to site admins
+    response = requests.post(
+        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
+        headers=headers
+    )
+    print(response.text)
+    assert response.status_code == 200
+
+    test_site_admin("CANDIG_NOT_ADMIN", True)
+
+    # remove user1 from site admins
+    response = requests.delete(
+        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
+        headers=headers
+    )
+    assert response.status_code == 200
+    test_site_admin("CANDIG_NOT_ADMIN", False)
+
+
 ## Vault tests: can we add an aws access key and retrieve it?
 def test_vault():
-    site_admin_token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    site_admin_token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {site_admin_token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -231,10 +357,7 @@ def clean_up_program(test_id):
     """
     Deletes a dataset and all related objects. Expected 204
     """
-    site_admin_token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    site_admin_token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {site_admin_token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -276,10 +399,7 @@ def test_ingest_permissions():
     # when the user has no admin access, they should not be allowed
     assert response.status_code == 401
 
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -312,10 +432,7 @@ def test_htsget():
 
 ## Can we add samples to Opa-controlled dataset?
 def test_htsget_add_sample_to_dataset():
-    site_admin_token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    site_admin_token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {site_admin_token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -426,10 +543,7 @@ def test_ingest_htsget():
     print(response.json())
     assert response.status_code == 403
 
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -438,16 +552,14 @@ def test_ingest_htsget():
     # when the user has admin access, they should be allowed
     print(response.json())
     assert response.status_code == 200
-    for id in response.json():
-        assert "genomic" in response.json()[id]
-        assert "sample" in response.json()[id]
+    for id in response.json()["results"]:
+        assert "genomic" in response.json()["results"][id]
+        assert "sample" in response.json()["results"][id]
+        assert len(response.json()["errors"]) == 0
 
 
 def test_sample_metadata():
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -531,16 +643,10 @@ def verify_samples():
 
 @pytest.mark.parametrize("object_id, file_name, file_type, user", verify_samples())
 def test_verify_htsget(object_id, file_name, file_type, user):
-    if user == "user1":
-        token = get_token(
-            username=ENV["CANDIG_NOT_ADMIN_USER"],
-            password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
-        )
-    elif user == "user2":
-        token = get_token(
-            username=ENV["CANDIG_SITE_ADMIN_USER"],
-            password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-        )
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
 
     headers = {
         "Authorization": f"Bearer {token}",
@@ -555,10 +661,7 @@ def test_verify_htsget(object_id, file_name, file_type, user):
     old_url = new_json["access_methods"][0]["access_url"]["url"]
     new_json["access_methods"][0]["access_url"]["url"] += "test"
 
-    post_token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    post_token = get_site_admin_token()
     post_headers = {
         "Authorization": f"Bearer {post_token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -582,10 +685,7 @@ def test_verify_htsget(object_id, file_name, file_type, user):
 
 
 def test_cohort_status():
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -641,10 +741,7 @@ def test_federation_call():
         "path": "beacon/v2/service-info",
     }
 
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "content-type": "application/json",
@@ -668,10 +765,7 @@ def test_federation_call():
 
 # Add a server, then test to see if federated calls now include that server in the results
 def test_add_server():
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -716,10 +810,7 @@ def test_add_server():
 
 # Query Test: Get all donors
 def test_query_donors_all():
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -763,10 +854,7 @@ def test_query_donors_all():
 
 # Test 2: Search for a specific donor
 def test_query_donor_search():
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -807,10 +895,7 @@ def test_query_donor_search():
 
 def test_query_genomic():
     # tests that a request sent via query to htsget-beacon properly prunes the data
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
