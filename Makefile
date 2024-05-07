@@ -339,10 +339,13 @@ docker-secrets: mkdir minio-secrets katsu-secrets
 	@echo admin > tmp/secrets/keycloak-admin-user
 	$(MAKE) secret-keycloak-admin-password
 
-	@echo user1 > tmp/secrets/keycloak-test-user
+	@echo $(DEFAULT_SITE_ADMIN_USER) > tmp/secrets/keycloak-test-site-admin
+	$(MAKE) secret-keycloak-test-site-admin-password
+
+	@echo user1@test.ca > tmp/secrets/keycloak-test-user
 	$(MAKE) secret-keycloak-test-user-password
 
-	@echo user2 > tmp/secrets/keycloak-test-user2
+	@echo user2@test.ca > tmp/secrets/keycloak-test-user2
 	$(MAKE) secret-keycloak-test-user2-password
 
 	$(MAKE) secret-tyk-secret-key
@@ -354,6 +357,8 @@ docker-secrets: mkdir minio-secrets katsu-secrets
 
 	$(MAKE) secret-opa-root-token
 	$(MAKE) secret-opa-service-token
+
+	$(MAKE) secret-redis-secret-key
 
 
 
@@ -372,7 +377,7 @@ docker-volumes:
 	docker volume create toil-jobstore --label candigv2=volume
 	docker volume create keycloak-data --label candigv2=volume
 	docker volume create tyk-data --label candigv2=volume
-	docker volume create tyk-redis-data --label candigv2=volume
+	docker volume create redis-data --label candigv2=volume
 	docker volume create vault-data --label candigv2=volume
 	docker volume create opa-data --label candigv2=volume
 	docker volume create htsget-data --label candigv2=volume
@@ -524,7 +529,7 @@ print-%:
 test-integration:
 	python ./settings.py
 ifeq ($(KEEP_TEST_DATA),true)
-	source ./env.sh; pytest ./etc/tests -k 'not test_clean_up'
+	source ./env.sh; pytest ./etc/tests -k 'not test_clean_up' $(ARGS)
 else
 	source ./env.sh; pytest ./etc/tests $(ARGS)
 endif
@@ -538,4 +543,29 @@ stop-all:
 .PHONY: start-all
 start-all:
 	CONTAINERS="$(shell docker ps -a --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker start $$CONTAINER; done
+
+#>>>
+# rebuild the entire stack without touching the postgres container
+
+#<<<
+.PHONY: rebuild-without-postgres
+rebuild-without-postgres:
+	# Back up postgres-related variables
+	mkdir -p tmp2
+	@cp tmp/secrets/metadata-* tmp2/
+	@cp tmp/secrets/katsu-secret-key tmp2/
+	# Remove Postgres from the .env
+	$(eval CANDIG_MODULES := $(filter-out postgres,$(CANDIG_MODULES)))
+	# Clean everything
+	$(MAKE) clean-all CANDIG_MODULES="$(CANDIG_MODULES)"
+	docker system prune -af
+	# Start build-all
+	./pre-build-check.sh $(ARGS)
+	$(MAKE) init-docker
+	# Copy back our secrets
+	@cp tmp2/* tmp/secrets/
+	rm -r tmp2/
+	# Rebuild everything
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
+	./post_build.sh
 

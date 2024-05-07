@@ -1,0 +1,21 @@
+services:
+  redis:
+    image: redis:${REDIS_VERSION}
+    labels:
+      - "candigv2=redis"
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+    secrets:
+      - redis-secret-key
+    environment:
+      - REDIS_PASSWORD_FILE=/run/secrets/redis-secret-key
+    command: sh -c "redis-server --requirepass $(cat $$REDIS_PASSWORD_FILE)"
+    healthcheck:
+      test: redis-cli ping
+      interval: 30s
+      timeout: 20s
+      retries: 3

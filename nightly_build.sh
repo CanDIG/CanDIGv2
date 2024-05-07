@@ -43,6 +43,9 @@ if [[ $SKIP_GIT -ne 1 ]]; then
     fi
 fi
 
+# Rerun nightly_env.sh in case anything changed in the .env file
+source nightly_env.sh
+
 # Re-initialize conda
 make bin-conda
 source bin/miniconda3/etc/profile.d/conda.sh
@@ -81,10 +84,9 @@ source env.sh
 cd $INGEST_PATH
 export CLINICAL_DATA_LOCATION=$INGEST_PATH/tests/clinical_ingest.json
 # should be pip install -r requirements.txt, but that didn't seem to work last I checked -- dependency errors?
-pip install dateparser
-pip install openapi_spec_validator
+pip install -r requirements.txt
 python katsu_ingest.py
 cd $BUILD_PATH
 
-PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\`\`\`"
+PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: $(cat ./tmp/secrets/keycloak-test-site-admin)\npassword $(cat ./tmp/secrets/keycloak-test-site-admin-password)\`\`\`"
 

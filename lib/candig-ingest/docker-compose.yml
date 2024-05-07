@@ -1,5 +1,3 @@
-version: 1.0.1
-
 services:
     candig-ingest:
         build:
@@ -12,20 +10,22 @@ services:
         ports:
             - "${CANDIG_INGEST_PORT}:1235"
         environment:
-            KEYCLOAK_PUBLIC_URL: "${KEYCLOAK_PUBLIC_URL}"
+            KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
+            KATSU_URL: ${KATSU_PRIVATE_URL}
+            HTSGET_URL: ${HTSGET_PRIVATE_URL}
             CANDIG_URL: "http://${CANDIG_DOMAIN}:5080"
             VAULT_URL: ${VAULT_PRIVATE_URL}
-            CANDIG_CLIENT_ID: "${KEYCLOAK_CLIENT_ID}"
-            CANDIG_SECRET_FILE: "/run/secrets/keycloak-secret"
-            OPA_URL: ${OPA_URL}
-            SERVICE_NAME: "${SERVICE_NAME}"
+            OPA_URL: ${OPA_PRIVATE_URL}
+            SERVICE_NAME: ${SERVICE_NAME}
+            DEFAULT_SITE_ADMIN_USER: ${DEFAULT_SITE_ADMIN_USER}
+            CANDIG_USER_KEY: ${CANDIG_USER_KEY}
         extra_hosts:
               - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
         secrets:
-          - source: keycloak-client-local-candig-secret
-            target: keycloak-secret
           - source: vault-approle-token
             target: vault-approle-token
+          - source: opa-service-token
+            target: opa-service-token
         healthcheck:
             test: ["CMD", "curl", "--fail", "http://${CANDIG_DOMAIN}:1235"]
             interval: 30s

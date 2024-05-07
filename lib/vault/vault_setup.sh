@@ -131,8 +131,8 @@ curl --request POST --header "X-Vault-Token: ${key_root}" --data @lib/vault/tmp/
 rm lib/vault/tmp/temp.json
 
 ## SPECIAL STORES ACCESS
-# Ingest needs access to the opa store's access path:
-docker exec $vault sh -c "echo 'path \"opa/access\" {capabilities = [\"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; vault policy write ${ingest} ${ingest}-policy.hcl"
+# Ingest needs access to the opa store's programs path:
+docker exec $vault sh -c "echo 'path \"opa/programs\" {capabilities = [\"update\", \"read\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/programs/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/site_roles\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/users/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/pending_users\" {capabilities = [ \"update\", \"read\"]}' >> ${ingest}-policy.hcl; vault policy write ${ingest} ${ingest}-policy.hcl"
 
 # Federation needs access to the opa store's data path (to add servers):
 docker exec $vault sh -c "echo 'path \"opa/data\" {capabilities = [\"update\", \"read\", \"delete\"]}' >> federation-policy.hcl; vault policy write federation federation-policy.hcl"

@@ -261,8 +261,9 @@ echo $KEYCLOAK_PUBLIC_KEY > tmp/secrets/keycloak-public-key | tee -a $LOGFILE
 
 if [[ ${KEYCLOAK_GENERATE_TEST_USER} == 1 ]]; then
   echo "Adding test user" | tee -a $LOGFILE
-  add_user "$(cat tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)"
-  add_user "$(cat tmp/secrets/keycloak-test-user2)" "$(cat tmp/secrets/keycloak-test-user2-password)"
+  add_user "$(sed s/@test.ca// tmp/secrets/keycloak-test-user)" "$(cat tmp/secrets/keycloak-test-user-password)"
+  add_user "$(sed s/@test.ca// tmp/secrets/keycloak-test-user2)" "$(cat tmp/secrets/keycloak-test-user2-password)"
+  add_user "$(sed s/@test.ca// tmp/secrets/keycloak-test-site-admin)" "$(cat tmp/secrets/keycloak-test-site-admin-password)"
 fi
 
 echo "Waiting for keycloak to restart" | tee -a $LOGFILE
