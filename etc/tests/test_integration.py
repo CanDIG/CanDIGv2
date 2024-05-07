@@ -782,16 +782,10 @@ def verify_samples():
 
 @pytest.mark.parametrize("object_id, file_name, file_type, user", verify_samples())
 def test_verify_htsget(object_id, file_name, file_type, user):
-    if user == "user1":
-        token = get_token(
-            username=ENV["CANDIG_NOT_ADMIN_USER"],
-            password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
-        )
-    elif user == "user2":
-        token = get_token(
-            username=ENV["CANDIG_SITE_ADMIN_USER"],
-            password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-        )
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
 
     headers = {
         "Authorization": f"Bearer {token}",
@@ -806,10 +800,7 @@ def test_verify_htsget(object_id, file_name, file_type, user):
     old_url = new_json["access_methods"][0]["access_url"]["url"]
     new_json["access_methods"][0]["access_url"]["url"] += "test"
 
-    post_token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    post_token = get_site_admin_token()
     post_headers = {
         "Authorization": f"Bearer {post_token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -833,10 +824,7 @@ def test_verify_htsget(object_id, file_name, file_type, user):
 
 
 def test_cohort_status():
-    token = get_token(
-        username=ENV["CANDIG_SITE_ADMIN_USER"],
-        password=ENV["CANDIG_SITE_ADMIN_PASSWORD"],
-    )
+    token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
