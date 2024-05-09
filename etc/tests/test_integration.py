@@ -916,7 +916,7 @@ def test_query_discovery():
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/"
     ).json()
     query_response = requests.get(
-        f"{ENV['CANDIG_ENV']['CANDIG_DOMAIN']}:{ENV['CANDIG_ENV']['QUERY_PORT']}/discovery/programs"
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs"
     ).json()
 
     # Ensure that each category in metadata corresponds to something in the site
