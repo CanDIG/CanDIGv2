@@ -49,6 +49,7 @@ def get_env():
     vars["TYK_POLICY_ID"] = get_env_value("TYK_POLICY_ID")
     vars["CANDIG_DEBUG_MODE"] = get_env_value("CANDIG_DEBUG_MODE")
     vars["CANDIG_USER_KEY"] = get_env_value("CANDIG_USER_KEY")
+    vars["VAULT_SERVICE_PUBLIC_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
 
     # vars that come from files:
     with open(f"tmp/secrets/opa-service-token") as f:

@@ -423,7 +423,7 @@ def test_htsget():
     os.environ[
         "TESTENV_URL"
     ] = f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}"
-    retcode = pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py", "-k", "test_remove_objects or test_post_objects or test_index_variantfile"])
+    retcode = pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py", "-k", "test_remove_objects or test_post_objects or test_index_variantfile or test_install_public_object"])
     if old_val is not None:
         os.environ["TESTENV_URL"] = old_val
     print(retcode)
@@ -916,7 +916,7 @@ def test_query_discovery():
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/"
     ).json()
     query_response = requests.get(
-        f"{ENV['CANDIG_ENV']['TYK_QUERY_API_TARGET']}/discovery/programs"
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs"
     ).json()
 
     # Ensure that each category in metadata corresponds to something in the site
