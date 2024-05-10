@@ -44,7 +44,6 @@ def get_env():
     vars["KEYCLOAK_REALM_URL"] = get_env_value("KEYCLOAK_REALM_URL")
     vars["VAULT_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
     vars["OPA_URL"] = get_env_value("OPA_URL")
-    vars["MINIO_URL"] = get_env_value("MINIO_PUBLIC_URL")
     vars["TYK_LOGIN_TARGET_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
     vars["TYK_POLICY_ID"] = get_env_value("TYK_POLICY_ID")
     vars["CANDIG_DEBUG_MODE"] = get_env_value("CANDIG_DEBUG_MODE")
@@ -72,10 +71,6 @@ def get_env():
         vars["VAULT_S3_TOKEN"] = f.read().splitlines().pop()
     with open(f"tmp/vault/keys.txt") as f:
         vars["VAULT_ROOT_TOKEN"] = f.read().splitlines().pop(-1)
-    with open(f"tmp/secrets/minio-access-key") as f:
-        vars["MINIO_ACCESS_KEY"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/minio-secret-key") as f:
-        vars["MINIO_SECRET_KEY"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/tyk-secret-key") as f:
         vars["TYK_SECRET_KEY"] = f.read().splitlines().pop()
     vars["POSTGRES_PASSWORD_FILE"] = f"tmp/secrets/metadata-db-secret"

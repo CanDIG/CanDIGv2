@@ -1,8 +1,8 @@
 volumes:
-  minio-data:
-    external: true
-  minio-config:
-    external: true
+  # minio-data:
+  #   external: true
+  # minio-config:
+  #   external: true
   toil-jobstore:
     external: true
   prometheus-data:
@@ -59,14 +59,14 @@ secrets:
     file: $PWD/lib/katsu/settings.py
     labels:
       - "candigv2=secret"
-  minio-access-key:
-    file: $PWD/tmp/secrets/minio-access-key
-    labels:
-      - "candigv2=secret"
-  minio-secret-key:
-    file: $PWD/tmp/secrets/minio-secret-key
-    labels:
-      - "candigv2=secret"
+  # minio-access-key:
+  #   file: $PWD/tmp/secrets/minio-access-key
+  #   labels:
+  #     - "candigv2=secret"
+  # minio-secret-key:
+  #   file: $PWD/tmp/secrets/minio-secret-key
+  #   labels:
+  #     - "candigv2=secret"
   portainer-user:
     file: $PWD/tmp/secrets/portainer-user
     labels:
