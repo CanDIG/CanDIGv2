@@ -3,7 +3,7 @@ services:
     build:
       context: $PWD/lib/htsget/htsget_app
       args:
-        venv_python: "3.10" #"${VENV_PYTHON}"
+        venv_python: "${VENV_PYTHON}"
     image: ${DOCKER_REGISTRY}/htsget:${HTSGET_VERSION:-latest}
     labels:
       - "candigv2=htsget"
@@ -41,6 +41,7 @@ services:
       POSTGRES_USERNAME_FILE: "/run/secrets/metadata-db-user"
       POSTGRES_PASSWORD_FILE: "/run/secrets/metadata-db-secret"
       AGGREGATE_COUNT_THRESHOLD: ${AGGREGATE_COUNT_THRESHOLD}
+      CURL_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
