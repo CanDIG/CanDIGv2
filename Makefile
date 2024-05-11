@@ -351,7 +351,6 @@ docker-secrets: mkdir katsu-secrets #minio-secrets
 	$(MAKE) secret-keycloak-test-user-password
 	$(MAKE) secret-keycloak-test-user2-password
 
-	$(MAKE) secret-metadata-app-secret
 	$(MAKE) secret-metadata-db-secret
 
 	$(MAKE) secret-tyk-secret-key
@@ -438,7 +437,7 @@ init-docker: docker-volumes docker-secrets
 
 #<<<
 minio-secrets:
-	@echo admin > tmp/secrets/minio-access-key
+	@echo $(DEFAULT_ADMIN_USER) > tmp/secrets/minio-access-key
 	$(MAKE) secret-minio-secret-key
 	@echo '[default]' > tmp/secrets/aws-credentials
 	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> tmp/secrets/aws-credentials

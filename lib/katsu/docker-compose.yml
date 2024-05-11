@@ -14,7 +14,7 @@ services:
       - POSTGRES_DATABASE=metadata
       - POSTGRES_HOST=metadata-db
       - POSTGRES_PORT=5432
-      - POSTGRES_USER=admin
+      - POSTGRES_USER=${DEFAULT_ADMIN_USER}
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
       - REDIS_PASSWORD_FILE=/run/secrets/redis_secret_key
       - OPA_URL=${OPA_PRIVATE_URL}
