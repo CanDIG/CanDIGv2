@@ -349,13 +349,8 @@ docker-secrets: mkdir katsu-secrets #minio-secrets
 	@echo admin > tmp/secrets/keycloak-admin-user
 	$(MAKE) secret-keycloak-admin-password
 
-	@echo $(DEFAULT_SITE_ADMIN_USER) > tmp/secrets/keycloak-test-site-admin
 	$(MAKE) secret-keycloak-test-site-admin-password
-
-	@echo user1@test.ca > tmp/secrets/keycloak-test-user
 	$(MAKE) secret-keycloak-test-user-password
-
-	@echo user2@test.ca > tmp/secrets/keycloak-test-user2
 	$(MAKE) secret-keycloak-test-user2-password
 
 	$(MAKE) secret-tyk-secret-key
@@ -372,7 +367,7 @@ docker-secrets: mkdir katsu-secrets #minio-secrets
 
 
 #>>>
-# create persistant volumes for docker containers
+# create persistent volumes for docker containers
 # make docker-volumes
 
 #<<<

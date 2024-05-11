@@ -55,17 +55,11 @@ def get_env():
         vars["OPA_SECRET"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-client-{vars['CANDIG_CLIENT_ID']}-secret") as f:
         vars["CANDIG_CLIENT_SECRET"] = f.read().splitlines().pop()
-    if os.path.isfile("tmp/secrets/keycloak-test-site-admin"):
-        with open(f"tmp/secrets/keycloak-test-site-admin") as f:
-            vars["CANDIG_SITE_ADMIN_USER"] = f.read().splitlines().pop()
+    if os.path.isfile("tmp/secrets/keycloak-test-site-admin-password"):
         with open(f"tmp/secrets/keycloak-test-site-admin-password") as f:
             vars["CANDIG_SITE_ADMIN_PASSWORD"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/keycloak-test-user") as f:
-        vars["CANDIG_NOT_ADMIN_USER"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-test-user-password") as f:
         vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/keycloak-test-user2") as f:
-        vars["CANDIG_NOT_ADMIN2_USER"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-test-user2-password") as f:
         vars["CANDIG_NOT_ADMIN2_PASSWORD"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/vault-s3-token") as f:
