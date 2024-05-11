@@ -27,28 +27,8 @@ volumes:
     external: true
 
 secrets:
-  aws-credentials:
-    file: $PWD/tmp/secrets/aws-credentials
-    labels:
-      - "candigv2=secret"
-  federation-servers:
-    file: $PWD/tmp/federation/servers.json
-    labels:
-      - "candigv2=secret"
-  federation-services:
-    file: $PWD/tmp/federation/services.json
-    labels:
-      - "candigv2=secret"
   katsu-secret-key:
     file: $PWD/tmp/secrets/katsu-secret-key
-    labels:
-      - "candigv2=secret"
-  metadata-app-secret:
-    file: $PWD/tmp/secrets/metadata-app-secret
-    labels:
-      - "candigv2=secret"
-  metadata-db-user:
-    file: $PWD/tmp/secrets/metadata-db-user
     labels:
       - "candigv2=secret"
   metadata-db-secret:

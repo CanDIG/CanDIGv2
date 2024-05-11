@@ -354,7 +354,6 @@ docker-secrets: mkdir katsu-secrets #minio-secrets
 	$(MAKE) secret-metadata-db-secret
 
 	$(MAKE) secret-tyk-secret-key
-	$(MAKE) secret-tyk-node-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
 
 	$(MAKE) secret-vault-s3-token

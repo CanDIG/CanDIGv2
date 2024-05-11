@@ -24,9 +24,6 @@ export KEYCLOAK_CLIENT_ID_64=$KEYCLOAK_CLIENT_ID_64_VAL
 TYK_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-secret-key)
 export TYK_SECRET_KEY=$TYK_SECRET_KEY_VAL
 
-TYK_NODE_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-node-secret-key)
-export TYK_NODE_SECRET_KEY=$TYK_NODE_SECRET_KEY_VAL
-
 TYK_ANALYTIC_ADMIN_SECRET_VAL=$(cat $PWD/tmp/secrets/tyk-analytics-admin-key)
 export TYK_ANALYTIC_ADMIN_SECRET=$TYK_ANALYTIC_ADMIN_SECRET_VAL
 
