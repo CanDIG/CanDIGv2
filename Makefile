@@ -351,6 +351,9 @@ docker-secrets: mkdir katsu-secrets #minio-secrets
 	$(MAKE) secret-keycloak-test-user-password
 	$(MAKE) secret-keycloak-test-user2-password
 
+	$(MAKE) secret-metadata-app-secret
+	$(MAKE) secret-metadata-db-secret
+
 	$(MAKE) secret-tyk-secret-key
 	$(MAKE) secret-tyk-node-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
@@ -450,8 +453,6 @@ katsu-secrets:
 	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
 		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
 
-	$(MAKE) secret-metadata-app-secret
-	$(MAKE) secret-metadata-db-secret
 #>>>
 # pull docker image to $DOCKER_REGISTRY
 # $module is the name of the sub-folder in lib/
