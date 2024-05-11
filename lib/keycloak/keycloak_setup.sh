@@ -23,7 +23,7 @@ trap handle_error ERR
 ####################################################
 #              VARIABLES CONFIGURATION             #
 ####################################################
-KEYCLOAK_ADMIN=$(cat tmp/secrets/keycloak-admin-user)
+KEYCLOAK_ADMIN=${DEFAULT_ADMIN_USER}
 KEYCLOAK_ADMIN_PASSWORD=$(cat tmp/secrets/keycloak-admin-password)
 READY_CHECK_URL="http://${CANDIG_DOMAIN}:${KEYCLOAK_PORT}/auth/health/ready"
 KC_ADMIN_URL="http://${CANDIG_DOMAIN}:${KEYCLOAK_PORT}/auth"

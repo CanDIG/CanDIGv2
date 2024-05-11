@@ -13,9 +13,9 @@ services:
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
       QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: true
+      KEYCLOAK_ADMIN: ${DEFAULT_ADMIN_USER}
       # KEYCLOAK_FRONTEND_URL: ${KEYCLOAK_PUBLIC_URL_PROD}/auth
     secrets:
-      - keycloak-admin-user
       - keycloak-admin-password
     ports:
       - "${KEYCLOAK_PORT}:8080"

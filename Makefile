@@ -345,8 +345,6 @@ docker-push:
 #<<<
 .PHONY: docker-secrets
 docker-secrets: mkdir katsu-secrets #minio-secrets
-
-	@echo admin > tmp/secrets/keycloak-admin-user
 	$(MAKE) secret-keycloak-admin-password
 
 	$(MAKE) secret-keycloak-test-site-admin-password
@@ -452,7 +450,6 @@ katsu-secrets:
 	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
 		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
 
-	@echo admin > tmp/secrets/metadata-db-user
 	$(MAKE) secret-metadata-app-secret
 	$(MAKE) secret-metadata-db-secret
 #>>>
