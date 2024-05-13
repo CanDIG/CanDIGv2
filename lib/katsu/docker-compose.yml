@@ -33,8 +33,6 @@ services:
         target: opa-service-token
       - source: redis-secret-key
         target: redis_secret_key
-      - source: katsu-secret-key
-        target: katsu_secret
     labels:
       - "candigv2=chord-metadata"
     healthcheck:

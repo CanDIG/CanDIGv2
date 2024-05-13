@@ -344,7 +344,7 @@ docker-push:
 
 #<<<
 .PHONY: docker-secrets
-docker-secrets: mkdir katsu-secrets #minio-secrets
+docker-secrets: mkdir #minio-secrets
 	$(MAKE) secret-keycloak-admin-password
 
 	$(MAKE) secret-keycloak-test-site-admin-password
@@ -442,14 +442,6 @@ minio-secrets:
 	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> tmp/secrets/aws-credentials
 	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> tmp/secrets/aws-credentials
 
-#>>>
-# make katsu-secret and database secret
-
-#<<<
-katsu-secrets:
-	@echo admin > tmp/secrets/katsu-secret-key
-	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
-		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
 
 #>>>
 # pull docker image to $DOCKER_REGISTRY
@@ -553,7 +545,6 @@ rebuild-without-postgres:
 	# Back up postgres-related variables
 	mkdir -p tmp2
 	@cp tmp/secrets/metadata-* tmp2/
-	@cp tmp/secrets/katsu-secret-key tmp2/
 	# Remove Postgres from the .env
 	$(eval CANDIG_MODULES := $(filter-out postgres,$(CANDIG_MODULES)))
 	# Clean everything

@@ -27,10 +27,6 @@ volumes:
     external: true
 
 secrets:
-  katsu-secret-key:
-    file: $PWD/tmp/secrets/katsu-secret-key
-    labels:
-      - "candigv2=secret"
   metadata-db-secret:
     file: $PWD/tmp/secrets/metadata-db-secret
     labels:
