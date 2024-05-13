@@ -31,10 +31,6 @@ secrets:
     file: $PWD/tmp/secrets/metadata-db-secret
     labels:
       - "candigv2=secret"
-  metadata-settings:
-    file: $PWD/lib/katsu/settings.py
-    labels:
-      - "candigv2=secret"
   # minio-access-key:
   #   file: $PWD/tmp/secrets/minio-access-key
   #   labels:
