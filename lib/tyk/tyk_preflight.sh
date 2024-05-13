@@ -18,7 +18,7 @@ export CONFIG_DIR="$PWD/lib/tyk/tmp"
 KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret)
 export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_VAL
 
-KEYCLOAK_CLIENT_ID_64_VAL=$(cat $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-id-64)
+KEYCLOAK_CLIENT_ID_64_VAL=$(echo -n ${KEYCLOAK_CLIENT_ID} | base64)
 export KEYCLOAK_CLIENT_ID_64=$KEYCLOAK_CLIENT_ID_64_VAL
 
 TYK_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-secret-key)
