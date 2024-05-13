@@ -43,14 +43,6 @@ secrets:
   #   file: $PWD/tmp/secrets/minio-secret-key
   #   labels:
   #     - "candigv2=secret"
-  portainer-user:
-    file: $PWD/tmp/secrets/portainer-user
-    labels:
-      - "candigv2=secret"
-  portainer-secret:
-    file: $PWD/tmp/secrets/portainer-secret
-    labels:
-      - "candigv2=secret"
   wes-dependency-resolver:
     file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
     labels:
