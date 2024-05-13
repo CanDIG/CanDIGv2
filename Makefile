@@ -334,7 +334,7 @@ docker-push:
 
 #<<<
 .PHONY: docker-secrets
-docker-secrets: mkdir minio-secrets katsu-secrets
+docker-secrets: mkdir katsu-secrets #minio-secrets
 
 	@echo admin > tmp/secrets/keycloak-admin-user
 	$(MAKE) secret-keycloak-admin-password
@@ -371,8 +371,8 @@ docker-secrets: mkdir minio-secrets katsu-secrets
 docker-volumes:
 	docker volume create grafana-data --label candigv2=volume
 	docker volume create jupyter-data --label candigv2=volume
-	docker volume create minio-config --label candigv2=volume
-	docker volume create minio-data $(MINIO_VOLUME_OPT) --label candigv2=volume
+	# docker volume create minio-config --label candigv2=volume
+	# docker volume create minio-data $(MINIO_VOLUME_OPT) --label candigv2=volume
 	docker volume create prometheus-data --label candigv2=volume
 	docker volume create toil-jobstore --label candigv2=volume
 	docker volume create keycloak-data --label candigv2=volume

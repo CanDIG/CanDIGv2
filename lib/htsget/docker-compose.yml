@@ -16,10 +16,6 @@ services:
         target: vault-s3-token
       - source: opa-service-token
         target: opa-service-token
-      - source: minio-access-key
-        target: minio-access-key
-      - source: minio-secret-key
-        target: minio-secret-key
       - source: metadata-db-secret
         target: metadata-db-secret
       - source: metadata-db-user
@@ -29,7 +25,6 @@ services:
       HTSGET_URL: ${TYK_LOGIN_TARGET_URL}/${TYK_HTSGET_API_LISTEN_PATH}
       OPA_URL: ${OPA_PRIVATE_URL}
       VAULT_URL: ${VAULT_PRIVATE_URL}
-      MINIO_URL: ${MINIO_PRIVATE_URL}
       DEBUG_MODE: ${CANDIG_DEBUG_MODE}
       DB_PATH: "metadata-db"
       SERVER_LOCAL_DATA: /app/htsget_server/data
