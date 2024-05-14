@@ -3,7 +3,7 @@ services:
     build:
       context: $PWD/lib/htsget/htsget_app
       args:
-        venv_python: "${VENV_PYTHON}"
+        venv_python: "3.10" #"${VENV_PYTHON}"
     image: ${DOCKER_REGISTRY}/htsget:${HTSGET_VERSION:-latest}
     labels:
       - "candigv2=htsget"
