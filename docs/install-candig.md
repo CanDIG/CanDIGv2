@@ -167,7 +167,7 @@ Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infini
 bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 ```
 
-yq >= 4 is required, but the conda version is outdated.  Find a way to install it system-wide.
+yq >= 4 is required, but the conda version is outdated.  Install the latest version system-wide by following the instructions at [the yq GitHub](https://github.com/mikefarah/yq/#install).
 
 ### Note for WSL Systems
 Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop. Add `CONDA_INSTALL = ~/miniconda3`  above `CONDA = $(CONDA_INSTALL)/bin/conda` in the Makefile to avoid this issue. You can also use the below command to move the miniconda3 installation to the correct location.
