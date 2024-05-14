@@ -7,7 +7,7 @@
 The CanDIG v2 project is a collection of heterogeneous services designed to work together to facilitate end to end
 dataflow for genomic data.
 
-## Installation 
+## Installation
 
 CanDIG uses a make-based deployment process, with services containerized in Docker. To deploy CanDIGv2, follow the installation guide in `docs/`:
 
@@ -44,6 +44,17 @@ services:
     network_mode: ${DOCKER_MODE}
 ...
 ```
+### Configuring CanDIG modules
+
+Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` setting defines which modules are included in the deployment.
+
+By default (if you copy the sample file from `etc/env/example.env`) the installation includes the minimal list of modules:
+
+```
+  CANDIG_MODULES=keycloak vault minio postgres redis htsget katsu candig-data-portal query tyk opa federation candig-ingest
+```
+
+Optional modules follow the `#` and include various monitoring components, workflow execution, and some older modules not generally installed.
 
 ### Configuring CanDIG modules
 
