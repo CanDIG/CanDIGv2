@@ -49,7 +49,9 @@ def get_env():
     vars["CANDIG_DEBUG_MODE"] = get_env_value("CANDIG_DEBUG_MODE")
     vars["CANDIG_USER_KEY"] = get_env_value("CANDIG_USER_KEY")
     vars["VAULT_SERVICE_PUBLIC_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
-
+    vars["CANDIG_SITE_ADMIN_USER"] = get_env_value("DEFAULT_SITE_ADMIN_USER")
+    vars["CANDIG_NOT_ADMIN_USER"] = get_env_value("TEST_USER_1")
+    vars["CANDIG_NOT_ADMIN2_USER"] = get_env_value("TEST_USER_2")
     # vars that come from files:
     with open(f"tmp/secrets/opa-service-token") as f:
         vars["OPA_SECRET"] = f.read().splitlines().pop()
