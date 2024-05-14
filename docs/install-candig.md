@@ -20,6 +20,11 @@ We recommend giving Docker at least 4 CPUs and 4GB of memory.
 
 CanDIG can be installed and deployed as below for development situations where no real data will ever be ingested into the system. For critical differences in production deployments, please see the [Guide to CanDIG production deployments](production-candig.md).
 
+Docker Engine (also known as Docker CE) is recommened over Docker Desktop for linux installations.
+
+Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
+
+
 ## Install OS Dependencies
 
 <details>
