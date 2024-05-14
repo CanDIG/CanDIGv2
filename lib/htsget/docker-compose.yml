@@ -18,8 +18,6 @@ services:
         target: opa-service-token
       - source: metadata-db-secret
         target: metadata-db-secret
-      - source: metadata-db-user
-        target: metadata-db-user
     environment:
       HTSGET_TEST_KEY: "hoodlebug"
       HTSGET_URL: ${TYK_LOGIN_TARGET_URL}/${TYK_HTSGET_API_LISTEN_PATH}
@@ -33,7 +31,7 @@ services:
       POSTGRES_DATABASE: "genomic"
       POSTGRES_HOST_FILE: "metadata-db"
       POSTGRES_POST: 5433
-      POSTGRES_USERNAME_FILE: "/run/secrets/metadata-db-user"
+      POSTGRES_USERNAME: ${DEFAULT_ADMIN_USER}
       POSTGRES_PASSWORD_FILE: "/run/secrets/metadata-db-secret"
       AGGREGATE_COUNT_THRESHOLD: ${AGGREGATE_COUNT_THRESHOLD}
       CURL_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"

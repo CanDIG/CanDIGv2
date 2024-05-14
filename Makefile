@@ -176,16 +176,6 @@ clean-authx:
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
 
 
-#>>>
-# close all authentication and authorization services
-# make clean-authx
-
-#<<<
-.PHONY: clean-authx
-clean-authx:
-	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
-
-
 # Empties error and progress logs
 .PHONY: clean-logs
 clean-logs:
@@ -344,22 +334,16 @@ docker-push:
 
 #<<<
 .PHONY: docker-secrets
-docker-secrets: mkdir katsu-secrets #minio-secrets
-
-	@echo admin > tmp/secrets/keycloak-admin-user
+docker-secrets: mkdir #minio-secrets
 	$(MAKE) secret-keycloak-admin-password
 
-	@echo $(DEFAULT_SITE_ADMIN_USER) > tmp/secrets/keycloak-test-site-admin
 	$(MAKE) secret-keycloak-test-site-admin-password
-
-	@echo user1@test.ca > tmp/secrets/keycloak-test-user
 	$(MAKE) secret-keycloak-test-user-password
-
-	@echo user2@test.ca > tmp/secrets/keycloak-test-user2
 	$(MAKE) secret-keycloak-test-user2-password
 
+	$(MAKE) secret-metadata-db-secret
+
 	$(MAKE) secret-tyk-secret-key
-	$(MAKE) secret-tyk-node-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
 
 	$(MAKE) secret-vault-s3-token
@@ -372,7 +356,7 @@ docker-secrets: mkdir katsu-secrets #minio-secrets
 
 
 #>>>
-# create persistant volumes for docker containers
+# create persistent volumes for docker containers
 # make docker-volumes
 
 #<<<
@@ -442,24 +426,13 @@ init-docker: docker-volumes docker-secrets
 
 #<<<
 minio-secrets:
-	@echo admin > tmp/secrets/minio-access-key
+	@echo $(DEFAULT_ADMIN_USER) > tmp/secrets/minio-access-key
 	$(MAKE) secret-minio-secret-key
 	@echo '[default]' > tmp/secrets/aws-credentials
 	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> tmp/secrets/aws-credentials
 	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> tmp/secrets/aws-credentials
 
-#>>>
-# make katsu-secret and database secret
 
-#<<<
-katsu-secrets:
-	@echo admin > tmp/secrets/katsu-secret-key
-	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
-		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
-
-	@echo admin > tmp/secrets/metadata-db-user
-	$(MAKE) secret-metadata-app-secret
-	$(MAKE) secret-metadata-db-secret
 #>>>
 # pull docker image to $DOCKER_REGISTRY
 # $module is the name of the sub-folder in lib/
@@ -562,7 +535,6 @@ rebuild-without-postgres:
 	# Back up postgres-related variables
 	mkdir -p tmp2
 	@cp tmp/secrets/metadata-* tmp2/
-	@cp tmp/secrets/katsu-secret-key tmp2/
 	# Remove Postgres from the .env
 	$(eval CANDIG_MODULES := $(filter-out postgres,$(CANDIG_MODULES)))
 	# Clean everything

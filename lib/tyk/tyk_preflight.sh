@@ -18,20 +18,16 @@ export CONFIG_DIR="$PWD/lib/tyk/tmp"
 KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret)
 export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_VAL
 
-KEYCLOAK_CLIENT_ID_64_VAL=$(cat $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-id-64)
+KEYCLOAK_CLIENT_ID_64_VAL=$(echo -n ${KEYCLOAK_CLIENT_ID} | base64)
 export KEYCLOAK_CLIENT_ID_64=$KEYCLOAK_CLIENT_ID_64_VAL
 
 TYK_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-secret-key)
 export TYK_SECRET_KEY=$TYK_SECRET_KEY_VAL
 
-TYK_NODE_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-node-secret-key)
-export TYK_NODE_SECRET_KEY=$TYK_NODE_SECRET_KEY_VAL
-
 TYK_ANALYTIC_ADMIN_SECRET_VAL=$(cat $PWD/tmp/secrets/tyk-analytics-admin-key)
 export TYK_ANALYTIC_ADMIN_SECRET=$TYK_ANALYTIC_ADMIN_SECRET_VAL
 
-KEYCLOAK_PUBLIC_KEY_VAL=$(cat $PWD/tmp/secrets/keycloak-public-key)
-export KEYCLOAK_PUBLIC_KEY=$KEYCLOAK_PUBLIC_KEY_VAL
+export KEYCLOAK_PUBLIC_KEY=$(curl ${KEYCLOAK_REALM_URL} -k 2>/dev/null | jq -r '.public_key')
 
 REDIS_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/redis-secret-key)
 export REDIS_SECRET_KEY=$REDIS_SECRET_KEY_VAL

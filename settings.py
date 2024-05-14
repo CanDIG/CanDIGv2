@@ -49,23 +49,19 @@ def get_env():
     vars["CANDIG_DEBUG_MODE"] = get_env_value("CANDIG_DEBUG_MODE")
     vars["CANDIG_USER_KEY"] = get_env_value("CANDIG_USER_KEY")
     vars["VAULT_SERVICE_PUBLIC_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
-
+    vars["CANDIG_SITE_ADMIN_USER"] = get_env_value("DEFAULT_SITE_ADMIN_USER")
+    vars["CANDIG_NOT_ADMIN_USER"] = get_env_value("TEST_USER_1")
+    vars["CANDIG_NOT_ADMIN2_USER"] = get_env_value("TEST_USER_2")
     # vars that come from files:
     with open(f"tmp/secrets/opa-service-token") as f:
         vars["OPA_SECRET"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-client-{vars['CANDIG_CLIENT_ID']}-secret") as f:
         vars["CANDIG_CLIENT_SECRET"] = f.read().splitlines().pop()
-    if os.path.isfile("tmp/secrets/keycloak-test-site-admin"):
-        with open(f"tmp/secrets/keycloak-test-site-admin") as f:
-            vars["CANDIG_SITE_ADMIN_USER"] = f.read().splitlines().pop()
+    if os.path.isfile("tmp/secrets/keycloak-test-site-admin-password"):
         with open(f"tmp/secrets/keycloak-test-site-admin-password") as f:
             vars["CANDIG_SITE_ADMIN_PASSWORD"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/keycloak-test-user") as f:
-        vars["CANDIG_NOT_ADMIN_USER"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-test-user-password") as f:
         vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/keycloak-test-user2") as f:
-        vars["CANDIG_NOT_ADMIN2_USER"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-test-user2-password") as f:
         vars["CANDIG_NOT_ADMIN2_PASSWORD"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/vault-s3-token") as f:
