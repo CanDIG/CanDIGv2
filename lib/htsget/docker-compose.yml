@@ -12,6 +12,8 @@ services:
     ports:
       - "${HTSGET_PORT}:3000"
     secrets:
+      - source: vault-approle-token
+        target: vault-approle-token
       - source: opa-service-token
         target: opa-service-token
       - source: metadata-db-secret
@@ -32,7 +34,8 @@ services:
       POSTGRES_USERNAME: ${DEFAULT_ADMIN_USER}
       POSTGRES_PASSWORD_FILE: "/run/secrets/metadata-db-secret"
       AGGREGATE_COUNT_THRESHOLD: ${AGGREGATE_COUNT_THRESHOLD}
-      CURL_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+      CURL_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt" # this is for pysam
+      SERVICE_NAME: ${SERVICE_NAME}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
