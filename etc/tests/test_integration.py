@@ -308,46 +308,40 @@ def test_add_remove_site_admin():
 
 
 ## Vault tests: can we add an aws access key and retrieve it?
-def test_vault():
+def test_aws_credentials():
     site_admin_token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {site_admin_token}",
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    # confirm that this works with the CANDIG_S3_TOKEN:
-    headers["X-Vault-Token"] = ENV["VAULT_S3_TOKEN"]
-    # delete the test secret, if it exists:
-    response = requests.delete(
-        f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers
-    )
-    print(response)
-    assert response.status_code == 204
+    payload = {
+        "endpoint": "http://test.com",
+        "bucket": "test",
+        "secret_key": "test",
+        "access_key": "testtest"
+    }
 
-    # confirm that the test secret does not yet exist:
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers
-    )
-    print(response.json())
-    assert response.status_code == 404
-
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers
-    )
-    print(response.json())
-    assert response.status_code == 404
-
-    # set a secret
-    payload = {"url": "test.com", "secret": "test", "access": "testtest"}
+    # set a credential
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers, json=payload
-    )
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/vault/v1/aws/test-test", headers=headers
+        f"{ENV['CANDIG_URL']}/ingest/s3-credential", headers=headers, json=payload
     )
 
-    print(response.json())
-    assert response.json()["data"]["url"] == payload["url"]
+    # make sure that the endpoint was parsed correctly:
+    assert response.json()["endpoint"] == "test_com"
+
+    # get the credential back
+    url = f"{ENV['CANDIG_URL']}/ingest/s3-credential/endpoint/{response.json()['endpoint']}/bucket/{response.json()['bucket']}"
+    response = requests.get(url, headers=headers)
+
+    print(response.text)
+    assert response.json()["access_key"] == payload["access_key"]
+
+    # delete the credential
+    response = requests.delete(url, headers=headers)
+
+    print(response.text)
+    assert response.status_code == 204
 
 
 # =========================|| KATSU TEST BEGIN ||============================= #
