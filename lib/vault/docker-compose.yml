@@ -12,9 +12,6 @@ services:
       - VAULT_DISABLE_MLOCK=true
     cap_add:
       - IPC_LOCK
-    secrets:
-      - source: vault-s3-token
-        target: vault-s3-token
     command: vault server -config=/vault/config/vault-config.json
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
@@ -31,8 +28,6 @@ services:
     environment:
       - VAULT_URL=${VAULT_PRIVATE_URL}
     secrets:
-      - source: vault-s3-token
-        target: vault-s3-token
       - source: vault-approle-token
         target: vault-approle-token
     healthcheck:

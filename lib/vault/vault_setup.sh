@@ -99,14 +99,6 @@ echo
 echo ">> enabling approle"
 docker exec $vault sh -c "vault auth enable approle"
 
-echo
-echo ">> setting up aws policy"
-docker exec $vault sh -c "echo 'path \"aws/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' > aws-policy.hcl; vault policy write aws aws-policy.hcl"
-
-echo
-echo ">> enable kv store for aws secrets"
-docker exec $vault vault secrets enable -path="aws" -description="AWS-style ID/secret pairs" kv
-
 echo ">> setting up approle policy"
 docker exec $vault sh -c "echo 'path \"auth/approle/role/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' > approle-policy.hcl; vault policy write approle approle-policy.hcl"
 

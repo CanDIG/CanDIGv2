@@ -12,8 +12,6 @@ services:
     ports:
       - "${HTSGET_PORT}:3000"
     secrets:
-      - source: vault-s3-token
-        target: vault-s3-token
       - source: opa-service-token
         target: opa-service-token
       - source: metadata-db-secret
