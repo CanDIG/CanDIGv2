@@ -35,6 +35,7 @@ services:
         FEDERATION_SERVICE_URL: ${FEDERATION_SERVICE_URL}
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+        - "${CANDIG_AUTH_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
       test: [ "CMD", "curl", "${FEDERATION_SERVICE_URL}/federation/v1/service-info" ]
       interval: 30s

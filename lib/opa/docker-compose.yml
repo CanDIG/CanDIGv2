@@ -41,6 +41,7 @@ services:
       retries: 3
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+      - "${CANDIG_AUTH_DOMAIN}:${LOCAL_IP_ADDR}"
     entrypoint:
       - "bash"
       - "/app/entrypoint.sh"
@@ -62,3 +63,4 @@ services:
       - "app/permissions_engine/"
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+      - "${CANDIG_AUTH_DOMAIN}:${LOCAL_IP_ADDR}"
