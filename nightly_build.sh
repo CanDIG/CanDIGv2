@@ -63,7 +63,7 @@ TYK_TESTS=""
 TRIES=0
 while [ -z "$TYK_TESTS" ];
 do
-    TYK_TESTS=$(pytest -k "test_tyk" etc/tests/test_integration.py | grep "1 passed")
+    TYK_TESTS=$(make test-integration ARGS='-k "test_tyk" etc/tests/test_integration.py' | grep "1 passed")
     sleep 15
     TRIES=$TRIES+1
     if [[ $TRIES -gt 120 ]]; then
@@ -88,5 +88,5 @@ pip install -r requirements.txt
 python katsu_ingest.py
 cd $BUILD_PATH
 
-PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: $DEFAULT_SITE_ADMIN_USER\npassword $(cat ./tmp/secrets/keycloak-test-site-admin-password)\nusername: $TEST_USER_1\npassword $(cat ./tmp/secrets/keycloak-test-user-password)\nusername: $TEST_USER_2\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\`\`\`"
+PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: $CANDIG_SITE_ADMIN_USER\npassword $(cat ./tmp/secrets/keycloak-test-site-admin-password)\nusername: $CANDIG_NOT_ADMIN_USER\npassword $(cat ./tmp/secrets/keycloak-test-user-password)\nusername: $CANDIG_NOT_ADMIN2_USER\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\`\`\`"
 
