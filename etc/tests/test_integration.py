@@ -83,6 +83,7 @@ def test_tyk():
 def user_auth_datasets():
     return [
         ("CANDIG_NOT_ADMIN2", "PROGRAM-2"),
+        ("CANDIG_NOT_ADMIN", "PROGRAM-1"),
         ("CANDIG_NOT_ADMIN", "TEST_2"),
     ]
 
@@ -820,7 +821,7 @@ def test_query_donors_all():
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     ).json()
     print(response)
-    assert response and len(response["results"]) == 4
+    assert response and len(response["results"]) == 5
 
     # Check the summary stats as well
     summary_stats = response["summary"]
