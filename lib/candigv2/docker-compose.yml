@@ -59,10 +59,6 @@ secrets:
     file: $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret
     labels:
       - "candigv2=secret"
-  vault-s3-token:
-    file: $PWD/tmp/secrets/vault-s3-token
-    labels:
-      - "candigv2=secret"
   vault-approle-token:
       file: $PWD/tmp/secrets/vault-approle-token
       labels:
