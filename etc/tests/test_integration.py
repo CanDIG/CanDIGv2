@@ -308,7 +308,7 @@ def test_add_remove_site_admin():
 
 
 ## Vault tests: can we add an aws access key and retrieve it?
-def test_aws_credentials():
+def test_s3_credentials():
     site_admin_token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {site_admin_token}",
