@@ -11,8 +11,6 @@ services:
     ports:
       - "${FEDERATION_PORT}:4232"
     secrets:
-      - source: opa-service-token
-        target: opa-service-token
       - source: tyk-secret-key
         target: tyk-secret-key
       - source: vault-approle-token

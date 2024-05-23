@@ -348,9 +348,6 @@ docker-secrets: mkdir #minio-secrets
 
 	$(MAKE) secret-vault-approle-token
 
-	$(MAKE) secret-opa-root-token
-	$(MAKE) secret-opa-service-token
-
 	$(MAKE) secret-redis-secret-key
 
 

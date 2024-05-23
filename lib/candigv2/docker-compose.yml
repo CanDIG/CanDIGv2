@@ -63,14 +63,6 @@ secrets:
       file: $PWD/tmp/secrets/vault-approle-token
       labels:
         - "candigv2=secret"
-  opa-root-token:
-    file: $PWD/tmp/secrets/opa-root-token
-    labels:
-      - "candigv2=secret"
-  opa-service-token:
-    file: $PWD/tmp/secrets/opa-service-token
-    labels:
-      - "candigv2=secret"
   tyk-secret-key:
     file: $PWD/tmp/secrets/tyk-secret-key
     labels:

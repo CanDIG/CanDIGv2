@@ -29,8 +29,6 @@ services:
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret
-      - source: opa-service-token
-        target: opa-service-token
       - source: redis-secret-key
         target: redis_secret_key
     labels:
