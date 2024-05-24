@@ -34,8 +34,8 @@ all:
 mkdir:
 	mkdir -p bin
 	mkdir -p $(CONDA_INSTALL)
-	mkdir -p tmp/{configs,data,secrets}
-	mkdir -p tmp/{keycloak,tyk,vault}
+	mkdir -p tmp/secrets
+	mkdir -p tmp/vault
 
 
 #>>>
