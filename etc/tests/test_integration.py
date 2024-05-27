@@ -823,7 +823,7 @@ def test_query_donors_all():
             "60-69 Years": 1,
             "70-79 Years": 1
         },
-        "cancer_type_count": {
+        "primary_site_count": {
             "Esophagus": 1,
             "Eye and adnexa": 1,
             "Floor of mouth": 1,
@@ -867,7 +867,7 @@ def test_query_donor_search():
         "age_at_diagnosis": {
             "30-39 Years": 1
         },
-        "cancer_type_count": {
+        "primary_site_count": {
             "Eye and adnexa": 1
         },
         "patients_per_cohort": {
@@ -916,9 +916,13 @@ def test_query_discovery():
         for field in query_response["site"]["required_but_missing"][category]:
             for total_type in query_response["site"]["required_but_missing"][category][field]:
                 total = query_response["site"]["required_but_missing"][category][field][total_type]
+                if type(total) == str:
+                    # Can't perform this check on censored data
+                    continue
                 for program in katsu_response:
                     if category in program["metadata"]['required_but_missing'] and field in program["metadata"]['required_but_missing'][category]:
-                        total -= program["metadata"]['required_but_missing'][category][field][total_type]
+                        if type(program["metadata"]['required_but_missing'][category][field][total_type]) == int:
+                            total -= program["metadata"]['required_but_missing'][category][field][total_type]
                 if total != 0:
                     print(f"{category}/{field}/{total_type} totals don't line up")
                     assert False
