@@ -26,6 +26,7 @@ services:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
       - UWSGI_WORKERS=1
       - CACHE_DURATION=86400
+      - AGGREGATE_COUNT_THRESHOLD=${AGGREGATE_COUNT_THRESHOLD}
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret
