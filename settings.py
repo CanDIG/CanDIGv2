@@ -53,8 +53,6 @@ def get_env():
     vars["CANDIG_NOT_ADMIN_USER"] = get_env_value("TEST_USER_1")
     vars["CANDIG_NOT_ADMIN2_USER"] = get_env_value("TEST_USER_2")
     # vars that come from files:
-    with open(f"tmp/secrets/opa-service-token") as f:
-        vars["OPA_SECRET"] = f.read().splitlines().pop()
     with open(f"tmp/secrets/keycloak-client-{vars['CANDIG_CLIENT_ID']}-secret") as f:
         vars["CANDIG_CLIENT_SECRET"] = f.read().splitlines().pop()
     if os.path.isfile("tmp/secrets/keycloak-test-site-admin-password"):
