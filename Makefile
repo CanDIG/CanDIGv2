@@ -34,8 +34,8 @@ all:
 mkdir:
 	mkdir -p bin
 	mkdir -p $(CONDA_INSTALL)
-	mkdir -p tmp/{configs,data,secrets}
-	mkdir -p tmp/{keycloak,tyk,vault}
+	mkdir -p tmp/secrets
+	mkdir -p tmp/vault
 
 
 #>>>
@@ -347,9 +347,6 @@ docker-secrets: mkdir #minio-secrets
 	$(MAKE) secret-tyk-analytics-admin-key
 
 	$(MAKE) secret-vault-approle-token
-
-	$(MAKE) secret-opa-root-token
-	$(MAKE) secret-opa-service-token
 
 	$(MAKE) secret-redis-secret-key
 

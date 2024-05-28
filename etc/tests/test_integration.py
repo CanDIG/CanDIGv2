@@ -107,7 +107,6 @@ def get_katsu_datasets(user):
     katsu_headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "X-Opa": ENV["OPA_SECRET"],
         "Authorization": f"Bearer {get_site_admin_token()}"
     }
 
@@ -268,7 +267,6 @@ def test_site_admin(user, is_admin):
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "X-Opa": ENV["OPA_SECRET"],
         "Authorization": f"Bearer {token}"
     }
 
