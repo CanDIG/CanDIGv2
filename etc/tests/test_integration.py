@@ -325,7 +325,7 @@ def test_s3_credentials():
     response = requests.post(
         f"{ENV['CANDIG_URL']}/ingest/s3-credential", headers=headers, json=payload
     )
-
+    print(response.text)
     # make sure that the endpoint was parsed correctly:
     assert response.json()["endpoint"] == "test_com"
 
