@@ -10,7 +10,7 @@ from settings import get_env_value
 from site_admin_token import get_site_admin_token
 
 
-def find_services():
+def get_default_services():
     raw_services = get_env_value("FEDERATION_SERVICES").split(" ")
     services = []
     for s in raw_services:
@@ -23,6 +23,19 @@ def find_services():
         service['version'] = get_env_value(service_version)
         services.append(service)
     return services
+
+
+def get_default_server():
+    token = get_site_admin_token()
+    server = {
+        "server": json.loads(get_env_value("FEDERATION_SELF_SERVER").replace('\'', '"')),
+        "authentication": {
+            "issuer": get_env_value("KEYCLOAK_REALM_URL"),
+            "token": token
+        }
+    }
+    return server
+
 
 def main():
     token = get_site_admin_token()
@@ -37,10 +50,16 @@ def main():
     headers = {}
     headers["Authorization"] = f"Bearer {token}"
 
-    print("Adding servers to federation...")
+    print("Register existing servers")
     url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/v1/servers"
+    response = requests.request("POST", url, headers=headers, params={"register": True})
+    if response.status_code != 200:
+        print(f"POST response: {response.status_code} {response.text}")
+
+    print("Making sure our server is in federation...")
+    server = get_default_server()
     response = requests.request("POST", url, headers=headers, json=server)
-    # add other federated servers here
+
     if response.status_code != 200:
         print(f"POST response: {response.status_code} {response.text}")
     url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/v1/servers"
@@ -48,7 +67,7 @@ def main():
     print(response.text)
 
     print("Adding services to federation...")
-    services = find_services()
+    services = get_default_services()
     url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/v1/services"
     for service in services:
         response = requests.request("POST", url, headers=headers, json=service)
@@ -60,8 +79,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
