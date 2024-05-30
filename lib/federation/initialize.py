@@ -69,10 +69,12 @@ def main():
     print("Adding services to federation...")
     services = get_default_services()
     url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/v1/services"
+    response = requests.request("POST", url, headers=headers, params={"register": True})
+    if response.status_code != 200:
+        print(f"POST response: {response.status_code} {response.text}")
     for service in services:
         response = requests.request("POST", url, headers=headers, json=service)
 
-    url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/v1/services"
     response = requests.request("GET", url, headers=headers)
     print(response.text)
 
