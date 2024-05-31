@@ -493,14 +493,14 @@ def user_access():
             True,
         ),  # user1 can access test as part of SYNTHETIC-1
         (
-            "CANDIG_NOT_ADMIN_USER2",
-            "CANDIG_NOT_ADMIN_PASSWORD2", 
+            "CANDIG_NOT_ADMIN2_USER",
+            "CANDIG_NOT_ADMIN2_PASSWORD", 
             "NA02102-bam", 
             False
         ),  # user2 cannot access NA02102-bam
         (
-            "CANDIG_NOT_ADMIN_USER2",
-            "CANDIG_NOT_ADMIN_PASSWORD2", 
+            "CANDIG_NOT_ADMIN2_USER",
+            "CANDIG_NOT_ADMIN2_PASSWORD", 
             "multisample_1", 
             True
         )  # user2 can access multisample_1
@@ -526,8 +526,8 @@ def test_htsget_access_data(user, password, obj, access):
 
 
 def test_sample_metadata():
-    username = ENV["CANDIG_NOT_ADMIN_USER2"]
-    password = ENV["CANDIG_NOT_ADMIN_PASSWORD2"]
+    username = ENV["CANDIG_NOT_ADMIN2_USER"]
+    password = ENV["CANDIG_NOT_ADMIN2_PASSWORD"]
     headers = {
         "Authorization": f"Bearer {get_token(username=username, password=password)}",
         "Content-Type": "application/json; charset=utf-8",
@@ -552,8 +552,8 @@ def test_index_success():
     assert response.json()['indexed'] == 1
     
     token = get_token(
-        username=ENV["CANDIG_NOT_ADMIN_USER2"],
-        password=ENV["CANDIG_NOT_ADMIN_PASSWORD2"],
+        username=ENV["CANDIG_NOT_ADMIN2_USER"],
+        password=ENV["CANDIG_NOT_ADMIN2_PASSWORD"],
     )
     headers = {
         "Authorization": f"Bearer {token}",
@@ -582,15 +582,15 @@ def beacon_access():
             ["SYNTHETIC-2"],
         ),  
         (   # user2 can access NA18537-vcf, multisample_1, HG02102
-            "CANDIG_NOT_ADMIN_USER2",
-            "CANDIG_NOT_ADMIN_PASSWORD2",
+            "CANDIG_NOT_ADMIN2_USER",
+            "CANDIG_NOT_ADMIN2_PASSWORD",
             "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
             ["SYNTHETIC-2"],
             ["SYNTHETIC-1"],
         )  
         # (
-        #     "CANDIG_NOT_ADMIN_USER2",
-        #     "CANDIG_NOT_ADMIN_PASSWORD2",
+        #     "CANDIG_NOT_ADMIN2_USER",
+        #     "CANDIG_NOT_ADMIN2_PASSWORD",
         #     "NC_000001.11:g.16565782G>A",
         #     [],
         #     ["", "", ""],
@@ -626,8 +626,8 @@ def verify_samples():
             "multisample_1",
             "multisample_1.vcf.gz",
             "variant",
-            "CANDIG_NOT_ADMIN_USER2",
-            "CANDIG_NOT_ADMIN_PASSWORD2"
+            "CANDIG_NOT_ADMIN2_USER",
+            "CANDIG_NOT_ADMIN2_PASSWORD"
         ),
         (
             "NA02102-bam",
@@ -807,8 +807,8 @@ def test_add_server():
 
 # Query Test: Get all donors
 def test_query_donors_all():
-    token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER2'], 
-                      password=ENV['CANDIG_NOT_ADMIN_PASSWORD2'])
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'], 
+                      password=ENV['CANDIG_NOT_ADMIN2_PASSWORD'])
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -833,7 +833,7 @@ def test_query_donors_all():
             '50-59 Years': 2,
             '60-69 Years': 1
         },
-        'cancer_type_count': {
+        'primary_site_count': {
             'Adrenal gland': 1,
             'Base of tongue': 1,
             'Floor of mouth': 2,
@@ -874,8 +874,8 @@ def test_query_donors_all():
 
 # Test 2: Search for a specific donor
 def test_query_donor_search():
-    token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER2'], 
-                      password=ENV['CANDIG_NOT_ADMIN_PASSWORD2'])
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'], 
+                      password=ENV['CANDIG_NOT_ADMIN2_PASSWORD'])
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -895,7 +895,7 @@ def test_query_donor_search():
         'age_at_diagnosis': {
             '50-59 Years': 2
         },
-        'cancer_type_count': {
+        'primary_site_count': {
             'Floor of mouth': 2,
             'Other and unspecified parts of mouth': 2
         },
@@ -926,8 +926,8 @@ def test_query_donor_search():
 
 def test_query_genomic():
     # tests that a request sent via query to htsget-beacon properly prunes the data
-    token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER2'], 
-                      password=ENV['CANDIG_NOT_ADMIN_PASSWORD2'])
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'], 
+                      password=ENV['CANDIG_NOT_ADMIN2_PASSWORD'])
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -972,8 +972,8 @@ def test_query_genomic():
     assert response.json()["results"][0]['program_id'] == "SYNTHETIC-1"
     assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_1"
 
-    token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER2'], 
-                      password=ENV['CANDIG_NOT_ADMIN_PASSWORD2'])
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'], 
+                      password=ENV['CANDIG_NOT_ADMIN2_PASSWORD'])
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
@@ -998,10 +998,15 @@ def test_query_discovery():
     katsu_response = requests.get(
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/"
     ).json()
+    
+    pprint.pprint(katsu_response)
     query_response = requests.get(
         f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs"
     ).json()
 
+    pprint.pprint(query_response)
+    assert query_response['status'] == 200
+    assert katsu_response['status'] == 200
     # Ensure that each category in metadata corresponds to something in the site
     for category in query_response["site"]["required_but_missing"]:
         for field in query_response["site"]["required_but_missing"][category]:
