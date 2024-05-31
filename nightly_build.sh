@@ -88,5 +88,5 @@ pip install -r requirements.txt
 python katsu_ingest.py
 cd $BUILD_PATH
 
-PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: $CANDIG_SITE_ADMIN_USER\npassword $(cat ./tmp/secrets/keycloak-test-site-admin-password)\nusername: $CANDIG_NOT_ADMIN_USER\npassword $(cat ./tmp/secrets/keycloak-test-user-password)\nusername: $CANDIG_NOT_ADMIN2_USER\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\`\`\`"
+PostToSlack "\`\`\`\nBuild success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: $CANDIG_SITE_ADMIN_USER\npassword $(cat ./tmp/secrets/keycloak-test-site-admin-password)\nusername: $CANDIG_NOT_ADMIN_USER\npassword $(cat ./tmp/secrets/keycloak-test-user-password)\nusername: $CANDIG_NOT_ADMIN2_USER\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\n\`\`\`"
 
