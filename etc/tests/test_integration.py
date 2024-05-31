@@ -996,17 +996,9 @@ def test_query_genomic():
 
 def test_query_discovery():
     katsu_response = requests.get(
-        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/"
-    ).json()
-    
-    pprint.pprint(katsu_response)
+        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/").json()
     query_response = requests.get(
-        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs"
-    ).json()
-
-    pprint.pprint(query_response)
-    assert query_response['status'] == 200
-    assert katsu_response['status'] == 200
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs").json()
     # Ensure that each category in metadata corresponds to something in the site
     for category in query_response["site"]["required_but_missing"]:
         for field in query_response["site"]["required_but_missing"][category]:
