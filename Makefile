@@ -37,6 +37,7 @@ mkdir:
 	mkdir -p tmp/secrets
 	mkdir -p tmp/vault
 	mkdir -p tmp/postgres
+	mkdir -p tmp/redis
 
 
 #>>>
