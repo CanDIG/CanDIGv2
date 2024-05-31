@@ -12,5 +12,12 @@ mkdir -p lib/vault/tmp
 echo "Working on vault-config.json .."
 envsubst < lib/vault/configuration_templates/vault-config.json.tpl > lib/vault/tmp/vault-config.json
 
-# store the vault approle token in tmp/vault
-mv tmp/secrets/vault-approle-token tmp/vault/approle-token
+# if there isn't already a value, store the value in tmp/vault/approle-token
+if [[ ! -f "tmp/vault/approle-token" ]]; then
+    mv tmp/secrets/vault-approle-token tmp/vault/approle-token
+fi
+
+# if we didn't need this temp secret, delete it
+if [[ -f "tmp/secrets/vault-approle-token" ]]; then
+    rm tmp/secrets/vault-approle-token
+fi
