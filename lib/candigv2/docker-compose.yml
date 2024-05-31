@@ -60,7 +60,7 @@ secrets:
     labels:
       - "candigv2=secret"
   vault-approle-token:
-      file: $PWD/tmp/secrets/vault-approle-token
+      file: $PWD/tmp/vault/approle-token
       labels:
         - "candigv2=secret"
   tyk-secret-key:

@@ -11,3 +11,6 @@ mkdir -p lib/vault/tmp
 # vault-config.json
 echo "Working on vault-config.json .."
 envsubst < lib/vault/configuration_templates/vault-config.json.tpl > lib/vault/tmp/vault-config.json
+
+# store the vault approle token in tmp/vault
+mv tmp/secrets/vault-approle-token tmp/vault/approle-token
