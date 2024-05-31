@@ -155,6 +155,7 @@ clean-%:
 	-docker volume rm `docker volume ls --filter name=$* -q`
 	docker image rm `docker image ls --format "{{.Repository}}:{{.Tag}}" | grep $*`
 	rm -Rf lib/$*/tmp
+	rm -Rf tmp/$*
 
 
 #>>>
@@ -249,7 +250,6 @@ clean-images:
 clean-secrets:
 	-docker secret rm `docker secret ls -q --filter label=candigv2`
 	rm -rf tmp/secrets
-	rm -rf tmp/vault
 
 
 #>>>
