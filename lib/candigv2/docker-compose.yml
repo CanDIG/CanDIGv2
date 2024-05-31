@@ -28,7 +28,7 @@ volumes:
 
 secrets:
   metadata-db-secret:
-    file: $PWD/tmp/secrets/metadata-db-secret
+    file: $PWD/tmp/postgres/db-secret
     labels:
       - "candigv2=secret"
   # minio-access-key:
