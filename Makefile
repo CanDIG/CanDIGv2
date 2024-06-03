@@ -283,6 +283,7 @@ compose-%:
 	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
+	python settings.py; source env.sh; \
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
 	if [ -f lib/$*/$*_setup.sh ]; then \
