@@ -40,13 +40,6 @@ def get_default_server():
 def main():
     token = get_site_admin_token()
 
-    server = {
-        "server": json.loads(get_env_value("FEDERATION_SELF_SERVER").replace('\'', '"')),
-        "authentication": {
-            "issuer": get_env_value("KEYCLOAK_REALM_URL"),
-            "token": token
-        }
-    }
     headers = {}
     headers["Authorization"] = f"Bearer {token}"
 
