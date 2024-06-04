@@ -27,7 +27,7 @@ CREATE_OUTPUT=$(KCADM create clients/$CLIENT_ID/protocol-mappers/models -r $KEYC
     -s protocolMapper=oidc-audience-mapper \
     -s config="{\"included.client.audience\" : \"$KEYCLOAK_CLIENT_ID\",\"id.token.claim\" : \"true\",\"access.token.claim\" : \"true\"}" 2>&1)
 # uncomment the line below to see the output
- echo $CREATE_OUTPUT
+# echo $CREATE_OUTPUT
 
 # EXPORT: Get the client secret and save it to secrets
 # echo $CLIENT_ID
