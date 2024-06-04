@@ -25,8 +25,8 @@ trap handle_error ERR
 ####################################################
 KEYCLOAK_ADMIN=${DEFAULT_ADMIN_USER}
 KEYCLOAK_ADMIN_PASSWORD=$(cat tmp/secrets/keycloak-admin-password)
-READY_CHECK_URL="http://${CANDIG_DOMAIN}:${KEYCLOAK_PORT}/auth/health/ready"
-KC_ADMIN_URL="http://${CANDIG_DOMAIN}:${KEYCLOAK_PORT}/auth"
+READY_CHECK_URL="${KEYCLOAK_PUBLIC_URL}/auth/health/ready"
+KC_ADMIN_URL="${KEYCLOAK_PUBLIC_URL}/auth"
 #####################################################
 
 echo -e "🚧🚧🚧 ${YELLOW}KEYCLOAK SETUP BEGIN${DEFAULT} 🚧🚧🚧"
