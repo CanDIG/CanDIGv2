@@ -7,6 +7,7 @@ LOGFILE=$PWD/tmp/progress.txt
 # This script runs before the container is composed.
 
 # if there isn't already a value, store the passwords in tmp/keycloak
+mkdir -p tmp/keycloak
 if [[ ! -f "tmp/keycloak/admin-password" ]]; then
     mv tmp/secrets/keycloak-admin-password tmp/keycloak/admin-password
 fi

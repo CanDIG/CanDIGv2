@@ -7,6 +7,7 @@ LOGFILE=$PWD/tmp/progress.txt
 # This script runs before the container is composed.
 
 # if there isn't already a value, store the password in tmp/redis/secret-key
+mkdir -p tmp/redis
 if [[ ! -f "tmp/redis/secret-key" ]]; then
     mv tmp/secrets/redis-secret-key tmp/redis/secret-key
 fi

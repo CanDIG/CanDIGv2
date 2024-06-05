@@ -22,6 +22,7 @@ KEYCLOAK_CLIENT_ID_64_VAL=$(echo -n ${KEYCLOAK_CLIENT_ID} | base64)
 export KEYCLOAK_CLIENT_ID_64=$KEYCLOAK_CLIENT_ID_64_VAL
 
 # if there isn't already a value, store the password in tmp/tyk/secret-key
+mkdir -p tmp/tyk
 if [[ ! -f "tmp/tyk/secret-key" ]]; then
     mv tmp/secrets/tyk-secret-key tmp/tyk/secret-key
 fi

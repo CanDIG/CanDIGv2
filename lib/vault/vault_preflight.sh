@@ -13,6 +13,7 @@ echo "Working on vault-config.json .."
 envsubst < lib/vault/configuration_templates/vault-config.json.tpl > lib/vault/tmp/vault-config.json
 
 # if there isn't already a value, store the value in tmp/vault/approle-token
+mkdir -p tmp/vault
 if [[ ! -f "tmp/vault/approle-token" ]]; then
     mv tmp/secrets/vault-approle-token tmp/vault/approle-token
 fi
