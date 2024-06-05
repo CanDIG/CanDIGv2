@@ -205,9 +205,7 @@ clean-bin:
 .PHONY: clean-compose
 clean-compose:
 	source setup_hosts.sh; \
-	$(foreach MODULE, $(CANDIG_MODULES), \
-		export SERVICE_NAME=$(MODULE); \
-		docker compose -f lib/candigv2/docker-compose.yml -f lib/$(MODULE)/docker-compose.yml down || true;)
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) clean-$(MODULE);)
 
 
 #>>>
