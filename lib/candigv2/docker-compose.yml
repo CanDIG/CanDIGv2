@@ -44,13 +44,11 @@ secrets:
     labels:
       - "candigv2=secret"
   keycloak-admin-password:
-    file: $PWD/tmp/secrets/keycloak-admin-password
-    labels:
-      - "candigv2=secret"
+    file: $PWD/tmp/keycloak/admin-password
     labels:
       - "candigv2=secret"
   keycloak-client-secret:
-    file: $PWD/tmp/secrets/keycloak-client-secret
+    file: $PWD/tmp/keycloak/client-secret
     labels:
       - "candigv2=secret"
   vault-approle-token:

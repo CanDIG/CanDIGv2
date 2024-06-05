@@ -38,6 +38,7 @@ mkdir:
 	mkdir -p tmp/vault
 	mkdir -p tmp/postgres
 	mkdir -p tmp/redis
+	mkdir -p tmp/keycloak
 
 
 #>>>
