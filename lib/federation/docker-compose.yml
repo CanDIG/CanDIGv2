@@ -17,8 +17,6 @@ services:
         target: vault-approle-token
       - source: keycloak-client-secret
         target: /run/secrets/client_secret
-      - source: keycloak-test-user2-password
-        target: /run/secrets/password
     environment:
         TEST_KEY: "hoodlebug"
         KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}

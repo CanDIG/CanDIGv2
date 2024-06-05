@@ -47,12 +47,6 @@ secrets:
     file: $PWD/tmp/secrets/keycloak-admin-password
     labels:
       - "candigv2=secret"
-  keycloak-test-user-password:
-    file: $PWD/tmp/secrets/keycloak-test-user-password
-    labels:
-      - "candigv2=secret"
-  keycloak-test-user2-password:
-    file: $PWD/tmp/secrets/keycloak-test-user2-password
     labels:
       - "candigv2=secret"
   keycloak-client-secret:
