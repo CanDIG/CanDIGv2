@@ -56,7 +56,7 @@ secrets:
       labels:
         - "candigv2=secret"
   tyk-secret-key:
-    file: $PWD/tmp/secrets/tyk-secret-key
+    file: $PWD/tmp/tyk/secret-key
     labels:
       - "candigv2=secret"
   redis-secret-key:

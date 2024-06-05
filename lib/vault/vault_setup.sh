@@ -117,7 +117,7 @@ rm lib/vault/tmp/temp.json
 
 echo
 echo ">> setting up approle token"
-approle_token=$(cat tmp/secrets/vault-approle-token)
+approle_token=$(cat tmp/vault/approle-token)
 echo "{\"id\": \"${approle_token}\", \"policies\": [\"approle\"], \"periodic\": \"24h\"}" > lib/vault/tmp/temp.json
 curl --request POST --header "X-Vault-Token: ${key_root}" --data @lib/vault/tmp/temp.json $VAULT_SERVICE_PUBLIC_URL/v1/auth/token/create/approle
 rm lib/vault/tmp/temp.json

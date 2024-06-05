@@ -55,25 +55,25 @@ def get_env():
     vars["CANDIG_NOT_ADMIN_USER"] = get_env_value("TEST_USER_1")
     vars["CANDIG_NOT_ADMIN2_USER"] = get_env_value("TEST_USER_2")
     # vars that come from files:
-    if os.path.isfile("tmp/secrets/keycloak-client-secret"):
-        with open("tmp/secrets/keycloak-client-secret") as f:
+    if os.path.isfile("tmp/keycloak/client-secret"):
+        with open("tmp/keycloak/client-secret") as f:
             vars["CANDIG_CLIENT_SECRET"] = f.read().splitlines().pop()
-    if os.path.isfile("tmp/secrets/keycloak-test-site-admin-password"):
-        with open("tmp/secrets/keycloak-test-site-admin-password") as f:
+    if os.path.isfile("tmp/keycloak/test-site-admin-password"):
+        with open("tmp/keycloak/test-site-admin-password") as f:
             vars["CANDIG_SITE_ADMIN_PASSWORD"] = f.read().splitlines().pop()
-    if os.path.isfile("tmp/secrets/keycloak-test-user-password"):
-        with open("tmp/secrets/keycloak-test-user-password") as f:
+    if os.path.isfile("tmp/keycloak/test-user-password"):
+        with open("tmp/keycloak/test-user-password") as f:
             vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
-    if os.path.isfile("tmp/secrets/keycloak-test-user2-password"):
-        with open("tmp/secrets/keycloak-test-user2-password") as f:
+    if os.path.isfile("tmp/keycloak/test-user2-password"):
+        with open("tmp/keycloak/test-user2-password") as f:
             vars["CANDIG_NOT_ADMIN2_PASSWORD"] = f.read().splitlines().pop()
     if os.path.isfile("tmp/vault/keys.txt"):
         with open("tmp/vault/keys.txt") as f:
             vars["VAULT_ROOT_TOKEN"] = f.read().splitlines().pop(-1)
-    if os.path.isfile("tmp/secrets/tyk-secret-key"):
-        with open("tmp/secrets/tyk-secret-key") as f:
+    if os.path.isfile("tmp/tyk/secret-key"):
+        with open("tmp/tyk/secret-key") as f:
             vars["TYK_SECRET_KEY"] = f.read().splitlines().pop()
-    vars["POSTGRES_PASSWORD_FILE"] = f"tmp/secrets/metadata-db-secret"
+    vars["POSTGRES_PASSWORD_FILE"] = f"tmp/postgres/db-secret"
     vars["CANDIG_ENV"] = INTERPOLATED_ENV
     vars["DB_PATH"] = "metadata-db"
     return vars

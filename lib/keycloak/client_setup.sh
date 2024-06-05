@@ -34,4 +34,4 @@ CREATE_OUTPUT=$(KCADM create clients/$CLIENT_ID/protocol-mappers/models -r $KEYC
 # echo $(KCADM get clients/"$CLIENT_ID"/client-secret -r "$KEYCLOAK_REALM")
 CLIENT_SECRET=$(docker exec "$KEYCLOAK_CONTAINER_ID" /opt/keycloak/bin/kcadm.sh get clients/"$CLIENT_ID"/client-secret -r "$KEYCLOAK_REALM" | sed -n '/{/,/}/p' | jq -r '.value')
 # echo $CLIENT_SECRET
-echo "$CLIENT_SECRET" > tmp/secrets/keycloak-client-secret
+echo "$CLIENT_SECRET" > tmp/keycloak/client-secret

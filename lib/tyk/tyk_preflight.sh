@@ -15,21 +15,39 @@ LOGFILE=$PWD/tmp/progress.txt
 # see Makefile.authx for other details.
 export CONFIG_DIR="$PWD/lib/tyk/tmp"
 
-KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/secrets/keycloak-client-secret)
+KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/keycloak/client-secret)
 export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_VAL
 
 KEYCLOAK_CLIENT_ID_64_VAL=$(echo -n ${KEYCLOAK_CLIENT_ID} | base64)
 export KEYCLOAK_CLIENT_ID_64=$KEYCLOAK_CLIENT_ID_64_VAL
 
-TYK_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-secret-key)
-export TYK_SECRET_KEY=$TYK_SECRET_KEY_VAL
+# if there isn't already a value, store the password in tmp/tyk/secret-key
+if [[ ! -f "tmp/tyk/secret-key" ]]; then
+    mv tmp/secrets/tyk-secret-key tmp/tyk/secret-key
+fi
 
-TYK_ANALYTIC_ADMIN_SECRET_VAL=$(cat $PWD/tmp/secrets/tyk-analytics-admin-key)
-export TYK_ANALYTIC_ADMIN_SECRET=$TYK_ANALYTIC_ADMIN_SECRET_VAL
+# if we didn't need this temp secret, delete it
+if [[ -f "tmp/secrets/tyk-secret-key" ]]; then
+    rm tmp/secrets/tyk-secret-key
+fi
+
+export TYK_SECRET_KEY=$(cat $PWD/tmp/tyk/secret-key)
+
+# if there isn't already a value, store the password in tmp/tyk/analytics-admin-key
+if [[ ! -f "tmp/tyk/analytics-admin-key" ]]; then
+    mv tmp/secrets/tyk-analytics-admin-key tmp/tyk/analytics-admin-key
+fi
+
+# if we didn't need this temp secret, delete it
+if [[ -f "tmp/secrets/tyk-analytics-admin-key" ]]; then
+    rm tmp/secrets/tyk-analytics-admin-key
+fi
+
+export TYK_ANALYTIC_ADMIN_SECRET=$(cat $PWD/tmp/tyk/analytics-admin-key)
 
 export KEYCLOAK_PUBLIC_KEY=$(curl ${KEYCLOAK_REALM_URL} -k 2>/dev/null | jq -r '.public_key')
 
-REDIS_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/redis-secret-key)
+REDIS_SECRET_KEY_VAL=$(cat $PWD/tmp/redis/secret-key)
 export REDIS_SECRET_KEY=$REDIS_SECRET_KEY_VAL
 
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
