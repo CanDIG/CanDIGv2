@@ -15,7 +15,7 @@ services:
         target: tyk-secret-key
       - source: vault-approle-token
         target: vault-approle-token
-      - source: keycloak-client-local-candig-secret
+      - source: keycloak-client-secret
         target: /run/secrets/client_secret
       - source: keycloak-test-user2-password
         target: /run/secrets/password

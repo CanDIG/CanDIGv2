@@ -15,7 +15,7 @@ LOGFILE=$PWD/tmp/progress.txt
 # see Makefile.authx for other details.
 export CONFIG_DIR="$PWD/lib/tyk/tmp"
 
-KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret)
+KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/secrets/keycloak-client-secret)
 export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_VAL
 
 KEYCLOAK_CLIENT_ID_64_VAL=$(echo -n ${KEYCLOAK_CLIENT_ID} | base64)

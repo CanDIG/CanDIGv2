@@ -30,7 +30,7 @@ make test-integration
 
 Check that you can see the data portal in your browser at [http://candig.docker.internal:5080](http://candig.docker.internal:5080). If not, refer to the instructions in the [Docker Deployment Guide](./install-docker.md).
 
-Check that you can generate a bearer token for user2 with the following call, substituting usernames, secrets and passwords from `TEST_USER_2` in .env, `tmp/secrets/keycloak-client-local_candig-secret` and `tmp/secrets/keycloak-test-user2-password`.
+Check that you can generate a bearer token for user2 with the following call, substituting usernames, secrets and passwords from `TEST_USER_2` in .env, `tmp/secrets/keycloak-client-secret` and `tmp/secrets/keycloak-test-user2-password`.
 
 ```bash
 ## user2 bearer token

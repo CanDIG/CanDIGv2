@@ -55,8 +55,8 @@ secrets:
     file: $PWD/tmp/secrets/keycloak-test-user2-password
     labels:
       - "candigv2=secret"
-  keycloak-client-local-candig-secret:
-    file: $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret
+  keycloak-client-secret:
+    file: $PWD/tmp/secrets/keycloak-client-secret
     labels:
       - "candigv2=secret"
   vault-approle-token:
