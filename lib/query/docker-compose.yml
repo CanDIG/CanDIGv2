@@ -15,7 +15,7 @@ services:
       options:
         tag: "{{.Name}}"
     ports:
-      - "${QUERY_PORT}:3000"
+      - "${QUERY_PORT}:1236"
     environment:
       CANDIG_KATSU_URL: ${KATSU_PRIVATE_URL}
       CANDIG_HTSGET_URL: ${HTSGET_PRIVATE_URL}
