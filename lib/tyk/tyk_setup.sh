@@ -19,8 +19,7 @@ do
 done
 sleep 5
 
-TYK_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-secret-key)
-export TYK_SECRET_KEY=$TYK_SECRET_KEY_VAL
+export TYK_SECRET_KEY=$(cat $PWD/tmp/tyk/secret-key)
 
 generate_key() {
 

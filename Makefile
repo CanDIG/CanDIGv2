@@ -35,7 +35,6 @@ mkdir:
 	mkdir -p bin
 	mkdir -p $(CONDA_INSTALL)
 	mkdir -p tmp/secrets
-	mkdir -p tmp/vault
 
 
 #>>>
@@ -151,8 +150,9 @@ clean-%:
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
 	-docker volume rm `docker volume ls --filter name=$* -q`
-	docker image rm `docker image ls --format "{{.Repository}}:{{.Tag}}" | grep $*`
-	rm -Rf lib/$*/tmp
+	-docker image rm `docker image ls --format "{{.Repository}}:{{.Tag}}" | grep $*`
+	-rm -Rf lib/$*/tmp
+	-rm -Rf tmp/$*
 
 
 #>>>
@@ -201,9 +201,7 @@ clean-bin:
 .PHONY: clean-compose
 clean-compose:
 	source setup_hosts.sh; \
-	$(foreach MODULE, $(CANDIG_MODULES), \
-		export SERVICE_NAME=$(MODULE); \
-		docker compose -f lib/candigv2/docker-compose.yml -f lib/$(MODULE)/docker-compose.yml down || true;)
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) clean-$(MODULE);)
 
 
 #>>>
@@ -247,7 +245,6 @@ clean-images:
 clean-secrets:
 	-docker secret rm `docker secret ls -q --filter label=candigv2`
 	rm -rf tmp/secrets
-	rm -rf tmp/vault
 
 
 #>>>
@@ -524,26 +521,19 @@ start-all:
 	CONTAINERS="$(shell docker ps -a --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker start $$CONTAINER; done
 
 #>>>
-# rebuild the entire stack without touching the postgres container
-
+# rebuild the entire stack without touching the data containers, defined in .env
 #<<<
-.PHONY: rebuild-without-postgres
-rebuild-without-postgres:
-	# Back up postgres-related variables
-	mkdir -p tmp2
-	@cp tmp/secrets/metadata-* tmp2/
-	# Remove Postgres from the .env
-	$(eval CANDIG_MODULES := $(filter-out postgres,$(CANDIG_MODULES)))
+
+.PHONY: rebuild-keep-data
+rebuild-keep-data:
+	# Remove the module from the .env
+	$(eval CANDIG_MODULES := $(filter-out $(CANDIG_DATA_MODULES),$(CANDIG_MODULES)))
 	# Clean everything
 	$(MAKE) clean-all CANDIG_MODULES="$(CANDIG_MODULES)"
 	docker system prune -af
 	# Start build-all
 	./pre-build-check.sh $(ARGS)
 	$(MAKE) init-docker
-	# Copy back our secrets
-	@cp tmp2/* tmp/secrets/
-	rm -r tmp2/
 	# Rebuild everything
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
-

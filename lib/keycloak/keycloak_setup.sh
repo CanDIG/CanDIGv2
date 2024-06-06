@@ -24,7 +24,7 @@ trap handle_error ERR
 #              VARIABLES CONFIGURATION             #
 ####################################################
 KEYCLOAK_ADMIN=${DEFAULT_ADMIN_USER}
-KEYCLOAK_ADMIN_PASSWORD=$(cat tmp/secrets/keycloak-admin-password)
+KEYCLOAK_ADMIN_PASSWORD=$(cat tmp/keycloak/admin-password)
 READY_CHECK_URL="${KEYCLOAK_PUBLIC_URL}/auth/health/ready"
 KC_ADMIN_URL="${KEYCLOAK_PUBLIC_URL}/auth"
 #####################################################
