@@ -416,7 +416,7 @@ def test_htsget():
     os.environ[
         "TESTENV_URL"
     ] = f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}"
-    retcode = pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py", "-k", "test_remove_objects or test_post_objects or test_index_variantfile or test_install_public_object"])
+    retcode = pytest.main(["-x", "lib/htsget/htsget_app/tests/test_htsget_server.py"]) #, "-k", "test_remove_objects or test_post_objects or test_index_variantfile or test_install_public_object"])
     if old_val is not None:
         os.environ["TESTENV_URL"] = old_val
     print(retcode)
