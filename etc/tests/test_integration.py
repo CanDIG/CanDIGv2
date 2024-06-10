@@ -390,6 +390,7 @@ def clean_up_program_htsget(program_id):
 def test_ingest_not_admin_katsu():
     clean_up_program("SYNTHETIC-1")
     clean_up_program("SYNTHETIC-2")
+    clean_up_program("SYNTHETIC-10")
 
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
         test_data = json.load(f)
@@ -939,6 +940,7 @@ def test_query_genomic():
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     )
+    pprint.pprint(response.json())
     if len(response.json()["results"]) != 1:
         print(f"\n\nExpected 1 result from the genomic query using position 'chr21:5030000-5030847' but got {len(response.json()["results"])}")
         if len(response.json()["results"]) > 0:
