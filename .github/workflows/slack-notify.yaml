@@ -1,0 +1,15 @@
+name: Slack Notify on Update
+
+on:
+  pull_request:
+    branches:
+        - develop
+    paths:
+      - "etc/env/example.env"
+
+jobs:
+  notify-slack:
+    name: Slack notify
+    uses:
+    runs-on: ubuntu-latest
+    
