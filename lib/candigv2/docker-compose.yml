@@ -28,7 +28,7 @@ volumes:
 
 secrets:
   metadata-db-secret:
-    file: $PWD/tmp/secrets/metadata-db-secret
+    file: $PWD/tmp/postgres/db-secret
     labels:
       - "candigv2=secret"
   # minio-access-key:
@@ -44,30 +44,22 @@ secrets:
     labels:
       - "candigv2=secret"
   keycloak-admin-password:
-    file: $PWD/tmp/secrets/keycloak-admin-password
+    file: $PWD/tmp/keycloak/admin-password
     labels:
       - "candigv2=secret"
-  keycloak-test-user-password:
-    file: $PWD/tmp/secrets/keycloak-test-user-password
-    labels:
-      - "candigv2=secret"
-  keycloak-test-user2-password:
-    file: $PWD/tmp/secrets/keycloak-test-user2-password
-    labels:
-      - "candigv2=secret"
-  keycloak-client-local-candig-secret:
-    file: $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret
+  keycloak-client-secret:
+    file: $PWD/tmp/keycloak/client-secret
     labels:
       - "candigv2=secret"
   vault-approle-token:
-      file: $PWD/tmp/secrets/vault-approle-token
+      file: $PWD/tmp/vault/approle-token
       labels:
         - "candigv2=secret"
   tyk-secret-key:
-    file: $PWD/tmp/secrets/tyk-secret-key
+    file: $PWD/tmp/tyk/secret-key
     labels:
       - "candigv2=secret"
   redis-secret-key:
-    file: $PWD/tmp/secrets/redis-secret-key
+    file: $PWD/tmp/redis/secret-key
     labels:
       - "candigv2=secret"

@@ -15,8 +15,8 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
     # if no refresh token, get one:
     # check for default site admin user: if not present, check env vars
     username = os.getenv("CANDIG_SITE_ADMIN_USER")
-    if os.path.isfile("tmp/secrets/keycloak-test-site-admin-password"):
-        with open(f"tmp/secrets/keycloak-test-site-admin-password") as f:
+    if os.path.isfile("tmp/keycloak/test-site-admin-password"):
+        with open(f"tmp/keycloak/test-site-admin-password") as f:
             password = f.read().splitlines().pop()
     else:
         password = os.getenv("CANDIG_SITE_ADMIN_PASSWORD")
