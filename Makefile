@@ -510,6 +510,13 @@ else
 	source ./env.sh; pytest ./etc/tests $(ARGS)
 endif
 
+# Run a single test by using its name and print out results whether failing or passing
+# note some tests are dependent on others so doesn't always work as expected
+# Helpful when debugging issues with a specific test
+.PHONY: test-integration-%
+test-integration-%:
+	python ./settings.py; source ./env.sh; pytest ./etc/tests -s -rP -k '$*'
+
 # stop all docker containers
 .PHONY: stop-all
 stop-all:
