@@ -390,7 +390,6 @@ def clean_up_program_htsget(program_id):
 def test_ingest_not_admin_katsu():
     clean_up_program("SYNTHETIC-1")
     clean_up_program("SYNTHETIC-2")
-    clean_up_program("SYNTHETIC-10")
 
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
         test_data = json.load(f)
@@ -568,13 +567,6 @@ def test_index_success():
 ## Does Beacon return the correct level of authorized results?
 def beacon_access():
     return [
-        # (   # user1 can access test, multisample_2 as part of SYNTHETIC-1
-        #     "CANDIG_NOT_ADMIN_USER",
-        #     "CANDIG_NOT_ADMIN_PASSWORD",
-        #     "NC_000001.11:g.14248T>G", #chr1	14248	.	T	G
-        #     ["test"],
-        #     ["", ""],
-        # ),  
         (
             "CANDIG_NOT_ADMIN_USER",
             "CANDIG_NOT_ADMIN_PASSWORD",
@@ -589,13 +581,6 @@ def beacon_access():
             ["SYNTHETIC-2"],
             ["SYNTHETIC-1"],
         )  
-        # (
-        #     "CANDIG_NOT_ADMIN2_USER",
-        #     "CANDIG_NOT_ADMIN2_PASSWORD",
-        #     "NC_000001.11:g.16565782G>A",
-        #     [],
-        #     ["", "", ""],
-        # ),  
     ]
 
 
