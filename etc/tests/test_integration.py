@@ -419,7 +419,7 @@ def test_ingest_admin_katsu():
     }
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
         test_data = json.load(f)
-    
+
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     pprint.pprint(response.json())
     assert response.status_code == 201
@@ -455,7 +455,7 @@ def test_ingest_not_admin_htsget():
 
 def test_ingest_admin_htsget():
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_genomic_ingest.json", 'r') as f:
-        test_data = json.load(f)    
+        test_data = json.load(f)
 
     token = get_site_admin_token()
     headers = {
@@ -475,7 +475,7 @@ def test_ingest_admin_htsget():
         print(f"\n{results[id]}\n")
         assert "genomic" in results[id]
         assert "sample" in results[id]
-        
+
 
 ## Can we access the data when authorized to do so?
 def user_access():
@@ -494,14 +494,14 @@ def user_access():
         ),  # user1 can access test as part of SYNTHETIC-1
         (
             "CANDIG_NOT_ADMIN2_USER",
-            "CANDIG_NOT_ADMIN2_PASSWORD", 
-            "NA02102-bam", 
+            "CANDIG_NOT_ADMIN2_PASSWORD",
+            "NA02102-bam",
             False
         ),  # user2 cannot access NA02102-bam
         (
             "CANDIG_NOT_ADMIN2_USER",
-            "CANDIG_NOT_ADMIN2_PASSWORD", 
-            "multisample_1", 
+            "CANDIG_NOT_ADMIN2_PASSWORD",
+            "multisample_1",
             True
         )  # user2 can access multisample_1
     ]
@@ -550,7 +550,7 @@ def test_index_success():
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/test", headers=headers)
     assert "indexed" in response.json()
     assert response.json()['indexed'] == 1
-    
+
     token = get_token(
         username=ENV["CANDIG_NOT_ADMIN2_USER"],
         password=ENV["CANDIG_NOT_ADMIN2_PASSWORD"],
@@ -573,14 +573,14 @@ def beacon_access():
             "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
             ["SYNTHETIC-1"],
             ["SYNTHETIC-2"],
-        ),  
+        ),
         (   # user2 can access NA18537-vcf, multisample_1, HG02102
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
             "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
             ["SYNTHETIC-2"],
             ["SYNTHETIC-1"],
-        )  
+        )
     ]
 
 
@@ -793,7 +793,7 @@ def test_add_server():
 
 # Query Test: Get all donors
 def test_query_donors_all():
-    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'], 
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'],
                       password=ENV['CANDIG_NOT_ADMIN2_PASSWORD'])
     headers = {
         "Authorization": f"Bearer {token}",
@@ -804,7 +804,7 @@ def test_query_donors_all():
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     ).json()
-    
+
     if len(response["results"]) != 7:
         returned_donors = [x['program_id'] + ": " + (x['submitter_donor_id']) for x in response['results']]
         print(f"Expected to get 7 donors returned but query returned {len(response["results"])}.")
@@ -860,7 +860,7 @@ def test_query_donors_all():
 
 # Test 2: Search for a specific donor
 def test_query_donor_search():
-    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'], 
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'],
                       password=ENV['CANDIG_NOT_ADMIN2_PASSWORD'])
     headers = {
         "Authorization": f"Bearer {token}",
@@ -912,7 +912,7 @@ def test_query_donor_search():
 
 def test_query_genomic():
     # tests that a request sent via query to htsget-beacon properly prunes the data
-    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'], 
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'],
                       password=ENV['CANDIG_NOT_ADMIN2_PASSWORD'])
     headers = {
         "Authorization": f"Bearer {token}",
@@ -936,7 +936,7 @@ def test_query_genomic():
     assert response.json()["results"][0]['program_id'] == "SYNTHETIC-2"
     assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_NULL"
 
-    token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'], 
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
                       password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
     headers = {
         "Authorization": f"Bearer {token}",
@@ -959,7 +959,7 @@ def test_query_genomic():
     assert response.json()["results"][0]['program_id'] == "SYNTHETIC-1"
     assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_1"
 
-    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'], 
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'],
                       password=ENV['CANDIG_NOT_ADMIN2_PASSWORD'])
     headers = {
         "Authorization": f"Bearer {token}",
@@ -1012,7 +1012,7 @@ def test_query_discovery():
 
 def test_clean_up():
     clean_up_program("SYNTHETIC-1")
-    clean_up_program("SYNTHETIC-2") 
+    clean_up_program("SYNTHETIC-2")
 
     # clean up test_htsget
     old_val = os.environ.get("TESTENV_URL")
