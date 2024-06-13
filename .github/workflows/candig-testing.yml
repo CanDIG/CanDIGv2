@@ -58,8 +58,10 @@ jobs:
         run: |
               conda activate candig
               echo `file -bi .env`
+              iconv -f us-ascii -t UTF-8 .env -o .env-utf
+              mv .env-utf .env
+              echo `file -bi .env`
               echo `head .env`
-              iconv -f us-ascii -t UTF-8 .env > .env
               (yes || true) | make build-all
       - name: Integration testing
         run: |
