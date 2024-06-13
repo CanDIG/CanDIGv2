@@ -59,6 +59,7 @@ jobs:
               conda activate candig
               echo `python --version`
               echo `which python`
+              echo `docker --version`
               (yes || true) | make build-all
       - name: Integration testing
         run: |
