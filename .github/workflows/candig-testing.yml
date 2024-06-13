@@ -57,9 +57,8 @@ jobs:
       - name: Build stack
         run: |
               conda activate candig
-              echo `python --version`
-              echo `which python`
-              echo `docker --version`
+              echo `file -bi .env`
+              echo `head .env`
               (yes || true) | make build-all
       - name: Integration testing
         run: |
