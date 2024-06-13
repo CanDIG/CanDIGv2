@@ -9,7 +9,7 @@ import tempfile
 # get_env_value returns the correct, interpolated value for a variable.
 # get_env returns variables that are often exported for env vars, as well as several variables that come from generated secrets. All other values are saved as CANDIG_ENV.
 
-
+print("***** running settings.py ******")
 CANDIGV2_ENV = None
 INTERPOLATED_ENV = None
 with open(".env") as f:
@@ -19,6 +19,8 @@ with open(".env") as f:
     CANDIGV2_ENV = dotenv_values(fp.name, interpolate=False)
     INTERPOLATED_ENV = dotenv_values(fp.name, interpolate=True)
     os.unlink(fp.name)
+print(CANDIGV2_ENV)
+print(INTERPOLATED_ENV)
 
 
 # Python-dotenv doesn't interpolate quite correctly, so get_env_value interpolates manually
