@@ -505,9 +505,9 @@ print-%:
 test-integration:
 	python ./settings.py
 ifeq ($(KEEP_TEST_DATA),true)
-	source ./env.sh; pytest ./etc/tests -k 'not test_clean_up' $(ARGS)
+	source ./env.sh; pytest -v ./etc/tests -k 'not test_clean_up' $(ARGS)
 else
-	source ./env.sh; pytest ./etc/tests $(ARGS)
+	source ./env.sh; pytest -v ./etc/tests $(ARGS)
 endif
 
 # Run a single test by using its name and print out results whether failing or passing
