@@ -96,7 +96,6 @@ build-all:
 
 # Setup the entire stack
 	$(MAKE) init-docker
-	pip install -U -r etc/venv/requirements.txt
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
 
