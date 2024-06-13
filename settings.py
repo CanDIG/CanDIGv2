@@ -9,6 +9,7 @@ import tempfile
 # get_env_value returns the correct, interpolated value for a variable.
 # get_env returns variables that are often exported for env vars, as well as several variables that come from generated secrets. All other values are saved as CANDIG_ENV.
 
+
 CANDIGV2_ENV = None
 INTERPOLATED_ENV = None
 with open(".env") as f:
