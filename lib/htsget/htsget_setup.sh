@@ -18,4 +18,3 @@ done
 python settings.py
 source env.sh
 bash $PWD/create_service_store.sh "htsget"
-docker restart $htsget
