@@ -2,14 +2,11 @@ import json
 import os
 import re
 import sys
-import uuid
 from http import HTTPStatus
 from pathlib import Path
 import datetime
 import pytest
 import requests
-from dotenv import dotenv_values
-from copy import deepcopy
 import urllib.parse
 import pprint
 
