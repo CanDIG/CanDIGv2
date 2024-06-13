@@ -57,11 +57,7 @@ jobs:
       - name: Build stack
         run: |
               conda activate candig
-              echo `file -bi .env`
-              iconv -f us-ascii -t UTF-8 .env -o .env-utf
-              mv .env-utf .env
-              echo `file -bi .env`
-              echo `head .env`
+              echo `docker compose version`
               (yes || true) | make build-all
       - name: Integration testing
         run: |
