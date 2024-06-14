@@ -16,7 +16,7 @@ jobs:
        shell: bash -l {0}
     steps:
       - name: Install conda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           miniconda-version: "latest"
           channels: conda-forge, defaults
@@ -24,7 +24,7 @@ jobs:
           auto-update-conda: true
           auto-activate-base: true
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup environment file
         run: |
             cp etc/env/example.env example.env
@@ -40,7 +40,7 @@ jobs:
              make mkdir
       - name: Restore Conda environment cache
         id: cache-conda
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.CONDA }}
           key: ${{ runner.os }}-conda-${{ hashFiles('etc/venv/requirements.txt') }}
@@ -50,7 +50,7 @@ jobs:
         run: |
               make init-conda
       - name: Save Conda cache
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         if: steps.install-conda.outcome == 'success'
         with:
           path: ${{ env.CONDA }}
@@ -72,7 +72,7 @@ jobs:
         run: docker cp candigv2_vault-runner_1:/vault/vault-audit.log tmp/vault_audit.log 2>&1
       - name: Save container and error logs as artifact
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Post-build error log
           path: |
