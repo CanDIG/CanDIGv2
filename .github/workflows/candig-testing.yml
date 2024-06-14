@@ -29,6 +29,7 @@ jobs:
         run: |
             cp etc/env/example.env example.env
             sed "s@CONDA_INSTALL=.*@CONDA_INSTALL=$CONDA@" example.env > .env
+            sed -i "s@KEEP_TEST_DATA=false@KEEP_TEST_DATA=true@" .env
       - name: Display environment file
         run: cat ".env"
       - name: Add CanDIG local domain redirection to hosts
