@@ -388,8 +388,14 @@ def clean_up_program_htsget(program_id):
 
 
 def test_ingest_not_admin_katsu():
-    clean_up_program("SYNTHETIC-1")
-    clean_up_program("SYNTHETIC-2")
+    katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/").json()
+    katsu_programs = [x['program_id'] for x in katsu_response]
+    if 'SYNTHETIC-1' in katsu_programs:
+        print("cleaning up 'SYNTHETIC-1'")
+        clean_up_program("SYNTHETIC-1")
+    if 'SYNTHETIC-2' in katsu_programs:
+        print("cleaning up 'SYNTHETIC-2'")
+        clean_up_program("SYNTHETIC-2")
 
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
         test_data = json.load(f)
@@ -409,8 +415,14 @@ def test_ingest_not_admin_katsu():
 
 
 def test_ingest_admin_katsu():
-    clean_up_program("SYNTHETIC-1")
-    clean_up_program("SYNTHETIC-2")
+    katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/").json()
+    katsu_programs = [x['program_id'] for x in katsu_response]
+    if 'SYNTHETIC-1' in katsu_programs:
+        print("cleaning up 'SYNTHETIC-1'")
+        clean_up_program("SYNTHETIC-1")
+    if 'SYNTHETIC-2' in katsu_programs:
+        print("cleaning up 'SYNTHETIC-2'")
+        clean_up_program("SYNTHETIC-2")
 
     token = get_site_admin_token()
     headers = {
