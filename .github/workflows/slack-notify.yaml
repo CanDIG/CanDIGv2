@@ -10,6 +10,11 @@ on:
 jobs:
   notify-slack:
     name: Slack notify
-    uses:
     runs-on: ubuntu-latest
+    steps:
+      - name: post to slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.26.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     
