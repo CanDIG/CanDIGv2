@@ -51,7 +51,7 @@ make bin-conda
 source bin/miniconda3/etc/profile.d/conda.sh
 make init-conda
 conda activate candig
-make build-all ARGS="-s" 2<&1 >tmp/lastbuild.txt
+make build-all BUILD_OPTS="--no-cache" ARGS="-s" 2<&1 >tmp/lastbuild.txt
 
 if [ $? -ne 0 ]; then
     PostToSlack "Build failed:\n $(tail tmp/lastbuild.txt)"
