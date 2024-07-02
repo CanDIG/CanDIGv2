@@ -357,7 +357,7 @@ def clean_up_program(test_id):
     }
 
     delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/program/{test_id}/",
+        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/program/{test_id}/",
         headers=headers,
     )
     print(f"katsu delete response status code: {delete_response.status_code}")
