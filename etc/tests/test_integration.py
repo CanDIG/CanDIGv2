@@ -117,7 +117,8 @@ def get_katsu_datasets(user):
     return response.json()["result"]
 
 
-def add_program_authorization(dataset):
+def add_program_authorization(dataset: str, curators: list=[ENV['CANDIG_SITE_ADMIN_USER']], 
+                              team_members: list=[ENV['CANDIG_SITE_ADMIN_USER']]):
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
@@ -127,8 +128,8 @@ def add_program_authorization(dataset):
     # create a program and its authorizations:
     test_program = {
         "program_id": dataset,
-        "program_curators": [ENV['CANDIG_SITE_ADMIN_USER']],
-        "team_members": [ENV['CANDIG_SITE_ADMIN_USER']]
+        "program_curators": curators,
+        "team_members": team_members
     }
 
     print(f"{ENV['CANDIG_URL']}/ingest/program")
@@ -348,14 +349,16 @@ def test_s3_credentials():
 # -----------------
 def clean_up_program(test_id):
     """
-    Deletes a dataset and all related objects. Expected 204
+    Deletes a dataset and all related objects in katsu, htsget and opa. Expected 204
     """
+    print(f"deleting {test_id}")
     site_admin_token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {site_admin_token}",
         "Content-Type": "application/json; charset=utf-8",
     }
 
+    # delete program from katsu
     delete_response = requests.delete(
         f"{ENV['CANDIG_URL']}/katsu/v2/ingest/program/{test_id}/",
         headers=headers,
@@ -366,11 +369,24 @@ def clean_up_program(test_id):
     ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
     f" Response content: {delete_response.content}"
 
+    # delete program from htsget
     delete_response = requests.delete(
         f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{test_id}",
         headers=headers
     )
     print(f"htsget delete response status code: {delete_response.status_code}")
+    assert delete_response.status_code == 200
+
+    site_admin_token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    # delete program authorization from opa
+    delete_response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_id}",
+                                      headers=headers)
+    print(f"program authorization delete response status code: {delete_response.status_code}")
     assert delete_response.status_code == 200
 
 
@@ -414,6 +430,23 @@ def test_ingest_not_admin_katsu():
     # when the user has no admin access, they should not be allowed
     assert response.status_code == 401
 
+    # add program authorization
+    add_program_authorization("SYNTHETIC-1", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
+    add_program_authorization("SYNTHETIC-2", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    assert response.json()['SYNTHETIC-1']['errors'] == []
+    assert response.json()['SYNTHETIC-2']['errors'] == []
+    assert response.status_code == 201
+
 
 def test_ingest_admin_katsu():
     katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/")
@@ -455,6 +488,9 @@ def test_ingest_admin_katsu():
         assert 'SYNTHETIC-2' in katsu_programs
     else:
         print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
+    # Reinstate expected program authorizations
+    add_program_authorization("SYNTHETIC-1", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization("SYNTHETIC-2", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
 
 
 ## Htsget tests:
