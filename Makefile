@@ -399,7 +399,7 @@ init-conda:
 	source $(CONDA_ENV_SETTINGS) \
 		&& conda activate $(VENV_NAME) \
 		&& python -m ensurepip --upgrade \
-		&& python -m ensurepip --upgrade setuptools \
+		&& python -m pip --upgrade setuptools \
 		&& pip install -U -r etc/venv/requirements.txt
 
 #@echo "Load local conda: source bin/miniconda3/etc/profile.d/conda.sh"
