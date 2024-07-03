@@ -349,7 +349,8 @@ def test_s3_credentials():
 # -----------------
 def clean_up_program(test_id):
     """
-    Deletes a dataset and all related objects in katsu, htsget and opa. Expected 204
+    Deletes a dataset and all related objects in katsu, htsget and opa. Expected either 
+    successful delete or not found if the programs are not ingested.
     """
     print(f"deleting {test_id}")
     site_admin_token = get_site_admin_token()
