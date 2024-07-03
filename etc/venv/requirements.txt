@@ -6,7 +6,7 @@ aiohttp
 requests
 pytest
 pytz
-candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@mshadbolt/test_name_update
+candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@mshadbolt/test-name-update
 minio==7.1.12
 werkzeug>=2.3.8 # not directly required, pinned by Snyk to avoid a vulnerability
 clinical_etl@git+https://github.com/CanDIG/clinical_ETL_code.git@test_name_update
