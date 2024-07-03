@@ -142,6 +142,17 @@ def add_program_authorization(dataset: str, curators: list=[ENV['CANDIG_SITE_ADM
     return response.json()
 
 
+def delete_program_authorization(dataset: str):
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{dataset}", headers=headers)
+    print(response.text)
+    return response.json()
+
+
 ## Can we add a program authorization and modify it?
 @pytest.mark.parametrize("user, dataset", user_auth_datasets())
 def test_add_remove_program_authorization(user, dataset):
@@ -405,8 +416,13 @@ def clean_up_program_htsget(program_id):
 
 
 def test_ingest_not_admin_katsu():
+    response = delete_program_authorization('SYNTHETIC-1')
+    print(response)
+    response = delete_program_authorization('SYNTHETIC-2')
+    print(response)
     katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/")
     if katsu_response.status_code == 200:
+        print(katsu_response)
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
         if 'SYNTHETIC-1' in katsu_programs:
             print("cleaning up 'SYNTHETIC-1'")
