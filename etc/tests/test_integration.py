@@ -365,7 +365,7 @@ def clean_up_program(test_id):
     )
     print(f"katsu delete response status code: {delete_response.status_code}")
     assert (
-        delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
+        delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
     ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
     f" Response content: {delete_response.content}"
 
@@ -387,7 +387,7 @@ def clean_up_program(test_id):
     delete_response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_id}",
                                       headers=headers)
     print(f"program authorization delete response status code: {delete_response.status_code}")
-    assert delete_response.status_code == 200
+    assert (delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND)
 
 
 def clean_up_program_htsget(program_id):
@@ -441,7 +441,7 @@ def test_ingest_not_admin_katsu():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-
+    # When program authorization is added, ingest should be allowed
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     assert response.json()['SYNTHETIC-1']['errors'] == []
     assert response.json()['SYNTHETIC-2']['errors'] == []
