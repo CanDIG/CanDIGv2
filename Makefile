@@ -96,6 +96,7 @@ build-all:
 
 # Setup the entire stack
 	$(MAKE) init-docker
+	pip install --upgrade setuptools
 	pip install -U -r etc/venv/requirements.txt
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
@@ -398,6 +399,7 @@ init-conda:
 
 	source $(CONDA_ENV_SETTINGS) \
 		&& conda activate $(VENV_NAME) \
+		&& pip install --upgrade setuptools \
 		&& pip install -U -r etc/venv/requirements.txt
 
 #@echo "Load local conda: source bin/miniconda3/etc/profile.d/conda.sh"
