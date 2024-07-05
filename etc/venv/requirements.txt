@@ -1,3 +1,4 @@
+setuptools>=70.2
 docker
 python-dotenv
 tox
@@ -11,4 +12,3 @@ minio==7.1.12
 werkzeug>=2.3.8 # not directly required, pinned by Snyk to avoid a vulnerability
 clinical_etl@git+https://github.com/CanDIG/clinical_ETL_code.git@v2.2.1
 GitPython
-setuptools>=70.2
