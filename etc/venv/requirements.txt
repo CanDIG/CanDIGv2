@@ -1,4 +1,4 @@
-setuptools>=70.2
+setuptools'>=70.2'
 docker
 python-dotenv
 tox
