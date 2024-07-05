@@ -395,7 +395,7 @@ init-conda:
 	echo "    started init-conda" >> $(LOGFILE)
 	# source conda's script to be safe, so the conda command is found
 	source $(CONDA_ENV_SETTINGS) \
-		&& $(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP) setuptools=$(VENV_SETUP_TOOLS)
+		&& $(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
 
 	source $(CONDA_ENV_SETTINGS) \
 		&& conda activate $(VENV_NAME) \
