@@ -117,7 +117,8 @@ def get_katsu_datasets(user):
     return response.json()["result"]
 
 
-def add_program_authorization(dataset):
+def add_program_authorization(dataset: str, curators: list, 
+                              team_members: list):
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
@@ -127,8 +128,8 @@ def add_program_authorization(dataset):
     # create a program and its authorizations:
     test_program = {
         "program_id": dataset,
-        "program_curators": [ENV['CANDIG_SITE_ADMIN_USER']],
-        "team_members": [ENV['CANDIG_SITE_ADMIN_USER']]
+        "program_curators": curators,
+        "team_members": team_members
     }
 
     print(f"{ENV['CANDIG_URL']}/ingest/program")
@@ -141,10 +142,21 @@ def add_program_authorization(dataset):
     return response.json()
 
 
+def delete_program_authorization(dataset: str):
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{dataset}", headers=headers)
+    print(response.text)
+    return response.json()
+
+
 ## Can we add a program authorization and modify it?
 @pytest.mark.parametrize("user, dataset", user_auth_datasets())
 def test_add_remove_program_authorization(user, dataset):
-    add_program_authorization(dataset)
+    add_program_authorization(dataset, [], [])
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
@@ -180,7 +192,7 @@ def test_add_remove_program_authorization(user, dataset):
 @pytest.mark.parametrize("user, dataset", user_auth_datasets())
 def test_user_authorizations(user, dataset):
     # set up these programs to exist at all:
-    add_program_authorization(dataset)
+    add_program_authorization(dataset, [], [])
 
     # add user to pending users
     username = ENV[f"{user}_USER"]
@@ -348,30 +360,46 @@ def test_s3_credentials():
 # -----------------
 def clean_up_program(test_id):
     """
-    Deletes a dataset and all related objects. Expected 204
+    Deletes a dataset and all related objects in katsu, htsget and opa. Expected either 
+    successful delete or not found if the programs are not ingested.
     """
+    print(f"deleting {test_id}")
     site_admin_token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {site_admin_token}",
         "Content-Type": "application/json; charset=utf-8",
     }
 
+    # delete program from katsu
     delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/katsu/v2/authorized/program/{test_id}/",
+        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/program/{test_id}/",
         headers=headers,
     )
     print(f"katsu delete response status code: {delete_response.status_code}")
     assert (
-        delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
+        delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
     ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
     f" Response content: {delete_response.content}"
 
+    # delete program from htsget
     delete_response = requests.delete(
         f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{test_id}",
         headers=headers
     )
     print(f"htsget delete response status code: {delete_response.status_code}")
     assert delete_response.status_code == 200
+
+    site_admin_token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    # delete program authorization from opa
+    delete_response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_id}",
+                                      headers=headers)
+    print(f"program authorization delete response status code: {delete_response.status_code}")
+    assert (delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND)
 
 
 def clean_up_program_htsget(program_id):
@@ -388,8 +416,13 @@ def clean_up_program_htsget(program_id):
 
 
 def test_ingest_not_admin_katsu():
+    response = delete_program_authorization('SYNTHETIC-1')
+    print(response)
+    response = delete_program_authorization('SYNTHETIC-2')
+    print(response)
     katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/")
     if katsu_response.status_code == 200:
+        print(katsu_response)
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
         if 'SYNTHETIC-1' in katsu_programs:
             print("cleaning up 'SYNTHETIC-1'")
@@ -413,6 +446,23 @@ def test_ingest_not_admin_katsu():
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     # when the user has no admin access, they should not be allowed
     assert response.status_code == 401
+
+    # add program authorization
+    add_program_authorization("SYNTHETIC-1", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
+    add_program_authorization("SYNTHETIC-2", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    # When program authorization is added, ingest should be allowed
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    assert response.json()['SYNTHETIC-1']['errors'] == []
+    assert response.json()['SYNTHETIC-2']['errors'] == []
+    assert response.status_code == 201
 
 
 def test_ingest_admin_katsu():
@@ -455,6 +505,9 @@ def test_ingest_admin_katsu():
         assert 'SYNTHETIC-2' in katsu_programs
     else:
         print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
+    # Reinstate expected program authorizations
+    add_program_authorization("SYNTHETIC-1", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization("SYNTHETIC-2", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
 
 
 ## Htsget tests:
