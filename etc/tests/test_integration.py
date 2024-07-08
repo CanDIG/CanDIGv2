@@ -117,8 +117,8 @@ def get_katsu_datasets(user):
     return response.json()["result"]
 
 
-def add_program_authorization(dataset: str, curators: list=[ENV['CANDIG_SITE_ADMIN_USER']], 
-                              team_members: list=[ENV['CANDIG_SITE_ADMIN_USER']]):
+def add_program_authorization(dataset: str, curators: list, 
+                              team_members: list):
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
@@ -156,7 +156,7 @@ def delete_program_authorization(dataset: str):
 ## Can we add a program authorization and modify it?
 @pytest.mark.parametrize("user, dataset", user_auth_datasets())
 def test_add_remove_program_authorization(user, dataset):
-    add_program_authorization(dataset)
+    add_program_authorization(dataset, [], [])
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
@@ -192,7 +192,7 @@ def test_add_remove_program_authorization(user, dataset):
 @pytest.mark.parametrize("user, dataset", user_auth_datasets())
 def test_user_authorizations(user, dataset):
     # set up these programs to exist at all:
-    add_program_authorization(dataset)
+    add_program_authorization(dataset, [], [])
 
     # add user to pending users
     username = ENV[f"{user}_USER"]
