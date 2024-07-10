@@ -27,15 +27,25 @@ KEYCLOAK_ADMIN=${DEFAULT_ADMIN_USER}
 KEYCLOAK_ADMIN_PASSWORD=$(cat tmp/keycloak/admin-password)
 READY_CHECK_URL="${KEYCLOAK_PUBLIC_URL}/auth/health/ready"
 KC_ADMIN_URL="${KEYCLOAK_PUBLIC_URL}/auth"
+DEBUG_MODE=false
 #####################################################
 
 echo -e "🚧🚧🚧 ${YELLOW}KEYCLOAK SETUP BEGIN${DEFAULT} 🚧🚧🚧"
 echo -n ">> waiting for keycloak to start"
-# keycloak is booting up before it can accept any requests
-until $(curl --output /dev/null --silent --fail --head "${READY_CHECK_URL}"); do
+
+function READY_CHECK() {
+    if [ "$DEBUG_MODE" = true ]; then
+        curl --head -fsS "${READY_CHECK_URL}" | grep -q "200"
+    else
+        curl --head -s "${READY_CHECK_URL}" | grep -q "200"
+    fi
+}
+
+until READY_CHECK; do
     printf '.'
     sleep 1
 done
+
 echo -e "\n${GREEN}Keycloak is ready ✅${DEFAULT}"
 
 # Get the Keycloak container ID
@@ -43,7 +53,21 @@ KEYCLOAK_CONTAINER_ID=$(docker ps | grep keycloak/keycloak | awk '{print $1}')
 
 # Define the KCADM function to run commands inside the Keycloak container
 function KCADM() {
-    docker exec "$KEYCLOAK_CONTAINER_ID" /opt/keycloak/bin/kcadm.sh "$@"
+    local show_output=false
+    if [ "$1" = "-full" ]; then
+        show_output=true
+        shift
+    fi
+
+    if [ "$DEBUG_MODE" = true ]; then
+        docker exec "$KEYCLOAK_CONTAINER_ID" /opt/keycloak/bin/kcadm.sh "$@" || handle_error
+    else
+        if [ "$show_output" = true ]; then
+            docker exec "$KEYCLOAK_CONTAINER_ID" /opt/keycloak/bin/kcadm.sh "$@" || handle_error
+        else
+            docker exec "$KEYCLOAK_CONTAINER_ID" /opt/keycloak/bin/kcadm.sh "$@" > /dev/null 2>&1 || handle_error
+        fi
+    fi
 }
 
 # authenticate as admin
