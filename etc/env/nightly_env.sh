@@ -7,3 +7,5 @@ export BUILD_PATH=<PATH_TO_BUILD>
 
 # Set this to 1 to skip the git pull step, which may destroy changes in your working directories
 export SKIP_GIT=0
+
+sed -i "s@KEEP_TEST_DATA=false@KEEP_TEST_DATA=true@" .env
