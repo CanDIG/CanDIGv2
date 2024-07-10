@@ -7,14 +7,14 @@ services:
       - ${PWD}/lib/keycloak/credential_loader.sh:/opt/keycloak/credential_loader.sh
       - keycloak-data:/opt/keycloak/data
     environment:
-      KC_HOSTNAME: ${CANDIG_DOMAIN}
-      PROXY_ADDRESS_FORWARDING: ${KEYCLOAK_ENABLE_PROXY}
+      KC_HOSTNAME: ${CANDIG_AUTH_DOMAIN}
+      KEYCLOAK_ADMIN: ${DEFAULT_ADMIN_USER}
       KC_HTTP_RELATIVE_PATH: /auth
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
       QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: true
-      KEYCLOAK_ADMIN: ${DEFAULT_ADMIN_USER}
-      # KEYCLOAK_FRONTEND_URL: ${KEYCLOAK_PUBLIC_URL_PROD}/auth
+      KC_HTTP_ENABLED: true
+      # KC_PROXY_HEADERS: xforwarded # FOR PROD
     secrets:
       - keycloak-admin-password
     ports:
@@ -28,3 +28,4 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+ 
