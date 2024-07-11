@@ -26,4 +26,4 @@ KCADM create clients/$CLIENT_ID/protocol-mappers/models -r $KEYCLOAK_REALM \
 
 # EXPORT client secret
 CLIENT_SECRET=$(KCADM -full get clients/"$CLIENT_ID"/client-secret -r "$KEYCLOAK_REALM" | sed -n '/{/,/}/p' | jq -r '.value')
-echo "$CLIENT_SECRET" > tmp/keycloak/client-secret
+echo -n "$CLIENT_SECRET" > tmp/keycloak/client-secret
