@@ -15,14 +15,14 @@ services:
       QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: true
       KC_HTTP_ENABLED: true
       # KC_PROXY_HEADERS: xforwarded # FOR PROD
+      CANDIG_DEBUG_MODE: ${CANDIG_DEBUG_MODE}
     secrets:
       - keycloak-admin-password
     ports:
       - "${KEYCLOAK_PORT}:8080"
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
-    entrypoint: ["/bin/sh", "-c"]
-    command: ["/opt/keycloak/credential_loader.sh start"]
+    entrypoint: ["/bin/sh", "-c", "/opt/keycloak/credential_loader.sh"]
     healthcheck:
       test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e \"GET /auth/health HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3"]
       interval: 30s
