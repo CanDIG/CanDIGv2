@@ -80,14 +80,8 @@ if [ $? -ne 0 ]; then
     exit
 fi
 
-# Run the ingestion
-python settings.py
 source env.sh
-cd $INGEST_PATH
-export CLINICAL_DATA_LOCATION=$INGEST_PATH/tests/clinical_ingest.json
-# should be pip install -r requirements.txt, but that didn't seem to work last I checked -- dependency errors?
-pip install -r requirements.txt
-python katsu_ingest.py
+
 cd $BUILD_PATH
 
 PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\`\`\`"
