@@ -15,7 +15,7 @@ services:
       QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: true
       KC_HTTP_ENABLED: true
       # KC_PROXY_HEADERS: xforwarded # FOR PROD
-      CANDIG_DEBUG_MODE: ${CANDIG_DEBUG_MODE}
+      CANDIG_PRODUCTION_MODE: ${CANDIG_PRODUCTION_MODE}
     secrets:
       - keycloak-admin-password
     ports:
