@@ -7,24 +7,25 @@ services:
       - ${PWD}/lib/keycloak/credential_loader.sh:/opt/keycloak/credential_loader.sh
       - keycloak-data:/opt/keycloak/data
     environment:
-      KC_HOSTNAME: ${CANDIG_DOMAIN}
-      PROXY_ADDRESS_FORWARDING: ${KEYCLOAK_ENABLE_PROXY}
+      KC_HOSTNAME: ${CANDIG_AUTH_DOMAIN}
+      KEYCLOAK_ADMIN: ${DEFAULT_ADMIN_USER}
       KC_HTTP_RELATIVE_PATH: /auth
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
       QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: true
-      KEYCLOAK_ADMIN: ${DEFAULT_ADMIN_USER}
-      # KEYCLOAK_FRONTEND_URL: ${KEYCLOAK_PUBLIC_URL_PROD}/auth
+      KC_HTTP_ENABLED: true
+      # KC_PROXY_HEADERS: xforwarded # FOR PROD
+      CANDIG_PRODUCTION_MODE: ${CANDIG_PRODUCTION_MODE}
     secrets:
       - keycloak-admin-password
     ports:
       - "${KEYCLOAK_PORT}:8080"
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
-    entrypoint: ["/bin/sh", "-c"]
-    command: ["/opt/keycloak/credential_loader.sh start-dev"]
+    entrypoint: ["/bin/sh", "-c", "/opt/keycloak/credential_loader.sh"]
     healthcheck:
       test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e \"GET /auth/health HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3"]
       interval: 30s
       timeout: 10s
       retries: 3
+ 
