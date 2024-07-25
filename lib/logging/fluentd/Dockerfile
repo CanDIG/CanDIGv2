@@ -1,12 +1,9 @@
-ARG version
-
-FROM fluent/fluentd:${version}
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
 
 LABEL Maintainer="CanDIG Project"
 
 USER root
-
-RUN gem uninstall elasticsearch && gem install elasticsearch -v 7.17.0
 
 RUN gem install fluent-plugin-concat
 
