@@ -1,5 +1,9 @@
 services:
   opa-runner:
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     build:
       context: $PWD/lib/opa/opa
       args:
@@ -40,6 +44,10 @@ services:
 
   opa:
     image: openpolicyagent/opa:latest-static
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     labels:
       - "candigv2=opa"
     ports:
@@ -49,7 +57,7 @@ services:
     command:
       - "run"
       - "--server"
-      - "--log-level=debug"
+      - "--log-level=info"
       - "--authentication=token"
       - "--authorization=basic"
       - "app/permissions_engine/"

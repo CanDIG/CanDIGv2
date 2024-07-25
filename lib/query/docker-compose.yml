@@ -10,6 +10,10 @@ services:
     image: candig/query:${QUERY_VERSION:-latest}
     volumes:
       - query-data:/app
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     ports:
       - "${QUERY_PORT}:3000"
     environment:

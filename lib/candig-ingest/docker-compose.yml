@@ -9,6 +9,10 @@ services:
             - "candigv2=candig-ingest"
         ports:
             - "${CANDIG_INGEST_PORT}:1235"
+        logging:
+            driver: "fluentd"
+            options:
+                tag: "{{.Name}}"
         environment:
             KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
             KATSU_URL: ${KATSU_PRIVATE_URL}
