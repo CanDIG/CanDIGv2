@@ -29,7 +29,7 @@ services:
           - source: vault-approle-token
             target: vault-approle-token
         healthcheck:
-            test: ["CMD", "curl", "--fail", "http://${CANDIG_DOMAIN}:1235"]
+            test: ["CMD", "curl", "--fail", "${CANDIG_INGEST_PRIVATE_URL}/service-info"]
             interval: 30s
             timeout: 10s
             retries: 3
