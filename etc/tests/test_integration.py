@@ -61,10 +61,11 @@ def test_tyk():
     }
     endpoints = [
         f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v2/service-info",
+        f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v3/service-info",
         f"{ENV['CANDIG_ENV']['TYK_FEDERATION_API_LISTEN_PATH']}/v1/service-info",
         f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/service/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/service-info"]
+        f"{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/service-info",
+    ]
     responses = []
     for endpoint in endpoints:
         response = requests.get(
@@ -95,12 +96,7 @@ def get_katsu_datasets(user):
         "Content-Type": "application/json; charset=utf-8"
     }
     payload = {
-        "input": {
-            "body": {
-                "path": "/v2/discovery/", "method": "GET"
-            },
-            "token": token
-        }
+        "input": {"body": {"path": "/v3/discovery/", "method": "GET"}, "token": token}
     }
 
     katsu_headers = {
@@ -372,7 +368,7 @@ def clean_up_program(test_id):
 
     # delete program from katsu
     delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/katsu/v2/ingest/program/{test_id}/",
+        f"{ENV['CANDIG_URL']}/katsu/v3/ingest/program/{test_id}/",
         headers=headers,
     )
     print(f"katsu delete response status code: {delete_response.status_code}")
@@ -420,7 +416,9 @@ def test_ingest_not_admin_katsu():
     print(response)
     response = delete_program_authorization('SYNTHETIC-2')
     print(response)
-    katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/")
+    katsu_response = requests.get(
+        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
+    )
     if katsu_response.status_code == 200:
         print(katsu_response)
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
@@ -466,7 +464,9 @@ def test_ingest_not_admin_katsu():
 
 
 def test_ingest_admin_katsu():
-    katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/")
+    katsu_response = requests.get(
+        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
+    )
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
         if 'SYNTHETIC-1' in katsu_programs:
@@ -1060,7 +1060,8 @@ def test_query_genomic():
 
 def test_query_discovery():
     katsu_response = requests.get(
-        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/").json()
+        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
+    ).json()
     query_response = requests.get(
         f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs").json()
     # Ensure that each category in metadata corresponds to something in the site
