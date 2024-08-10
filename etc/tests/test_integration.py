@@ -412,9 +412,13 @@ def clean_up_program_htsget(program_id):
 
 
 def test_ingest_not_admin_katsu():
-    response = delete_program_authorization('SYNTHETIC-1')
+    response = delete_program_authorization('SYNTH_01')
     print(response)
-    response = delete_program_authorization('SYNTHETIC-2')
+    response = delete_program_authorization('SYNTH_02')
+    print(response)
+    response = delete_program_authorization('SYNTH_03')
+    print(response)
+    response = delete_program_authorization('SYNTH_04')
     print(response)
     katsu_response = requests.get(
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
@@ -422,12 +426,18 @@ def test_ingest_not_admin_katsu():
     if katsu_response.status_code == 200:
         print(katsu_response)
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
-        if 'SYNTHETIC-1' in katsu_programs:
-            print("cleaning up 'SYNTHETIC-1'")
-            clean_up_program("SYNTHETIC-1")
-        if 'SYNTHETIC-2' in katsu_programs:
-            print("cleaning up 'SYNTHETIC-2'")
-            clean_up_program("SYNTHETIC-2")
+        if 'SYNTH_01' in katsu_programs:
+            print("cleaning up 'SYNTH_01'")
+            clean_up_program("SYNTH_01")
+        if 'SYNTH_02' in katsu_programs:
+            print("cleaning up 'SYNTH_02'")
+            clean_up_program("SYNTH_02")
+        if 'SYNTH_03' in katsu_programs:
+            print("cleaning up 'SYNTH_03'")
+            clean_up_program("SYNTH_03")
+        if 'SYNTH_04' in katsu_programs:
+            print("cleaning up 'SYNTH_04'")
+            clean_up_program("SYNTH_04")
 
     with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
         test_data = json.load(f)
@@ -446,8 +456,10 @@ def test_ingest_not_admin_katsu():
     assert response.status_code == 401
 
     # add program authorization
-    add_program_authorization("SYNTHETIC-1", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
-    add_program_authorization("SYNTHETIC-2", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
+    add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
+    add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
+    add_program_authorization("SYNTH_03", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
+    add_program_authorization("SYNTH_04", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
     token = get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
         password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
@@ -458,8 +470,10 @@ def test_ingest_not_admin_katsu():
     }
     # When program authorization is added, ingest should be allowed
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
-    assert response.json()['SYNTHETIC-1']['errors'] == []
-    assert response.json()['SYNTHETIC-2']['errors'] == []
+    assert response.json()['SYNTH_01']['errors'] == []
+    assert response.json()['SYNTH_02']['errors'] == []
+    assert response.json()['SYNTH_03']['errors'] == []
+    assert response.json()['SYNTH_04']['errors'] == []
     assert response.status_code == 201
 
 
@@ -469,12 +483,18 @@ def test_ingest_admin_katsu():
     )
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
-        if 'SYNTHETIC-1' in katsu_programs:
-            print("cleaning up 'SYNTHETIC-1'")
-            clean_up_program("SYNTHETIC-1")
-        if 'SYNTHETIC-2' in katsu_programs:
-            print("cleaning up 'SYNTHETIC-2'")
-            clean_up_program("SYNTHETIC-2")
+        if 'SYNTH_01' in katsu_programs:
+            print("cleaning up 'SYNTH_01'")
+            clean_up_program("SYNTH_01")
+        if 'SYNTH_02' in katsu_programs:
+            print("cleaning up 'SYNTH_02'")
+            clean_up_program("SYNTH_02")
+        if 'SYNTH_03' in katsu_programs:
+            print("cleaning up 'SYNTH_03'")
+            clean_up_program("SYNTH_03")
+        if 'SYNTH_04' in katsu_programs:
+            print("cleaning up 'SYNTH_04'")
+            clean_up_program("SYNTH_04")
 
     token = get_site_admin_token()
     headers = {
@@ -490,24 +510,30 @@ def test_ingest_admin_katsu():
     #### This section runs only if ingest responds in time while we improve ingest so it doesn't time out ####
     if response.status_code == 201:
         assert response.status_code == 201
-        assert len(response.json()["SYNTHETIC-2"]["errors"]) == 0
-        assert len(response.json()["SYNTHETIC-1"]["errors"]) == 0
-        assert len(response.json()["SYNTHETIC-2"]["results"]) == 15
-        assert len(response.json()["SYNTHETIC-1"]["results"]) == 14
+        assert len(response.json()["SYNTH_02"]["errors"]) == 0
+        assert len(response.json()["SYNTH_01"]["errors"]) == 0
+        assert len(response.json()["SYNTH_03"]["errors"]) == 0
+        assert len(response.json()["SYNTH_04"]["errors"]) == 0
+        assert len(response.json()["SYNTH_02"]["results"]) == 13
+        assert len(response.json()["SYNTH_01"]["results"]) == 13
+        assert len(response.json()["SYNTH_03"]["results"]) == 13
+        assert len(response.json()["SYNTH_04"]["results"]) == 13
     else:
         print("Ingest timed out, waiting 10s for ingest to complete...")
         time.sleep(10)
-    katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v2/discovery/programs/")
+    katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
         print(f"Currently ingested katsu programs: {katsu_programs}")
-        assert 'SYNTHETIC-1' in katsu_programs
-        assert 'SYNTHETIC-2' in katsu_programs
+        assert 'SYNTH_01' in katsu_programs
+        assert 'SYNTH_02' in katsu_programs
+        assert 'SYNTH_03' in katsu_programs
+        assert 'SYNTH_04' in katsu_programs
     else:
         print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
     # Reinstate expected program authorizations
-    add_program_authorization("SYNTHETIC-1", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
-    add_program_authorization("SYNTHETIC-2", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
+    add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
 
 
 ## Htsget tests:
@@ -562,13 +588,13 @@ def user_access():
             "CANDIG_NOT_ADMIN_PASSWORD",
             "NA18537-vcf",
             False,
-        ),  # user1 cannot access NA18537 as part of SYNTHETIC-2
+        ),  # user1 cannot access NA18537 as part of SYNTH_02
         (
             "CANDIG_NOT_ADMIN_USER",
             "CANDIG_NOT_ADMIN_PASSWORD",
             "test",
             True,
-        ),  # user1 can access test as part of SYNTHETIC-1
+        ),  # user1 can access test as part of SYNTH_01
         (
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
@@ -648,15 +674,15 @@ def beacon_access():
             "CANDIG_NOT_ADMIN_USER",
             "CANDIG_NOT_ADMIN_PASSWORD",
             "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
-            ["SYNTHETIC-1"],
-            ["SYNTHETIC-2"],
+            ["SYNTH_01"],
+            ["SYNTH_02"],
         ),
         (   # user2 can access NA18537-vcf, multisample_1, HG02102
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
             "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
-            ["SYNTHETIC-2"],
-            ["SYNTHETIC-1"],
+            ["SYNTH_02"],
+            ["SYNTH_01"],
         )
     ]
 
@@ -751,7 +777,7 @@ def test_cohort_status():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTHETIC-2/status", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTH_02/status", headers=headers)
     assert "index_complete" in response.json()
     assert len(response.json()['index_complete']) > 0
 
@@ -912,7 +938,7 @@ def test_query_donors_all():
             'Testis': 2
         },
         'patients_per_cohort': {
-            'SYNTHETIC-2': 7
+            'SYNTH_02': 7
         },
         'treatment_type_count': {
             'Bone marrow transplant': 1,
@@ -963,7 +989,7 @@ def test_query_donor_search():
             'Other and unspecified parts of mouth': 2
         },
         'patients_per_cohort': {
-            'SYNTHETIC-2': 2
+            'SYNTH_02': 2
         },
         'treatment_type_count': {
             'Bone marrow transplant': 1,
@@ -1010,7 +1036,7 @@ def test_query_genomic():
             for donor in response.json()["results"]:
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
     assert response and len(response.json()["results"]) == 1
-    assert response.json()["results"][0]['program_id'] == "SYNTHETIC-2"
+    assert response.json()["results"][0]['program_id'] == "SYNTH_02"
     assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_NULL"
 
     token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
@@ -1033,7 +1059,7 @@ def test_query_genomic():
             for donor in response.json()["results"]:
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
     assert response and len(response.json()["results"]) == 1
-    assert response.json()["results"][0]['program_id'] == "SYNTHETIC-1"
+    assert response.json()["results"][0]['program_id'] == "SYNTH_01"
     assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_1"
 
     token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'],
@@ -1089,8 +1115,8 @@ def test_query_discovery():
 
 
 def test_clean_up():
-    clean_up_program("SYNTHETIC-1")
-    clean_up_program("SYNTHETIC-2")
+    clean_up_program("SYNTH_01")
+    clean_up_program("SYNTH_02")
 
     # clean up test_htsget
     old_val = os.environ.get("TESTENV_URL")
