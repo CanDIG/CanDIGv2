@@ -16,6 +16,10 @@ services:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret

@@ -10,6 +10,10 @@ services:
       - "candigv2=federation"
     ports:
       - "${FEDERATION_PORT}:4232"
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     secrets:
       - source: tyk-secret-key
         target: tyk-secret-key
