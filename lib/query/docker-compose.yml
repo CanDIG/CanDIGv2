@@ -23,6 +23,7 @@ services:
       OPA_URL: ${OPA_URL}
       SERVICE_NAME: ${SERVICE_NAME}
       AGGREGATE_COUNT_THRESHOLD: ${AGGREGATE_COUNT_THRESHOLD}
+      DEBUG_MODE: ${CANDIG_DEBUG_MODE}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:

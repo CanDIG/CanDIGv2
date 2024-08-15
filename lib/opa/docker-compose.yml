@@ -31,6 +31,7 @@ services:
       SITE_ADMIN_USER: ${DEFAULT_SITE_ADMIN_USER}
       USER1: ${TEST_USER_1}
       USER2: ${TEST_USER_2}
+      DEBUG_MODE: ${CANDIG_DEBUG_MODE}
     healthcheck:
       test: ["CMD", "curl", "--fail", "${OPA_PRIVATE_URL}/v1/data/service/service-info"]
       interval: 30s
