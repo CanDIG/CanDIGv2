@@ -11,13 +11,16 @@ if [[ $* == *-s* ]]; then
 fi
 
 if [[ $((IP_COUNT > 1)) ]] && [[ "$SILENT_MODE" != 1 ]]; then
-    printf "You have more than one IP address, VPNs can cause errors with the build process, if possible we recommend diabling it\n"
-    read -r -p 'Do you want to continue? (y/n)' choice
-        case "$choice" in
-          n|N) exit 1;;
-          y|Y) break;;
-          *) echo 'Response not valid';;
-        esac
+    printf "You have more than one IP address, VPNs can cause errors with the build process, if possible we recommend disabling it\n"
+        while [[ "$SILENT_MODE" != 1 ]]
+        do
+            read -r -p 'Do you want to continue? (y/n)' choice
+            case "$choice" in
+            n|N) exit 1;;
+            y|Y) break;;
+            *) echo 'Response not valid';;
+            esac
+        done
 fi
 
 # Check 2: The value of CANDIG_DOMAIN can be reached
