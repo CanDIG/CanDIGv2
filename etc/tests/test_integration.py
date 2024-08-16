@@ -635,9 +635,11 @@ def test_sample_metadata():
         "Authorization": f"Bearer {get_token(username=username, password=password)}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_REGISTRATION_NULL_01", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_NULL_0001", headers=headers)
     assert "genomes" in response.json()
-    assert "multisample_1" in response.json()["genomes"]
+    assert "multisample_2" in response.json()["genomes"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_0072", headers=headers)
+    assert "genomes" in response.json()
     assert "HG00100-cram" in response.json()["genomes"]
 
 
@@ -652,6 +654,7 @@ def test_index_success():
     }
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/test", headers=headers)
     assert "indexed" in response.json()
+    print(response.json())
     assert response.json()['indexed'] == 1
 
     token = get_token(
@@ -1117,6 +1120,8 @@ def test_query_discovery():
 def test_clean_up():
     clean_up_program("SYNTH_01")
     clean_up_program("SYNTH_02")
+    clean_up_program("SYNTH_03")
+    clean_up_program("SYNTH_04")
 
     # clean up test_htsget
     old_val = os.environ.get("TESTENV_URL")
