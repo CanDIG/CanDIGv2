@@ -203,7 +203,9 @@ clean-bin:
 .PHONY: clean-compose
 clean-compose:
 	source setup_hosts.sh; \
-	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) clean-$(MODULE);)
+	$(eval CANDIG_MODULES := $(filter-out logging,$(CANDIG_MODULES))) \
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) clean-$(MODULE);) \
+	$(MAKE) clean-logging;
 
 
 #>>>

@@ -23,6 +23,7 @@ services:
             SERVICE_NAME: ${SERVICE_NAME}
             DEFAULT_SITE_ADMIN_USER: ${DEFAULT_SITE_ADMIN_USER}
             CANDIG_USER_KEY: ${CANDIG_USER_KEY}
+            DEBUG_MODE: ${CANDIG_DEBUG_MODE}
         extra_hosts:
               - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
         secrets:
