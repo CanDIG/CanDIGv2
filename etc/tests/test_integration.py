@@ -910,50 +910,43 @@ def test_query_donors_all():
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     ).json()
-
-    if len(response["results"]) != 7:
+    print(response)
+    
+    # CANDIG_NOT_ADMIN2_USER has authorization for SYNTH_02, so expects a return of 10 donors which is the first page of results
+    if len(response["results"]) != 10:
         returned_donors = [x['program_id'] + ": " + (x['submitter_donor_id']) for x in response['results']]
-        print(f"Expected to get 7 donors returned but query returned {len(response["results"])}.")
+        print(f"Expected to get 20 donors returned but query returned {len(response["results"])}.")
         print(f"Donors returned were: \n{"\n".join(returned_donors)}")
-    assert response and len(response["results"]) == 7
+    assert response and len(response["results"]) == 10
 
     # Check the summary stats as well
     summary_stats = response["summary"]
+    pprint.pprint(summary_stats)
+
     expected_response = {
         'age_at_diagnosis': {
-            '0-19 Years': 1,
-            '50-59 Years': 2,
-            '60-69 Years': 1
+            '30-39 Years': 3,
+            '40-49 Years': 8,
+            '50-59 Years': 5
         },
         'primary_site_count': {
-            'Adrenal gland': 1,
-            'Base of tongue': 1,
-            'Floor of mouth': 2,
-            'Hypopharynx': 1,
-            'Other and unspecified female genital organs': 1,
-            'Other and unspecified major salivary glands': 1,
-            'Other and unspecified parts of biliary tract': 1,
-            'Other and unspecified parts of mouth': 3,
-            'Other endocrine glands and related structures': 2,
-            'Pancreas': 1,
-            'Penis': 1,
-            'Skin': 1,
-            'Testis': 2
+            'Breast': 4,
+            'Bronchus and lung': 4,
+            'Colon': 4,
+            'None': 4,
+            'Skin': 4
         },
         'patients_per_cohort': {
-            'SYNTH_02': 7
+            'SYNTH_02': 20
         },
         'treatment_type_count': {
-            'Bone marrow transplant': 1,
-            'Chemotherapy': 2,
-            'Hormonal therapy': 2,
-            'Immunotherapy': 2,
-            'No treatment': 1,
-            'Other targeting molecular therapy': 1,
-            'Photodynamic therapy': 2,
-            'Radiation therapy': 4,
-            'Stem cell transplant': 2,
-            'Surgery': 2
+            'Bone marrow transplant': 9,
+            'Other targeting molecular therapy': 6,
+            'Photodynamic therapy': 8,
+            'Radiation therapy': 18,
+            'Stem cell transplant': 8,
+            'Surgery': 24,
+            'Systemic therapy': 40
         }
     }
     for category in expected_response.keys():
@@ -974,22 +967,29 @@ def test_query_donor_search():
     }
 
     params = {
-        "treatment": "Chemotherapy"
+        "treatment": "Radiation therapy"
     }
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     ).json()
-    assert response and len(response["results"]) == 2
+    pprint.pprint(response)
+    assert response and len(response["results"]) == 10
 
     # Check the summary stats as well
     summary_stats = response["summary"]
+    pprint.pprint(summary_stats)
     expected_response = {
         'age_at_diagnosis': {
-            '50-59 Years': 2
+            '30-39 Years': 3,
+            '40-49 Years': 6,
+            '50-59 Years': 4
         },
         'primary_site_count': {
-            'Floor of mouth': 2,
-            'Other and unspecified parts of mouth': 2
+            'Breast': 68,
+            'Bronchus and lung': 68,
+            'Colon': 68,
+            'None': 68,
+            'Skin': 68
         },
         'patients_per_cohort': {
             'SYNTH_02': 2
