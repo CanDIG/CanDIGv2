@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 
 # Check 1: VPN is up
-if command -v ifconfig >/dev/null 2>&1; then
-    IP_COUNT=`ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}' | wc -l | printf -v int '%d\n' "$1" 2>/dev/null`
-fi
+# if command -v ifconfig >/dev/null 2>&1; then
+#     IP_COUNT=`ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}' | wc -l | printf -v int '%d\n' "$1" 2>/dev/null`
+# fi
 
 SILENT_MODE=0
 if [[ $* == *-s* ]]; then
     SILENT_MODE=1
 fi
 
-if [[ $((IP_COUNT > 1)) ]] && [[ "$SILENT_MODE" != 1 ]]; then
-    printf "You have more than one IP address, VPNs can cause errors with the build process, if possible we recommend disabling it\n"
-        while [[ "$SILENT_MODE" != 1 ]]
-        do
-            read -r -p 'Do you want to continue? (y/n)' choice
-            case "$choice" in
-            n|N) exit 1;;
-            y|Y) break;;
-            *) echo 'Response not valid';;
-            esac
-        done
-fi
+# if [[ $((IP_COUNT > 1)) ]] && [[ "$SILENT_MODE" != 1 ]]; then
+#     printf "You have more than one IP address, VPNs can cause errors with the build process, if possible we recommend disabling it\n"
+#         while [[ "$SILENT_MODE" != 1 ]]
+#         do
+#             read -r -p 'Do you want to continue? (y/n)' choice
+#             case "$choice" in
+#             n|N) exit 1;;
+#             y|Y) break;;
+#             *) echo 'Response not valid';;
+#             esac
+#         done
+# fi
 
 # Check 2: The value of CANDIG_DOMAIN can be reached
 if [ -z "$CANDIG_DOMAIN" ]; then
