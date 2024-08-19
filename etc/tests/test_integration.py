@@ -641,6 +641,10 @@ def test_sample_metadata():
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_0072", headers=headers)
     assert "genomes" in response.json()
     assert "HG00100-cram" in response.json()["genomes"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_ALL_0002", headers=headers)
+    assert "genomes" in response.json()
+    pprint.pprint(response.json())
+    assert "HG02102-all" in response.json()["genomes"]
 
 
 def test_index_success():
@@ -668,6 +672,10 @@ def test_index_success():
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1", headers=headers)
     assert "indexed" in response.json()
     assert response.json()['indexed'] == 1
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
 
 
 ## Does Beacon return the correct level of authorized results?
@@ -915,7 +923,7 @@ def test_query_donors_all():
     # CANDIG_NOT_ADMIN2_USER has authorization for SYNTH_02, so expects a return of 10 donors which is the first page of results
     if len(response["results"]) != 10:
         returned_donors = [x['program_id'] + ": " + (x['submitter_donor_id']) for x in response['results']]
-        print(f"Expected to get 20 donors returned but query returned {len(response["results"])}.")
+        print(f"Expected to get 10 donors returned but query returned {len(response["results"])}.")
         print(f"Donors returned were: \n{"\n".join(returned_donors)}")
     assert response and len(response["results"]) == 10
 
@@ -985,27 +993,23 @@ def test_query_donor_search():
             '50-59 Years': 4
         },
         'primary_site_count': {
-            'Breast': 68,
-            'Bronchus and lung': 68,
-            'Colon': 68,
-            'None': 68,
-            'Skin': 68
+            'Breast': 4,
+            'Bronchus and lung': 3,
+            'Colon': 3,
+            'None': 3,
+            'Skin': 4
         },
         'patients_per_cohort': {
-            'SYNTH_02': 2
+            'SYNTH_02': 17
         },
         'treatment_type_count': {
-            'Bone marrow transplant': 1,
-            'Chemotherapy': 2,
-            'Hormonal therapy': 2,
-            'Immunotherapy': 2,
-            'No treatment': 1,
-            'Other targeting molecular therapy': 1,
-            'Photodynamic therapy': 2,
-            'Radiation therapy': 3,
-            'Stem cell transplant': 2,
-            'Surgery': 2
-        }
+            'Bone marrow transplant': 8,
+            'Other targeting molecular therapy': 5,
+            'Photodynamic therapy': 8,
+            'Radiation therapy': 18,
+            'Stem cell transplant': 8,
+            'Surgery': 21,
+            'Systemic therapy': 34}
     }
     for category in expected_response.keys():
         for value in expected_response[category].keys():
@@ -1040,7 +1044,7 @@ def test_query_genomic():
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
     assert response and len(response.json()["results"]) == 1
     assert response.json()["results"][0]['program_id'] == "SYNTH_02"
-    assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_NULL"
+    assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_0021"
 
     token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
                       password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
@@ -1063,28 +1067,28 @@ def test_query_genomic():
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
     assert response and len(response.json()["results"]) == 1
     assert response.json()["results"][0]['program_id'] == "SYNTH_01"
-    assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_1"
+    assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_NULL_0001"
 
-    token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'],
-                      password=ENV['CANDIG_NOT_ADMIN2_PASSWORD'])
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
+                      password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
     params = {
-        "gene": "TP53",
+        "gene": "SLX9",
         "assembly": "hg38"
     }
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     )
-    if len(response.json()["results"]) != 7:
-        print(f"\n\nExpected all results from the genomic query using gene name 'TP53' but got {len(response.json()["results"])}")
+    if len(response.json()["results"]) != 1:
+        print(f"\n\nExpected 1 results from the genomic query using gene name 'SLX9' but got {len(response.json()["results"])}")
         if len(response.json()["results"]) > 0:
             print("Got results from:")
             for donor in response.json()["results"]:
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
-    assert response and len(response.json()["results"]) == 7
+    assert response and len(response.json()["results"]) == 1
 
 
 def test_query_discovery():
