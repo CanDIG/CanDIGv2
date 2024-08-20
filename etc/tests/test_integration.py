@@ -490,61 +490,48 @@ def test_ingest_not_admin_katsu():
     
 
 
-
 def test_ingest_admin_katsu():
+    """Test whether an admin can ingest each of the synthetic data programs can be ingested and add the expected
+    program authorizations."""
     katsu_response = requests.get(
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
     )
+    programs = ['SYNTH_01', 'SYNTH_02', 'SYNTH_03', 'SYNTH_04']
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
-        if 'SYNTH_01' in katsu_programs:
-            print("cleaning up 'SYNTH_01'")
-            clean_up_program("SYNTH_01")
-        if 'SYNTH_02' in katsu_programs:
-            print("cleaning up 'SYNTH_02'")
-            clean_up_program("SYNTH_02")
-        if 'SYNTH_03' in katsu_programs:
-            print("cleaning up 'SYNTH_03'")
-            clean_up_program("SYNTH_03")
-        if 'SYNTH_04' in katsu_programs:
-            print("cleaning up 'SYNTH_04'")
-            clean_up_program("SYNTH_04")
+        for program in programs:
+            if program in katsu_programs:
+                print(f"cleaning up {program}")
+                clean_up_program(program)
+    
+    for program in programs:
+        token = get_site_admin_token()
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json; charset=utf-8",
+        }
+    
+        with open(f"lib/candig-ingest/candigv2-ingest/tests/{program}.json", 'r') as f:
+            test_data = json.load(f)
 
-    token = get_site_admin_token()
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-    with open("lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
-        test_data = json.load(f)
-
-    print("Sending clinical data to katsu...")
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
-    print(f"Ingest response code: {response.status_code}")
-    #### This section runs only if ingest responds in time while we improve ingest so it doesn't time out ####
-    if response.status_code == 201:
-        assert response.status_code == 201
-        assert len(response.json()["SYNTH_02"]["errors"]) == 0
-        assert len(response.json()["SYNTH_01"]["errors"]) == 0
-        assert len(response.json()["SYNTH_03"]["errors"]) == 0
-        assert len(response.json()["SYNTH_04"]["errors"]) == 0
-        assert len(response.json()["SYNTH_02"]["results"]) == 13
-        assert len(response.json()["SYNTH_01"]["results"]) == 13
-        assert len(response.json()["SYNTH_03"]["results"]) == 13
-        assert len(response.json()["SYNTH_04"]["results"]) == 13
-    else:
-        print("Ingest timed out, waiting 10s for ingest to complete...")
-        time.sleep(10)
-    katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
-    if katsu_response.status_code == 200:
-        katsu_programs = [x['program_id'] for x in katsu_response.json()]
-        print(f"Currently ingested katsu programs: {katsu_programs}")
-        assert 'SYNTH_01' in katsu_programs
-        assert 'SYNTH_02' in katsu_programs
-        assert 'SYNTH_03' in katsu_programs
-        assert 'SYNTH_04' in katsu_programs
-    else:
-        print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
+        print(f"Sending {program }clinical data to katsu...")
+        response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+        print(f"Ingest response code: {response.status_code}")
+        #### This section runs only if ingest responds in time while we improve ingest so it doesn't time out ####
+        if response.status_code == 201:
+            assert response.status_code == 201
+            assert len(response.json()[program]["errors"]) == 0
+            assert len(response.json()[program]["results"]) == 13
+        else:
+            print("Ingest timed out, waiting 10s for ingest to complete...")
+            time.sleep(10)
+        katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
+        if katsu_response.status_code == 200:
+            katsu_programs = [x['program_id'] for x in katsu_response.json()]
+            print(f"Currently ingested katsu programs: {katsu_programs}")
+            assert program in katsu_programs
+        else:
+            print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
     # Reinstate expected program authorizations
     add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
     add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
