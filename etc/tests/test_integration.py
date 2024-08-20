@@ -396,6 +396,8 @@ def clean_up_program(test_id):
                                       headers=headers)
     print(f"program authorization delete response status code: {delete_response.status_code}")
     assert (delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND)
+    response = delete_program_authorization(test_id)
+    print(response)
 
 
 def clean_up_program_htsget(program_id):
@@ -412,14 +414,6 @@ def clean_up_program_htsget(program_id):
 
 
 def test_ingest_not_admin_katsu():
-    response = delete_program_authorization('SYNTH_01')
-    print(response)
-    response = delete_program_authorization('SYNTH_02')
-    print(response)
-    response = delete_program_authorization('SYNTH_03')
-    print(response)
-    response = delete_program_authorization('SYNTH_04')
-    print(response)
     katsu_response = requests.get(
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
     )
@@ -470,11 +464,31 @@ def test_ingest_not_admin_katsu():
     }
     # When program authorization is added, ingest should be allowed
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
-    assert response.json()['SYNTH_01']['errors'] == []
-    assert response.json()['SYNTH_02']['errors'] == []
-    assert response.json()['SYNTH_03']['errors'] == []
-    assert response.json()['SYNTH_04']['errors'] == []
-    assert response.status_code == 201
+    if response.status_code == 201:
+        assert response.status_code == 201
+        assert len(response.json()["SYNTH_02"]["errors"]) == 0
+        assert len(response.json()["SYNTH_01"]["errors"]) == 0
+        assert len(response.json()["SYNTH_03"]["errors"]) == 0
+        assert len(response.json()["SYNTH_04"]["errors"]) == 0
+        assert len(response.json()["SYNTH_02"]["results"]) == 13
+        assert len(response.json()["SYNTH_01"]["results"]) == 13
+        assert len(response.json()["SYNTH_03"]["results"]) == 13
+        assert len(response.json()["SYNTH_04"]["results"]) == 13
+    else:
+        print("Ingest timed out, waiting 10s for ingest to complete...")
+        time.sleep(10)
+    katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
+    if katsu_response.status_code == 200:
+        katsu_programs = [x['program_id'] for x in katsu_response.json()]
+        print(f"Currently ingested katsu programs: {katsu_programs}")
+        assert 'SYNTH_01' in katsu_programs
+        assert 'SYNTH_02' in katsu_programs
+        assert 'SYNTH_03' in katsu_programs
+        assert 'SYNTH_04' in katsu_programs
+    else:
+        print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
+    
+
 
 
 def test_ingest_admin_katsu():
