@@ -1051,6 +1051,29 @@ def test_query_genomic():
     assert response.json()["results"][0]['program_id'] == "SYNTH_01"
     assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_NULL_0001"
 
+
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN_USER"],
+        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/HG02102-all", headers=headers)
+    assert "indexed" in response.json()
+    while response.json()['indexed'] != 1:
+        print("Waiting for vcf to finish indexing")
+        time.sleep(5)
+        token = get_token(
+            username=ENV["CANDIG_NOT_ADMIN_USER"],
+            password=ENV["CANDIG_NOT_ADMIN_PASSWORD"])
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json; charset=utf-8"}
+        response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/HG02102-all", headers=headers)
+
+
     token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
                       password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
     headers = {
@@ -1072,6 +1095,28 @@ def test_query_genomic():
             for donor in response.json()["results"]:
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
     assert response and len(response.json()["results"]) == 1
+
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
+                      password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    params = {
+        "gene": "TP53",
+        "assembly": "hg38"
+    }
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
+    )
+    pprint.pprint(response.json())
+    if len(response.json()["results"]) != 0:
+        print(f"\n\nExpected 0 results from the genomic query using gene name 'TP53' but got {len(response.json()["results"])}")
+        if len(response.json()["results"]) > 0:
+            print("Got results from:")
+            for donor in response.json()["results"]:
+                print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
+    assert response and len(response.json()["results"]) == 0
 
 
 def test_query_discovery():
