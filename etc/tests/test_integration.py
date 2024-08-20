@@ -563,6 +563,8 @@ def test_ingest_not_admin_htsget():
     programs=["SYNTH_01", "SYNTH_02"]
     for program in programs:
         clean_up_program_htsget(program)
+    add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
 
 
 
