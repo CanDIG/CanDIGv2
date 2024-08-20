@@ -414,7 +414,7 @@ def clean_up_program_htsget(program_id):
 
 
 def test_ingest_not_admin_katsu():
-    """Test ingest of SYNTH_01, without and with program authorization."""
+    """Test ingest of SYNTH_01 as CANDIG_NOT_ADMIN_USER, without and with program authorization."""
     katsu_response = requests.get(
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
     )
