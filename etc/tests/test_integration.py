@@ -559,8 +559,9 @@ def test_ingest_not_admin_htsget():
         assert "genomic" in results[id]
         assert "sample" in results[id]
     # clean up before the next test
-    programs=[]
-    clean_up_program_htsget()
+    programs=["SYNTH_01", "SYNTH_02"]
+    for program in programs:
+        clean_up_program_htsget(program)
 
 
 
@@ -1090,7 +1091,6 @@ def test_query_genomic():
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     )
-    pprint.pprint(response.json())
     if len(response.json()["results"]) != 1:
         print(f"\n\nExpected 1 results from the genomic query using gene name 'TPTE' but got {len(response.json()["results"])}")
         if len(response.json()["results"]) > 0:
