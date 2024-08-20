@@ -1017,7 +1017,6 @@ def test_query_genomic():
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     )
-    pprint.pprint(response.json())
     if len(response.json()["results"]) != 1:
         print(f"\n\nExpected 1 result from the genomic query using position 'chr21:5030000-5030847' but got {len(response.json()["results"])}")
         if len(response.json()["results"]) > 0:
@@ -1041,6 +1040,7 @@ def test_query_genomic():
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     )
+    
     if len(response.json()["results"]) != 1:
         print(f"\n\nExpected 1 result from the genomic query using gene name 'LOC102723996' but got {len(response.json()["results"])}")
         if len(response.json()["results"]) > 0:
@@ -1064,6 +1064,7 @@ def test_query_genomic():
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     )
+    pprint.pprint(response.json())
     if len(response.json()["results"]) != 1:
         print(f"\n\nExpected 1 results from the genomic query using gene name 'SLX9' but got {len(response.json()["results"])}")
         if len(response.json()["results"]) > 0:
