@@ -6,6 +6,10 @@ services:
     volumes:
       - ${PWD}/lib/keycloak/credential_loader.sh:/opt/keycloak/credential_loader.sh
       - keycloak-data:/opt/keycloak/data
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     environment:
       KC_HOSTNAME: ${CANDIG_AUTH_DOMAIN}
       KEYCLOAK_ADMIN: ${DEFAULT_ADMIN_USER}
@@ -28,4 +32,3 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
- 

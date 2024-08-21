@@ -1,5 +1,9 @@
 services:
   htsget:
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     build:
       context: $PWD/lib/htsget/htsget_app
       args:
@@ -21,7 +25,7 @@ services:
       HTSGET_URL: ${TYK_LOGIN_TARGET_URL}/${TYK_HTSGET_API_LISTEN_PATH}
       OPA_URL: ${OPA_PRIVATE_URL}
       VAULT_URL: ${VAULT_PRIVATE_URL}
-      DEBUG_MODE: ${CANDIG_DEBUG_MODE}
+      DEBUG_MODE: 0 #${CANDIG_DEBUG_MODE}
       DB_PATH: "metadata-db"
       SERVER_LOCAL_DATA: /app/htsget_server/data
       INDEXING_PATH: /home/candig/tmp

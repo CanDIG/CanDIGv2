@@ -12,10 +12,15 @@ services:
       - POSTGRES_DB=metadata
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
       - POSTGRES_HOST_AUTH_METHOD=password
+      - DEBUG_MODE=${CANDIG_DEBUG_MODE}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret

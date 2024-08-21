@@ -6,6 +6,10 @@ services:
         venv_python: "${VENV_PYTHON}"
         debug_mode: ${CANDIG_DEBUG_MODE}
     image: ${DOCKER_REGISTRY}/katsu:${KATSU_VERSION:-latest}
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     ports:
       - "${KATSU_PORT}:8000"
     extra_hosts:
@@ -37,4 +41,3 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
