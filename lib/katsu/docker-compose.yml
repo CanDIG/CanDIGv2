@@ -37,7 +37,7 @@ services:
     labels:
       - "candigv2=chord-metadata"
     healthcheck:
-      test: ["CMD", "curl", "--fail", "${KATSU_PRIVATE_URL}/v2/service-info"]
+      test: ["CMD", "curl", "--fail", "${KATSU_PRIVATE_URL}/v3/service-info"]
       interval: 30s
       timeout: 10s
       retries: 3
