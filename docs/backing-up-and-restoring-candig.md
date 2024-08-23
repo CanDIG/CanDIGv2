@@ -1,36 +1,41 @@
-# Backing up and restoring CanDIG
+# Backing up and restoring CanDIG data
 
-There are two kinds of data stored in CanDIG that we recommend saving backup copies regularly.
-1. Clinical and genomic data stored in CanDIGs's postgres databases
+There are two kinds of data stored in CanDIG that we recommend backing up regularly.
+1. Clinical and Genomic metadata stored in CanDIGs's postgres databases
 1. Authorization data stored in vault that details user's authorization to access/edit ingested data
 
-We recommend taking back ups after each ingest event and to store your one or more copies of your backups on a separate secure server to your CanDIG installation. We also recommend encrypting your backup so that it cannot be accessed by an unauthorizaed user.
+We recommend taking back ups after each ingest event and to store one or more copies of your backups on a separate secure server from your CanDIG installation. We also recommend encrypting your backup so that it cannot be accessed by an unauthorizaed user.
 
 ## Backing up postgres databases
 
-Both clinical and genomic metadata are stored within databases running in the postgres container. To backup the data stored in these databases:
+Both clinical and genomic metadata are stored within databases running in the postgres container `metadata-db`. 
 
-1. Open a terminal inside the running postgres docker container with:
+The commands below assume that you are connected to the machine that is hosting the dockerized CanDIGv2 stack.
+
+To backup the data stored in these databases:
+
+1. Open an interactive terminal inside the running postgres docker container with:
 
 ```bash
 docker exec -it candigv2_metadata-db_1 bash
 ```
 
-1. Dump contents of the two databases to file. `-d` specifies the database to dump, `-f` specifies the filename. Below we use the date and the name of the database being backed up:
+1. Dump contents of the two databases to files. `-d` specifies the database to dump, `-f` specifies the filename. Below we use the date and the name of the database being backed up:
 
 ```bash
 pg_dump -U admin -d genomic -f yyyy-mm-dd-genomic-backup.sql
 pg_dump -U admin -d metadata -f yyyy-mm-dd-clinical-backup.sql
 ```
 
-You should then have two files with a complete copy of the sql databases. 
+You should then have two files, each with a complete copy of each of the databases. 
+
 You can now exit the container by entering
 
 ```bash
 exit
 ```
 
-You should copy these to a secure location outside of the running container and consider encrypting them or otherwise ensuring that unauthorized users will not have access to the information. To copy from the container on to the docker host you can use a command similar to: 
+You should copy these to a secure location outside of the running container and consider encrypting them or otherwise ensuring that unauthorized users will not have access to the information. To copy from the container on to the docker host, you can use a command similar to: 
 
 ```bash
 docker cp candigv2_metadata-db_1:yyyy-mm-dd-genomic-backup.sql /desired/path/target
@@ -39,35 +44,37 @@ docker cp candigv2_metadata-db_1:yyyy-mm-dd-clinical-backup.sql /desired/path/ta
 
 ## Restoring postgres databases
 
-To restore the databases that we have backed up, assuming you have the CanDIG stack up and running 1. Stop the running katsu and htsget containers which are connected to the database
+To restore the databases that we have backed up, assuming you have the CanDIG stack up and running 
+
+1. Stop the running katsu and htsget containers which are connected to the databases
 
 ```bash
 docker stop candigv2_katsu_1
 docker stop candigv2_htsget_1
 ```
 
-1. Then we copy the `sql` backup files into the running postgres container
+1. Then we need to copy the `sql` backup files into the running postgres container
 
 ```bash
 docker cp /path/to/backup/yyyy-mm-dd-genomic-backup.sql candigv2_metadata-db_1:/yyyy-mm-dd-genomic-backup.sql
 docker cp /path/to/backup/yyyy-mm-dd-clinical-backup.sql candigv2_metadata-db_1:/yyyy-mm-dd-clinical-backup.sql
 ```
 
-1. Next we need to delete the initialized databases so we can replace them with the backed up versions. 
+Next we need to delete the initialized databases so we can replace them with the backed up versions. 
 
-First, open an interactive terminal to the postgres container
+1. Open an interactive terminal to the postgres container
 
 ```bash
 docker exec -it candigv2_metadata-db_1 bash
 ```
 
-Then connect to a database other than the ones we want to drop with
+1. Then connect to the psql commandline prompt with a database other than the ones we want to drop:
 
 ```bash
 psql -U admin -d template1
 ```
 
-Then drop the two existing databases, create empty replacement databases and exit the psql commandline prompt
+1. Then drop the two existing databases, create empty replacement databases then quit the psql commandline prompt
 
 ```bash
 DROP DATABASE metadata;
@@ -77,16 +84,16 @@ CREATE DATABASE genomic;
 \q
 ```
 
-1. Then load the backed up copies from file with these commands:
+1. Load the backed up copies from file with these commands:
 
 ```bash
 psql -U admin -d metadata < yyyy-mm-dd-clinical-backup.sql
 psql -U admin -d genomic < yyyy-mm-dd-genomic-backup.sql
 ```
 
-Then exit the interactive terminal with the `exit` command.
+1. Exit the interactive terminal with the `exit` command.
 
-1. Then restart the katsu and htsget services
+1. Restart the katsu and htsget services
 
 ```bash
 docker start candigv2_katsu_1
@@ -96,6 +103,5 @@ docker start candigv2_htsget_1
 You should be able to see the restored data in the data portal.
 
 ## Backing up Authorization data
-
 
 
