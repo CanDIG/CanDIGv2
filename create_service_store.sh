@@ -39,6 +39,10 @@ create_service_store() {
             echo ">> setting up $service store policy"
             docker exec $vault sh -c "echo 'path \"${service}/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${service}-policy.hcl; vault policy write ${service} ${service}-policy.hcl"
 
+            # containers are able to read the keycloak client ID and secret
+            docker exec $vault sh -c "echo 'path \"keycloak/client-secret\" {capabilities = [\"read\"]}' >> ${service}-policy.hcl; vault policy write ${service} ${service}-policy.hcl"
+            docker exec $vault sh -c "echo 'path \"keycloak/client-id\" {capabilities = [\"read\"]}' >> ${service}-policy.hcl; vault policy write ${service} ${service}-policy.hcl"
+
             if [[ $service != "opa" ]]; then
                 echo ">> add $service store to opa's policy"
                 docker exec $vault sh -c "echo 'path \"${service}/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> opa-policy.hcl; vault policy write opa opa-policy.hcl"
