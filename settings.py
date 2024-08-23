@@ -75,7 +75,7 @@ def get_env():
             vars["TYK_SECRET_KEY"] = f.read().splitlines().pop()
     vars["POSTGRES_PASSWORD_FILE"] = f"tmp/postgres/db-secret"
     vars["CANDIG_ENV"] = INTERPOLATED_ENV
-    vars["DB_PATH"] = "metadata-db"
+    vars["DB_PATH"] = "postgres-db"
     return vars
 
 
