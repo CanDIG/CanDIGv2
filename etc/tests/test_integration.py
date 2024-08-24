@@ -33,7 +33,7 @@ def test_keycloak():
 
 
 ## Can we get an access token for a user?
-def get_token(username=None, password=None):
+def get_token(username=None, password=None, access_token=False):
     payload = {
         "client_id": ENV["CANDIG_CLIENT_ID"],
         "client_secret": ENV["CANDIG_CLIENT_SECRET"],
@@ -47,7 +47,9 @@ def get_token(username=None, password=None):
         data=payload,
     )
     if response.status_code == 200:
-        return response.json()["access_token"]
+        if access_token:
+            return response.json()["access_token"]
+        return response.json()["refresh_token"]
 
 
 def test_get_token():
@@ -90,7 +92,7 @@ def user_auth_datasets():
 def get_katsu_datasets(user):
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
-    token = get_token(username=username, password=password)
+    token = get_token(username=username, password=password, access_token=True)
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8"
@@ -270,7 +272,7 @@ def test_site_admin(user, is_admin):
     payload = {"input": {}}
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
-    token = get_token(username=username, password=password)
+    token = get_token(username=username, password=password, access_token=True)
 
     headers = {
         "Content-Type": "application/json",
