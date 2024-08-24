@@ -113,7 +113,7 @@ def get_katsu_datasets(user):
     return response.json()["result"]
 
 
-def add_program_authorization(dataset: str, curators: list, 
+def add_program_authorization(dataset: str, curators: list,
                               team_members: list):
     token = get_site_admin_token()
     headers = {
@@ -356,7 +356,7 @@ def test_s3_credentials():
 # -----------------
 def clean_up_program(test_id):
     """
-    Deletes a dataset and all related objects in katsu, htsget and opa. Expected either 
+    Deletes a dataset and all related objects in katsu, htsget and opa. Expected either
     successful delete or not found if the programs are not ingested.
     """
     print(f"deleting {test_id}")
@@ -468,7 +468,7 @@ def test_ingest_not_admin_katsu():
         assert 'SYNTH_01' in katsu_programs
     else:
         print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
-    
+
 
 
 def test_ingest_admin_katsu():
@@ -484,14 +484,14 @@ def test_ingest_admin_katsu():
             if program in katsu_programs:
                 print(f"cleaning up {program}")
                 clean_up_program(program)
-    
+
     for program in programs:
         token = get_site_admin_token()
         headers = {
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json; charset=utf-8",
         }
-    
+
         with open(f"lib/candig-ingest/candigv2-ingest/tests/{program}.json", 'r') as f:
             test_data = json.load(f)
 
@@ -931,7 +931,7 @@ def test_query_donors_all():
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     ).json()
     print(response)
-    
+
     # CANDIG_NOT_ADMIN2_USER has authorization for SYNTH_02, so expects a return of 10 donors which is the first page of results
     if len(response["results"]) != 10:
         returned_donors = [x['program_id'] + ": " + (x['submitter_donor_id']) for x in response['results']]
@@ -1070,7 +1070,7 @@ def test_query_genomic():
     response = requests.get(
         f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
     )
-    
+
     if len(response.json()["results"]) != 1:
         print(f"\n\nExpected 1 result from the genomic query using gene name 'LOC102723996' but got {len(response.json()["results"])}")
         if len(response.json()["results"]) > 0:
