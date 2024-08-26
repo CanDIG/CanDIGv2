@@ -21,7 +21,7 @@ services:
       - source: postgres-db-secret
         target: postgres_db_secret
     labels:
-      - "candigv2=chord-metadata"
+      - "candigv2=postgres"
     healthcheck:
       test: export PGPASSWORD=$(< $$POSTGRES_PASSWORD_FILE); psql -d $$POSTGRES_DB -U $$POSTGRES_USER -c "SELECT 1"
       interval: 60s
