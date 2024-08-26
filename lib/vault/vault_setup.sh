@@ -122,6 +122,13 @@ echo "{\"id\": \"${approle_token}\", \"policies\": [\"approle\"], \"periodic\": 
 curl --request POST --header "X-Vault-Token: ${key_root}" --data @lib/vault/tmp/temp.json $VAULT_SERVICE_PUBLIC_URL/v1/auth/token/create/approle
 rm lib/vault/tmp/temp.json
 
+# Containers need to access the client secret and id:
+docker exec $vault vault secrets enable -path=keycloak -description="keycloak kv store" kv
+
+curl --request POST --header "X-Vault-Token: ${key_root}" --data "{\"value\": \"$CANDIG_CLIENT_SECRET\"}" $VAULT_SERVICE_PUBLIC_URL/v1/keycloak/client-secret
+
+curl --request POST --header "X-Vault-Token: ${key_root}" --data "{\"value\": \"$CANDIG_CLIENT_ID\"}" $VAULT_SERVICE_PUBLIC_URL/v1/keycloak/client-id
+
 ## SPECIAL STORES ACCESS
 # Ingest needs access to the opa store's programs path:
 docker exec $vault sh -c "echo 'path \"opa/programs\" {capabilities = [\"update\", \"read\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/programs/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/site_roles\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/users/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/pending_users\" {capabilities = [ \"update\", \"read\"]}' >> ${ingest}-policy.hcl; vault policy write ${ingest} ${ingest}-policy.hcl"
