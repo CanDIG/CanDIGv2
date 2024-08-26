@@ -18,22 +18,22 @@ services:
     secrets:
       - source: vault-approle-token
         target: vault-approle-token
-      - source: metadata-db-secret
-        target: metadata-db-secret
+      - source: postgres-db-secret
+        target: postgres-db-secret
     environment:
       HTSGET_TEST_KEY: "hoodlebug"
       HTSGET_URL: ${TYK_LOGIN_TARGET_URL}/${TYK_HTSGET_API_LISTEN_PATH}
       OPA_URL: ${OPA_PRIVATE_URL}
       VAULT_URL: ${VAULT_PRIVATE_URL}
       DEBUG_MODE: 0 #${CANDIG_DEBUG_MODE}
-      DB_PATH: "metadata-db"
+      DB_PATH: "postgres-db"
       SERVER_LOCAL_DATA: /app/htsget_server/data
       INDEXING_PATH: /home/candig/tmp
       TESTENV_URL: ${HTSGET_PRIVATE_URL}
       POSTGRES_DATABASE: "genomic"
-      POSTGRES_HOST_FILE: "metadata-db"
+      POSTGRES_HOST_FILE: "postgres-db"
       POSTGRES_USERNAME: ${DEFAULT_ADMIN_USER}
-      POSTGRES_PASSWORD_FILE: "/run/secrets/metadata-db-secret"
+      POSTGRES_PASSWORD_FILE: "/run/secrets/postgres-db-secret"
       AGGREGATE_COUNT_THRESHOLD: ${AGGREGATE_COUNT_THRESHOLD}
       CURL_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt" # this is for pysam
       SERVICE_NAME: ${SERVICE_NAME}

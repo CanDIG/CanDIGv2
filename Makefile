@@ -343,7 +343,7 @@ docker-secrets: mkdir #minio-secrets
 	$(MAKE) secret-keycloak-test-user-password
 	$(MAKE) secret-keycloak-test-user2-password
 
-	$(MAKE) secret-metadata-db-secret
+	$(MAKE) secret-postgres-db-secret
 
 	$(MAKE) secret-tyk-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key

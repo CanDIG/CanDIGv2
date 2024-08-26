@@ -27,7 +27,7 @@ volumes:
     external: true
 
 secrets:
-  metadata-db-secret:
+  postgres-db-secret:
     file: $PWD/tmp/postgres/db-secret
     labels:
       - "candigv2=secret"
