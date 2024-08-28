@@ -3,6 +3,7 @@
 import argparse
 import re
 import requests
+import statistics
 import threading
 import time
 
@@ -31,6 +32,22 @@ parser.add_argument(
     type=int
 )
 parser.add_argument(
+    '-b',
+    '--burst',
+    help='Number of requests to do simultaneously',
+    required=False,
+    default=100,
+    type=int
+)
+parser.add_argument(
+    '-w',
+    '--burst-wait',
+    help='Number of seconds to wait between burst requests (default 1)',
+    required=False,
+    default=1,
+    type=float
+)
+parser.add_argument(
     '-H',
     '--headers',
     help='Header to use',
@@ -39,19 +56,22 @@ parser.add_argument(
 )
 
 
-def make_single_request(is_post, url, headers, expected_response, invalid_returns, timings, response_lock):
+def make_single_request(is_post, url, headers, expected_response,
+        invalid_returns, timings, response_lock):
     start = time.time()
     response = ""
     if is_post:
-        response = requests.post(url, headers=headers)
+        response = requests.post(url, headers=headers, timeout=60)
     else:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=60)
     end = time.time()
     response_lock.acquire()
-    timings.append(end - start)
-    if not response.ok or response.text != expected_response:
-        invalid_returns.append(response)
-    response_lock.release()
+    try:
+        timings.append(end - start)
+        if not response.ok or response.text != expected_response:
+            invalid_returns.append(response)
+    finally:
+        response_lock.release()
 
 
 def stress_test():
@@ -75,7 +95,8 @@ def stress_test():
         response = requests.get(url, headers=headers)
 
     if not response.ok:
-        print(f"Error while trying the endpoint once: {response.status_code} {response.reason}")
+        print(f"Error while trying the endpoint once:\n")
+        print(f"{response.status_code} {response.reason}")
         return
 
     # Check with the user to make sure the response seems ok
@@ -89,26 +110,43 @@ def stress_test():
             print("Sorry, I didn't understand that. Please enter either y or n")
     expected_response = response.text
 
-    # Start all the threads
+    # Start all the threads in bursts
     invalid_returns = []
-    all_threads = []
     timings = []
     response_lock = threading.Lock()
-    for _ in range(args.n):
-        t = threading.Thread(target=make_single_request,args=(is_post, url, headers, expected_response, invalid_returns, timings, response_lock))
-        t.start()
-        all_threads.append(t)
+    for i in range(args.n // args.burst):
+        all_threads = []
+        # We do BURST threads at once, except on the last iteration where we do
+        # the n - (b*i) threads (i.e. the remainder)
+        num_threads = args.burst
+        if  args.burst * (i + 1) > args.n:
+            num_threads = args.n - (args.burst * i)
+        for _ in range(args.burst):
+            t = threading.Thread(
+                    target=make_single_request,
+                    args=(is_post, url, headers, expected_response,
+                        invalid_returns, timings, response_lock))
+            t.start()
+            all_threads.append(t)
 
-    # Run through the list of threads until all of them are complete
-    for thread in all_threads:
-        thread.join()
+        # Run through the list of threads until all of them are complete
+        for thread in all_threads:
+            thread.join()
+
+        if args.burst_wait > 0:
+            time.sleep(args.burst_wait)
 
     # Check the average response time
     lowest = min(timings)
     highest = max(timings)
-    print(f"Shortest response: {lowest}s\nLongest response: {highest}s\nInvalid responses: {len(invalid_returns)}")
+    print(f"Shortest response: {lowest}s\nLongest response: {highest}s")
+    print(f"Mean: {statistics.fmean(timings)}")
+    print(f"Total responses: {len(timings)}")
+    print(f"\nInvalid responses: {len(invalid_returns)}")
     if len(invalid_returns) > 0:
-        print(f"\nSample invalid response: {invalid_returns[0]}")
+        print(f"\nSample invalid response: {invalid_returns[0].status_code}")
+        print(f"\n{invalid_returns[0].reason}\n")
+        print(invalid_returns[0].text)
 
 
 if __name__ == "__main__":
