@@ -15,7 +15,7 @@ services:
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     environment:
-      - POSTGRES_DATABASE=metadata
+      - POSTGRES_DATABASE=clinical
       - POSTGRES_HOST=postgres-db
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${DEFAULT_ADMIN_USER}
