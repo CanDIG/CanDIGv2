@@ -8,8 +8,10 @@ import threading
 import time
 
 parser = argparse.ArgumentParser(
-    prog="Endpoint stress-tester",
+    prog="test-endpoint.py",
     description="""
+Endpoint stress-tester
+
 Floods a given URL with requests, ensuring that the return is
 consistent"""
     )
@@ -50,17 +52,22 @@ parser.add_argument(
 parser.add_argument(
     '-H',
     '--headers',
-    help='Header to use',
+    help='header to use',
     required=False,
     nargs='*'
 )
 parser.add_argument(
     '--out',
-    help='Output file',
+    help='output file',
     required=False,
     type=argparse.FileType('w')
 )
-
+parser.add_argument(
+    '-s',
+    '--silent',
+    help='Silent mode (auto-accept first response, take no input)',
+    action='store_true'
+)
 
 def make_single_request(is_post, url, headers, expected_response,
         invalid_returns, timings, response_lock):
@@ -80,9 +87,8 @@ def make_single_request(is_post, url, headers, expected_response,
         response_lock.release()
 
 
-def stress_test():
+def stress_test(args):
     # Parse out args
-    args = parser.parse_args()
     is_post = args.X.lower() == "post"
 
     headers = {}
@@ -107,7 +113,7 @@ def stress_test():
 
     # Check with the user to make sure the response seems ok
     user_ok = ""
-    while user_ok != "y":
+    while not args.silent and user_ok != "y":
         print(f"Response: \n{response.text}\n\nDoes this look ok? (y/n)")
         user_ok = input().lower()
         if user_ok == "n":
@@ -158,6 +164,9 @@ def stress_test():
     if args.out is not None:
         args.out.write(",".join(str(timing) for timing in timings))
 
+def stress_test_command_line():
+    args = parser.parse_args()
+    stress_test(args)
 
 if __name__ == "__main__":
-    stress_test()
+    stress_test_command_line()
