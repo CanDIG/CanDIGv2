@@ -54,6 +54,12 @@ parser.add_argument(
     required=False,
     nargs='*'
 )
+parser.add_argument(
+    '--out',
+    help='Output file',
+    required=False,
+    type=argparse.FileType('w')
+)
 
 
 def make_single_request(is_post, url, headers, expected_response,
@@ -136,7 +142,7 @@ def stress_test():
         if args.burst_wait > 0:
             time.sleep(args.burst_wait)
 
-    # Check the average response time
+    # Print the average response time
     lowest = min(timings)
     highest = max(timings)
     print(f"Shortest response: {lowest}s\nLongest response: {highest}s")
@@ -147,6 +153,10 @@ def stress_test():
         print(f"\nSample invalid response: {invalid_returns[0].status_code}")
         print(f"\n{invalid_returns[0].reason}\n")
         print(invalid_returns[0].text)
+
+    # Print full timings into a csv
+    if args.out is not None:
+        args.out.write(",".join(str(timing) for timing in timings))
 
 
 if __name__ == "__main__":
