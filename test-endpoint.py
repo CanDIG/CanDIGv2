@@ -30,7 +30,7 @@ parser.add_argument(
     '-n',
     help='Number of iterations to test with',
     required=False,
-    default=100000,
+    default=100,
     type=int
 )
 parser.add_argument(
@@ -38,7 +38,7 @@ parser.add_argument(
     '--burst',
     help='Number of requests to do simultaneously',
     required=False,
-    default=100,
+    default=10,
     type=int
 )
 parser.add_argument(
@@ -162,7 +162,9 @@ def stress_test(args):
 
     # Print full timings into a csv
     if args.out is not None:
-        args.out.write(",".join(str(timing) for timing in timings))
+        args.out.write(",".join(str(timing) for timing in timings) + "\n")
+        for invalid_return in invalid_returns:
+            args.out.write(f"{invalid_return}\n")
 
 def stress_test_command_line():
     args = parser.parse_args()

@@ -13,7 +13,7 @@ consistent"""
     )
 
 parser.add_argument(
-    '--in',
+    '--input',
     help='URLs to hit, line-delimited. Additional arguments are space delimited',
     required=True,
     type=argparse.FileType('r')
@@ -21,7 +21,7 @@ parser.add_argument(
 parser.add_argument(
     '--out',
     help='output files prefix',
-    required=False
+    required=True
 )
 parser.add_argument(
     '--username',
@@ -60,10 +60,20 @@ def get_token(username, password, secret, login_url):
 
 def stress_test():
     args = parser.parse_args()
-    print(get_token(args.username, args.password, args.secret, args.loginurl))
+    for line in args.input:
+        url = line.strip()
+        if url == "":
+            continue
+        sanitized_url = re.sub(r'https?://', "", url)
+        sanitized_url = re.sub(r'/', "_", sanitized_url)
+        token = get_token(args.username, args.password, args.secret, args.loginurl)
 
-    rc = subprocess.run(["python", "test-endpoint.py", "--help"])
-    print(rc.stdout)
+        rc = subprocess.run(
+            ['python', 'test-endpoint.py',
+            '--url', url,
+            '--out', args.out + sanitized_url + ".csv",
+            '--silent',
+            '-H', f"Authorization: Bearer {token}"])
 
 if __name__ == "__main__":
     stress_test()
