@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import datetime
 import re
 import requests
 import statistics
@@ -70,19 +71,31 @@ parser.add_argument(
 )
 
 def make_single_request(is_post, url, headers, expected_response,
-        invalid_returns, timings, response_lock):
+        invalid_returns, timings, timestamps, response_lock):
     start = time.time()
     response = ""
-    if is_post:
-        response = requests.post(url, headers=headers, timeout=60)
-    else:
-        response = requests.get(url, headers=headers, timeout=60)
+    try:
+        if is_post:
+            response = requests.post(url, headers=headers, timeout=60)
+        else:
+            response = requests.get(url, headers=headers, timeout=60)
+    except Exception as e:
+        response_lock.acquire()
+        end = time.time()
+        try:
+            invalid_returns.append(e)
+            timestamps.append(datetime.datetime.now())
+            timings.append(end - start)
+        finally:
+            response_lock.release()
+        return
     end = time.time()
     response_lock.acquire()
     try:
         timings.append(end - start)
+        timestamps.append(datetime.datetime.now())
         if not response.ok or response.text != expected_response:
-            invalid_returns.append(response)
+            invalid_returns.append(f"{datetime.datetime.now()}: {response.status_code} {response.reason}")
     finally:
         response_lock.release()
 
@@ -125,6 +138,7 @@ def stress_test(args):
     # Start all the threads in bursts
     invalid_returns = []
     timings = []
+    timestamps = []
     response_lock = threading.Lock()
     for i in range(args.n // args.burst):
         all_threads = []
@@ -137,7 +151,7 @@ def stress_test(args):
             t = threading.Thread(
                     target=make_single_request,
                     args=(is_post, url, headers, expected_response,
-                        invalid_returns, timings, response_lock))
+                        invalid_returns, timings, timestamps, response_lock))
             t.start()
             all_threads.append(t)
 
@@ -156,13 +170,13 @@ def stress_test(args):
     print(f"Total responses: {len(timings)}")
     print(f"\nInvalid responses: {len(invalid_returns)}")
     if len(invalid_returns) > 0:
-        print(f"\nSample invalid response: {invalid_returns[0].status_code}")
-        print(f"\n{invalid_returns[0].reason}\n")
-        print(invalid_returns[0].text)
+        print(f"\nSample invalid response: {invalid_returns[0]}")
+        print(f"\n{invalid_returns[0]}\n")
 
     # Print full timings into a csv
     if args.out is not None:
         args.out.write(",".join(str(timing) for timing in timings) + "\n")
+        args.out.write(",".join(str(timestamp) for timestamp in timestamps) + "\n")
         for invalid_return in invalid_returns:
             args.out.write(f"{invalid_return}\n")
 

@@ -61,19 +61,23 @@ def get_token(username, password, secret, login_url):
 def stress_test():
     args = parser.parse_args()
     for line in args.input:
-        url = line.strip()
-        if url == "":
+        # Allow other methods
+        split = line.strip().split(" ")
+        if line.strip() == "":
             continue
+        url = split[0]
+        extra = split[1:]
         sanitized_url = re.sub(r'https?://', "", url)
         sanitized_url = re.sub(r'/', "_", sanitized_url)
         token = get_token(args.username, args.password, args.secret, args.loginurl)
+        print(url)
 
         rc = subprocess.run(
             ['python', 'test-endpoint.py',
             '--url', url,
             '--out', args.out + sanitized_url + ".csv",
             '--silent',
-            '-H', f"Authorization: Bearer {token}"])
+            '-H', f"Authorization: Bearer {token}"] + extra)
 
 if __name__ == "__main__":
     stress_test()
