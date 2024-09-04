@@ -80,8 +80,8 @@ def make_single_request(is_post, url, headers, expected_response,
         else:
             response = requests.get(url, headers=headers, timeout=60)
     except Exception as e:
-        response_lock.acquire()
         end = time.time()
+        response_lock.acquire()
         try:
             invalid_returns.append(e)
             timestamps.append(datetime.datetime.now())
