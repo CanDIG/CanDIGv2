@@ -509,13 +509,13 @@ def test_ingest_admin_katsu():
         response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
         print(f"Ingest response code: {response.status_code}")
         #### This section runs only if ingest responds in time while we improve ingest so it doesn't time out ####
-        if response.status_code == 201:
-            assert response.status_code == 201
-            assert len(response.json()[program]["errors"]) == 0
-            assert len(response.json()[program]["results"]) == 13
-        else:
-            print("Ingest timed out, waiting 10s for ingest to complete...")
-            time.sleep(10)
+        queue_id = response.json()["queue_id"]
+        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+        while response.status_code == 200 and "status" in response.json():
+            time.sleep(3)
+            response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+        assert len(response.json()[program]["errors"]) == 0
+        assert len(response.json()[program]["results"]) == 13
         katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
         if katsu_response.status_code == 200:
             katsu_programs = [x['program_id'] for x in katsu_response.json()]
