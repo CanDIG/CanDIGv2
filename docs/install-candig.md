@@ -15,6 +15,12 @@ Docker Engine (also known as Docker CE) is recommened over Docker Desktop for li
 
 Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
 
+## Resource requirements
+
+We have successfully run and installed the CanDIGv2 stack on VMs with 4 CPUs and 8GB of memory.
+
+We recommend giving Docker at least 4 CPUs and 4GB of memory.
+
 
 ## Install OS Dependencies
 
@@ -307,33 +313,6 @@ If you can see the data portal at http://candig.docker.internal:5080/, your inst
 Confirm your installation with the [automatic tests](/docs/ingest-and-test.md).
 
 
-### Old
-The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets.
-
-```bash
-# initialize docker environment
-make init-docker
-
-## Do one of the following:
-# pull latest CanDIGv2 images:
-make docker-pull
-
-# or build images:
-make build-images
-
-# deploy stack
-make compose
-make init-authx # If this command fails, try the #update-firewall section of this Markdown file
-
-# Specific cached modules may be out of date, so to disable caching for a specific module, add BUILD_OPTS='--no-cache' at the end of make like so:
-# make build-htsget-server BUILD_OPTS='--no-cache'
-# make compose-htsget-server
-# make build-% and compose-% will work for any folder name in lib/
-
-# TODO: post deploy auth configuration
-
-```
-
 ## Update Firewall
 
 If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
@@ -346,32 +325,6 @@ sudo ufw allow from $DOCKER_BRIDGE_IP to <your ip>
 ```
 
 Re-run `make clean-authx` and `make init-authx` and it should work.
-
-## Cleanup CanDIGv2 Compose Environment
-
-Use the following steps to clean up running CanDIGv2 services in a docker-compose configuration. Note that these steps are destructive and will remove **ALL** containers, secrets, volumes, networks, certs, and images. If you are using docker in a shared environment (i.e. with other non-CanDIGv2 containers running) please consider running the cleanup steps manually instead.
-
-The following steps are performed by `make clean-all`:
-
-```bash
-# 1. stop and remove running stacks
-make clean-compose
-
-# 2. stop and remove remaining containers
-make clean-containers
-
-# 3. remove all configs/secrets from docker and local dir
-make clean-secrets
-
-# 4. remove all docker volumes and local data dir
-make clean-volumes
-
-# 5. delete all cached images
-make clean-images
-
-# 6. remove bin dir (inlcuding miniconda)
-make clean-bin
-```
 
 ## For Apple Silicon
 
