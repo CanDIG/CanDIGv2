@@ -230,7 +230,7 @@ ProvCodes = [
 ```bash
 CANDIG_SITE_LOCATION=UHN # or your site's location
 ...
-FEDERATION_SELF_SERVER="{'id': 'UHN', 'url': '${FEDERATION_SERVICE_URL}/${TYK_FEDERATION_API_LISTEN_PATH}','location': {'name': 'UHN','province': 'ON','province-code': 'ca-on'}}"
+FEDERATION_SELF_SERVER="{'id': 'UHN', 'url': '${FEDERATION_SERVICE_URL}/${TYK_FEDERATION_API_LISTEN_PATH}','location': {'name': ${CANDIG_SITE_LOCATION},'province': 'ON','province-code': 'ca-on'}}"
 ```
 #### Setting Site Logo
 To customize the site logo, you need to place your image in the candig-data-portal either before building or within the container after running the build-all or install-all commands. The image should be located at `CanDIGv2/lib/candig-data-portal/candig-data-portal/src/assets/images/users/siteLogo.png`. This will overwrite the default logo.
