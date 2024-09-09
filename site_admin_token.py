@@ -37,6 +37,7 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
             )
 
         if "error" in credentials:
+            os.remove("tmp/site-admin-refresh-token")
             return get_site_admin_token()
 
         with open(f"tmp/site-admin-refresh-token", "w") as f:
