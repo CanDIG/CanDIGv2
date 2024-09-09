@@ -45,6 +45,7 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
 
         return credentials["access_token"]
     except Exception as e:
+        os.remove("tmp/site-admin-refresh-token")
         raise authx.auth.CandigAuthError(f"Error obtaining response from keycloak server: {e}")
 
 if __name__ == "__main__":
