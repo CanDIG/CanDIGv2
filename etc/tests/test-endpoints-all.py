@@ -1,4 +1,5 @@
 import argparse
+import os
 import re
 import requests
 import subprocess
@@ -73,7 +74,7 @@ def stress_test():
         print(url)
 
         rc = subprocess.run(
-            ['python', 'test-endpoint.py',
+            ['python', os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-endpoint.py'),
             '--url', url,
             '--out', args.out + sanitized_url + ".csv",
             '--silent',
