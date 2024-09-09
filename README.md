@@ -82,7 +82,7 @@ CanDIGv2/
  │    ├── docker/                  - docker configurations
  │    ├── env/                     - sample .env file
  │    ├── ssl/                     - ssl root-ca/site configs and certs
- |    ├── tests/                   - integration tests (under development)
+ |    ├── tests/                   - integration and performance tests (under development)
  │    ├── venv/                    - dependency files for virtualenvs (conda, pip, etc.)
  │    └── yml/                     - various yaml based configs (toil, traefik, etc.)
  ├── lib/                          - contains modules of services/apps
