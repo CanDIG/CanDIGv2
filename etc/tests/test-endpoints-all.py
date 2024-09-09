@@ -69,14 +69,14 @@ def stress_test():
         url = split[0]
         extra = split[1:]
         sanitized_url = re.sub(r'https?://', "", url)
-        sanitized_url = re.sub(r'/', "_", sanitized_url)
+        sanitized_url = re.sub(r'/', "-", sanitized_url)
         token = get_token(args.username, args.password, args.secret, args.loginurl)
         print(url)
 
         rc = subprocess.run(
             ['python', os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-endpoint.py'),
             '--url', url,
-            '--out', args.out + sanitized_url + ".csv",
+            '--out', os.path.join(args.out, sanitized_url + ".csv"),
             '--silent',
             '-H', f"Authorization: Bearer {token}"] + extra)
 
