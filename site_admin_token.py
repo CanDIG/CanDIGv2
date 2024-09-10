@@ -37,7 +37,10 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
             )
 
         if "error" in credentials:
-            os.remove("tmp/site-admin-refresh-token")
+            try:
+                os.remove("tmp/site-admin-refresh-token")
+            except:
+                pass
             return get_site_admin_token()
 
         with open(f"tmp/site-admin-refresh-token", "w") as f:
@@ -45,7 +48,10 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
 
         return credentials["access_token"]
     except Exception as e:
-        os.remove("tmp/site-admin-refresh-token")
+        try:
+            os.remove("tmp/site-admin-refresh-token")
+        except:
+            pass
         raise authx.auth.CandigAuthError(f"Error obtaining response from keycloak server: {e}")
 
 if __name__ == "__main__":
