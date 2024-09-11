@@ -57,7 +57,9 @@ The following default settings in the `.env` file should be changed when deployi
 When CanDIG is initially deployed, a `site_admin` user will be created by default. The username and password for this user can be found in the `env.sh` file. It is important to change this default to a real user who should have site administration privileges. 
 
 1. Login to the data portal with the credentials you wish to make a site administrator to ensure the user can login successfully
+
 2. Get a site admin token using the default site admin user:
+
 ```bash
 source env.sh
 ```
@@ -81,7 +83,7 @@ export TOKEN=$(echo $CURL_OUTPUT | grep -Eo 'access_token":"[a-zA-Z0-9._\-]+' | 
 3. Set the role of the real user to a site admin with the following curl command:
 
 ```bash
-curl -X POST $CANDIG_URL'/ingest/site-role/admin/email/<your real user email>' -H 'Authorization: Bearer '$TOKEN
+curl -X POST $CANDIG_URL'/ingest/site-role/admin/email/<YOUR-EMAIL-ADDRESS>' -H 'Authorization: Bearer '$TOKEN
 ```
 
 4. Check the role assignment was successful by verifying the following command returns `True`:
