@@ -2,11 +2,11 @@
 
 Apart from the basic steps in the [CanDIGv2 Install Guide](install-candig.md) to get the candig stack up and running, there are additional settings and security recommendations that need to set up in a production level environment. We provide the following as general advice, but it is important for all CanDIG deployers to also consult with their institutional infrastructure security personnel to ensure that their deployment meets the necessary level of data security.
 
-## Proxy
+## Reverse Proxy
 
 It is essential to setup a proxy so that only specific ports are open to the internet. The software used for this is up to the deployer. 
 
-Basically, the only ports that should be available are to tyk (5080) and keycloak (8080).
+Basically, the only ports that should be available are to tyk (443) and keycloak (80).
 
 Some specific examples of how existing institutes have approached this are below.
 
@@ -20,7 +20,14 @@ At UHN, the candig.uhnresearch.ca domain is under a proxy, so requests to a spec
 
 Specifically, the UHN proxy forwards all candig.uhnresearch.ca and candigauth.uhnresearch.ca requests (all ports) to candig1:5080 (tyk) and candig1:8080 (keycloak) respectively, thereby acting as a firewall.  All CanDIGv2 microservices can only be accessed through Tyk.
 
-### nginx - C3G
+### OpenStack security group & nginx - C3G
+
+ OpenStack security group that allows access to ports 80 and 443 acts as a Firewall.
+
+ nginx acts as a reverse proxy which:
+ 1. Re-routes http traffic to https
+ 2. Provides SSL certificates
+ 3. Routes ${CANDIG_DOMAIN} and ${CANDIG_AUTH_DOMAIN} http[s] traffic from outside to the appropriate microservice (tyk or keycloak respectively) and port.
 
 ## Virtual Machine behind Virtual Private Network
 
