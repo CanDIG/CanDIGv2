@@ -113,7 +113,7 @@ curl -X GET $CANDIG_URL'/ingest/site-role/admin/email/site_admin@test.ca' -H 'Au
 ```
 
 
-## Connecting Keycloak to instituional LDAP
+## Connecting Keycloak to institutional LDAP
 
 
 ## Federating with other CanDIG production instances
