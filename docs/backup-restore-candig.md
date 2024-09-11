@@ -1,10 +1,13 @@
 # Backing up and restoring CanDIG data
 
-There are two kinds of data stored in CanDIG that we recommend backing up regularly.
+There are three kinds of data stored in CanDIG that we recommend backing up regularly.
 1. Clinical and Genomic metadata stored in CanDIGs's postgres databases
-1. Authorization data stored in vault that details user's authorization to access/edit ingested data
+2. Authorization data stored in vault that details user's authorization to access/edit ingested data
+3. Logs
 
-We recommend taking back ups after each ingest event and to store one or more copies of your backups on a separate secure server from your CanDIG installation. We also recommend encrypting your backup so that it cannot be accessed by an unauthorizaed user.
+For data types 1 and 2, we recommend taking back ups after each ingest event and to store one or more copies of your backups on a separate secure server from your CanDIG installation. We also recommend encrypting your backup so that it cannot be accessed by an unauthorizaed user.
+
+Logs can be backed up on a regular schedule and at a minimum, should be saved elsewhere when performing a rebuild of the stack.
 
 ## Backing up postgres databases
 
@@ -103,5 +106,9 @@ docker start candigv2_htsget_1
 You should be able to see the restored data in the data portal.
 
 ## Backing up Authorization data
+
+## Backing up logs
+
+Logs are stored in `tmp/logging`. The contents of this folder should be saved periodically.
 
 
