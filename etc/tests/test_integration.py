@@ -506,6 +506,7 @@ def test_ingest_admin_katsu():
         while response.status_code == 200 and "status" in response.json():
             time.sleep(3)
             response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+        print(response.json())
         assert len(response.json()[program]["errors"]) == 0
         assert len(response.json()[program]["results"]) == 13
         katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
