@@ -2,9 +2,9 @@
 
 Apart from the basic steps in the [CanDIGv2 Install Guide](install-candig.md) to get the candig stack up and running, there are additional settings and security recommendations that need to set up in a production level environment. We provide the following as general advice, but it is important for all CanDIG deployers to also consult with their institutional infrastructure security personnel to ensure that their deployment meets the necessary level of data security.
 
-## Reverse Proxy
+## Reverse Proxy & Firewall
 
-It is essential to setup a proxy so that only specific ports are open to the internet. The software used for this is up to the deployer. 
+It is essential to setup a reverse proxy and firewall so that only specific ports are open to the internet. The software used for this is up to the deployer and is considered outside of the CanDIG stack. 
 
 Basically, the only ports that should be available are to tyk (443) and keycloak (80).
 
@@ -37,20 +37,20 @@ Any user that can access the VM where the CanDIG stack is running can access pot
 
 The following default settings in the `.env` file should be changed when deploying CanDIG in a production environment:
 
-| default value                                                                             | value in prod environment                                                                | function |
-|-------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|----------|
-| `CANDIG_DEBUG_MODE=1`                                                                     | `CANDIG_DEBUG_MODE=0`                                                                    |          |
-| `CANDIG_PRODUCTION_MODE=0`                                                                | `CANDIG_PRODUCTION_MODE=1`                                                               |          |
-| `CANDIG_DOMAIN=candig.docker.internal`                                                    | `CANDIG_DOMAIN=<your.prod.domain>`                                                       |          |
-| `CANDIG_AUTH_DOMAIN=candig.docker.internal`                                               | `CANDIG_AUTH_DOMAIN=<your.prod.auth.domain>`                                             |          |
-| `CANDIG_SITE_LOCATION=LOCAL`                                                              | `CANDIG_SITE_LOCATION=<your-site-location>`                                              |          |
-| `FEDERATION_SELF_SERVER`={see .env}                                                       | update id, province, province-code                                                       |          |
-| `KEYCLOAK_PUBLIC_PROTO=http`                                                              | `KEYCLOAK_PUBLIC_PROTO=https`                                                            |          |
-| `${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}:${KEYCLOAK_PORT}`                       | `KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}`                   |          |
-| `KEYCLOAK_PRIVATE_URL=${KEYCLOAK_PRIVATE_PROTO}://${CANDIG_AUTH_DOMAIN}:${KEYCLOAK_PORT}` | `KEYCLOAK_PRIVATE_URL=${KEYCLOAK_PRIVATE_PROTO}://keycloak:${KEYCLOAK_PORT}`             |          |
-| `TYK_LOGIN_TARGET_URL=http://${CANDIG_DOMAIN}:${TYK_SERVICE_PUBLIC_PORT}`                 | `TYK_LOGIN_TARGET_URL=https://${CANDIG_DOMAIN}`                                          |          |
-| `TYK_USE_SSL=false`                                                                       | `TYK_USE_SSL=true`                                                                       |          |
-| `CANDIG_DATA_PORTAL_URL=http://${CANDIG_DOMAIN}:${CANDIG_DATA_PORTAL_PORT}/data-portal`   | `CANDIG_DATA_PORTAL_URL=https://${CANDIG_DOMAIN}:${CANDIG_DATA_PORTAL_PORT}/data-portal` |          |
+| value in prod environment                                                                | function |
+|------------------------------------------------------------------------------------------|----------|
+| `CANDIG_DOMAIN=<your.prod.domain>`                                                       |          |
+| `CANDIG_AUTH_DOMAIN=<your.prod.auth.domain>`                                             |          |
+| `CANDIG_DEBUG_MODE=0`                                                                    |          |
+| `CANDIG_PRODUCTION_MODE=1`                                                               |          |
+| `CANDIG_SITE_LOCATION=`update to your site location                                              |          |
+| `FEDERATION_SELF_SERVER` - update id, province, province-code                                                       |          |
+| `KEYCLOAK_PUBLIC_PROTO=https`                                                            |          |
+| `KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}`                   |          |
+| `KEYCLOAK_PRIVATE_URL=${KEYCLOAK_PRIVATE_PROTO}://keycloak:${KEYCLOAK_PORT}`             |          |
+| `TYK_LOGIN_TARGET_URL=https://${CANDIG_DOMAIN}`                                          |          |
+| `TYK_USE_SSL=true`                                                                       |          |
+| `CANDIG_DATA_PORTAL_URL=https://${CANDIG_DOMAIN}:${CANDIG_DATA_PORTAL_PORT}/data-portal` |          |
 
 ## Changing the default site admin
 
