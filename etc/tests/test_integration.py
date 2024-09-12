@@ -459,7 +459,7 @@ def test_ingest_not_admin_katsu():
     queue_id = response.json()["queue_id"]
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     while response.status_code == 200 and "status" in response.json():
-        time.sleep(3)
+        time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     assert len(response.json()["SYNTH_01"]["errors"]) == 0
     assert len(response.json()["SYNTH_01"]["results"]) == 13
@@ -504,7 +504,7 @@ def test_ingest_admin_katsu():
         queue_id = response.json()["queue_id"]
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
         while response.status_code == 200 and "status" in response.json():
-            time.sleep(3)
+            time.sleep(2)
             response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
         print(response.json())
         assert len(response.json()[program]["errors"]) == 0
@@ -537,7 +537,7 @@ def test_ingest_not_admin_htsget():
     }
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
     # when the user has no admin access, they should not be allowed
-    assert response.status_code == 403
+    assert response.status_code == 400
 
     add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
     add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
@@ -550,18 +550,25 @@ def test_ingest_not_admin_htsget():
         "Content-Type": "application/json; charset=utf-8",
     }
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
+    queue_id = response.json()["queue_id"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    while response.status_code == 200 and "status" in response.json():
+        time.sleep(2)
+        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+
     # when the user has program_curator role, they should be allowed
     assert response.status_code == 200
-    results = response.json()['results']
-    if len(response.json()["errors"]) > 0:
-        print("Expected to get no errors when ingesting into htsget but the following errors were found:")
-        print("\n".join(response.json()["errors"]))
-    assert len(response.json()["errors"]) == 0
-    for id in results:
-        print(id)
-        print(f"\n{results[id]}\n")
-        assert "genomic" in results[id]
-        assert "sample" in results[id]
+    for program in response.json():
+        results = response.json()[program]
+        if len(results["errors"]) > 0:
+            print("Expected to get no errors when ingesting into htsget but the following errors were found:")
+            print("\n".join(results["errors"]))
+        assert len(results["errors"]) == 0
+        for id in results["results"]:
+            print(id)
+            print(f"\n{results["results"][id]}\n")
+            assert "genomic" in results["results"][id]
+            assert "sample" in results["results"][id]
     # clean up before the next test
     programs=["SYNTH_01", "SYNTH_02"]
     for program in programs:
@@ -581,18 +588,24 @@ def test_ingest_admin_htsget():
         "Content-Type": "application/json; charset=utf-8",
     }
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
+    queue_id = response.json()["queue_id"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    while response.status_code == 200 and "status" in response.json():
+        time.sleep(2)
+        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     # when the user has admin access, they should be allowed
     assert response.status_code == 200
-    results = response.json()['results']
-    if len(response.json()["errors"]) > 0:
-        print("Expected to get no errors when ingesting into htsget but the following errors were found:")
-        print("\n".join(response.json()["errors"]))
-    assert len(response.json()["errors"]) == 0
-    for id in results:
-        print(id)
-        print(f"\n{results[id]}\n")
-        assert "genomic" in results[id]
-        assert "sample" in results[id]
+    for program in response.json():
+        results = response.json()[program]
+        if len(results["errors"]) > 0:
+            print("Expected to get no errors when ingesting into htsget but the following errors were found:")
+            print("\n".join(results["errors"]))
+        assert len(results["errors"]) == 0
+        for id in results["results"]:
+            print(id)
+            print(f"\n{results["results"][id]}\n")
+            assert "genomic" in results["results"][id]
+            assert "sample" in results["results"][id]
 
 
 ## Can we access the data when authorized to do so?
