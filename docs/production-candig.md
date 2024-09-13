@@ -164,6 +164,7 @@ curl -X GET $CANDIG_URL'/ingest/site-role/admin/email/site_admin@test.ca' -H 'Au
 ## Connecting Keycloak to institutional LDAP
 
 
+
 ## Federating with other CanDIG production instances
 
 To federate your own node with another CanDIG node, follow the instructions in the [federation-service README](https://github.com/CanDIG/federation_service#how-to-register-peer-servers).
@@ -172,5 +173,5 @@ Federation is a two way process, where you need to register another server with 
 
 Once two nodes are federated, summary data from federated nodes will appear in both nodes' data portals and will be viewable by all users who are able to authenticate to either node. 
 
-Access to patient level data through specific program authorization is managed by the node that hosts the data for that program. For example, if a user from UHN needs to be given authorization to a program hosted within the BC node, a site administrator from BC will need to add a program authorization for that UHN user to that program within the BC CanDIG node.
+Access to patient level data through specific program authorization is managed by the node that hosts the data for that program. For example, if a user from UHN needs to be given authorization to a program hosted within the BC node, a site administrator from BC will need to [add a program authorization](https://github.com/CanDIG/candigv2-ingest#6-adding-a-dac-style-program-authorization-for-a-user) for that UHN user to that program within the BC CanDIG node.
 
