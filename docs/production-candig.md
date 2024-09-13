@@ -18,7 +18,7 @@ At UHN, the candig.uhnresearch.ca domain is under a proxy, so requests to a spec
 [ CLIENT ] ---> | HTTPS | ---> [ UHN PROXY ] ---> | HTTP | ---> [ CANDIG_PROD / TYK ] ---> | HTTP | ---> [ CANDIG_DATA_SERVICES ]
 ```
 
-Specifically, the UHN proxy forwards all candig.uhnresearch.ca and candigauth.uhnresearch.ca requests (all ports) to candig1:5080 (tyk) and candig1:8080 (keycloak) respectively, thereby acting as a firewall.  All CanDIGv2 microservices can only be accessed through Tyk.
+Specifically, the UHN proxy forwards all candig.uhnresearch.ca and candigauth.uhnresearch.ca requests (port 443) to candig1:5080 (tyk) and candig1:8080 (keycloak) respectively, thereby acting as a firewall.  All CanDIGv2 microservices can only be accessed through Tyk.
 
 ### OpenStack security group & nginx - C3G
 
