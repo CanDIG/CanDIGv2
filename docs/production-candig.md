@@ -22,7 +22,7 @@ Specifically, the UHN proxy forwards all candig.uhnresearch.ca and candigauth.uh
 
 ### OpenStack security group & nginx - C3G
 
- OpenStack security group that allows access to ports 80 and 443 acts as a Firewall.
+ An OpenStack security group is applied as a firewall that allows ingress traffic to ports 80 and 443 only.
 
  nginx acts as a reverse proxy which:
  1. Re-routes http traffic to https
@@ -169,9 +169,9 @@ curl -X GET $CANDIG_URL'/ingest/site-role/admin/email/site_admin@test.ca' -H 'Au
 
 To federate your own node with another CanDIG node, follow the instructions in the [federation-service README](https://github.com/CanDIG/federation_service#how-to-register-peer-servers).
 
-Federation is a two way process, where you need to register another server with your node, and the other node needs to register you node, by exchanging valid site administration bearer tokens.
+Federation is a two way process, where you need to register another server with your node, and the other node needs to register your node, by exchanging valid site administration bearer tokens.
 
-Once two nodes are federated, summary data from federated nodes will appear in both nodes' data portals and will be viewable by all users who are able to authenticate to either node. 
+Once two nodes are federated, summary data from federated nodes will appear in both nodes' data portals and will be viewable by all users who are able to login. 
 
 Access to patient level data through specific program authorization is managed by the node that hosts the data for that program. For example, if a user from UHN needs to be given authorization to a program hosted within the BC node, a site administrator from BC will need to [add a program authorization](https://github.com/CanDIG/candigv2-ingest#6-adding-a-dac-style-program-authorization-for-a-user) for that UHN user to that program within the BC CanDIG node.
 
