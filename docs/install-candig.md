@@ -26,7 +26,8 @@ CanDIG can be installed and deployed as below for development situations where n
 
 ## Install OS Dependencies
 
-### Debian
+<details>
+<summary>Debian</summary>
 
 1. Update system/install dependencies
 
@@ -71,7 +72,11 @@ sudo systemctl start docker
 sudo usermod -aG docker $(whoami)
 ```
 
-### Ubuntu
+</details>
+
+<details>
+
+<summary>Ubuntu</summary>
 
 1. Update system/install dependencies
 ```bash
@@ -121,7 +126,11 @@ groups
 getent group docker
 ```
 
-### CentOS 7
+</details>
+
+<details>
+
+<summary>CentOS 7</summary>
 
 1. Update system/install dependencies
 
@@ -166,8 +175,11 @@ sudo usermod -aG docker $(whoami)
 ```
 yq >= 4 is required.  See [https://github.com/mikefarah/yq/#install](https://github.com/mikefarah/yq/#install) for install options.
 
+</details>
 
-### Note for WSL Systems
+<details>
+
+<summary>Note for WSL Systems</summary>
 Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop. Add `CONDA_INSTALL = ~/miniconda3`  above `CONDA = $(CONDA_INSTALL)/bin/conda` in the Makefile to avoid this issue. You can also use the below command to move the miniconda3 installation to the correct location.
 
 
@@ -177,15 +189,7 @@ bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 
 yq >= 4 is required, but the conda version is outdated.  Install the latest version system-wide by following the instructions at [the yq GitHub](https://github.com/mikefarah/yq/#install).
 
-### Note for WSL Systems
-Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop. Add `CONDA_INSTALL = ~/miniconda3`  above `CONDA = $(CONDA_INSTALL)/bin/conda` in the Makefile to avoid this issue. You can also use the below command to move the miniconda3 installation to the correct location.
-
-
-```bash
-bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
-```
-
-yq >= 4 is required, but the conda version is outdated.  Find a way to install it system-wide.
+</details>
 
 ## Initialize CanDIGv2 Repo
 
@@ -214,7 +218,35 @@ conda activate candig
 
 ## Deploy CanDIGv2 Services with Compose
 
+### `.env` Environment File
 
+You need an `.env` file in the project root directory, which contains a set of global variables that are used as reference to the various parameters, plugins, and config options that operators can modify for testing purposes. This repo contains an example `.env` file in `etc/env/example.env`.
+
+For a basic desktop sandbox setup, the example variable file needs very little (if any) modification.
+
+When deploying CanDIGv2
+using `make`, `.env` is imported by `make` and all uncommented variables are added as environment variables via
+`export`.
+
+Some of the functionality that is controlled through `.env` are:
+
+* operating system flags
+* change docker network, driver, and swarm host
+* modify ports, protocols, and plugins for various services
+* version control and app pinning
+* pre-defined defaults for turnkey deployment
+
+Environment variables defined in the `.env` file can be read in `docker-compose` scripts through the variable substitution operator
+`${VAR}`.
+
+```yaml
+# example compose YAML using variable substitution with default option
+services:
+  consul:
+    image: progrium/consul
+    network_mode: ${DOCKER_MODE}
+...
+```
 
 ### New
 
