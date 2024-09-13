@@ -214,50 +214,6 @@ conda activate candig
 
 ## Deploy CanDIGv2 Services with Compose
 
-### Site Specific Settings
-You will need to modify the `.env` file to reflect your site's specific settings. Set CANDIG_SITE_LOCATION to the name of your site, such as UHN, BCGSC, or C3G. For federation settings, set the id, name, province, and province-code for `FEDERATION_SELF_SERVER` variable in the `.env`. The `name` within the `FEDERATION_SELF_SERVER` variable should match the `CANDIG_SITE_LOCATION` variable.
-
-```bash
-ProvCodes = [
-    'ca-ab',
-    'ca-bc',
-    'ca-mb',
-    'ca-nb',
-    'ca-nl',
-    'ca-nt',
-    'ca-ns',
-    'ca-nu',
-    'ca-on',
-    'ca-pe',
-    'ca-qc',
-    'ca-sk',
-    'ca-yt'
-];
-```
-
-```bash
-CANDIG_SITE_LOCATION=UHN # or your site's location
-...
-FEDERATION_SELF_SERVER="{'id': 'UHN', 'url': '${FEDERATION_SERVICE_URL}/${TYK_FEDERATION_API_LISTEN_PATH}','location': {'name': '${CANDIG_SITE_LOCATION}','province': 'ON','province-code': 'ca-on'}}"
-```
-#### Setting Site Logo
-To customize the site logo, you need to place your image in the candig-data-portal either before building or within the container after running the build-all or install-all commands. The image should be located at `CanDIGv2/lib/candig-data-portal/candig-data-portal/src/assets/images/users/siteLogo.png`. This will overwrite the default logo.
-
-File requirements:
-- Name the file siteLogo.png
-- The image should be square and will be set to 34x34 pixels
-- The image format must be PNG
-
-If the portal is already running, copy the logo into the Docker container using this command:
-
-```bash
- docker cp Your_images_path/siteLogo.png candigv2_candig-data-portal_1:/app/candig-data-portal/src/assets/images/users
- ```
- Otherwise:
-
- ```bash
- cp your_image_path/siteLogo.png CanDIGv2/lib/candig-data-portal/candig-data-portal/src/assets/images/users/siteLogo.png
- ```
 
 
 ### New
