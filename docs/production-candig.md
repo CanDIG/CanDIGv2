@@ -166,3 +166,11 @@ curl -X GET $CANDIG_URL'/ingest/site-role/admin/email/site_admin@test.ca' -H 'Au
 
 ## Federating with other CanDIG production instances
 
+To federate your own node with another CanDIG node, follow the instructions in the [federation-service README](https://github.com/CanDIG/federation_service#how-to-register-peer-servers).
+
+Federation is a two way process, where you need to register another server with your node, and the other node needs to register you node, by exchanging valid site administration bearer tokens.
+
+Once two nodes are federated, summary data from federated nodes will appear in both nodes' data portals and will be viewable by all users who are able to authenticate to either node. 
+
+Access to patient level data through specific program authorization is managed by the node that hosts the data for that program. For example, if a user from UHN needs to be given authorization to a program hosted within the BC node, a site administrator from BC will need to add a program authorization for that UHN user to that program within the BC CanDIG node.
+
