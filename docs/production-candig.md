@@ -2,6 +2,10 @@
 
 Apart from the basic steps in the [CanDIGv2 Install Guide](install-candig.md) to get the candig stack up and running, there are additional settings and security recommendations that need to set up in a production level environment. We provide the following as general advice, but it is important for all CanDIG deployers to also consult with their institutional infrastructure security personnel to ensure that their deployment meets the necessary level of data security.
 
+## Stable branch
+
+Production deployments should use the latest stable release of CanDIGv2 which uses the stable branches and fixed versions of all other submodules and packages. The develop versions of CanDIG software is under active development and should not be used for production purposes. When new stable releases are made, we recommend updating as soon as possible. It is possible that CanDIG nodes running different stable releases will not be able to be federated.
+
 ## Reverse Proxy & Firewall
 
 It is essential to setup a reverse proxy and firewall so that only specific ports are open to the internet. The software used for this is up to the deployer and is considered outside of the CanDIG stack. 

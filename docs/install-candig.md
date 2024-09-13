@@ -1,10 +1,6 @@
 # CanDIGv2 Install Guide
 
----
-
-These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, there are [modification instructions](#modifications-for-apple-silicon-m1) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
-
-Before beginning, you should set up your environment variables as described in the [README](../README.md).
+These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, there are modification instructions in the [install-os-dependencies](#install-os-dependencies) section. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
 
 Docker Engine (also known as Docker CE) is recommended over Docker Desktop for linux installations.
 
