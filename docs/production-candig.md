@@ -37,23 +37,23 @@ Any user that can access the VM where the CanDIG stack is running can access pot
 
 The following default settings in the `.env` file should be changed when deploying CanDIG in a production environment:
 
-| value in prod environment                                                                | function |
-|------------------------------------------------------------------------------------------|----------|
-| `CANDIG_DOMAIN=<your.prod.domain>`                                                       |          |
-| `CANDIG_AUTH_DOMAIN=<your.prod.auth.domain>`                                             |          |
-| `CANDIG_DEBUG_MODE=0`                                                                    |          |
-| `CANDIG_PRODUCTION_MODE=1`                                                               |          |
-| `CANDIG_SITE_LOCATION=`update to your site location                                              |          |
-| `FEDERATION_SELF_SERVER` - update id, province, province-code see [section below]()                                                       |          |
-| `KEYCLOAK_PUBLIC_PROTO=https`                                                            |          |
-| `KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}`                   |          |
-| `KEYCLOAK_PRIVATE_URL=${KEYCLOAK_PRIVATE_PROTO}://keycloak:${KEYCLOAK_PORT}`             |          |
-| `TYK_LOGIN_TARGET_URL=https://${CANDIG_DOMAIN}`                                          |          |
-| `TYK_USE_SSL=true`                                                                       |          |
-| `CANDIG_DATA_PORTAL_URL=https://${CANDIG_DOMAIN}:${CANDIG_DATA_PORTAL_PORT}/data-portal` |          |
+| value in prod environment                                                                |
+|------------------------------------------------------------------------------------------|
+| `CANDIG_DOMAIN=<your.prod.domain>`                                                       |
+| `CANDIG_AUTH_DOMAIN=<your.prod.auth.domain>`                                             |
+| `CANDIG_DEBUG_MODE=0`                                                                    |
+| `CANDIG_PRODUCTION_MODE=1`                                                               | 
+| `CANDIG_SITE_LOCATION=`<your-site-location> e.g. UHN, BC                                             |
+| `FEDERATION_SELF_SERVER` - update id, province, province-code see [section below](setting-location-information)                                                       |
+| `KEYCLOAK_PUBLIC_PROTO=https`                                                            |
+| `KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}`                   |
+| `KEYCLOAK_PRIVATE_URL=${KEYCLOAK_PRIVATE_PROTO}://keycloak:${KEYCLOAK_PORT}`             |
+| `TYK_LOGIN_TARGET_URL=https://${CANDIG_DOMAIN}`                                          |
+| `TYK_USE_SSL=true`                                                                       |
+| `CANDIG_DATA_PORTAL_URL=https://${CANDIG_DOMAIN}:${CANDIG_DATA_PORTAL_PORT}/data-portal` |
 
 ### Setting location information
-You will need to modify the `FEDERATION_SELF_SERVER` file to reflect your site's specific settings. Set `CANDIG_SITE_LOCATION` to the name of your site, such as UHN, BCGSC, or C3G. For federation settings, set the id, name, province, and province-code for `FEDERATION_SELF_SERVER` variable in the `.env`. 
+You will need to modify the `FEDERATION_SELF_SERVER` file to reflect your site's specific settings. Set `CANDIG_SITE_LOCATION` to the name of your site, such as UHN, BCGSC, or C3G. For federation settings, set the id, name, province, and province-code for `FEDERATION_SELF_SERVER` variable in the `.env`. See table below for codes for each Canadian province and territory:
 
 |   Province/Territory         |   province  |   province-code  |
 |------------------------------|-------------|------------------|
@@ -71,13 +71,14 @@ You will need to modify the `FEDERATION_SELF_SERVER` file to reflect your site's
 |   Saskatchewan               |   SK        |   ca-sk          |
 |   Yukon                      |   YT        |   ca-yt          |
 
-Example from UHN:
+Example values from UHN which is located in Ontario:
 
 ```bash
 CANDIG_SITE_LOCATION=UHN # or your site's location
 ...
 FEDERATION_SELF_SERVER="{'id': 'UHN', 'url': '${FEDERATION_SERVICE_URL}/${TYK_FEDERATION_API_LISTEN_PATH}','location': {'name': '${CANDIG_SITE_LOCATION}','province': 'ON','province-code': 'ca-on'}}"
 ```
+
 ## Setting Site Logo
 To customize the site logo, you need to place your image in the candig-data-portal either before building or within the container after running the build-all or install-all commands. The image should be located at `CanDIGv2/lib/candig-data-portal/candig-data-portal/src/assets/images/users/siteLogo.png`. This will overwrite the default logo.
 
