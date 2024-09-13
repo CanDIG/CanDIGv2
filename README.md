@@ -9,23 +9,11 @@ dataflow for genomic data.
 
 ## Installation
 
-CanDIG uses a make-based deployment process, with services containerized in Docker. To deploy CanDIGv2, follow the installation guide in `docs/`:
+CanDIG uses a make-based deployment process, with services containerized in Docker. To deploy CanDIGv2, follow the installation guides in `docs/`:
 
 * [CanDIG Deployment Guide](./docs/install-candig.md)
 
 See [Interact with the stack](docs/interact-with-the-stack.md) for a guide to additional options or view all Makefile options with `make help`.
-
-### Configuring CanDIG modules
-
-Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` setting defines which modules are included in the deployment.
-
-By default (if you copy the sample file from `etc/env/example.env`) the installation includes the minimal list of modules:
-
-```
-  CANDIG_MODULES=logging keycloak vault redis postgres htsget katsu query tyk opa federation candig-ingest candig-data-portal
-```
-
-Optional modules follow the `#` and include various monitoring components, workflow execution, and some older modules not generally installed.
 
 ## Project Structure
 
