@@ -191,6 +191,64 @@ yq >= 4 is required, but the conda version is outdated.  Install the latest vers
 
 </details>
 
+<details>
+
+<summary>For Apple Silicon</summary>
+
+### 1. Install OS Dependencies
+
+- Install dependencies
+
+```bash
+brew install gettext
+brew link --force gettext
+brew install jq
+brew install yq
+```
+
+- Get [Docker Desktop for Apple Silicon](https://docs.docker.com/desktop/install/mac-install/). Be sure to start it.
+
+### 2. Initialize CanDIGv2 Repo
+
+```bash
+git clone -b develop https://github.com/CanDIG/CanDIGv2.git
+cd CanDIGv2
+git submodule update --init --recursive
+cp -i etc/env/example.env .env
+```
+
+### 3. Update .env file
+
+```bash
+# find out your ip and add to LOCAL_IP_ADDR
+LOCAL_IP_ADDR=xxx.xx.x.x
+# change OS
+VENV_OS=arm64mac
+```
+
+Edit /etc/hosts on the machine (`sudo nano /etc/hosts`):
+
+```bash
+::1 candig.docker.internal
+```
+
+### 4. Initialize conda
+
+```bash
+make bin-all
+make init-conda
+conda activate candig
+```
+
+### 5. Build and test
+
+```bash
+make build-all
+make test-integration
+```
+
+</details>
+
 ## Initialize CanDIGv2 Repo
 
 ```bash
@@ -331,59 +389,7 @@ sudo ufw allow from $DOCKER_BRIDGE_IP to <your ip>
 
 Re-run `make clean-authx` and `make init-authx` and it should work.
 
-## For Apple Silicon
 
-### 1. Install OS Dependencies
-
-- Install dependencies
-
-```bash
-brew install gettext
-brew link --force gettext
-brew install jq
-brew install yq
-```
-
-- Get [Docker Desktop for Apple Silicon](https://docs.docker.com/desktop/install/mac-install/). Be sure to start it.
-
-### 2. Initialize CanDIGv2 Repo
-
-```bash
-git clone -b develop https://github.com/CanDIG/CanDIGv2.git
-cd CanDIGv2
-git submodule update --init --recursive
-cp -i etc/env/example.env .env
-```
-
-### 3. Update .env file
-
-```bash
-# find out your ip and add to LOCAL_IP_ADDR
-LOCAL_IP_ADDR=xxx.xx.x.x
-# change OS
-VENV_OS=arm64mac
-```
-
-Edit /etc/hosts on the machine (`sudo nano /etc/hosts`):
-
-```bash
-::1 candig.docker.internal
-```
-
-### 4. Initialize conda
-
-```bash
-make bin-all
-make init-conda
-conda activate candig
-```
-
-### 5. Build and test
-
-```bash
-make build-all
-make test-integration
-```
 
 Once everything has run without errors, take a look at the documentation for
 [ingesting data and testing the deployment](ingest-and-test.md) as well as
