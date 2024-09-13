@@ -180,8 +180,8 @@ yq >= 4 is required.  See [https://github.com/mikefarah/yq/#install](https://git
 <details>
 
 <summary>Note for WSL Systems</summary>
-Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop. Add `CONDA_INSTALL = ~/miniconda3`  above `CONDA = $(CONDA_INSTALL)/bin/conda` in the Makefile to avoid this issue. You can also use the below command to move the miniconda3 installation to the correct location.
 
+Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop. Add `CONDA_INSTALL = ~/miniconda3`  above `CONDA = $(CONDA_INSTALL)/bin/conda` in the Makefile to avoid this issue. You can also use the below command to move the miniconda3 installation to the correct location.
 
 ```bash
 bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
@@ -216,9 +216,9 @@ make init-conda
 conda activate candig
 ```
 
-## Deploy CanDIGv2 Services with Compose
+<details>
 
-### `.env` Environment File
+<summary>More info about the `.env` Environment File</summary>
 
 You need an `.env` file in the project root directory, which contains a set of global variables that are used as reference to the various parameters, plugins, and config options that operators can modify for testing purposes. This repo contains an example `.env` file in `etc/env/example.env`.
 
@@ -247,6 +247,9 @@ services:
     network_mode: ${DOCKER_MODE}
 ...
 ```
+
+</details>
+
 <details>
 
 <summary>Configuring CanDIG modules</summary>
@@ -262,9 +265,7 @@ By default (if you copy the sample file from `etc/env/example.env`) the installa
 Optional modules follow the `#` and include various monitoring components, workflow execution, and some older modules not generally installed.
  </details>
 
-### New
-
-`install-all` will perform all of the steps of the old method (section below) including the conda install, building images explicitly. **Note**: On Mac M1, you will not be able to use make install-all; instead, use the conda installation instructions as described above. Build-all will then build and compose the containers for you.
+`install-all` will perform all of the steps to deploy CanDIG including the conda install, building images explicitly. **Note**: On Mac M1, you will not be able to use make install-all; instead, use the conda installation instructions as described above. Build-all will then build and compose the containers for you.
 
 
 ```bash
