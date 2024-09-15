@@ -4,7 +4,7 @@ Apart from the basic steps in the [CanDIGv2 Install Guide](install-candig.md) to
 
 ## Stable branch
 
-Production deployments should use the latest [stable release of CanDIGv2](https://github.com/CanDIG/CanDIGv2/releases) which uses the stable branches and fixed versions of all other submodules and packages. The develop versions of CanDIG software is under active development and should not be used for production purposes. When new stable releases are made, we recommend updating as soon as possible. It is possible that CanDIG nodes running different stable releases will not be able to be federated.
+Production deployments should use the latest [stable release of CanDIGv2](https://github.com/CanDIG/CanDIGv2/releases) which uses the stable branches and fixed versions of all other submodules and packages. The develop versions of CanDIG software are under active development and should not be used for production purposes. When new stable releases are made, we recommend updating as soon as possible. It is possible that CanDIG nodes running different stable releases will not be able to be federated.
 
 ## Reverse Proxy & Firewall
 
