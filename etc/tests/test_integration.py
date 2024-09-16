@@ -549,7 +549,8 @@ def test_ingest_not_admin_htsget():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
+    # since we're only ingesting for a quick test before we delete again, don't bother indexing
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data, params={"do_not_index": True})
     queue_id = response.json()["queue_id"]
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     while response.status_code == 200 and "status" in response.json():
