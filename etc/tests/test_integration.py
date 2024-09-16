@@ -1057,6 +1057,7 @@ def test_query_genomic():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
+    # look for something that is in multisample_1
     params = {
         "chrom": "chr21:5030000-5030847",
         "assembly": "hg38"
@@ -1080,6 +1081,7 @@ def test_query_genomic():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
+    # look for something that is in multisample_2
     params = {
         "gene": "LOC102723996",
         "assembly": "hg38"
@@ -1104,6 +1106,7 @@ def test_query_genomic():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
+    # look for something that is in NA20787
     params = {
         "gene": "TPTE",
         "assembly": "hg38"
