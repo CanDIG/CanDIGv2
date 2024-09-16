@@ -677,6 +677,23 @@ def test_sample_metadata():
 
 
 def test_index_success():
+    # wait to make sure that the final vcf, NA18537.vcf.gz, has been indexed
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/NA18537-vcf", headers=headers)
+    tries = 0
+    print(response.json())
+    while response.status_code != 200 or "indexed" not in response.json() or response.json()['indexed'] != 1:
+        time.sleep(2)
+        response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/NA18537-vcf", headers=headers)
+        print(response.json())
+        tries = tries + 1
+        if tries > 15:
+            print("indexing is taking too long")
+            assert False
     token = get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
         password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
@@ -700,11 +717,8 @@ def test_index_success():
     }
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1", headers=headers)
     assert "indexed" in response.json()
+    print(response.json())
     assert response.json()['indexed'] == 1
-    token = get_token(
-        username=ENV["CANDIG_NOT_ADMIN_USER"],
-        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
-    )
 
 
 ## Does Beacon return the correct level of authorized results?
