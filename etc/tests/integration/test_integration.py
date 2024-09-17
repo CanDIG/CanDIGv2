@@ -465,7 +465,7 @@ def test_ingest_not_admin_katsu():
         print(response.json())
         assert False
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-    while response.status_code == 200:
+    while response.status_code == 200 and "status" in response.json():
         time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     print(response.text)
@@ -512,7 +512,7 @@ def test_ingest_admin_katsu():
         queue_id = response.json()["queue_id"]
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
         while response.status_code == 200 and "status" in response.json():
-            time.sleep(3)
+            time.sleep(2)
             response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
         print(response.json())
         assert len(response.json()[program]["errors"]) == 0
@@ -571,12 +571,18 @@ def test_ingest_not_admin_htsget():
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
 
     # when the user has program_curator role, they should be allowed
-    assert response.status_code == 201
+    assert response.status_code == 200
     for program in response.json():
         results = response.json()[program]
-        print(json.dumps(results["results"], indent=2))
-        for res in results["results"]:
-            assert "error processing" not in res
+        if len(results["errors"]) > 0:
+            print("Expected to get no errors when ingesting into htsget but the following errors were found:")
+            print("\n".join(results["errors"]))
+        assert len(results["errors"]) == 0
+        for id in results["results"]:
+            print(id)
+            print(f"\n{results["results"][id]}\n")
+            assert "genomic" in results["results"][id]
+            assert "sample" in results["results"][id]
     # clean up before the next test
     programs=["SYNTH_01", "SYNTH_02", "SYNTH_03", "SYNTH_04"]
     programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
@@ -752,10 +758,6 @@ def test_index_success():
     assert "indexed" in response.json()
     print(response.json())
     assert response.json()['indexed'] == 1
-    token = get_token(
-        username=ENV["CANDIG_NOT_ADMIN_USER"],
-        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
-    )
 
 
 ## Does Beacon return the correct level of authorized results?
