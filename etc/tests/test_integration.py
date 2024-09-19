@@ -459,7 +459,7 @@ def test_ingest_not_admin_katsu():
     queue_id = response.json()["queue_id"]
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     while response.status_code == 200 and "status" in response.json():
-        time.sleep(3)
+        time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     assert len(response.json()["SYNTH_01"]["errors"]) == 0
     assert len(response.json()["SYNTH_01"]["results"]) == 13
@@ -504,7 +504,7 @@ def test_ingest_admin_katsu():
         queue_id = response.json()["queue_id"]
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
         while response.status_code == 200 and "status" in response.json():
-            time.sleep(3)
+            time.sleep(2)
             response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
         print(response.json())
         assert len(response.json()[program]["errors"]) == 0
@@ -537,7 +537,7 @@ def test_ingest_not_admin_htsget():
     }
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
     # when the user has no admin access, they should not be allowed
-    assert response.status_code == 403
+    assert response.status_code == 400
 
     add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
     add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
@@ -549,19 +549,27 @@ def test_ingest_not_admin_htsget():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
+    # since we're only ingesting for a quick test before we delete again, don't bother indexing
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data, params={"do_not_index": True})
+    queue_id = response.json()["queue_id"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    while response.status_code == 200 and "status" in response.json():
+        time.sleep(2)
+        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+
     # when the user has program_curator role, they should be allowed
     assert response.status_code == 200
-    results = response.json()['results']
-    if len(response.json()["errors"]) > 0:
-        print("Expected to get no errors when ingesting into htsget but the following errors were found:")
-        print("\n".join(response.json()["errors"]))
-    assert len(response.json()["errors"]) == 0
-    for id in results:
-        print(id)
-        print(f"\n{results[id]}\n")
-        assert "genomic" in results[id]
-        assert "sample" in results[id]
+    for program in response.json():
+        results = response.json()[program]
+        if len(results["errors"]) > 0:
+            print("Expected to get no errors when ingesting into htsget but the following errors were found:")
+            print("\n".join(results["errors"]))
+        assert len(results["errors"]) == 0
+        for id in results["results"]:
+            print(id)
+            print(f"\n{results["results"][id]}\n")
+            assert "genomic" in results["results"][id]
+            assert "sample" in results["results"][id]
     # clean up before the next test
     programs=["SYNTH_01", "SYNTH_02"]
     for program in programs:
@@ -581,18 +589,24 @@ def test_ingest_admin_htsget():
         "Content-Type": "application/json; charset=utf-8",
     }
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
+    queue_id = response.json()["queue_id"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    while response.status_code == 200 and "status" in response.json():
+        time.sleep(2)
+        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     # when the user has admin access, they should be allowed
     assert response.status_code == 200
-    results = response.json()['results']
-    if len(response.json()["errors"]) > 0:
-        print("Expected to get no errors when ingesting into htsget but the following errors were found:")
-        print("\n".join(response.json()["errors"]))
-    assert len(response.json()["errors"]) == 0
-    for id in results:
-        print(id)
-        print(f"\n{results[id]}\n")
-        assert "genomic" in results[id]
-        assert "sample" in results[id]
+    for program in response.json():
+        results = response.json()[program]
+        if len(results["errors"]) > 0:
+            print("Expected to get no errors when ingesting into htsget but the following errors were found:")
+            print("\n".join(results["errors"]))
+        assert len(results["errors"]) == 0
+        for id in results["results"]:
+            print(id)
+            print(f"\n{results["results"][id]}\n")
+            assert "genomic" in results["results"][id]
+            assert "sample" in results["results"][id]
 
 
 ## Can we access the data when authorized to do so?
@@ -663,6 +677,23 @@ def test_sample_metadata():
 
 
 def test_index_success():
+    # wait to make sure that the final vcf, NA18537.vcf.gz, has been indexed
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/NA18537-vcf", headers=headers)
+    tries = 0
+    print(response.json())
+    while response.status_code != 200 or "indexed" not in response.json() or response.json()['indexed'] != 1:
+        time.sleep(2)
+        response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/NA18537-vcf", headers=headers)
+        print(response.json())
+        tries = tries + 1
+        if tries > 15:
+            print("indexing is taking too long")
+            assert False
     token = get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
         password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
@@ -686,11 +717,8 @@ def test_index_success():
     }
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1", headers=headers)
     assert "indexed" in response.json()
+    print(response.json())
     assert response.json()['indexed'] == 1
-    token = get_token(
-        username=ENV["CANDIG_NOT_ADMIN_USER"],
-        password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
-    )
 
 
 ## Does Beacon return the correct level of authorized results?
@@ -1043,6 +1071,7 @@ def test_query_genomic():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
+    # look for something that is in multisample_1
     params = {
         "chrom": "chr21:5030000-5030847",
         "assembly": "hg38"
@@ -1066,6 +1095,7 @@ def test_query_genomic():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
+    # look for something that is in multisample_2
     params = {
         "gene": "LOC102723996",
         "assembly": "hg38"
@@ -1090,6 +1120,7 @@ def test_query_genomic():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
+    # look for something that is in NA20787
     params = {
         "gene": "TPTE",
         "assembly": "hg38"
