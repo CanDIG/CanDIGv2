@@ -293,6 +293,12 @@ compose-%:
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
+cleancompose-%:
+	$(MAKE) clean-$*
+	$(MAKE) docker-volumes
+	$(MAKE) build-$*
+	$(MAKE) compose-$*
+
 #>>>
 # take down individual modules using docker-compose
 # $module is the name of the sub-folder in lib/
