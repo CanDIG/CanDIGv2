@@ -293,6 +293,13 @@ compose-%:
 	echo "    finished compose-$*" >> $(LOGFILE)
 
 
+#>>>
+# NOT the same as make clean-compose! This is a shortcut that combines
+# the make clean/build/compose steps (and re-creates docker volumes)
+# $module is the name of the sub-folder in lib/
+# make compose-$module
+
+#<<<
 cleancompose-%:
 	$(MAKE) clean-$*
 	$(MAKE) docker-volumes
