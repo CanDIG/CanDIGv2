@@ -294,13 +294,12 @@ compose-%:
 
 
 #>>>
-# NOT the same as make clean-compose! This is a shortcut that combines
-# the make clean/build/compose steps (and re-creates docker volumes)
+# Combines the make clean/build/compose steps (and re-creates docker volumes)
 # $module is the name of the sub-folder in lib/
 # make compose-$module
 
 #<<<
-cleancompose-%:
+recompose-%:
 	$(MAKE) clean-$*
 	$(MAKE) docker-volumes
 	$(MAKE) build-$*
