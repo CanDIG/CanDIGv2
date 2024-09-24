@@ -7,7 +7,7 @@ services:
     image: ${DOCKER_REGISTRY}/fluentd:${FLUENTD_VERSION:-latest}
     volumes:
       - type: bind
-        source: $PWD/tmp/logging
+        source: $PWD/tmp/logs
         target: /logging
     ports:
       - "${FLUENTD_PORT}:24224"
