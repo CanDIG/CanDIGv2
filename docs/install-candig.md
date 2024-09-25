@@ -270,6 +270,13 @@ make init-conda
 conda activate candig
 ```
 
+Copy and edit the `.env` file to match your configuration
+
+```
+cp etc/env/example.env .env
+```
+
+
 <details>
 
 <summary>More info about the `.env` Environment File</summary>
