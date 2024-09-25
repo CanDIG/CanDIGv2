@@ -57,10 +57,11 @@ services:
       - opa-data:/app
     command:
       - "run"
-      - "--server"
+      - "--set=decision_logs.console=true"
       - "--log-level=info"
       - "--authentication=token"
       - "--authorization=basic"
+      - "-s"
       - "app/permissions_engine/"
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
