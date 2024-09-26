@@ -311,6 +311,8 @@ services:
 ...
 ```
 
+</details>
+
 ### 3. option A: install miniconda and initialize candig virtualenv
 
 Use this option for systems installations. It installs miniconda in the candigv2 repo.
