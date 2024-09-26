@@ -135,7 +135,7 @@ def add_program_authorization(dataset: str, curators: list,
     print(response.text)
     # if the site user is the default user, there should be a warning
     if ENV['CANDIG_SITE_ADMIN_USER'] == ENV['CANDIG_ENV']['DEFAULT_SITE_ADMIN_USER']:
-        assert "warning" in response.json()
+        assert "warnings" in response.json()
 
     return response.json()
 
@@ -456,6 +456,7 @@ def test_ingest_not_admin_katsu():
     }
     # When program authorization is added, ingest should be allowed
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    print(response.json())
     queue_id = response.json()["queue_id"]
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     while response.status_code == 200 and "status" in response.json():
@@ -976,9 +977,9 @@ def test_query_donors_all():
 
     expected_response = {
         'age_at_diagnosis': {
-            '30-39 Years': 3,
-            '40-49 Years': 8,
-            '50-59 Years': 5
+            '30-39 Years': 2,
+            '40-49 Years': 6,
+            '50-59 Years': 6
         },
         'primary_site_count': {
             'Breast': 4,
@@ -991,13 +992,14 @@ def test_query_donors_all():
             'SYNTH_02': 20
         },
         'treatment_type_count': {
-            'Bone marrow transplant': 9,
-            'Other targeting molecular therapy': 6,
-            'Photodynamic therapy': 8,
-            'Radiation therapy': 18,
-            'Stem cell transplant': 8,
-            'Surgery': 24,
-            'Systemic therapy': 40
+            'Bone marrow transplant': 7,
+            'Other': 5,
+            'Photodynamic therapy': 6,
+            'Radiation therapy': 19,
+            'Stem cell transplant': 10,
+            'Surgery': 21,
+            'Systemic therapy': 40,
+            'Targeted molecular therapy': 15
         }
     }
     for category in expected_response.keys():
@@ -1031,28 +1033,29 @@ def test_query_donor_search():
     pprint.pprint(summary_stats)
     expected_response = {
         'age_at_diagnosis': {
-            '30-39 Years': 3,
-            '40-49 Years': 6,
-            '50-59 Years': 4
+            '30-39 Years': 2,
+            '40-49 Years': 5,
+            '50-59 Years': 6
         },
         'primary_site_count': {
-            'Breast': 4,
-            'Bronchus and lung': 3,
+            'Breast': 3,
+            'Bronchus and lung': 4,
             'Colon': 3,
-            'None': 3,
+            'None': 4,
             'Skin': 4
         },
         'patients_per_cohort': {
-            'SYNTH_02': 17
+            'SYNTH_02': 18
         },
         'treatment_type_count': {
-            'Bone marrow transplant': 8,
-            'Other targeting molecular therapy': 5,
-            'Photodynamic therapy': 8,
-            'Radiation therapy': 18,
-            'Stem cell transplant': 8,
-            'Surgery': 21,
-            'Systemic therapy': 34}
+            'Bone marrow transplant': 7,
+            'Other': 5,
+            'Photodynamic therapy': 6,
+            'Radiation therapy': 19,
+            'Stem cell transplant': 9,
+            'Surgery': 19,
+            'Systemic therapy': 36,
+            'Targeted molecular therapy': 14}
     }
     for category in expected_response.keys():
         for value in expected_response[category].keys():
