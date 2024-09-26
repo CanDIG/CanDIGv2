@@ -352,6 +352,8 @@ By default (if you copy the sample file from `etc/env/example.env`) the installa
 Optional modules follow the `#` and include various monitoring components, workflow execution, and some older modules not generally installed.
  </details>
 
+## Build and compose all the modules
+
 `install-all` will perform all of the steps to deploy CanDIG including the conda install, building images explicitly. **Note**: On Mac M1, you will not be able to use make install-all; instead, use the conda installation instructions as described above. Build-all will then build and compose the containers for you.
 
 
@@ -364,6 +366,13 @@ make install-all
 ```bash
 make build-all
 ```
+
+Once everything has run without errors, take a look at the documentation for
+[ingesting data and testing the deployment](ingest-and-test.md) as well as
+[how to modify code and test changes](docker-and-submodules.md) in
+the context of the CanDIG stack.
+
+## Troubleshooting
 
 On some machines (MacOS), if you get an error something like:
 ```
@@ -405,7 +414,7 @@ If you can see the data portal at http://candig.docker.internal:5080/, your inst
 Confirm your installation with the [automatic tests](/docs/ingest-and-test.md).
 
 
-## Update Firewall
+### Update Firewall
 
 If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
 
@@ -417,8 +426,3 @@ sudo ufw allow from $DOCKER_BRIDGE_IP to <your ip>
 ```
 
 Re-run `make clean-authx` and `make init-authx` and it should work.
-
-Once everything has run without errors, take a look at the documentation for
-[ingesting data and testing the deployment](ingest-and-test.md) as well as
-[how to modify code and test changes](docker-and-submodules.md) in
-the context of the CanDIG stack.
