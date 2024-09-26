@@ -68,6 +68,8 @@ sudo systemctl start docker
 sudo usermod -aG docker $(whoami)
 ```
 
+Continue to [Initialize CanDIGv2 Repo](#initialize-candigv2-repo) section below
+
 </details>
 
 <details>
@@ -122,6 +124,8 @@ groups
 getent group docker
 ```
 
+Continue to [Initialize CanDIGv2 Repo](#initialize-candigv2-repo) section below
+
 </details>
 
 <details>
@@ -171,6 +175,8 @@ sudo usermod -aG docker $(whoami)
 ```
 yq >= 4 is required.  See [https://github.com/mikefarah/yq/#install](https://github.com/mikefarah/yq/#install) for install options.
 
+Continue to [Initialize CanDIGv2 Repo](#initialize-candigv2-repo) section below
+
 </details>
 
 <details>
@@ -184,6 +190,8 @@ bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 ```
 
 yq >= 4 is required, but the conda version is outdated.  Install the latest version system-wide by following the instructions at [the yq GitHub](https://github.com/mikefarah/yq/#install).
+
+Continue to [Initialize CanDIGv2 Repo](#initialize-candigv2-repo) section below
 
 </details>
 
@@ -391,8 +399,6 @@ sudo ufw allow from $DOCKER_BRIDGE_IP to <your ip>
 ```
 
 Re-run `make clean-authx` and `make init-authx` and it should work.
-
-
 
 Once everything has run without errors, take a look at the documentation for
 [ingesting data and testing the deployment](ingest-and-test.md) as well as

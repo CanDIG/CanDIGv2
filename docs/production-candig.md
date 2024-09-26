@@ -167,7 +167,7 @@ curl -X GET $CANDIG_URL'/ingest/site-role/admin/email/site_admin@test.ca' -H 'Au
 
 ## Connecting Keycloak to institutional LDAP
 
-
+You will need to work with your site IT administrator in order to connect an external authentication service to the running Keycloak.
 
 ## Federating with other CanDIG production instances
 
