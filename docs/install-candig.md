@@ -68,7 +68,7 @@ sudo systemctl start docker
 sudo usermod -aG docker $(whoami)
 ```
 
-Continue to [Initialize CanDIGv2 Repo](#initialize-candigv2-repo) section below
+Continue to [Configure .env](#configure-.env) section below
 
 </details>
 
@@ -124,7 +124,7 @@ groups
 getent group docker
 ```
 
-Continue to [Initialize CanDIGv2 Repo](#initialize-candigv2-repo) section below
+Continue to [Configure .env](#configure-.env) section below
 
 </details>
 
@@ -175,7 +175,7 @@ sudo usermod -aG docker $(whoami)
 ```
 yq >= 4 is required.  See [https://github.com/mikefarah/yq/#install](https://github.com/mikefarah/yq/#install) for install options.
 
-Continue to [Initialize CanDIGv2 Repo](#initialize-candigv2-repo) section below
+Continue to [Configure .env](#configure-.env) section below
 
 </details>
 
@@ -191,7 +191,7 @@ bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 
 yq >= 4 is required, but the conda version is outdated.  Install the latest version system-wide by following the instructions at [the yq GitHub](https://github.com/mikefarah/yq/#install).
 
-Continue to [Initialize CanDIGv2 Repo](#initialize-candigv2-repo) section below
+Continue to [Configure .env](#configure-.env) section below
 
 </details>
 
@@ -253,30 +253,7 @@ make test-integration
 
 </details>
 
-## Initialize CanDIGv2 Repo
-
-```bash
-# 1. initialize repo and submodules
-git clone -b develop https://github.com/CanDIG/CanDIGv2.git
-cd CanDIGv2
-git submodule update --init --recursive
-
-# 2. copy and edit .env with your site's local configuration
-cp -i etc/env/example.env .env
-
-# 3. (IF NOT USING MAKE INSTALL-ALL) option A: install miniconda and initialize candig virtualenv (use this option
-# for systems installations). Installs miniconda in the candigv2 repo.
-make bin-conda  # If this fails on WSL, see the Note for WSL Systems section below
-make init-conda
-
-# 3. (IF NOT USING MAKE INSTALL-ALL) option B: if you want to use an existing conda installation on your local
-# at the top of the Makefile, set CONDA_BASE to your existing conda installation
-make mkdir # skip most of bin-conda, but need the dir-creating step
-make init-conda
-
-# 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
-conda activate candig
-```
+## Configure .env
 
 Copy and edit the `.env` file to match your configuration
 
@@ -284,6 +261,14 @@ Copy and edit the `.env` file to match your configuration
 cp etc/env/example.env .env
 ```
 
+Update any of the information you want or need to customize including:
+
+```bash
+# find out your ip and add to LOCAL_IP_ADDR
+LOCAL_IP_ADDR=xxx.xx.x.x
+# change OS
+VENV_OS=<your OS>
+```
 
 <details>
 
@@ -318,6 +303,31 @@ services:
 ```
 
 </details>
+
+## Initialize CanDIGv2 Repo
+
+```bash
+# 1. initialize repo and submodules
+git clone -b develop https://github.com/CanDIG/CanDIGv2.git
+cd CanDIGv2
+git submodule update --init --recursive
+
+# 2. copy and edit .env with your site's local configuration
+cp -i etc/env/example.env .env
+
+# 3. (IF NOT USING MAKE INSTALL-ALL) option A: install miniconda and initialize candig virtualenv (use this option
+# for systems installations). Installs miniconda in the candigv2 repo.
+make bin-conda  # If this fails on WSL, see the Note for WSL Systems section below
+make init-conda
+
+# 3. (IF NOT USING MAKE INSTALL-ALL) option B: if you want to use an existing conda installation on your local
+# at the top of the Makefile, set CONDA_BASE to your existing conda installation
+make mkdir # skip most of bin-conda, but need the dir-creating step
+make init-conda
+
+# 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
+conda activate candig
+```
 
 <details>
 
