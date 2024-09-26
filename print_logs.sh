@@ -4,7 +4,7 @@
 # logs for further inspection.
 
 
-cat tmp/logging/buffer.*.log
+cat tmp/logs/buffer.*.log
 
 # CONTAINERS=$(docker ps -a --format "{{.Names}}")
 # for CONTAINER in $CONTAINERS; do
