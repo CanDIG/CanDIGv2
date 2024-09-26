@@ -364,18 +364,20 @@ Optional modules follow the `#` and include various monitoring components, workf
 make install-all
 ```
 
-`build-all` will do the same without running bin-conda and init-conda:
+`build-all` will do the same without running `bin-conda` and `init-conda`:
 
 ```bash
 make build-all
 ```
 
 Once everything has run without errors, take a look at the documentation for
-[ingesting data and testing the deployment](ingest-and-test.md) as well as
-[how to modify code and test changes](docker-and-submodules.md) in
+[ingesting data and testing the deployment](ingest-and-test.md) as well as [Interacting with the stack using Make](interact-with-the-stack.md)
+and if you are a developer: [how to modify code and test changes](docker-and-submodules.md) in
 the context of the CanDIG stack.
 
 ## Troubleshooting
+
+Below are some common issues that our users have encountered. If you run into any other issues not addressed here, please reach out via a github issue in this repo.
 
 On some machines (MacOS), if you get an error something like:
 ```
