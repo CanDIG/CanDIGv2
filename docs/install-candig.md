@@ -253,12 +253,21 @@ make test-integration
 
 </details>
 
-## Configure .env
+## Initialize CanDIGv2 Repo
 
-Copy and edit the `.env` file to match your configuration
+
+### 1. Initialize repo and submodules
+```bash
+git clone -b develop https://github.com/CanDIG/CanDIGv2.git
+cd CanDIGv2
+git submodule update --init --recursive
+```
+
+### 2. Copy and edit .env with your site's local configuration
+
 
 ```
-cp etc/env/example.env .env
+cp -i etc/env/example.env .env
 ```
 
 Update any of the information you want or need to customize including:
@@ -302,30 +311,27 @@ services:
 ...
 ```
 
-</details>
+### 3. option A: install miniconda and initialize candig virtualenv
 
-## Initialize CanDIGv2 Repo
+Use this option for systems installations. It installs miniconda in the candigv2 repo.
 
 ```bash
-# 1. initialize repo and submodules
-git clone -b develop https://github.com/CanDIG/CanDIGv2.git
-cd CanDIGv2
-git submodule update --init --recursive
-
-# 2. copy and edit .env with your site's local configuration
-cp -i etc/env/example.env .env
-
-# 3. (IF NOT USING MAKE INSTALL-ALL) option A: install miniconda and initialize candig virtualenv (use this option
-# for systems installations). Installs miniconda in the candigv2 repo.
-make bin-conda  # If this fails on WSL, see the Note for WSL Systems section below
+make bin-conda  # If this fails on WSL, see the Note for WSL Systems section above
 make init-conda
+```
 
-# 3. (IF NOT USING MAKE INSTALL-ALL) option B: if you want to use an existing conda installation on your local
-# at the top of the Makefile, set CONDA_BASE to your existing conda installation
+### 3. option B. Use an existing Conda installation
+
+If you want to use an existing conda installation on your local at the bottom of the [.env](../etc/env/example.env#L310), set `CONDA_INSTALL` to your existing conda installation path
+
+```bash
 make mkdir # skip most of bin-conda, but need the dir-creating step
 make init-conda
+```
 
-# 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
+### 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
+
+```bash
 conda activate candig
 ```
 
