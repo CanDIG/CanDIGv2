@@ -108,7 +108,9 @@ When CanDIG is initially deployed, a `site_admin` user will be created by defaul
 
 1. Login to the data portal with the credentials you wish to make a site administrator to ensure the user can login successfully
 
-2. Get a site admin token using the default site admin user:
+2. ssh into the VM running your CanDIG deployment and cd into the currently deployed repo directory
+
+3. Get a site admin token using the default site admin user:
 
 ```bash
 source env.sh
@@ -130,19 +132,19 @@ CURL_OUTPUT=$(curl -s --request POST \
 export TOKEN=$(echo $CURL_OUTPUT | grep -Eo 'access_token":"[a-zA-Z0-9._\-]+' | cut -d '"' -f3)
 ```
 
-3. Set the role of the real user to a site admin with the following curl command:
+4. Set the role of the real user to a site admin with the following curl command:
 
 ```bash
 curl -X POST $CANDIG_URL'/ingest/site-role/admin/email/<YOUR-EMAIL-ADDRESS>' -H 'Authorization: Bearer '$TOKEN
 ```
 
-4. Check the role assignment was successful by verifying the following command returns `True`:
+5. Check the role assignment was successful by verifying the following command returns `True`:
 
 ```bash
 curl -X GET $CANDIG_URL'/ingest/site-role/admin/email/<YOUR-EMAIL-ADDRESS>' -H 'Authorization: Bearer '$TOKEN
 ```
 
-5. Delete the default site admin user using your new real user site admin token
+6. Delete the default site admin user using your new real user site admin token
 
 ```bash
 CURL_OUTPUT=$(curl -s --request POST \
@@ -161,9 +163,10 @@ export TOKEN=$(echo $CURL_OUTPUT | grep -Eo 'access_token":"[a-zA-Z0-9._\-]+' | 
 ```
 
 ```bash
-curl -X GET $CANDIG_URL'/ingest/site-role/admin/email/site_admin@test.ca' -H 'Authorization: Bearer '$TOKEN
+curl -X DELETE $CANDIG_URL'/ingest/site-role/admin/email/site_admin@test.ca' -H 'Authorization: Bearer '$TOKEN
 ```
 
+Keep the site admin user and password secure at all times.
 
 ## Connecting Keycloak to institutional LDAP
 
