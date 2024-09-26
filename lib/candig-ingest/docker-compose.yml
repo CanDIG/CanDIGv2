@@ -1,38 +1,41 @@
 services:
-    candig-ingest:
-        build:
-            context: $PWD/lib/candig-ingest/candigv2-ingest
-            args:
-                venv_python: "${VENV_PYTHON}"
-        image: ${DOCKER_REGISTRY}/candig-ingest:${CANDIG_INGEST_VERSION:-latest}
-        labels:
-            - "candigv2=candig-ingest"
-        ports:
-            - "${CANDIG_INGEST_PORT}:1235"
-        logging:
-            driver: "fluentd"
-            options:
-                tag: "{{.Name}}"
-        environment:
-            KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
-            KATSU_URL: ${KATSU_PRIVATE_URL}
-            HTSGET_URL: ${HTSGET_PRIVATE_URL}
-            CANDIG_URL: "http://${CANDIG_DOMAIN}:5080"
-            VAULT_URL: ${VAULT_PRIVATE_URL}
-            OPA_URL: ${OPA_PRIVATE_URL}
-            SERVICE_NAME: ${SERVICE_NAME}
-            DEFAULT_SITE_ADMIN_USER: ${DEFAULT_SITE_ADMIN_USER}
-            CANDIG_USER_KEY: ${CANDIG_USER_KEY}
-            DEBUG_MODE: ${CANDIG_DEBUG_MODE}
-            DAEMON_PATH: /home/candig/tmp
-        extra_hosts:
-              - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
-        secrets:
-          - source: vault-approle-token
-            target: vault-approle-token
-        healthcheck:
-            test: ["CMD", "curl", "--fail", "${CANDIG_INGEST_PRIVATE_URL}/service-info"]
-            interval: 30s
-            timeout: 10s
-            retries: 3
-
+  candig-ingest:
+    build:
+      context: $PWD/lib/candig-ingest/candigv2-ingest
+      args:
+        venv_python: "${VENV_PYTHON}"
+    image: ${DOCKER_REGISTRY}/candig-ingest:${CANDIG_INGEST_VERSION:-latest}
+    labels:
+      - "candigv2=candig-ingest"
+    ports:
+      - "${CANDIG_INGEST_PORT}:1235"
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
+    environment:
+      KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
+      KATSU_URL: ${KATSU_PRIVATE_URL}
+      HTSGET_URL: ${HTSGET_PRIVATE_URL}
+      CANDIG_URL: "http://${CANDIG_DOMAIN}:5080"
+      VAULT_URL: ${VAULT_PRIVATE_URL}
+      OPA_URL: ${OPA_PRIVATE_URL}
+      SERVICE_NAME: ${SERVICE_NAME}
+      DEFAULT_SITE_ADMIN_USER: ${DEFAULT_SITE_ADMIN_USER}
+      CANDIG_USER_KEY: ${CANDIG_USER_KEY}
+      DEBUG_MODE: ${CANDIG_DEBUG_MODE}
+      DAEMON_PATH: /home/candig/tmp
+      CANDIG_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+    secrets:
+      - source: vault-approle-token
+        target: vault-approle-token
+      - source: keycloak-client-secret
+        target: /run/secrets/client_secret
+    healthcheck:
+      test:
+        ["CMD", "curl", "--fail", "${CANDIG_INGEST_PRIVATE_URL}/service-info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
