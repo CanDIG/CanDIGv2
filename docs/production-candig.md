@@ -182,3 +182,7 @@ Once two nodes are federated, summary data from federated nodes will appear in b
 
 Access to patient level data through specific program authorization is managed by the node that hosts the data for that program. For example, if a user from UHN needs to be given authorization to a program hosted within the BC node, a site administrator from BC will need to [add a program authorization](https://github.com/CanDIG/candigv2-ingest#6-adding-a-dac-style-program-authorization-for-a-user) for that UHN user to that program within the BC CanDIG node.
 
+## Backing up production data
+
+It is not expected that a CanDIG instance would hold the only copy of any ingested data. However, recognising that the ETL and ingest process takes significant time and effort, it is a good idea to regularly backup all data stored in CanDIG. Steps for how to do this can be found in [Backing up and restoring CanDIG data](backup-restore-candig.md)
+
