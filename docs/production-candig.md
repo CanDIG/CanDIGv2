@@ -24,6 +24,9 @@ At UHN, the candig.uhnresearch.ca domain is under a proxy, so requests to a spec
 
 Specifically, the UHN proxy forwards all candig.uhnresearch.ca and candigauth.uhnresearch.ca requests (port 443) to candig1:5080 (tyk) and candig1:8080 (keycloak) respectively, thereby acting as a firewall.  All CanDIGv2 microservices can only be accessed through Tyk.
 
+> [!Note]
+> BCGSC initially had an issue with having a double proxy which caused a double URL bug. Switching to a single proxy resolved this issue. Please reach out if you need help solving this.
+
 ### OpenStack security group & nginx - C3G
 
  An OpenStack security group is applied as a firewall that allows ingress traffic to ports 80 and 443 only.
