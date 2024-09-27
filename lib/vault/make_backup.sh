@@ -10,6 +10,7 @@ zip=$(docker exec $vault_runner bash -c "cd /vault; tar -cz data/ > backup.tar.g
 copy=$(docker cp $vault_runner:/vault/backup.tar.gz $(pwd)/tmp/vault/backup/)
 
 cp $(pwd)/tmp/vault/keys.txt $(pwd)/tmp/vault/backup
+cp $(pwd)/tmp/vault/service_stores.txt $(pwd)/tmp/vault/backup
 pwd=$(pwd)
 cd $(pwd)/tmp/vault
 tar -cz backup > backup.tar.gz
