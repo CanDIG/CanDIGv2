@@ -561,3 +561,10 @@ rebuild-keep-data:
 	# Rebuild everything
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
+
+
+# wrapper for make_backup.sh to make sure we're running it from the right directory
+backup-vault:
+	@bash lib/vault/make_backup.sh
+	-$(MAKE) compose-vault
+	-$(MAKE) compose-opa
