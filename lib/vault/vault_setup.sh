@@ -41,6 +41,7 @@ if [[ -f "lib/vault/restore.tar.gz" ]]; then
   docker cp lib/vault/tmp/backup/keys.txt $vault_runner:/vault/config/
   docker cp lib/vault/tmp/backup/backup.tar.gz $vault_runner:/vault/
   docker exec $vault_runner bash -c "cd /vault; tar -xzf backup.tar.gz"
+  rm -R lib/vault/tmp/backup
   mv lib/vault/restore.tar.gz lib/vault/restored.tar.gz
 fi
 
