@@ -105,7 +105,29 @@ docker start candigv2_htsget_1
 
 You should be able to see the restored data in the data portal.
 
-## Backing up Authorization data
+## Backing up Secrets and Authorization data
+
+Secrets in CanDIG are stored within Vault. To back up Vault, run the command:
+
+```
+make backup-vault
+```
+
+This command creates a tar ball at `tmp/vault/backup.tar.gz`. This should be saved into a secure location outside the server your CanDIG deployment is running. You may want to change the name of the backup to include the date and type of backup for future reference, e.g. `YYYY-MM-DD-vault-backup.tar.gz`
+
+To restore the vault backup, copy the backup tarball into the vault directory in the CanDIG stack and rename it to `restore.tar.gz`:
+
+```
+cp /path/to/backup.tar.gz path/to/CanDIGv2/lib/vault/restore.tar.gz
+```
+
+Then run
+
+```
+make restore-vault
+```
+
+All previous secrets and authorizations should be restored to the stack.
 
 ## Backing up logs
 
