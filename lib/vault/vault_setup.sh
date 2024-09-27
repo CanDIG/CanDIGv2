@@ -24,7 +24,25 @@ ingest="candig-ingest"
 # https://www.vaultproject.io/api-docs/secret/identity/entity#batch-delete-entities
 
 vault=$(docker ps -a --format "{{.Names}}" | grep vault_1 | awk '{print $1}')
+vault_runner=$(docker ps -a --format "{{.Names}}" | grep vault-runner_1 | awk '{print $1}')
+
 docker cp lib/vault/tmp/vault-config.json $vault:/vault/config/
+
+
+# check to see if we need to restore a backup before initializing a fresh Vault:
+if [[ -f "lib/vault/restore.tar.gz" ]]; then
+  echo ">> restoring vault from backup"
+  docker stop $vault
+  pwd=$(pwd)
+  cd lib/vault/tmp
+  tar -xzf $pwd/lib/vault/restore.tar.gz
+  cd $pwd
+  cp lib/vault/tmp/backup/keys.txt tmp/vault/
+  docker cp lib/vault/tmp/backup/keys.txt $vault_runner:/vault/config/
+  docker cp lib/vault/tmp/backup/backup.tar.gz $vault_runner:/vault/
+  docker exec $vault_runner bash -c "cd /vault; tar -xzf backup.tar.gz"
+  mv lib/vault/restore.tar.gz lib/vault/restored.tar.gz
+fi
 
 # if vault isn't started, start it:
 docker restart $vault
@@ -139,7 +157,6 @@ docker exec $vault sh -c "echo 'path \"opa/data\" {capabilities = [\"update\", \
 # Htsget needs access to the ingest store's aws path:
 docker exec $vault sh -c "echo 'path \"candig-ingest/aws/*\" {capabilities = [\"read\"]}' >> htsget-policy.hcl; vault policy write htsget htsget-policy.hcl"
 
-vault_runner=$(docker ps -a --format "{{.Names}}" | grep vault-runner_1 | awk '{print $1}')
 docker restart $vault_runner
 
 if [ -f tmp/vault/service_stores.txt ]; then

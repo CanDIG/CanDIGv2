@@ -568,3 +568,10 @@ backup-vault:
 	@bash lib/vault/make_backup.sh
 	-$(MAKE) compose-vault
 	-$(MAKE) compose-opa
+
+
+# if there is a restore file available, restore it and then run compose-opa again
+restore-vault:
+	ls lib/vault/restore.tar.gz
+	-$(MAKE) compose-vault
+	-$(MAKE) compose-opa
