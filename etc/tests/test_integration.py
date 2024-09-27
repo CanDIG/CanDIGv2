@@ -498,6 +498,13 @@ def test_ingest_admin_katsu():
         with open(f"lib/candig-ingest/candigv2-ingest/tests/{program}.json", 'r') as f:
             test_data = json.load(f)
 
+        # no program auth: should fail
+        response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+        print(response.text)
+        assert response.status_code != 200
+
+        add_program_authorization(program, [], team_members=[])
+
         print(f"Sending {program} clinical data to katsu...")
         response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
         print(f"Ingest response code: {response.status_code}")
