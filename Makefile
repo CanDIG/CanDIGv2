@@ -573,5 +573,9 @@ backup-vault:
 # if there is a restore file available, restore it and then run compose-opa again
 restore-vault:
 	ls lib/vault/restore.tar.gz
+	-$(MAKE) clean-vault
+	-$(MAKE) secret-vault-approle-token
+	-$(MAKE) docker-volumes
+	-$(MAKE) build-vault
 	-$(MAKE) compose-vault
 	-$(MAKE) compose-opa
