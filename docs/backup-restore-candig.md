@@ -131,6 +131,4 @@ All previous secrets and authorizations should be restored to the stack.
 
 ## Backing up logs
 
-Logs are stored in `tmp/logging`. The contents of this folder should be saved periodically.
-
-
+Logs are stored in `tmp/logs`. The contents of this folder should be saved periodically.
