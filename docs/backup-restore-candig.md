@@ -107,7 +107,7 @@ You should be able to see the restored data in the data portal.
 
 ## Backing up Secrets and Authorization data
 
-Secrets in CanDIG are stored within Vault. To back up Vault, run the command:
+Secrets and Authorization data in CanDIG are stored within Vault. These should be backed up regularly so that they can be restored should there be a system crash and before the CanDIG stack is rebuilt. To back up Vault, run the command:
 
 ```
 make backup-vault
@@ -127,7 +127,7 @@ Then run
 make restore-vault
 ```
 
-All previous secrets and authorizations should be restored to the stack.
+All previous secrets and authorizations should be restored to the stack. The tarball is renamed to `restored.tar.gz` and can be deleted.
 
 ## Backing up logs
 
