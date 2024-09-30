@@ -505,11 +505,22 @@ def test_ingest_admin_katsu():
         with open(f"lib/candig-ingest/candigv2-ingest/tests/{program}.json", 'r') as f:
             test_data = json.load(f)
 
+        # no program auth: should fail
+        response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+        print(response.text)
+        assert response.status_code != 200
+
+        add_program_authorization(program, [], team_members=[])
+
         print(f"Sending {program} clinical data to katsu...")
         response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
         print(f"Ingest response code: {response.status_code}")
         #### This section runs only if ingest responds in time while we improve ingest so it doesn't time out ####
-        queue_id = response.json()["queue_id"]
+        try:
+            queue_id = response.json()["queue_id"]
+        except KeyError as e:
+            print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+            print(response.json())
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
         while response.status_code == 200 and "status" in response.json():
             time.sleep(2)
