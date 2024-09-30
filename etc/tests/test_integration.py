@@ -456,8 +456,11 @@ def test_ingest_not_admin_katsu():
     }
     # When program authorization is added, ingest should be allowed
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
-    print(response.json())
-    queue_id = response.json()["queue_id"]
+    try:
+        queue_id = response.json()["queue_id"]
+    except KeyError as e:
+        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+        print(response.json())
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     while response.status_code == 200 and "status" in response.json():
         time.sleep(2)
@@ -509,7 +512,11 @@ def test_ingest_admin_katsu():
         response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
         print(f"Ingest response code: {response.status_code}")
         #### This section runs only if ingest responds in time while we improve ingest so it doesn't time out ####
-        queue_id = response.json()["queue_id"]
+        try:
+            queue_id = response.json()["queue_id"]
+        except KeyError as e:
+            print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+            print(response.json())
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
         while response.status_code == 200 and "status" in response.json():
             time.sleep(2)
@@ -559,7 +566,11 @@ def test_ingest_not_admin_htsget():
     }
     # since we're only ingesting for a quick test before we delete again, don't bother indexing
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data, params={"do_not_index": True})
-    queue_id = response.json()["queue_id"]
+    try:
+        queue_id = response.json()["queue_id"]
+    except KeyError as e:
+        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+        print(response.json())
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     while response.status_code == 200 and "status" in response.json():
         time.sleep(2)
@@ -597,7 +608,11 @@ def test_ingest_admin_htsget():
         "Content-Type": "application/json; charset=utf-8",
     }
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
-    queue_id = response.json()["queue_id"]
+    try:
+        queue_id = response.json()["queue_id"]
+    except KeyError as e:
+        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+        print(response.json())
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     while response.status_code == 200 and "status" in response.json():
         time.sleep(2)
