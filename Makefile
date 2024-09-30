@@ -561,3 +561,21 @@ rebuild-keep-data:
 	# Rebuild everything
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
+
+
+# wrapper for make_backup.sh to make sure we're running it from the right directory
+backup-vault:
+	@bash lib/vault/make_backup.sh
+	-$(MAKE) compose-vault
+	-$(MAKE) compose-opa
+
+
+# if there is a restore file available, restore it and then run compose-opa again
+restore-vault:
+	ls lib/vault/restore.tar.gz
+	-$(MAKE) clean-vault
+	-$(MAKE) secret-vault-approle-token
+	-$(MAKE) docker-volumes
+	-$(MAKE) build-vault
+	-$(MAKE) compose-vault
+	-$(MAKE) compose-opa
