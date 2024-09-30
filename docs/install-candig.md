@@ -1,24 +1,29 @@
 # CanDIGv2 Install Guide
 
----
-
-These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, there are [modification instructions](#modifications-for-apple-silicon-m1) instructions at the bottom of this file. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
-
-Before beginning, you should set up your environment variables as described in the [README](../README.md).
+These instructions work for server deployments or local linux deployments. For local OSX using M1 architecture, there are modification instructions in the [install-os-dependencies](#install-os-dependencies) section. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
 
 Docker Engine (also known as Docker CE) is recommended over Docker Desktop for linux installations.
 
 Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
 
-
 Docker Engine (also known as Docker CE) is recommened over Docker Desktop for linux installations.
 
 Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
 
+## Resource requirements
+
+We have successfully run and installed the CanDIGv2 stack on VMs with 4 CPUs and 8GB of memory.
+
+We recommend giving Docker at least 4 CPUs and 4GB of memory.
+
+## Production vs Development Environments
+
+CanDIG can be installed and deployed as below for development situations where no real data will ever be ingested into the system. For critical differences in production deployments, please see the [Guide to CanDIG production deployments](production-candig.md).
 
 ## Install OS Dependencies
 
-### Debian
+<details>
+<summary>Debian</summary>
 
 1. Update system/install dependencies
 
@@ -63,7 +68,13 @@ sudo systemctl start docker
 sudo usermod -aG docker $(whoami)
 ```
 
-### Ubuntu
+Continue to [Configure .env](#configure-.env) section below
+
+</details>
+
+<details>
+
+<summary>Ubuntu</summary>
 
 1. Update system/install dependencies
 ```bash
@@ -113,7 +124,13 @@ groups
 getent group docker
 ```
 
-### CentOS 7
+Continue to [Configure .env](#configure-.env) section below
+
+</details>
+
+<details>
+
+<summary>CentOS 7</summary>
 
 1. Update system/install dependencies
 
@@ -158,10 +175,15 @@ sudo usermod -aG docker $(whoami)
 ```
 yq >= 4 is required.  See [https://github.com/mikefarah/yq/#install](https://github.com/mikefarah/yq/#install) for install options.
 
+Continue to [Configure .env](#configure-.env) section below
 
-### Note for WSL Systems
+</details>
+
+<details>
+
+<summary>Note for WSL Systems</summary>
+
 Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop. Add `CONDA_INSTALL = ~/miniconda3`  above `CONDA = $(CONDA_INSTALL)/bin/conda` in the Makefile to avoid this issue. You can also use the below command to move the miniconda3 installation to the correct location.
-
 
 ```bash
 bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
@@ -169,211 +191,13 @@ bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 
 yq >= 4 is required, but the conda version is outdated.  Install the latest version system-wide by following the instructions at [the yq GitHub](https://github.com/mikefarah/yq/#install).
 
-### Note for WSL Systems
-Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop. Add `CONDA_INSTALL = ~/miniconda3`  above `CONDA = $(CONDA_INSTALL)/bin/conda` in the Makefile to avoid this issue. You can also use the below command to move the miniconda3 installation to the correct location.
+Continue to [Configure .env](#configure-.env) section below
 
+</details>
 
-```bash
-bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
-```
+<details>
 
-yq >= 4 is required, but the conda version is outdated.  Find a way to install it system-wide.
-
-## Initialize CanDIGv2 Repo
-
-```bash
-# 1. initialize repo and submodules
-git clone -b develop https://github.com/CanDIG/CanDIGv2.git
-cd CanDIGv2
-git submodule update --init --recursive
-
-# 2. copy and edit .env with your site's local configuration
-cp -i etc/env/example.env .env
-
-# 3. (IF NOT USING MAKE INSTALL-ALL) option A: install miniconda and initialize candig virtualenv (use this option
-# for systems installations). Installs miniconda in the candigv2 repo.
-make bin-conda  # If this fails on WSL, see the Note for WSL Systems section below
-make init-conda
-
-# 3. (IF NOT USING MAKE INSTALL-ALL) option B: if you want to use an existing conda installation on your local
-# at the top of the Makefile, set CONDA_BASE to your existing conda installation
-make mkdir # skip most of bin-conda, but need the dir-creating step
-make init-conda
-
-# 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
-conda activate candig
-```
-
-## Deploy CanDIGv2 Services with Compose
-
-### Site Specific Settings
-You will need to modify the `.env` file to reflect your site's specific settings. Set CANDIG_SITE_LOCATION to the name of your site, such as UHN, BCGSC, or C3G. For federation settings, set the id, name, province, and province-code for `FEDERATION_SELF_SERVER` variable in the `.env`. The `name` within the `FEDERATION_SELF_SERVER` variable should match the `CANDIG_SITE_LOCATION` variable.
-
-```bash
-ProvCodes = [
-    'ca-ab',
-    'ca-bc',
-    'ca-mb',
-    'ca-nb',
-    'ca-nl',
-    'ca-nt',
-    'ca-ns',
-    'ca-nu',
-    'ca-on',
-    'ca-pe',
-    'ca-qc',
-    'ca-sk',
-    'ca-yt'
-];
-```
-
-```bash
-CANDIG_SITE_LOCATION=UHN # or your site's location
-...
-FEDERATION_SELF_SERVER="{'id': 'UHN', 'url': '${FEDERATION_SERVICE_URL}/${TYK_FEDERATION_API_LISTEN_PATH}','location': {'name': '${CANDIG_SITE_LOCATION}','province': 'ON','province-code': 'ca-on'}}"
-```
-#### Setting Site Logo
-To customize the site logo, you need to place your image in the candig-data-portal either before building or within the container after running the build-all or install-all commands. The image should be located at `CanDIGv2/lib/candig-data-portal/candig-data-portal/src/assets/images/users/siteLogo.png`. This will overwrite the default logo.
-
-File requirements:
-- Name the file siteLogo.png
-- The image should be square and will be set to 34x34 pixels
-- The image format must be PNG
-
-If the portal is already running, copy the logo into the Docker container using this command:
-
-```bash
- docker cp Your_images_path/siteLogo.png candigv2_candig-data-portal_1:/app/candig-data-portal/src/assets/images/users
- ```
- Otherwise:
-
- ```bash
- cp your_image_path/siteLogo.png CanDIGv2/lib/candig-data-portal/candig-data-portal/src/assets/images/users/siteLogo.png
- ```
-
-
-### New
-
-`install-all` will perform all of the steps of the old method (section below) including the conda install, building images explicitly. **Note**: On Mac M1, you will not be able to use make install-all; instead, use the conda installation instructions as described above. Build-all will then build and compose the containers for you.
-
-
-```bash
-make install-all
-```
-
-`build-all` will do the same without running bin-conda and init-conda:
-
-```bash
-make build-all
-```
-
-On some machines (MacOS), if you get an error something like:
-```
-Please ensure the value of $CANDIG_DOMAIN in your .env file points to this machine
-This should either be: 1) your local IP address, as assigned by your local network, or
-2) a domain name that resolves to this IP address
-```
-it may be necessary to add the following to `/etc/hosts`:
-
-In a terminal, run the following commands
-```
-sudo nano /etc/hosts
-```
-
-Then add the following line at the bottom of the file and save the changes:
-
-```
-::1	candig.docker.internal
-```
-
-In some other cases, it may be necessary to add your local/internal (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, find out what your local IP address is
-
-```bash
-# on mac
-ifconfig en0 | awk '$1 == "inet" {print $2}'
-# on linux
-ip route | awk -F\  '/default/ {print $9}'
-```
-
-Then edit your .env file with:
-
-```bash
-LOCAL_IP_ADDR=<your local IP>
-```
-Where `<your local IP>` is your local network IP (e.g. 192.168.x.x)
-
-If you can see the data portal at http://candig.docker.internal:5080/, your installation was successful.
-
-Confirm your installation with the [automatic tests](/docs/ingest-and-test.md).
-
-
-### Old
-The `init-docker` command will initialize CanDIGv2 and set up docker networks, volumes, configs, secrets, and perform other miscellaneous actions needed before deploying a CanDIGv2 stack. Running `init-docker` will override any previous configurations and secrets.
-
-```bash
-# initialize docker environment
-make init-docker
-
-## Do one of the following:
-# pull latest CanDIGv2 images:
-make docker-pull
-
-# or build images:
-make build-images
-
-# deploy stack
-make compose
-make init-authx # If this command fails, try the #update-firewall section of this Markdown file
-
-# Specific cached modules may be out of date, so to disable caching for a specific module, add BUILD_OPTS='--no-cache' at the end of make like so:
-# make build-htsget-server BUILD_OPTS='--no-cache'
-# make compose-htsget-server
-# make build-% and compose-% will work for any folder name in lib/
-
-# TODO: post deploy auth configuration
-
-```
-
-## Update Firewall
-
-If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
-
-Edit your firewall settings to allow connections from those adresses:
-
-```bash
-export DOCKER_BRIDGE_IP=$(docker network inspect bridge | grep Subnet | awk '{print $2}' | tr -d ',')
-sudo ufw allow from $DOCKER_BRIDGE_IP to <your ip>
-```
-
-Re-run `make clean-authx` and `make init-authx` and it should work.
-
-## Cleanup CanDIGv2 Compose Environment
-
-Use the following steps to clean up running CanDIGv2 services in a docker-compose configuration. Note that these steps are destructive and will remove **ALL** containers, secrets, volumes, networks, certs, and images. If you are using docker in a shared environment (i.e. with other non-CanDIGv2 containers running) please consider running the cleanup steps manually instead.
-
-The following steps are performed by `make clean-all`:
-
-```bash
-# 1. stop and remove running stacks
-make clean-compose
-
-# 2. stop and remove remaining containers
-make clean-containers
-
-# 3. remove all configs/secrets from docker and local dir
-make clean-secrets
-
-# 4. remove all docker volumes and local data dir
-make clean-volumes
-
-# 5. delete all cached images
-make clean-images
-
-# 6. remove bin dir (inlcuding miniconda)
-make clean-bin
-```
-
-## For Apple Silicon
+<summary>For Apple Silicon</summary>
 
 ### 1. Install OS Dependencies
 
@@ -427,7 +251,183 @@ make build-all
 make test-integration
 ```
 
+</details>
+
+## Initialize CanDIGv2 Repo
+
+
+### 1. Initialize repo and submodules
+```bash
+git clone -b develop https://github.com/CanDIG/CanDIGv2.git
+cd CanDIGv2
+git submodule update --init --recursive
+```
+
+### 2. Copy and edit .env with your site's local configuration
+
+
+```
+cp -i etc/env/example.env .env
+```
+
+Update any of the information you want or need to customize including:
+
+```bash
+# find out your ip and add to LOCAL_IP_ADDR
+LOCAL_IP_ADDR=xxx.xx.x.x
+# change OS
+VENV_OS=<your OS>
+```
+
+<details>
+
+<summary>More info about the `.env` Environment File</summary>
+
+You need an `.env` file in the project root directory, which contains a set of global variables that are used as reference to the various parameters, plugins, and config options that operators can modify for testing purposes. This repo contains an example `.env` file in `etc/env/example.env`.
+
+For a basic desktop sandbox setup, the example variable file needs very little (if any) modification.
+
+When deploying CanDIGv2
+using `make`, `.env` is imported by `make` and all uncommented variables are added as environment variables via
+`export`.
+
+Some of the functionality that is controlled through `.env` are:
+
+* operating system flags
+* change docker network, driver, and swarm host
+* modify ports, protocols, and plugins for various services
+* version control and app pinning
+* pre-defined defaults for turnkey deployment
+
+Environment variables defined in the `.env` file can be read in `docker-compose` scripts through the variable substitution operator
+`${VAR}`.
+
+```yaml
+# example compose YAML using variable substitution with default option
+services:
+  consul:
+    image: progrium/consul
+    network_mode: ${DOCKER_MODE}
+...
+```
+
+</details>
+
+### 3. option A: install miniconda and initialize candig virtualenv
+
+Use this option for systems installations. It installs miniconda in the candigv2 repo.
+
+```bash
+make bin-conda  # If this fails on WSL, see the Note for WSL Systems section above
+make init-conda
+```
+
+### 3. option B. Use an existing Conda installation
+
+If you want to use an existing conda installation on your local at the bottom of the [.env](../etc/env/example.env#L310), set `CONDA_INSTALL` to your existing conda installation path
+
+```bash
+make mkdir # skip most of bin-conda, but need the dir-creating step
+make init-conda
+```
+
+### 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
+
+```bash
+conda activate candig
+```
+
+<details>
+
+<summary>Configuring CanDIG modules</summary>
+
+Not all CanDIG modules are required for a minimal installation. The `CANDIG_MODULES` setting defines which modules are included in the deployment.
+
+By default (if you copy the sample file from `etc/env/example.env`) the installation includes the minimal list of modules:
+
+```
+  CANDIG_MODULES=logging keycloak vault redis postgres htsget katsu query tyk opa federation candig-ingest candig-data-portal
+```
+
+Optional modules follow the `#` and include various monitoring components, workflow execution, and some older modules not generally installed.
+ </details>
+
+## Build and compose all the modules
+
+`install-all` will perform all of the steps to deploy CanDIG including the conda install, building images explicitly. 
+
+> [!IMPORTANT] 
+> On Mac M1, you will not be able to use make install-all; instead, use the conda installation instructions as described above. Build-all will then build and compose the containers for you.
+
+
+```bash
+make install-all
+```
+
+`build-all` will do the same without running `bin-conda` and `init-conda`:
+
+```bash
+make build-all
+```
+
 Once everything has run without errors, take a look at the documentation for
-[ingesting data and testing the deployment](ingest-and-test.md) as well as
-[how to modify code and test changes](docker-and-submodules.md) in
+[ingesting data and testing the deployment](ingest-and-test.md) as well as [Interacting with the stack using Make](interact-with-the-stack.md)
+and if you are a developer: [how to modify code and test changes](docker-and-submodules.md) in
 the context of the CanDIG stack.
+
+## Troubleshooting
+
+Below are some common issues that our users have encountered. If you run into any other issues not addressed here, please reach out via a github issue in this repo.
+
+On some machines (MacOS), if you get an error something like:
+```
+Please ensure the value of $CANDIG_DOMAIN in your .env file points to this machine
+This should either be: 1) your local IP address, as assigned by your local network, or
+2) a domain name that resolves to this IP address
+```
+it may be necessary to add the following to `/etc/hosts`:
+
+In a terminal, run the following commands
+```
+sudo nano /etc/hosts
+```
+
+Then add the following line at the bottom of the file and save the changes:
+
+```
+::1	candig.docker.internal
+```
+
+In some other cases, it may be necessary to add your local/internal (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, find out what your local IP address is
+
+```bash
+# on mac
+ifconfig en0 | awk '$1 == "inet" {print $2}'
+# on linux
+ip route | awk -F\  '/default/ {print $9}'
+```
+
+Then edit your .env file with:
+
+```bash
+LOCAL_IP_ADDR=<your local IP>
+```
+Where `<your local IP>` is your local network IP (e.g. 192.168.x.x)
+
+If you can see the data portal at http://candig.docker.internal:5080/, your installation was successful.
+
+Confirm your installation with the [automatic tests](/docs/ingest-and-test.md).
+
+
+### Update Firewall
+
+If the command still fails, it may be necessary to disable your local firewall, or edit it to allow requests from all ports used in the Docker stack.
+
+Edit your firewall settings to allow connections from those adresses:
+
+```bash
+export DOCKER_BRIDGE_IP=$(docker network inspect bridge | grep Subnet | awk '{print $2}' | tr -d ',')
+sudo ufw allow from $DOCKER_BRIDGE_IP to <your ip>
+```
+
+Re-run `make clean-authx` and `make init-authx` and it should work.
