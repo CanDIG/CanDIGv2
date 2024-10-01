@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 
-# Check 1: UHN VPN is up
-if command -v getent >/dev/null 2>&1; then
-    CANDIG_HOST=`getent hosts candig-dev`
-elif command -v dscacheutil >/dev/null 2>&1; then
-    CANDIG_HOST=`dscacheutil -q host -a name candig-dev`
-fi
-
 SILENT_MODE=0
 if [[ $* == *-s* ]]; then
     SILENT_MODE=1
