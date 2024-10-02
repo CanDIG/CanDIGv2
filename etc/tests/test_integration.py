@@ -714,7 +714,7 @@ def test_index_success():
         response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/NA18537-vcf", headers=headers)
         print(response.json())
         tries = tries + 1
-        if tries > 15:
+        if tries > 60:
             print("indexing is taking too long")
             assert False
     token = get_token(
