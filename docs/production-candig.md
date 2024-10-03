@@ -10,7 +10,7 @@ Production deployments should use the latest [stable release of CanDIGv2](https:
 
 It is essential to setup a reverse proxy and firewall so that only specific ports are open to the internet. The software used for this is up to the deployer and is considered outside of the CanDIG stack. 
 
-Basically, the only ports that should be available are to tyk (443) and keycloak (80).
+Essentially, the only two ports that should be available to the outside world are Tyk (default 5080) and Keycloak (default 8080). Usually we configure a reverse proxy so that both are on separate domains, such that e.g. https://candig.uhnresearch.ca directs to Tyk and https://candigauth.uhnresearch.ca directs to Keycloak.
 
 Some specific examples of how existing institutes have approached this are below.
 
