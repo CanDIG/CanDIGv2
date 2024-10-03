@@ -108,7 +108,7 @@ If the portal is already running, copy the logo into the Docker container using 
 ## Managing user roles in CanDIG
 
 There are currently two site level roles in CanDIG
-* Site Administrator - Can do everything, ingest, delete, read all ingest endpoints
+* Site Administrator - Can do everything: ingest, delete, read all ingest endpoints
 * Site Curator - Can do anything apart from editing site level roles. Can ingest, delete, read all programs at a site, can add/delete program level roles
 
 There are currently two program level roles
