@@ -1,0 +1,23 @@
+name: Slack Notify on example.env Update
+
+on:
+  pull_request:
+    branches:
+        - develop
+    types:
+        - closed
+    paths:
+      - "etc/env/example.env"
+
+jobs:
+  notify-slack:
+    name: Slack notify
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: post to slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.26.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          

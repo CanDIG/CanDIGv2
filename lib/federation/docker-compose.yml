@@ -11,16 +11,12 @@ services:
     ports:
       - "${FEDERATION_PORT}:4232"
     secrets:
-      - source: opa-service-token
-        target: opa-service-token
       - source: tyk-secret-key
         target: tyk-secret-key
       - source: vault-approle-token
         target: vault-approle-token
-      - source: keycloak-client-local-candig-secret
+      - source: keycloak-client-secret
         target: /run/secrets/client_secret
-      - source: keycloak-test-user2-password
-        target: /run/secrets/password
     environment:
         TEST_KEY: "hoodlebug"
         KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}

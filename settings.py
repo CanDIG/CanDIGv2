@@ -42,44 +42,38 @@ def get_env():
     vars["CANDIG_CLIENT_ID"] = get_env_value("KEYCLOAK_CLIENT_ID")
     vars["KEYCLOAK_PUBLIC_URL"] = get_env_value("KEYCLOAK_PUBLIC_URL")
     vars["KEYCLOAK_REALM_URL"] = get_env_value("KEYCLOAK_REALM_URL")
+    vars["KEYCLOAK_REALM"] = get_env_value("KEYCLOAK_REALM")
+    vars["DEFAULT_ADMIN_USER"] = get_env_value("DEFAULT_ADMIN_USER")
     vars["VAULT_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
     vars["OPA_URL"] = get_env_value("OPA_URL")
-    vars["MINIO_URL"] = get_env_value("MINIO_PUBLIC_URL")
     vars["TYK_LOGIN_TARGET_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
     vars["TYK_POLICY_ID"] = get_env_value("TYK_POLICY_ID")
     vars["CANDIG_DEBUG_MODE"] = get_env_value("CANDIG_DEBUG_MODE")
     vars["CANDIG_USER_KEY"] = get_env_value("CANDIG_USER_KEY")
     vars["VAULT_SERVICE_PUBLIC_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
-
+    vars["CANDIG_SITE_ADMIN_USER"] = get_env_value("DEFAULT_SITE_ADMIN_USER")
+    vars["CANDIG_NOT_ADMIN_USER"] = get_env_value("TEST_USER_1")
+    vars["CANDIG_NOT_ADMIN2_USER"] = get_env_value("TEST_USER_2")
     # vars that come from files:
-    with open(f"tmp/secrets/opa-service-token") as f:
-        vars["OPA_SECRET"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/keycloak-client-{vars['CANDIG_CLIENT_ID']}-secret") as f:
-        vars["CANDIG_CLIENT_SECRET"] = f.read().splitlines().pop()
-    if os.path.isfile("tmp/secrets/keycloak-test-site-admin"):
-        with open(f"tmp/secrets/keycloak-test-site-admin") as f:
-            vars["CANDIG_SITE_ADMIN_USER"] = f.read().splitlines().pop()
-        with open(f"tmp/secrets/keycloak-test-site-admin-password") as f:
+    if os.path.isfile("tmp/keycloak/client-secret"):
+        with open("tmp/keycloak/client-secret") as f:
+            vars["CANDIG_CLIENT_SECRET"] = f.read().splitlines().pop()
+    if os.path.isfile("tmp/keycloak/test-site-admin-password"):
+        with open("tmp/keycloak/test-site-admin-password") as f:
             vars["CANDIG_SITE_ADMIN_PASSWORD"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/keycloak-test-user") as f:
-        vars["CANDIG_NOT_ADMIN_USER"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/keycloak-test-user-password") as f:
-        vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/keycloak-test-user2") as f:
-        vars["CANDIG_NOT_ADMIN2_USER"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/keycloak-test-user2-password") as f:
-        vars["CANDIG_NOT_ADMIN2_PASSWORD"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/vault-s3-token") as f:
-        vars["VAULT_S3_TOKEN"] = f.read().splitlines().pop()
-    with open(f"tmp/vault/keys.txt") as f:
-        vars["VAULT_ROOT_TOKEN"] = f.read().splitlines().pop(-1)
-    with open(f"tmp/secrets/minio-access-key") as f:
-        vars["MINIO_ACCESS_KEY"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/minio-secret-key") as f:
-        vars["MINIO_SECRET_KEY"] = f.read().splitlines().pop()
-    with open(f"tmp/secrets/tyk-secret-key") as f:
-        vars["TYK_SECRET_KEY"] = f.read().splitlines().pop()
-    vars["POSTGRES_PASSWORD_FILE"] = f"tmp/secrets/metadata-db-secret"
+    if os.path.isfile("tmp/keycloak/test-user-password"):
+        with open("tmp/keycloak/test-user-password") as f:
+            vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
+    if os.path.isfile("tmp/keycloak/test-user2-password"):
+        with open("tmp/keycloak/test-user2-password") as f:
+            vars["CANDIG_NOT_ADMIN2_PASSWORD"] = f.read().splitlines().pop()
+    if os.path.isfile("tmp/vault/keys.txt"):
+        with open("tmp/vault/keys.txt") as f:
+            vars["VAULT_ROOT_TOKEN"] = f.read().splitlines().pop(-1)
+    if os.path.isfile("tmp/tyk/secret-key"):
+        with open("tmp/tyk/secret-key") as f:
+            vars["TYK_SECRET_KEY"] = f.read().splitlines().pop()
+    vars["POSTGRES_PASSWORD_FILE"] = f"tmp/postgres/db-secret"
     vars["CANDIG_ENV"] = INTERPOLATED_ENV
     vars["DB_PATH"] = "metadata-db"
     return vars

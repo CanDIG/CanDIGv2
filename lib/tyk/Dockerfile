@@ -17,5 +17,8 @@ COPY ./tmp/middleware/virtualToken.js /opt/tyk-gateway/middleware/virtualToken.j
 COPY ./tmp/apps /opt/tyk-gateway/apps
 COPY ./tmp/policies/policies.json /opt/tyk-gateway/policies/policies.json
 
+# Required for the health check
+RUN apt-get -y update; apt-get -y install curl
+
 ## Extra APIs can be added here
 #COPY ./tmp/apps/api_example.json /opt/tyk-gateway/apps/api_example.json

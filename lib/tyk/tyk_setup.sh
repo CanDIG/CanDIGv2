@@ -19,8 +19,7 @@ do
 done
 sleep 5
 
-TYK_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-secret-key)
-export TYK_SECRET_KEY=$TYK_SECRET_KEY_VAL
+export TYK_SECRET_KEY=$(cat $PWD/tmp/tyk/secret-key)
 
 generate_key() {
 
@@ -50,11 +49,6 @@ generate_key() {
           "'"${TYK_CANDIG_DATA_PORTAL_API_ID}"'": {
               "api_id": "'"${TYK_CANDIG_DATA_PORTAL_API_ID}"'",
               "api_name": "'"${TYK_CANDIG_DATA_PORTAL_API_SLUG}"'",
-              "Versions": ["Default"]
-          },
-          "'"${TYK_GRAPHQL_API_ID}"'": {
-              "api_id": "'"${TYK_GRAPHQL_API_ID}"'",
-              "api_name": "'"${TYK_GRAPHQL_API_SLUG}"'",
               "Versions": ["Default"]
           },
           "'"${TYK_HTSGET_API_ID}"'": {

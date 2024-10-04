@@ -1,8 +1,8 @@
 volumes:
-  minio-data:
-    external: true
-  minio-config:
-    external: true
+  # minio-data:
+  #   external: true
+  # minio-config:
+  #   external: true
   toil-jobstore:
     external: true
   prometheus-data:
@@ -27,123 +27,39 @@ volumes:
     external: true
 
 secrets:
-  aws-credentials:
-    file: $PWD/tmp/secrets/aws-credentials
-    labels:
-      - "candigv2=secret"
-  federation-servers:
-    file: $PWD/tmp/federation/servers.json
-    labels:
-      - "candigv2=secret"
-  federation-services:
-    file: $PWD/tmp/federation/services.json
-    labels:
-      - "candigv2=secret"
-  katsu-secret-key:
-    file: $PWD/tmp/secrets/katsu-secret-key
-    labels:
-      - "candigv2=secret"
-  metadata-app-secret:
-    file: $PWD/tmp/secrets/metadata-app-secret
-    labels:
-      - "candigv2=secret"
-  metadata-db-user:
-    file: $PWD/tmp/secrets/metadata-db-user
-    labels:
-      - "candigv2=secret"
   metadata-db-secret:
-    file: $PWD/tmp/secrets/metadata-db-secret
+    file: $PWD/tmp/postgres/db-secret
     labels:
       - "candigv2=secret"
-  metadata-settings:
-    file: $PWD/lib/katsu/settings.py
-    labels:
-      - "candigv2=secret"
-  minio-access-key:
-    file: $PWD/tmp/secrets/minio-access-key
-    labels:
-      - "candigv2=secret"
-  minio-secret-key:
-    file: $PWD/tmp/secrets/minio-secret-key
-    labels:
-      - "candigv2=secret"
-  portainer-user:
-    file: $PWD/tmp/secrets/portainer-user
-    labels:
-      - "candigv2=secret"
-  portainer-secret:
-    file: $PWD/tmp/secrets/portainer-secret
-    labels:
-      - "candigv2=secret"
+  # minio-access-key:
+  #   file: $PWD/tmp/secrets/minio-access-key
+  #   labels:
+  #     - "candigv2=secret"
+  # minio-secret-key:
+  #   file: $PWD/tmp/secrets/minio-secret-key
+  #   labels:
+  #     - "candigv2=secret"
   wes-dependency-resolver:
     file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
     labels:
       - "candigv2=secret"
-  keycloak-admin-user:
-    file: $PWD/tmp/secrets/keycloak-admin-user
-    labels:
-      - "candigv2=secret"
   keycloak-admin-password:
-    file: $PWD/tmp/secrets/keycloak-admin-password
+    file: $PWD/tmp/keycloak/admin-password
     labels:
       - "candigv2=secret"
-  keycloak-test-site-admin:
-    file: $PWD/tmp/secrets/keycloak-test-site-admin
-    labels:
-      - "candigv2=secret"
-  keycloak-test-user:
-    file: $PWD/tmp/secrets/keycloak-test-user
-    labels:
-      - "candigv2=secret"
-  keycloak-test-user-password:
-    file: $PWD/tmp/secrets/keycloak-test-user-password
-    labels:
-      - "candigv2=secret"
-  keycloak-test-user2:
-    file: $PWD/tmp/secrets/keycloak-test-user2
-    labels:
-      - "candigv2=secret"
-  keycloak-test-user2-password:
-    file: $PWD/tmp/secrets/keycloak-test-user2-password
-    labels:
-      - "candigv2=secret"
-  keycloak-client-local-candig-secret:
-    file: $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret
-    labels:
-      - "candigv2=secret"
-  selfsigned-site-crt:
-    file: $PWD/tmp/ssl/public.crt
-    labels:
-      - "candigv2=secret"
-  selfsigned-site-key:
-    file: $PWD/tmp/ssl/selfsigned-root-ca.key
-    labels:
-      - "candigv2=secret"
-  selfsigned-site-pem:
-    file: $PWD/tmp/ssl/cert.pem
-    labels:
-      - "candigv2=secret"
-  vault-s3-token:
-    file: $PWD/tmp/secrets/vault-s3-token
+  keycloak-client-secret:
+    file: $PWD/tmp/keycloak/client-secret
     labels:
       - "candigv2=secret"
   vault-approle-token:
-      file: $PWD/tmp/secrets/vault-approle-token
+      file: $PWD/tmp/vault/approle-token
       labels:
         - "candigv2=secret"
-  opa-root-token:
-    file: $PWD/tmp/secrets/opa-root-token
-    labels:
-      - "candigv2=secret"
-  opa-service-token:
-    file: $PWD/tmp/secrets/opa-service-token
-    labels:
-      - "candigv2=secret"
   tyk-secret-key:
-    file: $PWD/tmp/secrets/tyk-secret-key
+    file: $PWD/tmp/tyk/secret-key
     labels:
       - "candigv2=secret"
   redis-secret-key:
-    file: $PWD/tmp/secrets/redis-secret-key
+    file: $PWD/tmp/redis/secret-key
     labels:
       - "candigv2=secret"

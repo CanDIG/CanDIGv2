@@ -51,7 +51,7 @@ make bin-conda
 source bin/miniconda3/etc/profile.d/conda.sh
 make init-conda
 conda activate candig
-make build-all ARGS="-s" 2<&1 >tmp/lastbuild.txt
+make build-all BUILD_OPTS="--no-cache" ARGS="-s" 2<&1 >tmp/lastbuild.txt
 
 if [ $? -ne 0 ]; then
     PostToSlack "Build failed:\n $(tail tmp/lastbuild.txt)"
@@ -63,7 +63,7 @@ TYK_TESTS=""
 TRIES=0
 while [ -z "$TYK_TESTS" ];
 do
-    TYK_TESTS=$(pytest -k "test_tyk" etc/tests/test_integration.py | grep "1 passed")
+    TYK_TESTS=$(make test-integration ARGS='-k "test_tyk" etc/tests/test_integration.py' | grep "1 passed")
     sleep 15
     TRIES=$TRIES+1
     if [[ $TRIES -gt 120 ]]; then
@@ -78,15 +78,8 @@ if [ $? -ne 0 ]; then
     exit
 fi
 
-# Run the ingestion
-python settings.py
 source env.sh
-cd $INGEST_PATH
-export CLINICAL_DATA_LOCATION=$INGEST_PATH/tests/clinical_ingest.json
-# should be pip install -r requirements.txt, but that didn't seem to work last I checked -- dependency errors?
-pip install -r requirements.txt
-python katsu_ingest.py
+
 cd $BUILD_PATH
 
-PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: $(cat ./tmp/secrets/keycloak-test-site-admin)\npassword $(cat ./tmp/secrets/keycloak-test-site-admin-password)\`\`\`"
-
+PostToSlack "\`\`\`\nBuild success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: $CANDIG_SITE_ADMIN_USER\npassword $(cat ./tmp/keycloak/test-site-admin-password)\nusername: $CANDIG_NOT_ADMIN_USER\npassword $(cat ./tmp/keycloak/test-user-password)\nusername: $CANDIG_NOT_ADMIN2_USER\npassword $(cat ./tmp/keycloak/test-user2-password)\n\`\`\`"

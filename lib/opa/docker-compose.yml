@@ -13,18 +13,8 @@ services:
     volumes:
       - opa-data:/app
     secrets:
-      - source: opa-root-token
-        target: opa-root-token
-      - source: opa-service-token
-        target: opa-service-token
       - source: vault-approle-token
         target: vault-approle-token
-      - source: keycloak-test-site-admin
-        target: /run/secrets/site_admin_name
-      - source: keycloak-test-user
-        target: /run/secrets/user1_name
-      - source: keycloak-test-user2
-        target: /run/secrets/user2_name
     environment:
       KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
@@ -34,8 +24,11 @@ services:
       VAULT_URL: ${VAULT_PRIVATE_URL}
       SERVICE_NAME: ${SERVICE_NAME}
       CANDIG_USER_KEY: ${CANDIG_USER_KEY}
+      SITE_ADMIN_USER: ${DEFAULT_SITE_ADMIN_USER}
+      USER1: ${TEST_USER_1}
+      USER2: ${TEST_USER_2}
     healthcheck:
-      test: [ "CMD", "python", "/app/healthcheck.py"]
+      test: ["CMD", "curl", "--fail", "${OPA_PRIVATE_URL}/v1/data/service/service-info"]
       interval: 30s
       timeout: 20s
       retries: 3

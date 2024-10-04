@@ -9,11 +9,6 @@ services:
     image: ${DOCKER_REGISTRY}/candig-data-portal:${CANDIG_DATA_PORTAL_VERSION:-latest}
     ports:
       - "${CANDIG_DATA_PORTAL_PORT}:2543"
-    secrets:
-      - source: vault-s3-token
-        target: vault-s3-token
-      - source: opa-service-token
-        target: opa-service-token
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     environment:
@@ -23,7 +18,9 @@ services:
       - REACT_APP_BASE_NAME=
       - REACT_APP_SITE_LOCATION=${CANDIG_SITE_LOCATION}
       - REACT_APP_CANDIG_VERSION=${CANDIG_VERSION}
+      - DEBUG_MODE=${CANDIG_DEBUG_MODE}
       - WDS_SOCKET_PORT=0
+      - AGGREGATE_COUNT_THRESHOLD=${AGGREGATE_COUNT_THRESHOLD}
     healthcheck:
       test: [ "CMD", "curl", "http://${CANDIG_DOMAIN}:5080" ]
       interval: 30s

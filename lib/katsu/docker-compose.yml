@@ -4,7 +4,7 @@ services:
       context: $PWD/lib/katsu/katsu_service
       args:
         venv_python: "${VENV_PYTHON}"
-        katsu_env: "dev"
+        debug_mode: ${CANDIG_DEBUG_MODE}
     image: ${DOCKER_REGISTRY}/katsu:${KATSU_VERSION:-latest}
     ports:
       - "${KATSU_PORT}:8000"
@@ -14,31 +14,26 @@ services:
       - POSTGRES_DATABASE=metadata
       - POSTGRES_HOST=metadata-db
       - POSTGRES_PORT=5432
-      - POSTGRES_USER=admin
+      - POSTGRES_USER=${DEFAULT_ADMIN_USER}
       - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
       - REDIS_PASSWORD_FILE=/run/secrets/redis_secret_key
       - OPA_URL=${OPA_PRIVATE_URL}
-      - EXTERNAL_URL=${CANDIG_DOMAIN}
-      - CANDIG_INTERNAL_DOMAIN=${CANDIG_INTERNAL_DOMAIN}
-      - KATSU_AUTHORIZATION=${CANDIG_AUTHORIZATION}
-      - HOST_CONTAINER_NAME=${KATSU_CONTAINER}
-      - CONN_MAX_AGE=60
-      - DJANGO_SETTINGS_MODULE=config.settings.dev
-      - UWSGI_WORKERS=1
-      - CACHE_DURATION=86400
+      - AGGREGATE_COUNT_THRESHOLD=${AGGREGATE_COUNT_THRESHOLD}
+      - CACHE_DURATION=${KATSU_CACHE_DURATION}
+      - ALLOWED_HOSTS=${KATSU_ALLOWED_HOSTS}
+      - CANDIG_DOMAIN=${CANDIG_DOMAIN}
+      - DEBUG_MODE=${CANDIG_DEBUG_MODE}
+      - WORKERS=${KATSU_WORKERS}
+      - THREADS=${KATSU_THREADS}
     secrets:
       - source: metadata-db-secret
         target: metadata_db_secret
-      - source: opa-service-token
-        target: opa-service-token
       - source: redis-secret-key
         target: redis_secret_key
-      - source: katsu-secret-key
-        target: katsu_secret
     labels:
       - "candigv2=chord-metadata"
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://${CANDIG_DOMAIN}:8008"]
+      test: ["CMD", "curl", "--fail", "${KATSU_PRIVATE_URL}/v2/service-info"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -15,25 +15,40 @@ LOGFILE=$PWD/tmp/progress.txt
 # see Makefile.authx for other details.
 export CONFIG_DIR="$PWD/lib/tyk/tmp"
 
-KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-secret)
+KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/keycloak/client-secret)
 export KEYCLOAK_SECRET=$KEYCLOAK_SECRET_VAL
 
-KEYCLOAK_CLIENT_ID_64_VAL=$(cat $PWD/tmp/secrets/keycloak-client-${KEYCLOAK_CLIENT_ID}-id-64)
+KEYCLOAK_CLIENT_ID_64_VAL=$(echo -n ${KEYCLOAK_CLIENT_ID} | base64)
 export KEYCLOAK_CLIENT_ID_64=$KEYCLOAK_CLIENT_ID_64_VAL
 
-TYK_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-secret-key)
-export TYK_SECRET_KEY=$TYK_SECRET_KEY_VAL
+# if there isn't already a value, store the password in tmp/tyk/secret-key
+mkdir -p tmp/tyk
+if [[ ! -f "tmp/tyk/secret-key" ]]; then
+    mv tmp/secrets/tyk-secret-key tmp/tyk/secret-key
+fi
 
-TYK_NODE_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/tyk-node-secret-key)
-export TYK_NODE_SECRET_KEY=$TYK_NODE_SECRET_KEY_VAL
+# if we didn't need this temp secret, delete it
+if [[ -f "tmp/secrets/tyk-secret-key" ]]; then
+    rm tmp/secrets/tyk-secret-key
+fi
 
-TYK_ANALYTIC_ADMIN_SECRET_VAL=$(cat $PWD/tmp/secrets/tyk-analytics-admin-key)
-export TYK_ANALYTIC_ADMIN_SECRET=$TYK_ANALYTIC_ADMIN_SECRET_VAL
+export TYK_SECRET_KEY=$(cat $PWD/tmp/tyk/secret-key)
 
-KEYCLOAK_PUBLIC_KEY_VAL=$(cat $PWD/tmp/secrets/keycloak-public-key)
-export KEYCLOAK_PUBLIC_KEY=$KEYCLOAK_PUBLIC_KEY_VAL
+# if there isn't already a value, store the password in tmp/tyk/analytics-admin-key
+if [[ ! -f "tmp/tyk/analytics-admin-key" ]]; then
+    mv tmp/secrets/tyk-analytics-admin-key tmp/tyk/analytics-admin-key
+fi
 
-REDIS_SECRET_KEY_VAL=$(cat $PWD/tmp/secrets/redis-secret-key)
+# if we didn't need this temp secret, delete it
+if [[ -f "tmp/secrets/tyk-analytics-admin-key" ]]; then
+    rm tmp/secrets/tyk-analytics-admin-key
+fi
+
+export TYK_ANALYTIC_ADMIN_SECRET=$(cat $PWD/tmp/tyk/analytics-admin-key)
+
+export KEYCLOAK_PUBLIC_KEY=$(curl ${KEYCLOAK_REALM_URL} -k 2>/dev/null | jq -r '.public_key')
+
+REDIS_SECRET_KEY_VAL=$(cat $PWD/tmp/redis/secret-key)
 export REDIS_SECRET_KEY=$REDIS_SECRET_KEY_VAL
 
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
@@ -118,21 +133,6 @@ cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +
 ' > lib/tyk/tmp/tmp_policies.json.tpl
 mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
-echo "Working on api_graphql.json"
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_graphql.json.tpl > ${CONFIG_DIR}/apps/${TYK_GRAPHQL_API_ID}.json
-cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
-{"${TYK_GRAPHQL_API_ID}": {
-    "allowed_urls": [],
-    "api_id": "${TYK_GRAPHQL_API_ID}",
-    "api_name": "${TYK_GRAPHQL_API_SLUG}",
-    "versions": [
-        "Default"
-    ]
-}
-}
-' > lib/tyk/tmp/tmp_policies.json.tpl
-mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
-
 echo "Working on api_htsget.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_htsget.json.tpl > ${CONFIG_DIR}/apps/${TYK_HTSGET_API_ID}.json
 cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
@@ -207,6 +207,9 @@ cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +
 }
 ' > lib/tyk/tmp/tmp_policies.json.tpl
 mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
+
+echo "Working on api_query.json" | tee -a $LOGFILE
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_query.json.tpl > ${CONFIG_DIR}/apps/${TYK_QUERY_API_ID}.json
 
 # Extra APIs can be added here
 # echo "Working on api_example.json"
