@@ -1,9 +1,0 @@
-services:
-  katsu:
-    build:
-      args:
-        katsu_env: "prod"
-    environment:
-      - DJANGO_SETTINGS_MODULE=config.settings.prod
-      - CONN_MAX_AGE=60 # change on traffic and performance
-      - UWSGI_WORKERS=4 # change on cpu cores and performance
