@@ -23,7 +23,9 @@ services:
       - REACT_APP_BASE_NAME=
       - REACT_APP_SITE_LOCATION=${CANDIG_SITE_LOCATION}
       - REACT_APP_CANDIG_VERSION=${CANDIG_VERSION}
+      - DEBUG_MODE=${CANDIG_DEBUG_MODE}
       - WDS_SOCKET_PORT=0
+      - AGGREGATE_COUNT_THRESHOLD=${AGGREGATE_COUNT_THRESHOLD}
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:3000"]
       interval: 30s

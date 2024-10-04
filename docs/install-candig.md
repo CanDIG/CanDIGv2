@@ -162,7 +162,16 @@ Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infini
 bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 ```
 
-yq >= 4 is required, but the conda version is outdated.  Find a way to install it system-wide.
+yq >= 4 is required, but the conda version is outdated.  Install the latest version system-wide by following the instructions at [the yq GitHub](https://github.com/mikefarah/yq/#install).
+
+### Note for WSL Systems
+Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop. Add `CONDA_INSTALL = ~/miniconda3`  above `CONDA = $(CONDA_INSTALL)/bin/conda` in the Makefile to avoid this issue. You can also use the below command to move the miniconda3 installation to the correct location.
+
+
+```bash
+bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
+```
+
 
 ## Initialize CanDIGv2 Repo
 
@@ -344,8 +353,6 @@ cp -i etc/env/example.env .env
 LOCAL_IP_ADDR=xxx.xx.x.x
 # change OS
 VENV_OS=arm64mac
-# change keycloak
-KEYCLOAK_BASE_IMAGE=quay.io/c3genomics/keycloak:${KEYCLOAK_VERSION}.arm64
 ```
 
 Edit /etc/hosts on the machine (`sudo nano /etc/hosts`):

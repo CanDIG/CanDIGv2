@@ -85,6 +85,6 @@ services:
       - prometheus
     user: "472"
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_USER=${DEFAULT_ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/admin_password
       # - GF_USERS_ALLOW_SIGN_UP=false

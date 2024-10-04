@@ -34,8 +34,7 @@ all:
 mkdir:
 	mkdir -p bin
 	mkdir -p $(CONDA_INSTALL)
-	mkdir -p tmp/{configs,data,secrets}
-	mkdir -p tmp/{keycloak,tyk,vault}
+	mkdir -p tmp/secrets
 
 
 #>>>
@@ -97,6 +96,8 @@ build-all:
 
 # Setup the entire stack
 	$(MAKE) init-docker
+	pip install --upgrade setuptools
+	pip install -U -r etc/venv/requirements.txt
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
 
@@ -151,8 +152,9 @@ clean-%:
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
 	-docker volume rm `docker volume ls --filter name=$* -q`
-	docker image rm `docker image ls --format "{{.Repository}}:{{.Tag}}" | grep $*`
-	rm -Rf lib/$*/tmp
+	-docker image rm `docker image ls --format "{{.Repository}}:{{.Tag}}" | grep $*`
+	-rm -Rf lib/$*/tmp
+	-rm -Rf tmp/$*
 
 
 #>>>
@@ -201,9 +203,7 @@ clean-bin:
 .PHONY: clean-compose
 clean-compose:
 	source setup_hosts.sh; \
-	$(foreach MODULE, $(CANDIG_MODULES), \
-		export SERVICE_NAME=$(MODULE); \
-		docker compose -f lib/candigv2/docker-compose.yml -f lib/$(MODULE)/docker-compose.yml down || true;)
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) clean-$(MODULE);)
 
 
 #>>>
@@ -247,7 +247,6 @@ clean-images:
 clean-secrets:
 	-docker secret rm `docker secret ls -q --filter label=candigv2`
 	rm -rf tmp/secrets
-	rm -rf tmp/vault
 
 
 #>>>
@@ -283,6 +282,7 @@ compose-%:
 	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
 	echo "    started compose-$*" >> $(LOGFILE)
 	source setup_hosts.sh; \
+	python settings.py; source env.sh; \
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
 	if [ -f lib/$*/$*_setup.sh ]; then \
@@ -334,36 +334,25 @@ docker-push:
 
 #<<<
 .PHONY: docker-secrets
-docker-secrets: mkdir minio-secrets katsu-secrets
-
-	@echo admin > tmp/secrets/keycloak-admin-user
+docker-secrets: mkdir #minio-secrets
 	$(MAKE) secret-keycloak-admin-password
 
-	@echo $(DEFAULT_SITE_ADMIN_USER) > tmp/secrets/keycloak-test-site-admin
 	$(MAKE) secret-keycloak-test-site-admin-password
-
-	@echo user1@test.ca > tmp/secrets/keycloak-test-user
 	$(MAKE) secret-keycloak-test-user-password
-
-	@echo user2@test.ca > tmp/secrets/keycloak-test-user2
 	$(MAKE) secret-keycloak-test-user2-password
 
+	$(MAKE) secret-metadata-db-secret
+
 	$(MAKE) secret-tyk-secret-key
-	$(MAKE) secret-tyk-node-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
 
-	$(MAKE) secret-vault-s3-token
 	$(MAKE) secret-vault-approle-token
-
-	$(MAKE) secret-opa-root-token
-	$(MAKE) secret-opa-service-token
 
 	$(MAKE) secret-redis-secret-key
 
 
-
 #>>>
-# create persistant volumes for docker containers
+# create persistent volumes for docker containers
 # make docker-volumes
 
 #<<<
@@ -371,8 +360,8 @@ docker-secrets: mkdir minio-secrets katsu-secrets
 docker-volumes:
 	docker volume create grafana-data --label candigv2=volume
 	docker volume create jupyter-data --label candigv2=volume
-	docker volume create minio-config --label candigv2=volume
-	docker volume create minio-data $(MINIO_VOLUME_OPT) --label candigv2=volume
+	# docker volume create minio-config --label candigv2=volume
+	# docker volume create minio-data $(MINIO_VOLUME_OPT) --label candigv2=volume
 	docker volume create prometheus-data --label candigv2=volume
 	docker volume create toil-jobstore --label candigv2=volume
 	docker volume create keycloak-data --label candigv2=volume
@@ -410,6 +399,7 @@ init-conda:
 
 	source $(CONDA_ENV_SETTINGS) \
 		&& conda activate $(VENV_NAME) \
+		&& pip install --upgrade setuptools \
 		&& pip install -U -r etc/venv/requirements.txt
 
 #@echo "Load local conda: source bin/miniconda3/etc/profile.d/conda.sh"
@@ -433,24 +423,13 @@ init-docker: docker-volumes docker-secrets
 
 #<<<
 minio-secrets:
-	@echo admin > tmp/secrets/minio-access-key
+	@echo $(DEFAULT_ADMIN_USER) > tmp/secrets/minio-access-key
 	$(MAKE) secret-minio-secret-key
 	@echo '[default]' > tmp/secrets/aws-credentials
 	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> tmp/secrets/aws-credentials
 	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> tmp/secrets/aws-credentials
 
-#>>>
-# make katsu-secret and database secret
 
-#<<<
-katsu-secrets:
-	@echo admin > tmp/secrets/katsu-secret-key
-	@dd if=/dev/urandom bs=1 count=50 2>/dev/null \
-		| base64 | tr -d '\n\r+' | sed s/[^A-Za-z0-9]//g > tmp/secrets/katsu-secret-key
-
-	@echo admin > tmp/secrets/metadata-db-user
-	$(MAKE) secret-metadata-app-secret
-	$(MAKE) secret-metadata-db-secret
 #>>>
 # pull docker image to $DOCKER_REGISTRY
 # $module is the name of the sub-folder in lib/
@@ -529,10 +508,17 @@ print-%:
 test-integration:
 	python ./settings.py
 ifeq ($(KEEP_TEST_DATA),true)
-	source ./env.sh; pytest ./etc/tests -k 'not test_clean_up' $(ARGS)
+	source ./env.sh; pytest -v ./etc/tests -k 'not test_clean_up' $(ARGS)
 else
-	source ./env.sh; pytest ./etc/tests $(ARGS)
+	source ./env.sh; pytest -v ./etc/tests $(ARGS)
 endif
+
+# Run a single test by using its name and print out results whether failing or passing
+# note some tests are dependent on others so doesn't always work as expected
+# Helpful when debugging issues with a specific test
+.PHONY: test-integration-%
+test-integration-%:
+	python ./settings.py; source ./env.sh; pytest ./etc/tests -s -rP -k '$*'
 
 # stop all docker containers
 .PHONY: stop-all
@@ -545,27 +531,19 @@ start-all:
 	CONTAINERS="$(shell docker ps -a --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker start $$CONTAINER; done
 
 #>>>
-# rebuild the entire stack without touching the postgres container
-
+# rebuild the entire stack without touching the data containers, defined in .env
 #<<<
-.PHONY: rebuild-without-postgres
-rebuild-without-postgres:
-	# Back up postgres-related variables
-	mkdir -p tmp2
-	@cp tmp/secrets/metadata-* tmp2/
-	@cp tmp/secrets/katsu-secret-key tmp2/
-	# Remove Postgres from the .env
-	$(eval CANDIG_MODULES := $(filter-out postgres,$(CANDIG_MODULES)))
+
+.PHONY: rebuild-keep-data
+rebuild-keep-data:
+	# Remove the module from the .env
+	$(eval CANDIG_MODULES := $(filter-out $(CANDIG_DATA_MODULES),$(CANDIG_MODULES)))
 	# Clean everything
 	$(MAKE) clean-all CANDIG_MODULES="$(CANDIG_MODULES)"
 	docker system prune -af
 	# Start build-all
 	./pre-build-check.sh $(ARGS)
 	$(MAKE) init-docker
-	# Copy back our secrets
-	@cp tmp2/* tmp/secrets/
-	rm -r tmp2/
 	# Rebuild everything
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
-

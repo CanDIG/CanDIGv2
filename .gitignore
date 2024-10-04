@@ -1,6 +1,7 @@
 #edit related
 *~
 .idea
+.DS_Store
 
 #data files/directories
 *.bam
@@ -12,6 +13,7 @@
 #project files
 .venv
 .env
+.env-bak
 /nightly_env.sh
 /bin
 /etc/ssl/selfsigned-*
