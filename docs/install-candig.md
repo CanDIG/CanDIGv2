@@ -11,11 +11,6 @@ Docker Engine (also known as Docker CE) is recommended over Docker Desktop for l
 Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
 
 
-Docker Engine (also known as Docker CE) is recommened over Docker Desktop for linux installations.
-
-Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
-
-
 ## Install OS Dependencies
 
 ### Debian
@@ -177,7 +172,6 @@ Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infini
 bash bin/miniconda_install.sh -f -b -u -p ~/miniconda3
 ```
 
-yq >= 4 is required, but the conda version is outdated.  Find a way to install it system-wide.
 
 ## Initialize CanDIGv2 Repo
 
