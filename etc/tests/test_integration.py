@@ -651,8 +651,8 @@ def user_access():
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
             "NA02102-bam",
-            False
-        ),  # user2 cannot access NA02102-bam
+            True
+        ),  # user2 can access NA02102-bam because site curator
         (
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
@@ -759,7 +759,7 @@ def beacon_access():
             "CANDIG_NOT_ADMIN2_PASSWORD",
             "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
             ["SYNTH_02"],
-            ["SYNTH_01"],
+            [],
         )
     ]
 
