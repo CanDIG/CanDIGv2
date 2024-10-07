@@ -10,7 +10,7 @@ Production deployments should use the latest [stable release of CanDIGv2](https:
 
 It is essential to setup a reverse proxy and firewall so that only specific ports are open to the internet. The software used for this is up to the deployer and is considered outside of the CanDIG stack. 
 
-Basically, the only ports that should be available are to tyk (443) and keycloak (80).
+Essentially, the only two ports that should be available to the outside world are Tyk (default 5080) and Keycloak (default 8080). Usually we configure a reverse proxy so that both are on separate domains, such that e.g. https://candig.uhnresearch.ca directs to Tyk and https://candigauth.uhnresearch.ca directs to Keycloak.
 
 Some specific examples of how existing institutes have approached this are below.
 
@@ -105,7 +105,22 @@ If the portal is already running, copy the logo into the Docker container using 
  cp your_image_path/siteLogo.png CanDIGv2/lib/candig-data-portal/candig-data-portal/src/assets/images/users/siteLogo.png
  ```
 
-## Changing the default site admin
+## Managing user roles in CanDIG
+
+There are currently two site level roles in CanDIG
+* Site Administrator - Can do everything: ingest, delete, read all ingest endpoints
+* Site Curator - Can do anything apart from editing site level roles. Can ingest, delete, read all programs at a site, can add/delete program level roles
+
+There are currently two program level roles
+* Program curator - can ingest/delete/read everything for a particular program
+* Team member - read-only access to a particular program
+
+Per-user authorizations
+* Authorized user - user external to the program team who has been granted temporary authorization to one or more programs
+
+Details about how to assign/remove roles from users is in the [candig-ingest README](https://github.com/CanDIG/candigv2-ingest/blob/develop/README.md)
+
+### Changing the default site admin
 
 When CanDIG is initially deployed, a `site_admin` user will be created by default. The username and password for this user can be found in the `env.sh` file. It is important to change this default to a real user who should have site administration privileges. 
 
@@ -170,6 +185,10 @@ curl -X DELETE $CANDIG_URL'/ingest/site-role/admin/email/site_admin@test.ca' -H 
 ```
 
 Keep the site admin user and password secure at all times.
+
+### Adding a site curator
+
+See [candig-ingest README](https://github.com/CanDIG/candigv2-ingest/blob/develop/README.md)
 
 ## Connecting Keycloak to institutional LDAP
 
