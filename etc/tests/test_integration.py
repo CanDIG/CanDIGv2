@@ -651,8 +651,8 @@ def user_access():
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
             "NA02102-bam",
-            True
-        ),  # user2 can access NA02102-bam because site curator
+            False
+        ),  # user2 cannot access NA02102-bam
         (
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
