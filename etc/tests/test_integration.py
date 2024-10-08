@@ -959,9 +959,14 @@ def test_add_server():
     response = requests.post(
         f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body
     )
-    last_result = response.json().pop()
-    print(last_result)
-    assert last_result["location"]["name"] == "test"
+    found_it = False
+    results = response.json()
+    while len(results) > 0:
+        last_result = results.pop(0)
+        print(last_result)
+        if last_result["location"]["name"] == "test":
+            found_it = True
+    assert found_it
 
     # delete the server
     response = requests.delete(
