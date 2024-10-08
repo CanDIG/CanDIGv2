@@ -155,7 +155,7 @@ clean-%:
 	-docker volume rm `docker volume ls --filter name=$* -q`
 	-docker image rm `docker image ls --format "{{.Repository}}:{{.Tag}}" | grep $*`
 	-rm -Rf lib/$*/tmp
-	-rm -Rf tmp/$*
+	-rm -f tmp/$*/*
 
 
 #>>>
@@ -194,7 +194,7 @@ clean-logs:
 #<<<
 .PHONY: clean-bin
 clean-bin:
-	rm -rf bin
+	rm -f bin/*
 
 
 #>>>
@@ -250,7 +250,7 @@ clean-images:
 .PHONY: clean-secrets
 clean-secrets:
 	-docker secret rm `docker secret ls -q --filter label=candigv2`
-	rm -rf tmp/secrets
+	rm -f tmp/secrets/*
 
 
 #>>>
@@ -262,7 +262,6 @@ clean-secrets:
 clean-volumes:
 	-docker volume rm `docker volume ls -q --filter label=candigv2`
 	-docker volume rm `docker volume ls -q --filter dangling=true`
-#rm -rf tmp/data
 
 
 #>>>
