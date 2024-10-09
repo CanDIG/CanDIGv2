@@ -940,7 +940,7 @@ def test_add_server():
 
     body = {
         "server": response.json()[0],
-        "authentication": {"issuer": ENV["KEYCLOAK_REALM_URL"], "token": token},
+        "authentication": {"issuer": ENV["KEYCLOAK_ISSUER_URL"], "token": token},
     }
     body["server"]["id"] = "test"
     body["server"]["location"]["name"] = "test"
