@@ -7,7 +7,6 @@ LABEL "candigv2"="tyk"
 # TODO: this image uses temp dir inside the lib/tyk which deviates from convention of this repo
 # See tyk_preflight.sh for the same.
 COPY ./tmp/tyk.conf /opt/tyk-gateway/tyk.conf
-COPY ./tmp/middleware/authMiddleware.js /opt/tyk-gateway/middleware/authMiddleware.js
 COPY ./tmp/middleware/backendAuthMiddleware.js /opt/tyk-gateway/middleware/backendAuthMiddleware.js
 COPY ./tmp/middleware/frontendAuthMiddleware.js /opt/tyk-gateway/middleware/frontendAuthMiddleware.js
 COPY ./tmp/middleware/permissionsStoreMiddleware.js /opt/tyk-gateway/middleware/permissionsStoreMiddleware.js
