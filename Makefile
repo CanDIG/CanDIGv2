@@ -167,7 +167,7 @@ clean-%:
 .PHONY: clean-all
 clean-all: clean-logs clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images# clean-bin
-	rm tmp/containers.txt
+	rm -f tmp/containers.txt
 
 
 #>>>
