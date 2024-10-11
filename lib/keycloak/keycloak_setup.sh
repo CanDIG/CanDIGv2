@@ -50,7 +50,7 @@ echo -e "\n${GREEN}Keycloak is ready ✅${DEFAULT}"
 
 # Get the Keycloak container ID
 KEYCLOAK_CONTAINER_ID=$(docker ps | grep keycloak/keycloak | awk '{print $1}' || true)
-if [ -z "$KEYCLOAK_CONTAINER_ID"];
+if [ -z "$KEYCLOAK_CONTAINER_ID" ];
 then
     printf "Error: KEYCLOAK_CONTAINER_ID is undefined.\n"
 else
