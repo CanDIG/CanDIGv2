@@ -49,7 +49,13 @@ done
 echo -e "\n${GREEN}Keycloak is ready ✅${DEFAULT}"
 
 # Get the Keycloak container ID
-KEYCLOAK_CONTAINER_ID=$(docker ps | grep keycloak/keycloak | awk '{print $1}')
+KEYCLOAK_CONTAINER_ID=$(docker ps | grep keycloak/keycloak | awk '{print $1}' || true)
+if [ -z "$KEYCLOAK_CONTAINER_ID"];
+then
+    printf "Error: KEYCLOAK_CONTAINER_ID is undefined.\n"
+else
+    printf "KEYCLOAK_CONTAINER_ID found as: ${KEYCLOAK_CONTAINER_ID}\n"
+fi
 
 # Define the KCADM function to run commands inside the Keycloak container
 function KCADM() {

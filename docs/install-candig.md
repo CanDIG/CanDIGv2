@@ -370,6 +370,16 @@ make install-all
 make build-all
 ```
 
+If you can see the data portal at http://candig.docker.internal:5080/, your installation was successful.
+
+Try logging in with one of the @test.ca usernames from .env.  The passwords are found in: tmp/keycloak/.
+
+Confirm your installation with the [automatic tests](ingest-and-test.md):
+```bash
+make test-integration
+```
+
+
 Once everything has run without errors, take a look at the documentation for
 [ingesting data and testing the deployment](ingest-and-test.md) as well as [Interacting with the stack using Make](interact-with-the-stack.md)
 and if you are a developer: [how to modify code and test changes](docker-and-submodules.md) in
@@ -412,11 +422,7 @@ Then edit your .env file with:
 ```bash
 LOCAL_IP_ADDR=<your local IP>
 ```
-Where `<your local IP>` is your local network IP (e.g. 192.168.x.x)
-
-If you can see the data portal at http://candig.docker.internal:5080/, your installation was successful.
-
-Confirm your installation with the [automatic tests](/docs/ingest-and-test.md).
+Where `<your local IP>` is your local network IP (e.g. 192.168.x.x, or another reserved IP  address.)
 
 
 ### Update Firewall
