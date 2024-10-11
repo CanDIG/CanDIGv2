@@ -4,7 +4,7 @@
 export KEYCLOAK_ADMIN_PASSWORD=$(< /run/secrets/keycloak-admin-password)
 
 if [ "$CANDIG_PRODUCTION_MODE" = 1 ]; then
-  exec /opt/keycloak/bin/kc.sh start
+  exec /opt/keycloak/bin/kc.sh --proxy-headers=xforwarded start
 else
   exec /opt/keycloak/bin/kc.sh start-dev
 fi
