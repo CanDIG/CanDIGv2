@@ -64,7 +64,6 @@ ifeq ($(VENV_OS), linux)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
-	echo "    finished bin-conda" >> $(LOGFILE)
 endif
 ifeq ($(VENV_OS), darwin)
 	curl -Lo bin/miniconda_install.sh \
@@ -73,7 +72,6 @@ ifeq ($(VENV_OS), darwin)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
-	echo "    finished bin-conda" >> $(LOGFILE)
 endif
 ifeq ($(VENV_OS), arm64mac)
 	curl -Lo bin/miniconda_install.sh \
@@ -82,8 +80,12 @@ ifeq ($(VENV_OS), arm64mac)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init zsh
-	echo "    finished bin-conda" >> $(LOGFILE)
 endif
+	$(CONDA) config --remove channels defaults
+	$(CONDA) config --add channels conda-forge
+	$(CONDA) config --set channel_priority strict
+	echo "    finished bin-conda" >> $(LOGFILE)
+
 
 #>>>
 # make build-all -P
