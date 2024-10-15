@@ -18,7 +18,7 @@ services:
       KC_METRICS_ENABLED: true
       QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: true
       KC_HTTP_ENABLED: true
-      # KC_PROXY_HEADERS: xforwarded # FOR PROD
+      KEYCLOAK_PROXY_HEADERS: ${KEYCLOAK_PROXY_HEADERS}
       CANDIG_PRODUCTION_MODE: ${CANDIG_PRODUCTION_MODE}
     secrets:
       - keycloak-admin-password
