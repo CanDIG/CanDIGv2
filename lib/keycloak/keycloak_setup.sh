@@ -82,4 +82,8 @@ if [ "${KEYCLOAK_GENERATE_TEST_USER}" == "1" ]; then
     source ./lib/keycloak/user_setup.sh
 fi
 
+# copy custom theming
+docker cp lib/keycloak/theme/keycloak candigv2_keycloak_1:/opt/keycloak/themes/
+KCADM update realms/candig -s "loginTheme=keycloak"
+
 echo -e "🎉🎉🎉 ${GREEN}KEYCLOAK SETUP DONE!${DEFAULT} 🎉🎉🎉"

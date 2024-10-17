@@ -98,6 +98,7 @@ build-all:
 	$(MAKE) init-docker
 	pip install --upgrade setuptools
 	pip install -U -r etc/venv/requirements.txt
+	touch tmp/containers.txt
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
 
@@ -166,6 +167,7 @@ clean-%:
 .PHONY: clean-all
 clean-all: clean-logs clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images# clean-bin
+	rm tmp/containers.txt
 
 
 #>>>
@@ -203,7 +205,9 @@ clean-bin:
 .PHONY: clean-compose
 clean-compose:
 	source setup_hosts.sh; \
-	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) clean-$(MODULE);)
+	$(eval CANDIG_MODULES := $(filter-out logging,$(CANDIG_MODULES))) \
+	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) clean-$(MODULE);) \
+	$(MAKE) clean-logging;
 
 
 #>>>
@@ -277,6 +281,8 @@ compose:
 # $module is the name of the sub-folder in lib/
 # make compose-$module
 
+containers=$(shell cat lib/$*/docker-compose.yml | yq -ojson '.services' | jq  'keys' | jq -r @sh)
+found=$(shell grep -ch $(containers) tmp/containers.txt)
 #<<<
 compose-%:
 	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
@@ -285,11 +291,27 @@ compose-%:
 	python settings.py; source env.sh; \
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
+	cat tmp/containers.txt
+	if [ $(found) -eq 0 ]; then \
+	echo $(containers) >> tmp/containers.txt; \
+	fi
 	if [ -f lib/$*/$*_setup.sh ]; then \
 	source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG); \
 	fi
 	echo "    finished compose-$*" >> $(LOGFILE)
 
+
+#>>>
+# Combines the make clean/build/compose steps (and re-creates docker volumes)
+# $module is the name of the sub-folder in lib/
+# make compose-$module
+
+#<<<
+recompose-%:
+	$(MAKE) clean-$*
+	$(MAKE) docker-volumes
+	$(MAKE) build-$*
+	$(MAKE) compose-$*
 
 #>>>
 # take down individual modules using docker-compose
@@ -341,7 +363,7 @@ docker-secrets: mkdir #minio-secrets
 	$(MAKE) secret-keycloak-test-user-password
 	$(MAKE) secret-keycloak-test-user2-password
 
-	$(MAKE) secret-metadata-db-secret
+	$(MAKE) secret-postgres-db-secret
 
 	$(MAKE) secret-tyk-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
@@ -523,12 +545,12 @@ test-integration-%:
 # stop all docker containers
 .PHONY: stop-all
 stop-all:
-	CONTAINERS="$(shell docker ps --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker stop $$CONTAINER; done
+	CONTAINERS="$(shell cat tmp/containers.txt | sed 's/ /\n/g' | sed 's/^\(.*\)$$/candigv2_\1_1/g' | sed -n '1!G;h;$$p')"; for CONTAINER in $$CONTAINERS; do docker stop $$CONTAINER; done
 
 # start all docker containers
 .PHONY: start-all
 start-all:
-	CONTAINERS="$(shell docker ps -a --format '{{.Names}}' | grep candigv2)"; for CONTAINER in $$CONTAINERS; do docker start $$CONTAINER; done
+	CONTAINERS="$(shell cat tmp/containers.txt | sed 's/ /\n/g' | sed 's/^\(.*\)$$/candigv2_\1_1/g')"; for CONTAINER in $$CONTAINERS; do docker start $$CONTAINER; sleep 2; done
 
 #>>>
 # rebuild the entire stack without touching the data containers, defined in .env
@@ -547,3 +569,21 @@ rebuild-keep-data:
 	# Rebuild everything
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
 	./post_build.sh
+
+
+# wrapper for make_backup.sh to make sure we're running it from the right directory
+backup-vault:
+	@bash lib/vault/make_backup.sh
+	-$(MAKE) compose-vault
+	-$(MAKE) compose-opa
+
+
+# if there is a restore file available, restore it and then run compose-opa again
+restore-vault:
+	ls lib/vault/restore.tar.gz
+	-$(MAKE) clean-vault
+	-$(MAKE) secret-vault-approle-token
+	-$(MAKE) docker-volumes
+	-$(MAKE) build-vault
+	-$(MAKE) compose-vault
+	-$(MAKE) compose-opa

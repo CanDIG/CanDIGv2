@@ -10,19 +10,24 @@ services:
     image: candig/query:${QUERY_VERSION:-latest}
     volumes:
       - query-data:/app
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     ports:
       - "${QUERY_PORT}:3000"
     environment:
       CANDIG_KATSU_URL: ${KATSU_PRIVATE_URL}
       CANDIG_HTSGET_URL: ${HTSGET_PRIVATE_URL}
       VAULT_URL: ${VAULT_PRIVATE_URL}
-      OPA_URL: ${OPA_URL}
+      OPA_URL: ${OPA_PRIVATE_URL}
       SERVICE_NAME: ${SERVICE_NAME}
       AGGREGATE_COUNT_THRESHOLD: ${AGGREGATE_COUNT_THRESHOLD}
+      DEBUG_MODE: ${CANDIG_DEBUG_MODE}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
-      test: [ "CMD", "curl", "http://${CANDIG_DOMAIN}:${QUERY_PORT}/service-info" ]
+      test: [ "CMD", "curl", "${QUERY_PRIVATE_URL}/service-info" ]
       interval: 30s
       timeout: 20s
       retries: 3

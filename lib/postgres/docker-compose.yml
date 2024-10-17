@@ -1,26 +1,27 @@
 services:
-  metadata-db:
+  postgres-db:
     image: postgres:16
-    #volumes:
-      #- katsu-db:/var/lib/postgresql/data
-      #add volume name to lib/{compose,swarm,kubernetes}
-      #add volume name to docker-volumes in Makefile
     ports:
       - "5433:5432"
     environment:
       - POSTGRES_USER=${DEFAULT_ADMIN_USER}
-      - POSTGRES_DB=metadata
-      - POSTGRES_PASSWORD_FILE=/run/secrets/metadata_db_secret
+      - POSTGRES_DB=clinical
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_db_secret
       - POSTGRES_HOST_AUTH_METHOD=password
+      - DEBUG_MODE=${CANDIG_DEBUG_MODE}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     secrets:
-      - source: metadata-db-secret
-        target: metadata_db_secret
+      - source: postgres-db-secret
+        target: postgres_db_secret
     labels:
-      - "candigv2=chord-metadata"
+      - "candigv2=postgres"
     healthcheck:
       test: export PGPASSWORD=$(< $$POSTGRES_PASSWORD_FILE); psql -d $$POSTGRES_DB -U $$POSTGRES_USER -c "SELECT 1"
       interval: 60s

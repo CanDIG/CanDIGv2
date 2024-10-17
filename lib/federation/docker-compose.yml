@@ -10,6 +10,10 @@ services:
       - "candigv2=federation"
     ports:
       - "${FEDERATION_PORT}:4232"
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     secrets:
       - source: tyk-secret-key
         target: tyk-secret-key
@@ -29,6 +33,7 @@ services:
         VAULT_URL: ${VAULT_PRIVATE_URL}
         SERVICE_NAME: ${SERVICE_NAME}
         FEDERATION_SERVICE_URL: ${FEDERATION_SERVICE_URL}
+        DEBUG_MODE: ${CANDIG_DEBUG_MODE}
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:

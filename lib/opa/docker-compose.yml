@@ -1,5 +1,9 @@
 services:
   opa-runner:
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     build:
       context: $PWD/lib/opa/opa
       args:
@@ -27,6 +31,7 @@ services:
       SITE_ADMIN_USER: ${DEFAULT_SITE_ADMIN_USER}
       USER1: ${TEST_USER_1}
       USER2: ${TEST_USER_2}
+      DEBUG_MODE: ${CANDIG_DEBUG_MODE}
     healthcheck:
       test: ["CMD", "curl", "--fail", "${OPA_PRIVATE_URL}/v1/data/service/service-info"]
       interval: 30s
@@ -40,6 +45,10 @@ services:
 
   opa:
     image: openpolicyagent/opa:latest-static
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     labels:
       - "candigv2=opa"
     ports:
@@ -48,10 +57,11 @@ services:
       - opa-data:/app
     command:
       - "run"
-      - "--server"
-      - "--log-level=debug"
+      - "--set=decision_logs.console=true"
+      - "--log-level=info"
       - "--authentication=token"
       - "--authorization=basic"
+      - "-s"
       - "app/permissions_engine/"
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"

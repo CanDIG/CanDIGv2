@@ -1,20 +1,8 @@
 #!/usr/bin/env bash
 
-# Check 1: UHN VPN is up
-if command -v getent >/dev/null 2>&1; then
-    CANDIG_HOST=`getent hosts candig-dev`
-elif command -v dscacheutil >/dev/null 2>&1; then
-    CANDIG_HOST=`dscacheutil -q host -a name candig-dev`
-fi
-
 SILENT_MODE=0
 if [[ $* == *-s* ]]; then
     SILENT_MODE=1
-fi
-
-if [[ ! -z "$CANDIG_HOST" ]] && [[ "$SILENT_MODE" != 1 ]]; then
-    printf "Please disable the UHN VPN, as it causes errors with the build process"
-    exit 1
 fi
 
 # Check 2: The value of CANDIG_DOMAIN can be reached

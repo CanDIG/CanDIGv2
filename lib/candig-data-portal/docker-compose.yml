@@ -9,12 +9,17 @@ services:
     image: ${DOCKER_REGISTRY}/candig-data-portal:${CANDIG_DATA_PORTAL_VERSION:-latest}
     ports:
       - "${CANDIG_DATA_PORTAL_PORT}:2543"
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     extra_hosts:
         - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     environment:
       - REACT_APP_KATSU_API_SERVER=${KATSU_PUBLIC_URL}
       - REACT_APP_HTSGET_SERVER=${HTSGET_PUBLIC_URL}
       - REACT_APP_FEDERATION_API_SERVER=${FEDERATION_PUBLIC_URL}
+      - REACT_APP_INGEST_SERVER=${CANDIG_INGEST_PUBLIC_URL}
       - REACT_APP_BASE_NAME=
       - REACT_APP_SITE_LOCATION=${CANDIG_SITE_LOCATION}
       - REACT_APP_CANDIG_VERSION=${CANDIG_VERSION}
@@ -22,7 +27,7 @@ services:
       - WDS_SOCKET_PORT=0
       - AGGREGATE_COUNT_THRESHOLD=${AGGREGATE_COUNT_THRESHOLD}
     healthcheck:
-      test: [ "CMD", "curl", "http://${CANDIG_DOMAIN}:5080" ]
+      test: [ "CMD", "curl", "${CANDIG_DATA_PORTAL_PRIVATE_URL}" ]
       interval: 30s
       timeout: 20s
       retries: 3
