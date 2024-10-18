@@ -23,17 +23,20 @@ with open(".env") as f:
 
 # Python-dotenv doesn't interpolate quite correctly, so get_env_value interpolates manually
 def get_env_value(key):
-    raw_value = CANDIGV2_ENV[key]
+    try:
+        raw_value = CANDIGV2_ENV[key]
 
-    while True:
-        var_match = re.match(r"^(.*)\$\{(.+?)\}(.*)$", raw_value, re.DOTALL)
-        if var_match is not None:
-            raw_value = var_match.group(1) + CANDIGV2_ENV[var_match.group(2)] + var_match.group(3)
-        else:
-            break
+        while True:
+            var_match = re.match(r"^(.*)\$\{(.+?)\}(.*)$", raw_value, re.DOTALL)
+            if var_match is not None:
+                raw_value = var_match.group(1) + CANDIGV2_ENV[var_match.group(2)] + var_match.group(3)
+            else:
+                break
 
-    CANDIGV2_ENV[key] = raw_value
-    return raw_value
+        CANDIGV2_ENV[key] = raw_value
+        return raw_value
+    except KeyError:
+        return None
 
 
 def get_env():
@@ -52,22 +55,10 @@ def get_env():
     vars["CANDIG_DEBUG_MODE"] = get_env_value("CANDIG_DEBUG_MODE")
     vars["CANDIG_USER_KEY"] = get_env_value("CANDIG_USER_KEY")
     vars["VAULT_SERVICE_PUBLIC_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
-    vars["CANDIG_SITE_ADMIN_USER"] = get_env_value("DEFAULT_SITE_ADMIN_USER")
-    vars["CANDIG_NOT_ADMIN_USER"] = get_env_value("TEST_USER_1")
-    vars["CANDIG_NOT_ADMIN2_USER"] = get_env_value("TEST_USER_2")
     # vars that come from files:
     if os.path.isfile("tmp/keycloak/client-secret"):
         with open("tmp/keycloak/client-secret") as f:
             vars["CANDIG_CLIENT_SECRET"] = f.read().splitlines().pop()
-    if os.path.isfile("tmp/keycloak/test-site-admin-password"):
-        with open("tmp/keycloak/test-site-admin-password") as f:
-            vars["CANDIG_SITE_ADMIN_PASSWORD"] = f.read().splitlines().pop()
-    if os.path.isfile("tmp/keycloak/test-user-password"):
-        with open("tmp/keycloak/test-user-password") as f:
-            vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
-    if os.path.isfile("tmp/keycloak/test-user2-password"):
-        with open("tmp/keycloak/test-user2-password") as f:
-            vars["CANDIG_NOT_ADMIN2_PASSWORD"] = f.read().splitlines().pop()
     if os.path.isfile("tmp/vault/keys.txt"):
         with open("tmp/vault/keys.txt") as f:
             vars["VAULT_ROOT_TOKEN"] = f.read().splitlines().pop(-1)
@@ -77,6 +68,27 @@ def get_env():
     vars["POSTGRES_PASSWORD_FILE"] = f"tmp/postgres/db-secret"
     vars["CANDIG_ENV"] = INTERPOLATED_ENV
     vars["DB_PATH"] = "postgres-db"
+
+    # test users:
+    if get_env_value("DEFAULT_SITE_ADMIN_USER") is not None:
+        vars["CANDIG_SITE_ADMIN_USER"] = get_env_value("DEFAULT_SITE_ADMIN_USER")
+        if os.path.isfile("tmp/keycloak/test-site-admin-password"):
+            with open("tmp/keycloak/test-site-admin-password") as f:
+                vars["CANDIG_SITE_ADMIN_PASSWORD"] = f.read().splitlines().pop()
+    else:
+        vars["CANDIG_SITE_ADMIN_USER"] = ""
+        vars["CANDIG_SITE_ADMIN_PASSWORD"] = ""
+
+    vars["CANDIG_NOT_ADMIN_USER"] = get_env_value("TEST_USER_1")
+    if os.path.isfile("tmp/keycloak/test-user-password"):
+        with open("tmp/keycloak/test-user-password") as f:
+            vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
+
+    vars["CANDIG_NOT_ADMIN2_USER"] = get_env_value("TEST_USER_2")
+    if os.path.isfile("tmp/keycloak/test-user2-password"):
+        with open("tmp/keycloak/test-user2-password") as f:
+            vars["CANDIG_NOT_ADMIN2_PASSWORD"] = f.read().splitlines().pop()
+
     return vars
 
 
