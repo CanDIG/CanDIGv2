@@ -184,6 +184,22 @@ export TOKEN=$(echo $CURL_OUTPUT | grep -Eo 'access_token":"[a-zA-Z0-9._\-]+' | 
 curl -X DELETE $CANDIG_URL'/ingest/site-role/admin/email/site_admin@test.ca' -H 'Authorization: Bearer '$TOKEN
 ```
 
+Comment out or remove the value of DEFAULT_SITE_ADMIN_USER in your .env file:
+```
+# default name for built-in site admin
+#DEFAULT_SITE_ADMIN_USER=site_admin@test.ca
+```
+
+Run `python settings.py; source env.sh` again to reset your environment variables.
+
+Test that the default user has been removed successfully:
+Remove the cached refresh token:
+```
+rm tmp/site-admin-refresh-token
+```
+
+Run `python site_admin_token.py`. You should be prompted for your actual site admin username and password.
+
 Keep the site admin user and password secure at all times.
 
 ### Adding a site curator
