@@ -64,7 +64,6 @@ ifeq ($(VENV_OS), linux)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
-	echo "    finished bin-conda" >> $(LOGFILE)
 endif
 ifeq ($(VENV_OS), darwin)
 	curl -Lo bin/miniconda_install.sh \
@@ -73,7 +72,6 @@ ifeq ($(VENV_OS), darwin)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
-	echo "    finished bin-conda" >> $(LOGFILE)
 endif
 ifeq ($(VENV_OS), arm64mac)
 	curl -Lo bin/miniconda_install.sh \
@@ -82,8 +80,12 @@ ifeq ($(VENV_OS), arm64mac)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init zsh
-	echo "    finished bin-conda" >> $(LOGFILE)
 endif
+	$(CONDA) config --remove channels defaults
+	$(CONDA) config --add channels conda-forge
+	$(CONDA) config --set channel_priority strict
+	echo "    finished bin-conda" >> $(LOGFILE)
+
 
 #>>>
 # make build-all -P
@@ -155,7 +157,7 @@ clean-%:
 	-docker volume rm `docker volume ls --filter name=$* -q`
 	-docker image rm `docker image ls --format "{{.Repository}}:{{.Tag}}" | grep $*`
 	-rm -Rf lib/$*/tmp
-	-rm -Rf tmp/$*
+	-rm -f tmp/$*/*
 
 
 #>>>
@@ -167,7 +169,7 @@ clean-%:
 .PHONY: clean-all
 clean-all: clean-logs clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images# clean-bin
-	rm tmp/containers.txt
+	rm -f tmp/containers.txt
 
 
 #>>>
@@ -194,7 +196,7 @@ clean-logs:
 #<<<
 .PHONY: clean-bin
 clean-bin:
-	rm -rf bin
+	rm -f bin/*
 
 
 #>>>
@@ -250,7 +252,7 @@ clean-images:
 .PHONY: clean-secrets
 clean-secrets:
 	-docker secret rm `docker secret ls -q --filter label=candigv2`
-	rm -rf tmp/secrets
+	rm -f tmp/secrets/*
 
 
 #>>>
@@ -262,7 +264,6 @@ clean-secrets:
 clean-volumes:
 	-docker volume rm `docker volume ls -q --filter label=candigv2`
 	-docker volume rm `docker volume ls -q --filter dangling=true`
-#rm -rf tmp/data
 
 
 #>>>
