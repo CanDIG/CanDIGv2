@@ -30,7 +30,7 @@ def get_default_server():
     server = {
         "server": json.loads(get_env_value("FEDERATION_SELF_SERVER").replace('\'', '"')),
         "authentication": {
-            "issuer": get_env_value("KEYCLOAK_REALM_URL"),
+            "issuer": get_env_value("KEYCLOAK_ISSUER_URL"),
             "token": token
         }
     }

@@ -83,7 +83,7 @@ Example values from UHN which is located in Ontario:
 ```bash
 CANDIG_SITE_LOCATION=UHN # or your site's location
 ...
-FEDERATION_SELF_SERVER="{'id': 'UHN', 'url': '${FEDERATION_SERVICE_URL}/${TYK_FEDERATION_API_LISTEN_PATH}','location': {'name': '${CANDIG_SITE_LOCATION}','province': 'ON','province-code': 'ca-on'}}"
+FEDERATION_SELF_SERVER="{'id': 'UHN', 'url': '${FEDERATION_SERVICE_URL}','location': {'name': '${CANDIG_SITE_LOCATION}','province': 'ON','province-code': 'ca-on'}}"
 ```
 
 ## Setting Site Logo
