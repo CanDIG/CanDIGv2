@@ -421,8 +421,6 @@ def test_ingest_not_admin_katsu():
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
     )
     programs = ['SYNTH_01', 'SYNTH_02', 'SYNTH_03', 'SYNTH_04']
-    pprint.pprint(ENV)
-
     programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
@@ -555,7 +553,6 @@ def test_ingest_not_admin_htsget():
     }
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
     # when the user has no admin access, they should not be allowed
-    pprint.pprint(response.json())
     assert response.status_code == 400
 
     add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
@@ -581,7 +578,6 @@ def test_ingest_not_admin_htsget():
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
 
     # when the user has program_curator role, they should be allowed
-    pprint.pprint(response.json())
     assert response.status_code == 200
     for program in response.json():
         results = response.json()[program]
