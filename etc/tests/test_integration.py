@@ -64,7 +64,7 @@ def test_tyk():
     endpoints = [
         f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
         f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v3/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_FEDERATION_API_LISTEN_PATH']}/v1/service-info",
+        f"federation/v1/service-info",
         f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/service/service-info",
         f"{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/service-info",
     ]
@@ -940,7 +940,7 @@ def test_add_server():
 
     body = {
         "server": response.json()[0],
-        "authentication": {"issuer": ENV["KEYCLOAK_REALM_URL"], "token": token},
+        "authentication": {"issuer": ENV["KEYCLOAK_ISSUER_URL"], "token": token},
     }
     body["server"]["id"] = "test"
     body["server"]["location"]["name"] = "test"
@@ -959,9 +959,14 @@ def test_add_server():
     response = requests.post(
         f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body
     )
-    last_result = response.json().pop()
-    print(last_result)
-    assert last_result["location"]["name"] == "test"
+    found_it = False
+    results = response.json()
+    while len(results) > 0:
+        last_result = results.pop(0)
+        print(last_result)
+        if last_result["location"]["name"] == "test":
+            found_it = True
+    assert found_it
 
     # delete the server
     response = requests.delete(

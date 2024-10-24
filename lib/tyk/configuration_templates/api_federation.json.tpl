@@ -18,7 +18,7 @@
         "target_url": "${TYK_FEDERATION_API_TARGET}",
         "strip_listen_path": false,
         "disable_strip_slash": false,
-        "listen_path": "/${TYK_FEDERATION_API_LISTEN_PATH}",
+        "listen_path": "/federation",
         "transport": {
             "ssl_insecure_skip_verify": false,
             "ssl_ciphers": [],
@@ -90,7 +90,7 @@
     "segregate_by_client": false,
     "providers": [
             {
-                "issuer": "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}",
+                "issuer": "${KEYCLOAK_ISSUER_URL}",
                 "client_ids": {
                     "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
                 }
