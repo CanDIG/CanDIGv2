@@ -52,9 +52,10 @@ The following default settings in the `.env` file should be changed when deployi
 | `CANDIG_PRODUCTION_MODE=1`                                                               | Turn on Production mode  |
 | `CANDIG_SITE_LOCATION=`<your-site-location> e.g. UHN, BC                                             | Ensures site location is named properly  |
 | `FEDERATION_SELF_SERVER` - update id, province, province-code see [section below](setting-location-information) | Ensures site displays properly on the map and can be federated |
-| `KEYCLOAK_PUBLIC_PROTO=https`                                                            |  change to https for prod |
-| `KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}`                   |  Keycloak public url shouldn't have port|
-| `KEYCLOAK_PRIVATE_URL=${KEYCLOAK_PRIVATE_PROTO}://keycloak:${KEYCLOAK_PORT}`             |  Keycloak private url shouldn't have port|
+| `KEYCLOAK_PUBLIC_PROTO=https`                                                            | change to https for prod |
+| `KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}`                   | Keycloak public url shouldn't have port|
+| `KEYCLOAK_PRIVATE_URL=${KEYCLOAK_PRIVATE_PROTO}://keycloak:${KEYCLOAK_PORT}`             | Keycloak private url shouldn't have port|
+| `KEYCLOAK_PROXY_HEADERS=xforwarded OR forwarded`                                         | Needs to be set to be consistent with your reverse proxy configuration, see [Keycloak docs](https://www.keycloak.org/server/reverseproxy) for more info |
 | `TYK_LOGIN_TARGET_URL=https://${CANDIG_DOMAIN}`                                          | ensure tyk uses https |
 | `TYK_USE_SSL=true`                                                                       | ensure tyk uses SSL |
 | `CANDIG_DATA_PORTAL_URL=https://${CANDIG_DOMAIN}:${CANDIG_DATA_PORTAL_PORT}/data-portal` | ensure dataportal url has https |
