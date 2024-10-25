@@ -92,7 +92,7 @@ endif
 
 #<<<
 .PHONY: build-all
-build-all:
+build-all: mkdir
 	printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG)
 	./pre-build-check.sh $(ARGS)
 
