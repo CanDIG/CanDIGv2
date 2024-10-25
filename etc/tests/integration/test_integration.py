@@ -518,9 +518,10 @@ def test_ingest_admin_katsu():
         #### This section runs only if ingest responds in time while we improve ingest so it doesn't time out ####
         try:
             queue_id = response.json()["queue_id"]
-        except KeyError as e:
-            print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+        except Exception as e:
+            print(f"Ingest was not successful: {type(e)} {str(e)}")
             print(response.json())
+            assert False
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
         while response.status_code == 200 and "status" in response.json():
             time.sleep(2)
