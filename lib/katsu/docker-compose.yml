@@ -33,8 +33,6 @@ services:
       - THREADS=${KATSU_THREADS}
       - SERVICE_NAME=${SERVICE_NAME}
     secrets:
-      - source: vault-approle-token
-        target: vault-approle-token
       - source: postgres-db-secret
         target: postgres_db_secret
       - source: redis-secret-key

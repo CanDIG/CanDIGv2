@@ -16,9 +16,6 @@ services:
       - "candigv2=opa"
     volumes:
       - opa-data:/app
-    secrets:
-      - source: vault-approle-token
-        target: vault-approle-token
     environment:
       KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}

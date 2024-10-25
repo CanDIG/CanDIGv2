@@ -369,8 +369,6 @@ docker-secrets: mkdir #minio-secrets
 	$(MAKE) secret-tyk-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
 
-	$(MAKE) secret-vault-approle-token
-
 	$(MAKE) secret-redis-secret-key
 
 
