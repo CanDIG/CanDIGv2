@@ -92,7 +92,7 @@ endif
 
 #<<<
 .PHONY: build-all
-build-all:
+build-all: mkdir
 	printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG)
 	./pre-build-check.sh $(ARGS)
 
@@ -305,7 +305,7 @@ compose-%:
 #>>>
 # Combines the make clean/build/compose steps (and re-creates docker volumes)
 # $module is the name of the sub-folder in lib/
-# make compose-$module
+# make recompose-$module
 
 #<<<
 recompose-%:
