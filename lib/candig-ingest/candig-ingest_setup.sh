@@ -21,4 +21,4 @@ bash $PWD/create_service_store.sh "candig-ingest"
 
 docker restart $ingest
 
-python $PWD/lib/candig-ingest/candigv2-ingest/generate_test_data.py --tmp tmp/data/synthdata
+python $PWD/lib/candig-ingest/candigv2-ingest/generate_test_data.py --tmp tmp/data/synthdata --delete

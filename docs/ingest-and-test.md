@@ -25,6 +25,8 @@ Run the tests with:
 make test-integration
 ```
 
+> [!Note]
+> These tests will not work if the default site administrator has been changed.
 
 ## Manual tests
 

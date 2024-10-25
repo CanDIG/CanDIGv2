@@ -49,7 +49,13 @@ done
 echo -e "\n${GREEN}Keycloak is ready ✅${DEFAULT}"
 
 # Get the Keycloak container ID
-KEYCLOAK_CONTAINER_ID=$(docker ps | grep keycloak/keycloak | awk '{print $1}')
+KEYCLOAK_CONTAINER_ID=$(docker ps | grep keycloak/keycloak | awk '{print $1}' || true)
+if [ -z "$KEYCLOAK_CONTAINER_ID" ];
+then
+    printf "Error: KEYCLOAK_CONTAINER_ID is undefined.\n"
+else
+    printf "KEYCLOAK_CONTAINER_ID found as: ${KEYCLOAK_CONTAINER_ID}\n"
+fi
 
 # Define the KCADM function to run commands inside the Keycloak container
 function KCADM() {
@@ -81,5 +87,9 @@ source ./lib/keycloak/client_setup.sh
 if [ "${KEYCLOAK_GENERATE_TEST_USER}" == "1" ]; then
     source ./lib/keycloak/user_setup.sh
 fi
+
+# copy custom theming
+docker cp lib/keycloak/theme/keycloak candigv2_keycloak_1:/opt/keycloak/themes/
+KCADM update realms/candig -s "loginTheme=keycloak"
 
 echo -e "🎉🎉🎉 ${GREEN}KEYCLOAK SETUP DONE!${DEFAULT} 🎉🎉🎉"

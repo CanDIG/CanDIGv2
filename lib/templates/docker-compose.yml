@@ -13,6 +13,10 @@ services:
       # volume name must start with the name of the service!
       # add volume name to lib/candigv2/docker-compose.yml
       # add volume name to docker-volumes in Makefile
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     ports:
       - "${{{service_port}}}:{{service_default_port}}"
     depends_on:

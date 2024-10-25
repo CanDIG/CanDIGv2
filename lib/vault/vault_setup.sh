@@ -24,7 +24,27 @@ ingest="candig-ingest"
 # https://www.vaultproject.io/api-docs/secret/identity/entity#batch-delete-entities
 
 vault=$(docker ps -a --format "{{.Names}}" | grep vault_1 | awk '{print $1}')
+vault_runner=$(docker ps -a --format "{{.Names}}" | grep vault-runner_1 | awk '{print $1}')
+
 docker cp lib/vault/tmp/vault-config.json $vault:/vault/config/
+
+
+# check to see if we need to restore a backup before initializing a fresh Vault:
+if [[ -f "lib/vault/restore.tar.gz" ]]; then
+  echo ">> restoring vault from backup"
+  docker stop $vault
+  pwd=$(pwd)
+  cd lib/vault/tmp
+  tar -xzf $pwd/lib/vault/restore.tar.gz
+  cd $pwd
+  cp lib/vault/tmp/backup/keys.txt tmp/vault/
+  cp lib/vault/tmp/backup/service_stores.txt tmp/vault/
+  docker cp lib/vault/tmp/backup/keys.txt $vault_runner:/vault/config/
+  docker cp lib/vault/tmp/backup/backup.tar.gz $vault_runner:/vault/
+  docker exec $vault_runner bash -c "cd /vault; tar -xzf backup.tar.gz"
+  rm -R lib/vault/tmp/backup
+  mv lib/vault/restore.tar.gz lib/vault/restored.tar.gz
+fi
 
 # if vault isn't started, start it:
 docker restart $vault
@@ -122,6 +142,13 @@ echo "{\"id\": \"${approle_token}\", \"policies\": [\"approle\"], \"periodic\": 
 curl --request POST --header "X-Vault-Token: ${key_root}" --data @lib/vault/tmp/temp.json $VAULT_SERVICE_PUBLIC_URL/v1/auth/token/create/approle
 rm lib/vault/tmp/temp.json
 
+# Containers need to access the client secret and id:
+docker exec $vault vault secrets enable -path=keycloak -description="keycloak kv store" kv
+
+curl --request POST --header "X-Vault-Token: ${key_root}" --data "{\"value\": \"$CANDIG_CLIENT_SECRET\"}" $VAULT_SERVICE_PUBLIC_URL/v1/keycloak/client-secret
+
+curl --request POST --header "X-Vault-Token: ${key_root}" --data "{\"value\": \"$CANDIG_CLIENT_ID\"}" $VAULT_SERVICE_PUBLIC_URL/v1/keycloak/client-id
+
 ## SPECIAL STORES ACCESS
 # Ingest needs access to the opa store's programs path:
 docker exec $vault sh -c "echo 'path \"opa/programs\" {capabilities = [\"update\", \"read\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/programs/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/site_roles\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/users/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> ${ingest}-policy.hcl; echo 'path \"opa/pending_users\" {capabilities = [ \"update\", \"read\"]}' >> ${ingest}-policy.hcl; vault policy write ${ingest} ${ingest}-policy.hcl"
@@ -132,7 +159,6 @@ docker exec $vault sh -c "echo 'path \"opa/data\" {capabilities = [\"update\", \
 # Htsget needs access to the ingest store's aws path:
 docker exec $vault sh -c "echo 'path \"candig-ingest/aws/*\" {capabilities = [\"read\"]}' >> htsget-policy.hcl; vault policy write htsget htsget-policy.hcl"
 
-vault_runner=$(docker ps -a --format "{{.Names}}" | grep vault-runner_1 | awk '{print $1}')
 docker restart $vault_runner
 
 if [ -f tmp/vault/service_stores.txt ]; then

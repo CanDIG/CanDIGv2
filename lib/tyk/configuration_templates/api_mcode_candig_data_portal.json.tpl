@@ -94,13 +94,7 @@
     "segregate_by_client": false,
     "providers": [
             {
-                "issuer": "${KEYCLOAK_PUBLIC_URL_PROD}/auth/realms/${KEYCLOAK_REALM}",
-                "client_ids": {
-                    "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
-                }
-            },
-            {
-                "issuer": "${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}",
+                "issuer": "${KEYCLOAK_ISSUER_URL}",
                 "client_ids": {
                     "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
                 }

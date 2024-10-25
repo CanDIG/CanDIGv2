@@ -8,10 +8,16 @@ services:
       - "candigv2=tyk"
     ports:
       - "${TYK_SERVICE_PUBLIC_PORT}:8080"
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
     volumes:
       - tyk-data:/opt/tyk-gateway
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+    environment:
+      - DEBUG_MODE=${CANDIG_DEBUG_MODE}
     healthcheck:
       test: [ "CMD", "curl", "http://0.0.0.0:8080/hello" ]
       interval: 30s

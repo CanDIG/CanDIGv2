@@ -7,13 +7,16 @@ assignees: ''
 
 ---
 
-**Operating system**
+## Operating system
 - OS (linux, WSL, OSX darwin, OSX arm)
 
-**Step where failure occurred (make-?)**
+## What version are you deploying
 
-**Are there errors in `tmp/error.txt`?**
+## Step where failure occurred (make-?)
 
-**Are there errors in the docker logs for the affected container(s)?**
+## Are there errors in `tmp/error.txt`?
 
-**Any other information**
+## Are there errors in the central log for the affected container(s)? `tmp/logs/*.log`
+<!-- Please specify which services are affected and copy/paste any relevant logs-->
+
+## Any other information

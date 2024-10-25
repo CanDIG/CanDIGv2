@@ -1,5 +1,5 @@
 {
-  "backend": {
+  "storage": {
     "file": {
       "path": ${VAULT_FILE_PATH}
     }
