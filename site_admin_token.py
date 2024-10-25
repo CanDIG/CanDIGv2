@@ -1,5 +1,6 @@
 import authx.auth
 import os
+import getpass
 from settings import get_env
 
 ENV = get_env()
@@ -15,16 +16,11 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
     # if no refresh token, get one:
     # check for default site admin user: if not present, check env vars
     username = os.getenv("CANDIG_SITE_ADMIN_USER")
-    if os.path.isfile("tmp/keycloak/test-site-admin-password"):
-        with open(f"tmp/keycloak/test-site-admin-password") as f:
-            password = f.read().splitlines().pop()
-    else:
-        password = os.getenv("CANDIG_SITE_ADMIN_PASSWORD")
-
+    password = os.getenv("CANDIG_SITE_ADMIN_PASSWORD")
     # site admin user/password need to be inputted on stdin if not default:
-    if password is None:
+    if password is None or password == "":
         username = input("Enter username: ")
-        password = input("Enter password: ")
+        password = getpass.getpass("Enter password: ")
 
     try:
         credentials = authx.auth.get_oauth_response(
@@ -39,8 +35,11 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
         if "error" in credentials:
             try:
                 os.remove("tmp/site-admin-refresh-token")
-            except:
+            except FileNotFoundError:
                 pass
+            except Exception as e:
+                print(str(e))
+                print(type(e))
             return get_site_admin_token()
 
         with open(f"tmp/site-admin-refresh-token", "w") as f:
@@ -55,4 +54,5 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
         raise authx.auth.CandigAuthError(f"Error obtaining response from keycloak server: {e}")
 
 if __name__ == "__main__":
-    print(get_site_admin_token())
+    result = get_site_admin_token()
+    print(result)
