@@ -488,6 +488,7 @@ def test_ingest_admin_katsu():
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
     )
     programs = ['SYNTH_01', 'SYNTH_02', 'SYNTH_03', 'SYNTH_04']
+    programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
         for program in programs:
@@ -495,47 +496,45 @@ def test_ingest_admin_katsu():
                 print(f"cleaning up {program}")
                 clean_up_program(program)
 
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    with open(f"lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
+        test_data = json.load(f)
+
+    # no program auth: should fail
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    print(response.text)
+    assert response.status_code != 200
+
     for program in programs:
-        token = get_site_admin_token()
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json; charset=utf-8",
-        }
-
-        with open(f"lib/candig-ingest/candigv2-ingest/tests/{program}.json", 'r') as f:
-            test_data = json.load(f)
-
-        # no program auth: should fail
-        response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
-        print(response.text)
-        assert response.status_code != 200
-
         add_program_authorization(program, [], team_members=[])
 
-        print(f"Sending {program} clinical data to katsu...")
-        response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
-        print(f"Ingest response code: {response.status_code}")
-        #### This section runs only if ingest responds in time while we improve ingest so it doesn't time out ####
-        try:
-            queue_id = response.json()["queue_id"]
-        except Exception as e:
-            print(f"Ingest was not successful: {type(e)} {str(e)}")
-            print(response.json())
-            assert False
-        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-        while response.status_code == 200 and "status" in response.json():
-            time.sleep(2)
-            response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    print(f"Sending {programs} clinical data to katsu...")
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    print(f"Ingest response code: {response.status_code}")
+    try:
+        queue_id = response.json()["queue_id"]
+    except KeyError as e:
+        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
         print(response.json())
-        assert len(response.json()[program]["errors"]) == 0
-        assert len(response.json()[program]["results"]) == 13
-        katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
-        if katsu_response.status_code == 200:
-            katsu_programs = [x['program_id'] for x in katsu_response.json()]
-            print(f"Currently ingested katsu programs: {katsu_programs}")
-            assert program in katsu_programs
-        else:
-            print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    while response.status_code == 200 and "status" in response.json():
+        time.sleep(2)
+        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    print(response.json())
+    assert len(response.json()[program]["errors"]) == 0
+    assert len(response.json()[program]["results"]) == 13
+    katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
+    if katsu_response.status_code == 200:
+        katsu_programs = [x['program_id'] for x in katsu_response.json()]
+        print(f"Currently ingested katsu programs: {katsu_programs}")
+        assert program in katsu_programs
+    else:
+        print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
     # Reinstate expected program authorizations
     add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
     add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
@@ -586,6 +585,7 @@ def test_ingest_not_admin_htsget():
     assert response.status_code == 200
     for program in response.json():
         results = response.json()[program]
+
         if len(results["errors"]) > 0:
             print("Expected to get no errors when ingesting into htsget but the following errors were found:")
             print("\n".join(results["errors"]))
