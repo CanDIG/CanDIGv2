@@ -459,9 +459,10 @@ def test_ingest_not_admin_katsu():
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     try:
         queue_id = response.json()["queue_id"]
-    except KeyError as e:
-        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+    except Exception as e:
+        print(f"Ingest was not successful: {type(e)} {str(e)}")
         print(response.json())
+        assert False
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     while response.status_code == 200 and "status" in response.json():
         time.sleep(2)
@@ -569,9 +570,10 @@ def test_ingest_not_admin_htsget():
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data, params={"do_not_index": True})
     try:
         queue_id = response.json()["queue_id"]
-    except KeyError as e:
-        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+    except Exception as e:
+        print(f"Ingest was not successful: {type(e)} {str(e)}")
         print(response.json())
+        assert False
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     while response.status_code == 200 and "status" in response.json():
         time.sleep(2)
@@ -613,9 +615,10 @@ def test_ingest_admin_htsget():
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
     try:
         queue_id = response.json()["queue_id"]
-    except KeyError as e:
-        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+    except Exception as e:
+        print(f"Ingest was not successful: {type(e)} {str(e)}")
         print(response.json())
+        assert False
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     while response.status_code == 200 and "status" in response.json():
         time.sleep(2)
@@ -945,7 +948,7 @@ def test_add_server():
 
     body = {
         "server": response.json()[0],
-        "authentication": {"issuer": ENV["KEYCLOAK_REALM_URL"], "token": token},
+        "authentication": {"issuer": ENV["KEYCLOAK_ISSUER_URL"], "token": token},
     }
     body["server"]["id"] = "test"
     body["server"]["location"]["name"] = "test"
@@ -964,9 +967,14 @@ def test_add_server():
     response = requests.post(
         f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body
     )
-    last_result = response.json().pop()
-    print(last_result)
-    assert last_result["location"]["name"] == "test"
+    found_it = False
+    results = response.json()
+    while len(results) > 0:
+        last_result = results.pop(0)
+        print(last_result)
+        if last_result["location"]["name"] == "test":
+            found_it = True
+    assert found_it
 
     # delete the server
     response = requests.delete(

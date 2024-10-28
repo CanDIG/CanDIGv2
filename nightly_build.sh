@@ -1,8 +1,9 @@
 #!/bin/bash
 
 PostToSlack () {
-    SAFE_TEXT=${1@Q}
-    SAFE_TEXT=${SAFE_TEXT//\"/\\\"}
+    # Single quoting the string breaks formatting, so instead we rely on the \" -> \\" to make sure this doesn't break the curl
+    # SAFE_TEXT=${1@Q}
+    SAFE_TEXT=${1//\"/\\\"}
     curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$SAFE_TEXT\"}" $HOOK_URL
 }
 
@@ -22,10 +23,10 @@ docker system prune -af
 # But also we need to check that we can't just merge the .env file
 if [[ $SKIP_GIT -ne 1 ]]; then
     git stash push -m "NIGHTLY_STASH"
-    git pull >tmp/gitpull.txt
+    git pull >tmp/gitpull.txt 2<&1
 
     if [ $? -ne 0 ]; then
-        PostToSlack "Could not automatically pull git repo: $(cat tmp/gitpull.txt)"
+        PostToSlack "Could not automatically pull git repo:\n\`\`\`$(cat tmp/gitpull.txt)\`\`\`"
         exit
     fi
 
@@ -35,9 +36,9 @@ if [[ $SKIP_GIT -ne 1 ]]; then
     STASH_TEXT=$(git stash list | grep "NIGHTLY_STASH")
     if [[ ! -z $STASH_TEXT ]]; then
         [[ $STASH_TEXT =~ \{([[:digit:]]+)\} ]]
-        git stash pop ${BASH_REMATCH[1]} 2<&1 >tmp/stashapply.txt
+        git stash pop ${BASH_REMATCH[1]} >tmp/stashapply.txt 2<&1
         if [ $? -ne 0 ]; then
-            PostToSlack "Could not automatically merge git repo: $(cat tmp/stashapply.txt)"
+            PostToSlack "Could not automatically merge git repo:\n\`\`\`$(cat tmp/stashapply.txt)\`\`\`"
             exit
         fi
     fi
@@ -51,10 +52,10 @@ make bin-conda
 source bin/miniconda3/etc/profile.d/conda.sh
 make init-conda
 conda activate candig
-make build-all BUILD_OPTS="--no-cache" ARGS="-s" 2<&1 >tmp/lastbuild.txt
+make build-all BUILD_OPTS="--no-cache" ARGS="-s" >tmp/lastbuild.txt 2<&1
 
 if [ $? -ne 0 ]; then
-    PostToSlack "Build failed:\n $(tail tmp/lastbuild.txt)"
+    PostToSlack "Build failed:\n\`\`\`$(tail tmp/lastbuild.txt)\`\`\`"
     exit
 fi
 
@@ -72,9 +73,9 @@ do
     fi
 done
 
-make test-integration 2<&1 >tmp/integration-build.txt
+make test-integration >tmp/integration-build.txt 2<&1
 if [ $? -ne 0 ]; then
-    PostToSlack "Integration tests failed:\n $(tail tmp/integration-build.txt)"
+    PostToSlack "Integration tests failed:\n\`\`\`$(tail tmp/integration-build.txt)\`\`\`"
     exit
 fi
 

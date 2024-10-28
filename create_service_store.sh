@@ -62,6 +62,7 @@ create_service_store() {
             # copy roleid to container
             container=$(echo ${container} | tr -d "'")
             docker cp $PWD/tmp/vault/${service}-roleid candigv2_${container}_1:/home/candig/roleid
+            docker cp $PWD/tmp/vault/approle-token candigv2_${container}_1:/home/candig/approle-token
         done
         # if we're not in debug mode, delete the tmp roleid file
         if [[ ${CANDIG_DEBUG_MODE:-"0"} == "0" ]]; then
