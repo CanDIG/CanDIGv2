@@ -3,7 +3,7 @@
 PostToSlack () {
     # Single quoting the string breaks formatting, so instead we rely on the \" -> \\" to make sure this doesn't break the curl
     # SAFE_TEXT=${1@Q}
-    SAFE_TEXT=${SAFE_TEXT//\"/\\\"}
+    SAFE_TEXT=${1//\"/\\\"}
     curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$SAFE_TEXT\"}" $HOOK_URL
 }
 
