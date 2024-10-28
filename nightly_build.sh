@@ -22,7 +22,7 @@ docker system prune -af
 # But also we need to check that we can't just merge the .env file
 if [[ $SKIP_GIT -ne 1 ]]; then
     git stash push -m "NIGHTLY_STASH"
-    git pull >tmp/gitpull.txt
+    git pull 2<&1 >tmp/gitpull.txt
 
     if [ $? -ne 0 ]; then
         PostToSlack "Could not automatically pull git repo: $(cat tmp/gitpull.txt)"
