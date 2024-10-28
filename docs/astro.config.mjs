@@ -8,7 +8,10 @@ export default defineConfig({
     base: 'CanDIGv2',
 	integrations: [
 		starlight({
-			title: 'CanDIG Docs',
+			title: 'Docs',
+            logo: {
+                src: './src/assets/my-logo.png',
+            },
 			social: {
 				github: 'https://github.com/candig/CanDIGv2',
 			},
@@ -20,8 +23,7 @@ export default defineConfig({
                         { label: 'Testing', slug: 'deployment/ingest-and-test'},
                         { label: 'Interact using Make', slug: 'deployment/interact-with-the-stack'},
                         { label: 'Production deployment', slug: 'deployment/production'},
-                        { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'},
-                        
+                        { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'}, 
                     ]
 
                 },
@@ -29,7 +31,8 @@ export default defineConfig({
 					label: 'Guides',
 					items: [
 						// Each item here is one entry in the navigation menu.
-						{ label: 'Data ingest', slug: 'guides/example' },
+						{ label: 'Data ingest', slug: 'guides/ingest' },
+                        { label: 'Data Exploration', slug: 'guides/explore' },
 					],
 				},
                 {

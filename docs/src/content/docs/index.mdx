@@ -1,36 +1,48 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
+title: ""
+description: Help with all things CanDIG
 template: splash
+banner: 
+  content: |
+    This site is currently a work in progress
 hero:
-  tagline: Congrats on setting up a new Starlight project!
-  image:
-    file: ../../assets/houston.webp
-  actions:
-    - text: Example Guide
-      link: /guides/example/
-      icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
-      icon: external
-      variant: minimal
+  tagline: Sharing genomic data across Canada!
+  #image:
+  #  file: ../../assets/CanDIG_1_3.png
+  #actions:
+  #  - text: Example Guide
+  #    link: /guides/example/
+  #    icon: right-arrow
+  #  - text: Read the Starlight docs
+  #    link: https://starlight.astro.build
+  #    icon: external
+  #    variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { LinkCard, Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
+## What are you looking for?
 
-<CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
+<CardGrid>
+	<LinkCard 
+		title="I want to deploy CanDIG" 
+		href="/deployment/local"
+		description="Read guides on how to install CanDIG in a development or production setting."
+	/>
+	<LinkCard 
+		title="I want to submit data to CanDIG"
+		href="/guides/ingest"
+		description="Read walk-throughs on how to submit your data to a CanDIG instance."
+	/>
+	<LinkCard 
+		title="I want to explore data in CanDIG"
+		href="/guides/explore"
+		description="Read walk-throughs on how to submit your data to a CanDIG instance."
+	/>
+	<LinkCard 
+		title="Technical docs"
+		href="/technical"
+		description="Read technical information about CanDIG including API docs"
+	/>
+
 </CardGrid>
