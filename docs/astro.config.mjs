@@ -25,7 +25,7 @@ export default defineConfig({
                     {
                         base: 'technical/ingest',
                         label: 'ingest api',
-                        schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-ingest/refs/heads/develop/ingest_openapi.yaml',
+                        schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-ingest/refs/heads/mshadbolt/improve-openapi-schema/ingest_openapi.yaml',
                     },
                     {
                         base: 'technical/query',
@@ -59,9 +59,9 @@ export default defineConfig({
                     label: 'Deployment',
                     items: [
                         { label: 'Local deployment', slug: 'deployment/local' },
+                        { label: 'Production deployment', slug: 'deployment/production'},
                         { label: 'Testing', slug: 'deployment/ingest-and-test'},
                         { label: 'Interact using Make', slug: 'deployment/interact-with-the-stack'},
-                        { label: 'Production deployment', slug: 'deployment/production'},
                         { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'}, 
                     ]
 
