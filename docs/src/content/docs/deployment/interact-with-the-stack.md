@@ -17,8 +17,9 @@ Individual services can be stopped using the docker command:
 ```bash
 docker container stop candigv2_<name of module>_1
 ```
+
 eg. to stop the ingest container this would be:
-```
+```bash
 docker container stop candigv2_candig-ingest_1
 ```
 
@@ -149,7 +150,7 @@ See the [Makefile](../Makefile) for the exact commands that each of these target
 
 If you get an error when running a make command, something like:
 
-```
+```bash
 bash: python: command not found
 ```
 or an error message about `dotenv` not being found.
@@ -160,7 +161,7 @@ Ensure the candig conda environment is activated in your terminal with `conda ac
 
 If you get an error where after cleaning an individual service, when composing, it gets stuck at 
 
-```
+```bash
 waiting for x service to start ...
 ```
 
@@ -170,7 +171,7 @@ Use CTRL + c to exit the process then try running `make docker-volumes` and then
 
 It is common to move around within the repo and not realise where you are. If you try to run a make command and get the error
 
-```
+```bash
 make: *** No rule to make target `clean-candig-ingest'.  Stop.
 ```
 
