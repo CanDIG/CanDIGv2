@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi'
 
 // https://astro.build/config
 export default defineConfig({
@@ -9,12 +10,50 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Docs',
+            editLink: {
+                baseUrl: 'https://github.com/CanDIG/CanDIGv2/edit/develop/'
+            },
             logo: {
                 src: './src/assets/my-logo.png',
+                replacesTitle: true,
             },
 			social: {
 				github: 'https://github.com/candig/CanDIGv2',
 			},
+            plugins: [
+                starlightOpenAPI([
+                    {
+                        base: 'technical/ingest',
+                        label: 'ingest api',
+                        schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-ingest/refs/heads/develop/ingest_openapi.yaml',
+                    },
+                    {
+                        base: 'technical/query',
+                        label: 'query api',
+                        schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-query/refs/heads/develop/query_server/openapi.yaml',
+                    },
+                    {
+                        base: 'technical/katsu',
+                        label: 'katsu api',
+                        schema: 'https://raw.githubusercontent.com/CanDIG/katsu/refs/heads/develop/chord_metadata_service/mohpackets/docs/schemas/schema.yml',
+                    },
+                    {
+                        base: 'technical/htsget/drs',
+                        label: 'htsget drs api',
+                        schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/develop/htsget_server/drs_openapi.yaml',
+                    },
+                    {
+                        base: 'technical/htsget/beacon',
+                        label: 'htsget beacon api',
+                        schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/develop/htsget_server/beacon_openapi.yaml',
+                    },
+                    {
+                        base: 'technical/htsget/operations',
+                        label: 'htsget operations api',
+                        schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/develop/htsget_server/htsget_openapi.yaml',
+                    },
+                ])
+            ],
 			sidebar: [
                 {
                     label: 'Deployment',
@@ -38,9 +77,11 @@ export default defineConfig({
                 {
                     label: 'Technical Docs',
                     items: [ 
-                        {label: 'Architecture', slug: 'technical/architecture'}
+                        { label: 'Architecture', slug: 'technical/architecture' },
+                        ...openAPISidebarGroups,
                     ]
                 },
+                
 				{
 					label: 'Reference',
 					autogenerate: { directory: 'reference' },
