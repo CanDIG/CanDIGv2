@@ -41,109 +41,31 @@ Anyone intending to upload data to a CanDIG instance.
 	/>
 	<LinkCard 
 		title="Step 2. Register programs"
-		href="guides/ingest/register-programs"
+		href="register-programs"
 		description="Register the programs you intend to ingest."
 	/>
 	<LinkCard 
 		title="Step 3. Ingest clinical data"
-		href="guides/ingest/ingest-clinical"
+		href="ingest-clinical"
 		description="Ingest your clinical data."
 	/>
 	<LinkCard 
 		title="Step 4. Prepare Genomic data"
-		href="guides/ingest/prepare-genomic"
+		href="prepare-genomic"
 		description="Prepare you genomic data for ingest."
 	/>
 	<LinkCard 
 		title="Step 5. Link Genomic data"
-		href="guides/ingest/ingest-genomic"
+		href="ingest-genomic"
 		description="Link your clinical data to your genomic data."
 	/>
   <LinkCard 
 		title="I need help"
-		href="guides/ingest/ingest-help"
+		href="ingest-help"
 		description="Get help with all aspects of ingest."
 	/>
 
 </CardGrid>
-
-# Step 3: Clinical Data Ingest
-
- If you have gotten this far, well done! Most of the hard work is done (hopefully). The output from the CSVConvert.py called something like $INPUT_DIR_map.json is the main file we need in order to
-
- ingest the clinical data into ingest.
-
- Assuming that you have a configured ingest instance up and running and have access to a user with site curator or program curator credentials, you should be able to run through the instructions below.
-
- It is preferable to attempt ingest using the API call. The API is described in ingest_openapi.md or can be explored using a swagger ui.
-
-## Ingesting clinical data into CanDIG
-
- Before you can use the ingest endpoint, you will need an authorized bearer token. Users with site administration, site curator, or program curator for the program/s being ingested are able to ingest those
-
- programs. To get a bearer token:
-
- 1. Get a token by logging into the candig data portal as site admin and copying the API token.
-
- a. Go to the icon in the top right of the screen and click the cog
-
- b. Click ‘ *** Get API Token’
-
- c. Click the token to copy the text
-
- 2. Open a terminal and save it into a variable called TOKEN
-
- 3. User the clinical ingest endpoint to ingest data.
-
- An example call to the clinical endpoint would look something like (note you will need to replace $CANDIG_URL with the root url of your instance):
-
- If ingest worked correctly, you should get a response from the API giving you your queue_id to check the status of your ingest:
-
- Since ingest is an asynchronous process, it can take some time to complete depending on the size of your clinical data. To check on the status of your clinical ingest, use the status endpoint:
-
- While the data is still being ingested, the status will read "status": "sill in queue". When clinical ingest is complete, a successful ingest will have a summary of what was ingested, you should check
-
- the numbers are as expected. If any errors were found that would prevent ingest, they will be listed in the errors key in the response.
-
- Example response from the status endpoint:
-
- user2@test.ca can now perform actions on program SYNTH_03 such as ingesting and deleting clinical, genomic and program registration data.
-
- Repeat this process for any additional programs.
-
- Posting to this endpoint replaces existing data, so if data exists for that program, it is important to GET from the endpoint first then add users to the list of program_curators before posting e.g.
-
- [“user2@test.ca”, “user1@test.ca”]
-
- This token should be kept secure, it lasts for 30 mins
-
-```bash
-TOKEN=ey-pasted-jwt
-```
-
-```bash
-curl -X 'POST' \
-  $CANDIG_URL'/ingest/clinical' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer '$TOKEN \
-  -d '@/absolute/path/to/dir_name_map.json>
-```
-
-
-```bash
-{"queue_id": "73c6888a-81d1-11ef-937c-0242ac12000f"}
-```
-
-```bash
-curl -X 'GET' \
- $CANDIG_URL'/ingest/status/<your_queue_id>' \
- -H 'accept: application/json' \
- -H 'Content-Type: application/json' \
- -H 'Authorization: Bearer '$TOKEN
-```
-
- Once you have successfully ingested all your clinical data, you can proceed with ingesting your genomic files and linking them the the ingested Sample Registration objects.
 
 # Step 4: Prepare Genomic Data
 
