@@ -3,7 +3,7 @@ title: Production deployment
 description: Modifications needed when deploying to a production server
 ---
 
-Apart from the basic steps in the [CanDIGv2 Install Guide](install-candig.md) to get the candig stack up and running, there are additional settings and security recommendations that need to set up in a production level environment. We provide the following as general advice, but it is important for all CanDIG deployers to also consult with their institutional infrastructure security personnel to ensure that their deployment meets the necessary level of data security.
+Apart from the basic steps in the <a href="/deployment/local">CanDIGv2 Install Guide</a> to get the candig stack up and running, there are additional settings and security recommendations that need to set up in a production level environment. We provide the following as general advice, but it is important for all CanDIG deployers to also consult with their institutional infrastructure security personnel to ensure that their deployment meets the necessary level of data security.
 
 ## Stable branch
 
