@@ -21,7 +21,7 @@ We recommend giving Docker at least 4 CPUs and 4GB of memory.
 
 ## Production vs Development Environments
 
-CanDIG can be installed and deployed as below for development situations where no real data will ever be ingested into the system. For critical differences in production deployments, please see the [Guide to CanDIG production deployments](production-candig.md).
+CanDIG can be installed and deployed as below for development situations where no real data will ever be ingested into the system. For critical differences in production deployments, please see the <a href="/CanDIGv2/deployment/production/">Guide to CanDIG production deployments</a>.
 
 ## Install OS Dependencies
 
@@ -377,14 +377,14 @@ If you can see the data portal at http://candig.docker.internal:5080/, your inst
 
 Try logging in with one of the @test.ca usernames from .env.  The passwords are found in: tmp/keycloak/.
 
-Confirm your installation with the [automatic tests](ingest-and-test.md):
+Confirm your installation with the <a href="/CanDIGv2/deployment/ingest-and-test/">automatic tests</a>:
 ```bash
 make test-integration
 ```
 
 
 Once everything has run without errors, take a look at the documentation for
-[ingesting data and testing the deployment](ingest-and-test.md) as well as [Interacting with the stack using Make](interact-with-the-stack.md)
+<a href="/CanDIGv2/deployment/ingest-and-test/">ingesting data and testing the deployment</a> as well as <a href="/CanDIGv2/deployment/interact-with-the-stack/">Interacting with the stack using Make</a>
 and if you are a developer: [how to modify code and test changes](docker-and-submodules.md) in
 the context of the CanDIG stack.
 

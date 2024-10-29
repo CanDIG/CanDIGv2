@@ -78,6 +78,7 @@ export default defineConfig({
                     label: 'Technical Docs',
                     items: [ 
                         { label: 'Architecture', slug: 'technical/architecture' },
+                        { label: 'Docker and submods', slug: 'technical/docker-and-submodules' },
                         ...openAPISidebarGroups,
                     ]
                 },
