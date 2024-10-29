@@ -1,0 +1,519 @@
+---
+title: Ingest step-by-step
+description: A step by step guide to ingesting data into CanDIG
+template: splash
+tableOfContents:
+  minHeadingLevel: 1
+  maxHeadingLevel: 2
+---
+
+import { Icon } from 'astro-icon/components';
+import { Steps } from '@astrojs/starlight/components';
+
+import { LinkCard, Card, CardGrid } from '@astrojs/starlight/components';
+
+# Intended Audience
+
+Anyone intending to upload data to a CanDIG instance.
+
+# Prerequisites
+
+- Decent working knowledge of python, JSON, docker, data transformation
+
+- [Optional] Locally running CanDIG stack for testing
+
+- Production CanDIG stack with authorization as site curator or program curator of the program(s) you are planning to ingest
+
+- Clinical data exported from your source database into a tabular format (CSVs or multi-tabbed xlsx)
+
+- Genomic data files in s3, local or NFS mounted drive available to htsget_app docker container
+
+- Linkage information between the sample registrations in the clinical data and the genomic data files
+
+
+## What stage of ingest are you up to?
+
+<CardGrid stagger>
+	<LinkCard 
+		title="Step 1. Prepare clinical data" 
+		href="guides/ingest/prepare-clinical"
+		description="Prepare your clinical data for ingest"
+	/>
+	<LinkCard 
+		title="Step 2. Register programs"
+		href="guides/ingest/register-programs"
+		description="Register the programs you intend to ingest."
+	/>
+	<LinkCard 
+		title="Step 3. Ingest clinical data"
+		href="guides/ingest/ingest-clinical"
+		description="Ingest your clinical data."
+	/>
+	<LinkCard 
+		title="Step 4. Prepare Genomic data"
+		href="guides/ingest/prepare-genomic"
+		description="Prepare you genomic data for ingest."
+	/>
+	<LinkCard 
+		title="Step 5. Link Genomic data"
+		href="guides/ingest/ingest-genomic"
+		description="Link your clinical data to your genomic data."
+	/>
+  <LinkCard 
+		title="I need help"
+		href="guides/ingest/ingest-help"
+		description="Get help with all aspects of ingest."
+	/>
+
+</CardGrid>
+
+# Step 3: Clinical Data Ingest
+
+ If you have gotten this far, well done! Most of the hard work is done (hopefully). The output from the CSVConvert.py called something like $INPUT_DIR_map.json is the main file we need in order to
+
+ ingest the clinical data into ingest.
+
+ Assuming that you have a configured ingest instance up and running and have access to a user with site curator or program curator credentials, you should be able to run through the instructions below.
+
+ It is preferable to attempt ingest using the API call. The API is described in ingest_openapi.md or can be explored using a swagger ui.
+
+## Ingesting clinical data into CanDIG
+
+ Before you can use the ingest endpoint, you will need an authorized bearer token. Users with site administration, site curator, or program curator for the program/s being ingested are able to ingest those
+
+ programs. To get a bearer token:
+
+ 1. Get a token by logging into the candig data portal as site admin and copying the API token.
+
+ a. Go to the icon in the top right of the screen and click the cog
+
+ b. Click ‘ *** Get API Token’
+
+ c. Click the token to copy the text
+
+ 2. Open a terminal and save it into a variable called TOKEN
+
+ 3. User the clinical ingest endpoint to ingest data.
+
+ An example call to the clinical endpoint would look something like (note you will need to replace $CANDIG_URL with the root url of your instance):
+
+ If ingest worked correctly, you should get a response from the API giving you your queue_id to check the status of your ingest:
+
+ Since ingest is an asynchronous process, it can take some time to complete depending on the size of your clinical data. To check on the status of your clinical ingest, use the status endpoint:
+
+ While the data is still being ingested, the status will read "status": "sill in queue". When clinical ingest is complete, a successful ingest will have a summary of what was ingested, you should check
+
+ the numbers are as expected. If any errors were found that would prevent ingest, they will be listed in the errors key in the response.
+
+ Example response from the status endpoint:
+
+ user2@test.ca can now perform actions on program SYNTH_03 such as ingesting and deleting clinical, genomic and program registration data.
+
+ Repeat this process for any additional programs.
+
+ Posting to this endpoint replaces existing data, so if data exists for that program, it is important to GET from the endpoint first then add users to the list of program_curators before posting e.g.
+
+ [“user2@test.ca”, “user1@test.ca”]
+
+ This token should be kept secure, it lasts for 30 mins
+
+```bash
+TOKEN=ey-pasted-jwt
+```
+
+```bash
+curl -X 'POST' \
+  $CANDIG_URL'/ingest/clinical' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '@/absolute/path/to/dir_name_map.json>
+```
+
+
+```bash
+{"queue_id": "73c6888a-81d1-11ef-937c-0242ac12000f"}
+```
+
+```bash
+curl -X 'GET' \
+ $CANDIG_URL'/ingest/status/<your_queue_id>' \
+ -H 'accept: application/json' \
+ -H 'Content-Type: application/json' \
+ -H 'Authorization: Bearer '$TOKEN
+```
+
+ Once you have successfully ingested all your clinical data, you can proceed with ingesting your genomic files and linking them the the ingested Sample Registration objects.
+
+# Step 4: Prepare Genomic Data
+
+ Genomic data ingest consists of storing file metadata and pointers to genomic files within the htsget_app micro-service. Your CanDIG instance needs to be connected to the place where your genomic
+
+ data is stored - CanDIG does not duplicate these files into internal separate storage.
+
+## A. Configure connection to Genomic Data source/s
+
+ Systems may need information in the drop-downs below:
+
+```
+Configuring s3 authorisation
+```
+```
+Configuring an NFS mount
+```
+ Once you have a confirmed the location for all genomic files, you can move on to creating the linking file where these file paths will be used to populate the access_method s in the genomic JSON file.
+
+## B. Create Genomic JSON file
+
+ To make the links between genomic files and the Sample registration objects they derived from as well as to show htsget_app where the files are located, a JSON file must be created that specifies
+
+ these relationships. The ingest README provides instructions and examples to demonstrate how the file should be structured.
+
+ For each genomic data file that is referenced, there must also be the appropriate index file for the file type specified. The current files supported and expected values in the genomic linking JSON file are:
+
+```
+7 "Of 24 primary_diagnoses, 24 were created",
+8 "Of 24 specimens, 24 were created",
+9 "Of 72 sample_registrations, 72 were created",
+10 "Of 48 treatments, 48 were created",
+11 "Of 96 systemic_therapies, 96 were created",
+12 "Of 24 radiations, 24 were created",
+13 "Of 24 surgeries, 24 were created",
+14 "Of 14 biomarkers, 14 were created",
+15 "Of 14 followups, 14 were created",
+16 "Of 10 comorbidities, 10 were created",
+17 "Of 10 exposures, 10 were created"
+18 ]
+19 }
+20 }
+```
+ All genomic data files need to be able to be ‘seen’ by the running htsget_app server in order for genomic file ingest to proceed. If files are in s3 compatible storage or locally available, you might
+
+ need local systems help before continuing
+
+Pre-requisites:
+
+- All files in s3-compatible storage bucket
+  - access and secret keys for the s3 storage bucket - it is recommended this has read access only
+
+Add s3 credentials to vault using the /add-s3-credential endpoint and JSON body following the template below:
+
+ To test the htsget_app instance can access the s3 bucket, try?
+
+
+
+```
+2 "endpoint": "<s3 compatible storage url>", # url of the s3 compatible storage
+3 "bucket": "the-name-of-the-bucket", # name of the bucket within that storage
+4 "access_key": "the-read-only-access-key",
+5 "secret_key": "the-S3-secret-key"
+6 }
+```
+ To configure an NFS mount you will need to:
+
+ Get permissions from system administrators to mount the volumes
+
+ Add the relevant volumes to the htsget_app docker-compose file
+
+ Should look something like the following which will give read only access to each listed folder:
+
+ ensure the relevant user inside the docker container has the right permissions to access the mounts and databases
+
+ To test that htsget_app instance can see the mount as local files run:
+
+ If volumes are mounted this way, and files are inside the provided directory, you will need to specify the access methods for each file in the Genomic JSON file (see next section) for each file
+
+ something like (note the three slashes ///):
+
+```
+file:///data/dir1/my_bam_file.bam
+```
+```
+1 volumes :
+2 - htsget-data:/data
+3 - /source/folder/path/dir1:/data/dir1:ro
+4 - /source/folder/path/dir2:/data/dir2:ro
+5 - /source/folder/path/dir3:/data/dir3:ro
+```
+```
+1 docker exec -it candigv2_htsget_1 ls /data/dir
+```
+ filetype expected file
+
+ extension
+
+ expected index file expected data_type
+
+
+ It is recommended to write a simple script to automate the creation of the Genomic JSON file. JSON validation of this file will occur before genomic data ingest proceeds. We are also working on tools to
+
+ help create this file, so if you need help, reach out to the CanDIG team ( DIG-1378: Create tool to automate process of creating genomic file linking JSON GROOMED ).
+
+# Step 5. Ingest Genomic data
+
+ It is preferred to use the API to post the genomic JSON as a body to the /ingest/genomic endpoint.
+
+ An example post request would look something like the below which would ingest the pointers to a gzipped VCF file along with its associated tabix index file which are located within s3 storage and link it
+
+ with the clinical Sample Registration sample_registration_id_1 :
+
+ Similar to clinical ingest, you could also specify the path to a file that contains the genomic file information, e.g.
+
+ The post request should return with a queue id that can be used to check the status of genomic ingest.
+
+ You can check the status of genomic ingest by using the ingest status endpoint:
+
+ While ingest is processing, you will see a message "status": "still in queue".
+
+ If you get a message such as "no such sample": "sample SAMPLE_0600 does not exist in clinical data' this means the sample the file is linking to cannot be found in the clinical data. Please
+
+ ensure you have ingested all samples being referred to in the genomic json file before attempting genomic ingest.
+
+
+```bash
+curl -X 'POST' \
+ $CANDIG_URL'/ingest/genomic' \
+ -H 'accept: application/json' \
+ -H 'Content-Type: application/json' \
+ -H 'Authorization: Bearer '$TOKEN
+ -d '[
+ {
+8 "program_id": "string",
+9 "genomic_file_id": "HG00096",
+10 "metadata": {
+11 "sequence_type": "wgs",
+12 "data_type": "variant",
+13 "reference": "hg38"
+14 },
+15 "main": {
+16 "name": "string",
+17 "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/HG00096.vcf.gz"
+18 },
+19 "index": {
+20 "name": "string",
+21 "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/HG00096.tbi"
+22 },
+23 "samples": [
+24 {
+25 "submitter_sample_id": "sample_registration_id_1",
+26 "genomic_file_sample_id": "HG00096"
+27 }
+28 ]
+29 }
+30 ]'
+```
+```
+1 curl -X 'POST' \
+2 $CANDIG_URL'/ingest/genomic' \
+3 -H 'accept: application/json' \
+4 -H 'Content-Type: application/json' \
+5 -H 'Authorization: Bearer '$TOKEN \
+6 -d '@/absolute/path/to/genomic.json>
+```
+
+```
+2 "queue_id": "bd36048e-8661-11ef-99d4-0242ac12000f",
+
+```
+```
+1 curl -X 'GET' \
+2 $CANDIG_URL'/ingest/status/<your_queue_id>' \
+3 -H 'accept: application/json' \
+4 -H 'Content-Type: application/json' \
+5 -H 'Authorization: Bearer '$TOKEN
+```
+
+# Troubleshooting
+
+## What if Validation is failing?
+
+ If validation fails, it is important to fix the issues. The validation should give an error message that gives you enough information to fix the problem. If you are still struggling then reach out the CanDIG team
+
+ and provide the error message so that we can try to help you. If all else fails, it is possible to ingest without the failing values and add the valid values at a later point.
+
+## What if I have missing values in a lot of required fields?
+
+ Ingest can proceed with missing fields as long as there are identifiers that provide links between the different objects in the data model. After ingest, you will be provided errors, warnings and completeness
+
+ statistics that tell you where data can be improved in the future.
+
+## What if I don’t have a matching object in my data model?
+
+ If the object is required for linking between objects that do exist in your model, or the missing object is the Sample Registration you will still need to create these objects. The minimum amount of
+
+ information you would need to provide is a submitter_$OBJECT_id, which can be any text value as long as each id is unique within the program you are ingesting. Objects that are ‘leaves’ in the graph
+
+ structure, that is, there is only one inward relationship to that object, can be left out of ingest, i.e. Comorbidity, Biomarker, Exposure, Follow up. Treatment objects may be uploaded without an object
+
+ that describes the specific treatment (i.e. Chemotherapy, Hormone Therapy, Immunotherapy, Radiation, Surgery), but the model does require these based on the field
+
+ Treatment.treatment_type, so the Donor would be considered incomplete.
+
+## What if I want to ingest genomic data without clinical data?
+
+ All genomic data in the system must be linked to a Donor through the submitter_sample_id. The genomic data stores sample ids linked to genomic data and the clinical data service stores sample ids
+
+ linked to Donors. So, prior to ingesting genomic data, you must first ingest enough clinical data to allow for creation of a Sample object. From the MOHCCN data model, a Sample must be linked to a
+
+ Program, Donor and Specimen, and Specimen must be linked to a Primary Diagnosis, Donor, and Program. The following clinical fields are required prior to genomic data ingest:
+
+ submitter_sample_id
+
+ submitter_specimen_id
+
+ submitter_primary_diagnosis_id
+
+ submitter_donor_id
+
+ program_id
+
+## What if I want to link my objects differently?
+
+ Currently it isn’t possible to link the objects in the data model differently so you will need to transform your data into a compatible structure to match the CanDIG MoHCCN data model.
+
+## 504 Errors when ingesting clinical data
+
+ If you receive a 504 error or Gateway timeout something like this:
+
+ Try splitting up your cohort into batches of 100 donors and try again.
+
+ We are working to fix this in DIG-1139: Gateway timeout 504 when calling federations service and/or TYK DONE
+
+## File not found errors when ingesting genomic files
+
+ If you receive a file not found error something like this:
+
+ This means that the hts_get_server cannot find the file at the path you provided. Double check that:
+
+ If using storage local to the hts_get_server, your access method has three slashes at the start, ie. file:///, the third one is important to indicate you are specifying the full path to the file
+
+ If using storage local to the hts_get_server, ensure the specified path is from the root of the running container
+
+ Ensure the user that is running the hts_get_server has the right permissions to see the file. You could test this by copying the path provided in the error message and running
+
+ If you are ingesting VCF files, they take some time to be indexed. This happens after ingest is complete. Searching by variants in the data portal is not possible until indexing is complete. If you
+
+ would like to check the indexing status of a particular file, use the htsget endpoint
+
+```
+1 {'errors': ["sample_registrations: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in
+time.\n</body></html>\n\n", "treatments: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in
+time.\n</body></html>\n\n", "chemotherapies: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in
+time.\n</body></html>\n\n"], 'results': ['Of 1 programs, 1 were created', 'Of 284 donors, 284 were created', 'Of 237 primary_diagnoses, 237 were created', 'Of 524
+specimens, 524 were created', 'Of 169 hormone_therapies, 169 were created', 'Of 114 immunotherapies, 114 were created', 'Of 134 radiations, 134 were created']} 201
+2 {
+3 "YOUR_PROGRAM_ID": {
+4 "errors": [
+5 "sample_registrations: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in time.\n</body>
+</html>\n\n",
+6 "treatments: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in time.\n</body></html>\n\n",
+7 "chemotherapies: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in time.\n</body>
+</html>\n\n"
+8 ]
+9 }
+10 }
+```
+```
+1 "<Your_genomic_file_ID": {
+2 "errors": "{\n \"message\": \"No file exists at /the/path/you/provided/as/access/method/genomic_file_name.bam.bai on the server.\"\n}\n"
+3 },
+```
+
+### Key not authorised error when ingesting genomic files
+
+ If you receive an error something like this:
+
+ This means that the token used by ingest to submit to hts-get has expired. At the moment this happens after around 5 minutes. The best workaround for this is to split the number of files you are attempting
+
+ to ingest into smaller batches, such as around 100 files at a time.
+
+ We are working to fix this in : DIG-1393: Improve candig-ingest DONE
+
+### What if I need to delete or edit data that I already ingested into the system?
+
+ Currently, there is no way to edit data that is already ingested into CanDIG. To change any data, the data must be deleted and re-ingested. Follow the steps below in order to delete data in CanDIG.
+
+ A. Clinical Data
+
+ First, you’ll need need to get a authentication token to delete the data from calling this command:
+
+ 1. Get a token by logging into the candig data portal as site admin and copying the API token.
+
+ a. Go to the icon in the top right of the screen and click the cog
+
+ b. Click ‘ *** Get API Token’
+
+ c. Click the token to copy the text
+
+ 2. Go to a terminal and save it into a variable called TOKEN
+
+ Once you get the token, call this command:
+
+ Remember to replace `PROGRAM_ID` and `CANDIG_URL` with the actual values for your program and deployment.
+
+ B. Genomic Data
+
+ First, you’ll need need to get a authentication token to delete the data from calling this command:
+
+ 1. Get a token by logging into the candig data portal as site admin and copying the API token.
+
+ a. Go to the icon in the top right of the screen and click the cog
+
+ b. Click ‘ *** Get API Token’
+
+ c. Click the token to copy the text
+
+```
+1 docker exec ls -l /the/path/you/provided/as/access/method/
+```
+```
+1 "genomic_file_id": {
+2 "errors": "{\n \"error\": \"Key not authorised\"\n}"
+3 }
+```
+ This token should be kept secure, it lasts for 30 mins
+
+```bash
+TOKEN=ey-pasted-jwt
+```
+
+```bash
+curl --request DELETE \
+--url $CANDIG_URL'/katsu/v2/ingest/program/$PROGRAM_ID/' \
+-H 'accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Bearer '$TOKEN
+```
+
+ 2. Go to a terminal and save it into a variable called TOKEN
+
+Once you get the access token, call this command:
+
+Remember to replace `$PROGRAM_ID` and `$CANDIG_URL` with the actual values for your program and deployment.
+
+### ‘No program authorization exists’ error when attempting ingest
+
+When attempting clinical data ingest into katsu, if you get a response such as below:
+
+It means you have not yet registered your program before ingesting. Please follow the instructions in [For next stable] CanDIG Data Ingest Step-by-Step | Step 2: Registering Programs and assigning roles to users section to submit a program authorization before attempting clinical ingest again.
+
+This token should be kept secure, it lasts for 30 mins
+
+```bash
+1 TOKEN=ey-pasted-jwt
+```
+
+```bash
+curl --request DELETE \
+--url {CANDIG_URL}'/genomics/ga4gh/drs/v1/cohorts/{PROGRAM_ID}' \
+-H 'accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Bearer '$TOKEN
+```
+
+```bash
+{'errors': {
+    'SYNTH_01': 
+        [{'not found': 'No program authorization exists'}]
+}
+```
