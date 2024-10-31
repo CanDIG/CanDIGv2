@@ -83,4 +83,4 @@ source env.sh
 
 cd $BUILD_PATH
 
-PostToSlack "\`\`\`\nBuild success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: $CANDIG_SITE_ADMIN_USER\npassword $(cat ./tmp/keycloak/test-site-admin-password)\nusername: $CANDIG_NOT_ADMIN_USER\npassword $(cat ./tmp/keycloak/test-user-password)\nusername: $CANDIG_NOT_ADMIN2_USER\npassword $(cat ./tmp/keycloak/test-user2-password)\n\`\`\`"
+PostToSlack "\`\`\`\nBuild success:\n$TYK_LOGIN_TARGET_URL\nusername: $CANDIG_SITE_ADMIN_USER\npassword $CANDIG_SITE_ADMIN_PASSWORD\nusername: $CANDIG_NOT_ADMIN_USER\npassword $CANDIG_NOT_ADMIN_PASSWORD\nusername: $CANDIG_NOT_ADMIN2_USER\npassword $CANDIG_NOT_ADMIN2_PASSWORD\n\`\`\`"
