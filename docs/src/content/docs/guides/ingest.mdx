@@ -12,26 +12,20 @@ import { Steps } from '@astrojs/starlight/components';
 
 import { LinkCard, Card, CardGrid } from '@astrojs/starlight/components';
 
-# Intended Audience
+### Intended Audience
 
 Anyone intending to upload data to a CanDIG instance.
 
-# Prerequisites
+### Prerequisites
 
 - Decent working knowledge of python, JSON, docker, data transformation
-
 - [Optional] Locally running CanDIG stack for testing
-
 - Production CanDIG stack with authorization as site curator or program curator of the program(s) you are planning to ingest
-
 - Clinical data exported from your source database into a tabular format (CSVs or multi-tabbed xlsx)
-
 - Genomic data files in s3, local or NFS mounted drive available to htsget_app docker container
-
 - Linkage information between the sample registrations in the clinical data and the genomic data files
 
-
-## What stage of ingest are you up to?
+### What stage of ingest are you up to?
 
 <CardGrid stagger>
 	<LinkCard 

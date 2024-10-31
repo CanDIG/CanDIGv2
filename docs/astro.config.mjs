@@ -17,6 +17,9 @@ export default defineConfig({
         }),
         starlight({
         title: 'Docs',
+        customCss: [
+            './src/styles/custom.css'
+        ],
         editLink: {
             baseUrl: 'https://github.com/CanDIG/CanDIGv2/edit/develop/'
         },
@@ -75,6 +78,7 @@ export default defineConfig({
                     { label: 'Production deployment', slug: 'deployment/production'},
                     { label: 'Testing', slug: 'deployment/ingest-and-test'},
                     { label: 'Interact using Make', slug: 'deployment/interact-with-the-stack'},
+                    { label: 'Logging', slug: 'deployment/logging'},
                     { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'}, 
                 ]
 

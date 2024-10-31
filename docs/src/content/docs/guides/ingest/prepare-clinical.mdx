@@ -3,12 +3,12 @@ title: Prepare clinical data
 description: A step by step guide to preparing clinical data for ingest into CanDIG
 tableOfContents:
   minHeadingLevel: 1
-  maxHeadingLevel: 2
+  maxHeadingLevel: 3
 ---
 
 We also call this ‘ ETL ’ or Extract, Transform Load. Basically we need to extract the data from its native database, transform it into the CanDIG data model, and load it into the CanDIG platform.
 
-This step relies on CanDIG’s clinical ETL mapping tool. If you haven’t done so already, clone the repo clinical_ETL_code: stable and note where you have it, we will be using it later!
+This step relies on CanDIG’s clinical ETL mapping tool. If you haven’t done so already, clone the repo [clinical_ETL_code: stable](https://github.com/CanDIG/clinical_ETL_code) and note where you have it, we will be using it later!
 
 ## A. Data export
 
@@ -22,15 +22,19 @@ CanDIG expects data to be in one or more tables, where there are shared identifi
 
 A toy partial example of data that could be transformed into the CanDIG model:
 
+![Example tables](../../../../assets/diagrams/table-examples.webp)
+
 *Figure 1: Example of clinical data tables to convert to the CanDIG MoHCCN model*
 
-The patient-id in the Diagnosis table, enables a relationship to show which diagnosis belongs to which patient. The diagnosis-id in the Biopsy table shows which Biopsy derives from which Diagnosis. Linking them all together (Patient -> Diagnosis -> Biopsy) means a Biopsy can ultimately be linked to the Patient it was taken from. The CanDIG model uses these concepts of linking objects and although the objects and fields may be named differently, as long as the data follows a similar structure we have tools to help convert between your data and the CanDIG model. Next we describe the CanDIG MoH data model.
+The `patient-id` in the Diagnosis table, enables a relationship to show which diagnosis belongs to which patient. The `diagnosis-id` in the Biopsy table shows which Biopsy derives from which Diagnosis. Linking them all together (Patient -> Diagnosis -> Biopsy) means a Biopsy can ultimately be linked to the Patient it was taken from. The CanDIG model uses these concepts of linking objects and although the objects and fields may be named differently, as long as the data follows a similar structure we have tools to help convert between your data and the CanDIG model. Next we describe the CanDIG MoH data model.
 
 ## B. Model mapping
 
 The CanDIG MoH Clinical data model is based on the MOHCCN v.3.1 data model. To load data into CanDIG, you will need to create a map from your data to the schemas, fields and permissible values in the CanDIG MoH model.
 
 The overall linking structure of the CanDIG data model is shown below:
+
+![clinical data model](../../../../assets/diagrams/model-no-legend.webp)
 
 *Figure 2: object linking and field overview of the CanDIG MoHCCN data model*
 
@@ -48,24 +52,11 @@ Some notes about the model:
 
 2. Determine whether the fields contain permissible values
 
- a. If fields don’t contain permissible values based on the MoHCCN data model, you will need to pre-process data to map your values to valid values. Permissible values for each field can be found in
-
- the MoHCCN data model spreadsheet. These values may be from external vocabularies, see the External Vocabularies section below for more information.
-
-<details>
-<summary>External Vocabularies</summary>
-
- The MoHCCN data model uses several external vocabularies for certain fields, expand the section below to learn more about them and how you can map your field values to these vocabularies.
-
- Note that some fields only allow specific terms from a given vocabulary and are validated with an enum, while others will allow any value from that vocabulary and are validated with a regular
-
- expression that matches the structure of the given term
-
-</details>
+ a. If fields don’t contain permissible values based on the MoHCCN data model, you will need to pre-process data to map your values to valid values. Permissible values for each field can be found in the MoHCCN data model spreadsheet. These values may be from external vocabularies
 
 ### i. Mapping template configuration
 
-In order to use CanDIG’s data transformation functionality, a mapping template that matches the fields in your model to the fields in the CanDIG data model needs to be configured. The complete mapping template is moh_v3_template.csv and can be found in the Clinical ETL Code repository that you cloned earlier. The README in the repo provides documentation of how to configure and use the code.
+In order to use CanDIG’s data transformation functionality, a mapping template that matches the fields in your model to the fields in the CanDIG data model needs to be configured. The complete mapping template is [`moh_v3_template.csv`](https://github.com/CanDIG/clinical_ETL_code/blob/stable/moh_v3_template.csv) and can be found in the [Clinical ETL Code repository](https://github.com/CanDIG/clinical_ETL_code/tree/stable) that you cloned earlier. The README in the repo provides documentation of how to configure and use the code.
 
 In a nutshell, for every field you want to map in the CanDIG MoHCCN data model, you will need to specify where in your exported data files the information for that field exists, and the mapping function that will transform it into a permissible value for that field. The exercise in step B.i will help guide this process.
 
@@ -111,3 +102,7 @@ This will likely be an iterative process of attempting conversion and fixing any
 - Any fields that do not meet the permissible values requirements will cause ingest to fail, if these are challenging to meet, they can be left blank and added at a later date. If there is no expectation that the field will ever be completed, the 'Not available' option can be used
 
 </details>
+
+:::tip
+Once you get to a final version of csv files, manifest, mapping functions, and mapping template, we recommend saving these files in a secure location as they will make it easier to update and reingest data if needed.
+:::
