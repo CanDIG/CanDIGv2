@@ -49,18 +49,18 @@ Any user that can access the VM where the CanDIG stack is running can access pot
 
 ## .env settings
 
-The following default settings in the `.env` file should be changed when deploying CanDIG in a production environment. You can also take a look at the [`example-production.env`]() and [`etc/env/production-diff-template.diff`]() files with the changes below incorporated.
+The following default settings in the `.env` file should be changed when deploying CanDIG in a production environment. You can also take a look at the [`example-production.env`](https://github.com/CanDIG/CanDIGv2/blob/develop/etc/env/example-production.env) and [`etc/env/production-diff-template.diff`](https://github.com/CanDIG/CanDIGv2/blob/develop/etc/env/production-diff-template.diff) files with the changes below incorporated.
 
-| value in prod environment                                                                | Notes  |
+| value in prod environment                                                                | Notes         |
 |------------------------------------------------------------------------------------------|---------------|
 | `CANDIG_DOMAIN=<your.prod.domain>`                                                       | Update to correct prod domain  |
 | `CANDIG_INTERNAL_DOMAIN=${CANDIG_DOMAIN}/internal ip address`                            | Some sites have needed to change this to `127.0.0.1` | 
 | `CANDIG_AUTH_DOMAIN=<your.prod.auth.domain>`                                             | Update to correct prod auth domain  |
-| `CANDIG_SITE_LOCATION=<your-site-location>`                                              | e.g. UHN, BC Ensures site location is named properly  |
+| `CANDIG_SITE_LOCATION=<your-site-location>`                                              | e.g. UHN, BC-Dev The name of your site, should be unique within a federation.  |
 | `CANDIG_DEBUG_MODE=0`                                                                    | Turn off DEBUG mode  |
 | `CANDIG_PRODUCTION_MODE=1`                                                               | Turn on Production mode  |
 | `LOCAL_IP_ADDR=192.168.x.x`                                                              | May need to set to your public IP, not always needed |
-| `FEDERATION_SELF_SERVER_ID=<unique-node-name>`                                           |  e.g. UHN-prod, BCGSC-prod. Uniquely identifies your node within the CanDIG federation |
+| `FEDERATION_SELF_SERVER_ID=<unique-node-name>`                                           |  e.g. UHN-prod, BCGSC-prod. Uniquely identifies your node within the CanDIG federation, can be `${CANDIG_SITE_LOCATION}` |
 | `FEDERATION_SELF_SERVER` - update province, province-code see [section below](setting-location-information) | Ensures site displays properly on the map and can be federated |
 | `KEYCLOAK_CLIENT_ID=<your-keycloak-identifier>`                                          | Optional to change this, more for consistency than necessity |
 | `KEYCLOAK_PUBLIC_PROTO=https`                                                            | change to https for prod |
