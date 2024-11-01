@@ -3,6 +3,9 @@ title: Production deployment
 description: Modifications needed when deploying to a production server
 ---
 
+import { Code } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
 Apart from the basic steps in the <a href="/CanDIGv2/deployment/local">CanDIGv2 Install Guide</a> to get the candig stack up and running, there are additional settings and security recommendations that need to set up in a production level environment. We provide the following as general advice, but it is important for all CanDIG deployers to also consult with their institutional infrastructure security personnel to ensure that their deployment meets the necessary level of data security.
 
 ## Stable branch
@@ -38,7 +41,7 @@ BCGSC initially had an issue with having a double proxy which caused a double UR
  nginx acts as a reverse proxy which:
  1. Re-routes http traffic to https
  2. Provides SSL certificates
- 3. Routes ${CANDIG_DOMAIN} and ${CANDIG_AUTH_DOMAIN} http[s] traffic from outside to the appropriate microservice (tyk or keycloak respectively) and port.
+ 3. Routes `${CANDIG_DOMAIN}` and `${CANDIG_AUTH_DOMAIN}` http[s] traffic from outside to the appropriate microservice (tyk or keycloak respectively) and port.
 
 ## Virtual Machine behind Virtual Private Network
 
@@ -48,14 +51,16 @@ Any user that can access the VM where the CanDIG stack is running can access pot
 
 The following default settings in the `.env` file should be changed when deploying CanDIG in a production environment:
 
+<Tabs>
+  <TabItem label="Tabular `.env` changes">
 | value in prod environment                                                                | What it does  |
 |------------------------------------------------------------------------------------------|---------------|
-| `CANDIG_DOMAIN=<your.prod.domain>`                                                       | Update to correct prod domain  |
-| `CANDIG_AUTH_DOMAIN=<your.prod.auth.domain>`                                             | Update to correct prod auth domain  |
+| `CANDIG_DOMAIN=https://your.prod.domain`                                                       | Update to correct prod domain  |
+| `CANDIG_AUTH_DOMAIN=https://your.prod.auth.domain`                                             | Update to correct prod auth domain  |
 | `CANDIG_DEBUG_MODE=0`                                                                    | Turn off DEBUG mode  |
 | `CANDIG_PRODUCTION_MODE=1`                                                               | Turn on Production mode  |
-| `CANDIG_SITE_LOCATION=`<your-site-location> e.g. UHN, BC                                             | Ensures site location is named properly  |
-| `FEDERATION_SELF_SERVER_ID=`<unique-node-name> e.g. UHN-prod, BCGSC-prod | Uniquely identifies your node within the CanDIG federation |
+| `CANDIG_SITE_LOCATION=<your-site-location>` e.g. UHN, BC                                             | Ensures site location is named properly  |
+| `FEDERATION_SELF_SERVER_ID=<unique-node-name>` e.g. UHN-prod, BCGSC-prod | Uniquely identifies your node within the CanDIG federation |
 | `FEDERATION_SELF_SERVER` - update province, province-code see [section below](setting-location-information) | Ensures site displays properly on the map and can be federated |
 | `KEYCLOAK_PUBLIC_PROTO=https`                                                            | change to https for prod |
 | `KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}`                   | Keycloak public url shouldn't have port|
@@ -64,6 +69,22 @@ The following default settings in the `.env` file should be changed when deployi
 | `TYK_LOGIN_TARGET_URL=https://${CANDIG_DOMAIN}`                                          | ensure tyk uses https |
 | `TYK_USE_SSL=true`                                                                       | ensure tyk uses SSL |
 | `CANDIG_DATA_PORTAL_URL=https://${CANDIG_DOMAIN}:${CANDIG_DATA_PORTAL_PORT}/data-portal` | ensure dataportal url has https |
+</TabItem>
+
+<TabItem label="diff style `.env` changes">
+```sh title=".env" del={1,3,5,7,} ins={2,4,6,8}
+CANDIG_DOMAIN=candig.docker.internal
+CANDIG_DOMAIN=<your.prod.domain>
+CANDIG_AUTH_DOMAIN=candig.docker.internal
+CANDIG_AUTH_DOMAIN=<your.prod.auth.domain>
+CANDIG_SITE_LOCATION=LOCAL
+CANDIG_SITE_LOCATION=your-site-location # BCGSC, UHN, C3G, etc.
+CANDIG_DEBUG_MODE=1
+CANDIG_DEBUG_MODE=0
+```
+</TabItem>
+
+</Tabs>
 
 ### Setting location information
 You will need to modify the `FEDERATION_SELF_SERVER` entry to reflect your site's specific settings. Set `CANDIG_SITE_LOCATION` to the name of your site, such as UHN, BCGSC, or C3G. For federation settings, set the name, province, and province-code for the `FEDERATION_SELF_SERVER` variable in the `.env`. See table below for codes for each Canadian province and territory:
