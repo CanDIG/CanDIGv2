@@ -1,8 +1,0 @@
-- type: modules
-    modulecmd: /usr/bin
-    modulepath: /hpf/tools/centos6/modulefiles
-    versionless: false
-    find_by: avail
-    prefetch: true
-    default_indicator: (default)
-
