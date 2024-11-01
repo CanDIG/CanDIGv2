@@ -1,0 +1,95 @@
+diff --git a/example.env b/example-production.env
+index 80409ee0..091d18d6 100644
+--- a/example.env
++++ b/example-production.env
+@@ -8,12 +8,12 @@ CANDIG_AUTH_MODULES=keycloak vault tyk opa
+ CANDIG_DATA_MODULES=keycloak vault redis postgres logging
+ 
+ # options are [<ip_addr>, <url>, host.docker.internal, candig.docker.internal]
+-CANDIG_DOMAIN=candig.docker.internal
+-CANDIG_INTERNAL_DOMAIN=${CANDIG_DOMAIN}
+-CANDIG_AUTH_DOMAIN=candig.docker.internal
+-CANDIG_SITE_LOCATION=LOCAL # BCGSC, UHN, C3G, etc.
+-CANDIG_DEBUG_MODE=1
+-CANDIG_PRODUCTION_MODE=0
++CANDIG_DOMAIN=YOUR_PRODUCTION_DOMAIN
++CANDIG_INTERNAL_DOMAIN=${CANDIG_DOMAIN}  # may need to change to IP address, depends on proxy
++CANDIG_AUTH_DOMAIN=YOUR_PRODUCTION_AUTH_DOMAIN
++CANDIG_SITE_LOCATION=YOUR_SITE_IDENTIFIER # BCGSC, UHN, C3G, etc.
++CANDIG_DEBUG_MODE=0
++CANDIG_PRODUCTION_MODE=1
+ CANDIG_VERSION=v5.0.0
+ 
+ # this is the unique key used by your site IDP to identify users.
+@@ -33,7 +33,7 @@ TEST_USER_2=user2@test.ca
+ KEEP_TEST_DATA=false
+ 
+ # set this to your local IP address (i.e. 192.168.x.x on most networks) if `make init-authx` cannot automatically determine your IP
+-LOCAL_IP_ADDR=
++LOCAL_IP_ADDR=  # may need to set this value
+ 
+ # miniconda venv
+ # options are [linux, darwin, arm64mac]
+@@ -143,8 +143,8 @@ FEDERATION_SERVICE_URL=http://${CANDIG_INTERNAL_DOMAIN}:${FEDERATION_PORT}
+ FEDERATION_PUBLIC_URL=${TYK_LOGIN_TARGET_URL}/federation
+ FEDERATION_PRIVATE_URL=http://federation:${FEDERATION_PORT}
+ FEDERATION_SERVICES=katsu htsget query
+-FEDERATION_SELF_SERVER_ID=internal-1
+-FEDERATION_SELF_SERVER="{'id': '${FEDERATION_SELF_SERVER_ID}', 'url': '${FEDERATION_SERVICE_URL}','location': {'name': '${CANDIG_SITE_LOCATION}','province': 'ON','province-code': 'ca-on'}}"
++FEDERATION_SELF_SERVER_ID=YOUR-SERVER-ID
++FEDERATION_SELF_SERVER="{'id': '${FEDERATION_SELF_SERVER_ID}', 'url': '${FEDERATION_SERVICE_URL}','location': {'name': '${CANDIG_SITE_LOCATION}','province': 'YOUR-PROVINCE','province-code': 'YOUR-PROVINCE-CODE'}}"
+ 
+ 
+ # katsu metadata service
+@@ -162,20 +162,20 @@ KATSU_THREADS=4
+ # keycloak service
+ KEYCLOAK_VERSION=24.0.0
+ KEYCLOAK_REALM=candig
+-KEYCLOAK_CLIENT_ID=local_candig
++KEYCLOAK_CLIENT_ID=YOUR_KEYCLOAK_IDENTIFIER  # optional
+ KEYCLOAK_LOGIN_REDIRECT_PATH=/auth/login
+ KEYCLOAK_PORT=8080
+-KEYCLOAK_PUBLIC_PROTO=http
++KEYCLOAK_PUBLIC_PROTO=https
+ KEYCLOAK_PRIVATE_PROTO=http
+-KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}:${KEYCLOAK_PORT}
+-KEYCLOAK_PRIVATE_URL=${KEYCLOAK_PRIVATE_PROTO}://${CANDIG_AUTH_DOMAIN}:${KEYCLOAK_PORT}
++KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}
++KEYCLOAK_PRIVATE_URL=${KEYCLOAK_PRIVATE_PROTO}://keycloak:${KEYCLOAK_PORT}
+ KEYCLOAK_REALM_URL=${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}
+ KEYCLOAK_ISSUER_URL=${KEYCLOAK_PUBLIC_URL}/auth/realms/${KEYCLOAK_REALM}
+ KEYCLOAK_GENERATE_TEST_USER=1
+ 
+ # some production instances use a reverse proxy: if needed, set this to "xforwarded" or "forwarded"
+ # https://www.keycloak.org/server/reverseproxy
+-KEYCLOAK_PROXY_HEADERS=none
++KEYCLOAK_PROXY_HEADERS=xforwarded # probably (depends on proxy setup)
+ 
+ # query service
+ QUERY_VERSION=3.3.0
+@@ -197,13 +197,13 @@ TYK_VERSION=v5.0.10
+ TYK_SERVICE_PUBLIC_PORT=5080
+ TYK_SERVICE_HOST=0.0.0.0
+ #TODO: consolidate tyk public and private domains
+-TYK_LOGIN_TARGET_URL=http://${CANDIG_DOMAIN}:${TYK_SERVICE_PUBLIC_PORT}
++TYK_LOGIN_TARGET_URL=https://${CANDIG_DOMAIN}
+ TYK_PRIVATE_URL=http://${CANDIG_DOMAIN}:${TYK_SERVICE_PUBLIC_PORT}
+-TYK_ANALYTICS_FROM_EMAIL=admin@distributedgenomics.ca
++TYK_ANALYTICS_FROM_EMAIL=YOUR-ADMIN-EMAIL@email.ca
+ TYK_ANALYTICS_FROM_NAME=CanDIG Admin
+ TYK_LISTEN_PATH=
+ TYK_POLICY_ID=candig_policy
+-TYK_USE_SSL=false
++TYK_USE_SSL=true
+ 
+ ## api - authentication
+ TYK_AUTH_API_ID=11
+@@ -300,7 +300,7 @@ OPA_PRIVATE_URL=http://opa:8181
+ # candig-data-portal (previously mcode)
+ CANDIG_DATA_PORTAL_VERSION=v4.0.0
+ CANDIG_DATA_PORTAL_PORT=2543
+-CANDIG_DATA_PORTAL_URL=http://${CANDIG_DOMAIN}:${CANDIG_DATA_PORTAL_PORT}/data-portal
++CANDIG_DATA_PORTAL_URL=https://${CANDIG_DOMAIN}:${CANDIG_DATA_PORTAL_PORT}/data-portal
+ CANDIG_DATA_PORTAL_PRIVATE_URL=http://candig-data-portal:3000
+ 
+ # vault helper tool
