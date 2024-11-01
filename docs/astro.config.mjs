@@ -20,6 +20,7 @@ export default defineConfig({
         customCss: [
             './src/styles/custom.css'
         ],
+        favicon: '/favicon.ico',
         editLink: {
             baseUrl: 'https://github.com/CanDIG/CanDIGv2/edit/develop/'
         },
