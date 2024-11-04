@@ -10,7 +10,7 @@ These instructions describe some basic functionality tests and the ingestion of 
 The easiest way to test your local installation is to run the integration tests.
 
 This requires:
-- An activated conda environment `(candig)` showing up on the left of your command line).
+- An activated conda environment `(candig)` showing up on the left of your command line.
 - Installation of some extra python requirements.
 
 This can be done automatically:
@@ -34,19 +34,19 @@ These tests will not work if the default site administrator has been changed.
 
 ## Manual tests
 
-Check that you can see the data portal in your browser at [http://candig.docker.internal:5080](http://candig.docker.internal:5080). If not, refer to the instructions in the [Docker Deployment Guide](./install-docker.md).
+These tests assume you are on a local deployment with default `.env` values. If not, you will need to update some of the values to suit your deployment. Check that you can see the data portal in your browser at [http://candig.docker.internal:5080](http://candig.docker.internal:5080). If not, refer to the instructions in the [deployment guide](local).
 
-Check that you can generate a bearer token for user2 with the following call, substituting usernames, secrets and passwords from `TEST_USER_2` in .env, `tmp/keycloak/client-secret` and `tmp/keycloak/test-user2-password`.
+Check that you can generate a bearer token for user2 with the following call, substituting usernames, secrets and passwords from `env.sh`.
 
 ```bash
 ## user2 bearer token
 curl -X "POST" "http://candig.docker.internal:8080/auth/realms/candig/protocol/openid-connect/token" \
      -H 'Content-Type: application/x-www-form-urlencoded; charset=utf-8' \
-     --data-urlencode "client_id=local_candig" \
-     --data-urlencode "client_secret=<client_secret>" \
+     --data-urlencode "client_id="$CANDIG_CLIENT_ID \
+     --data-urlencode "client_secret="$CANDIG_CLIENT_SECRET \
      --data-urlencode "grant_type=password" \
-     --data-urlencode "username=user2" \
-     --data-urlencode "password=<user2-password>" \
+     --data-urlencode "username="$CANDIG_NOT_ADMIN2_USER \
+     --data-urlencode "password="$CANDIG_NOT_ADMIN2_PASSWORD \
      --data-urlencode "scope=openid"
 ```
 
@@ -71,19 +71,10 @@ make build-federation
 make compose-federation
 ```
 
-
 ## Ingest the synthetic clinical dataset
 
-Synthetic data is ingested as part of the integration tests. By default, this data is deleted after tests are run. If you'd like to keep the data in the platform, ensure the [`KEEP_TEST_DATA`](https://github.com/CanDIG/CanDIGv2/blob/c2339c685720b327ca02ea6bb9d442e253cdb562/etc/env/example.env#L20) variable in your .env file is set to `true`.
+Synthetic data is ingested as part of the integration tests. By default, this data is deleted after tests are run. If you'd like to keep the data in the platform, ensure the `KEEP_TEST_DATA` variable in your .env file is set to `true`.
 
-If you would like to ingest the data separately, from the CanDIGv2 directory:
-```bash
-python settings.py
-source env.sh
-cd lib/candig-ingest/candigv2-ingest/
-pip install -r requirements.txt
-python katsu_ingest.py --input tests/clinical_ingest.json
-```
+If you would like to ingest the data separately, follow the [clinical ingest](../guides/ingest/ingest-clinical#ingesting-clinical-data-into-candig) and [genomic ingest](../guides/ingest/ingest-genomic) instructions using the test files in `lib/candig-ingest/candigv2-ingest/tests`,  using `small_dataset_clinical_ingest.json` for clinical ingest and `small_dataset_genomic_ingest.json` for genomic ingest.
+
 You should now see the ingested data in the [data portal](http://candig.docker.internal:5080).
-
-[Clinical data](https://github.com/CanDIG/candigv2-ingest#1-clinical-data) and [Genomic data](https://github.com/CanDIG/candigv2-ingest#2-genomic-data) describe the data ingestion process and include descriptions of ingestable test datasets.

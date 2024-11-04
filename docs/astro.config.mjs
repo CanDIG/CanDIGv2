@@ -79,8 +79,10 @@ export default defineConfig({
                     { label: 'Production deployment', slug: 'deployment/production'},
                     { label: 'Testing', slug: 'deployment/ingest-and-test'},
                     { label: 'Interact using Make', slug: 'deployment/interact-with-the-stack'},
+                    { label: 'User roles', slug: 'deployment/user-roles'},
                     { label: 'Logging', slug: 'deployment/logging'},
-                    { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'}, 
+                    { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'},
+                    { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'}, 
                 ]
 
             },

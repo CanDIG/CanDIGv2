@@ -3,15 +3,16 @@ title: CanDIGv2 Install Guide
 description: A guide to deploying CanDIG on your local laptop, PC or VM in a development setting
 ---
 
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
 These instructions work for server deployments or local deployments. For local OSX using M1 architecture, there are modification instructions in the [install-os-dependencies](#install-os-dependencies) section. For WSL you can follow the linux instructions and follow WSL instructions for firewall file at [update firewall](#update-firewall).
 
-Docker Engine (also known as Docker CE) is recommended over Docker Desktop for linux installations.
+Docker Engine (also known as Docker CE) is recommended over Docker Desktop for linux installations. Docker Desktop works well on Mac installations.
 
-Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
+:::note
+CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
+:::
 
-Docker Engine (also known as Docker CE) is recommened over Docker Desktop for linux installations.
-
-Note that CanDIG requires **Docker Compose v2**, which is provided alongside the latest version of Docker Engine. Versions of Docker which do not provide Docker Compose will unfortunately not work with CanDIG.
 
 ## Resource requirements
 
@@ -25,8 +26,8 @@ CanDIG can be installed and deployed as below for development situations where n
 
 ## Install OS Dependencies
 
-<details>
-<summary>Debian</summary>
+<Tabs>
+<TabItem label="Debian">
 
 1. Update system/install dependencies
 
@@ -73,11 +74,9 @@ sudo usermod -aG docker $(whoami)
 
 Continue to [Configure .env](#configure-.env) section below
 
-</details>
+</TabItem>
 
-<details>
-
-<summary>Ubuntu</summary>
+<TabItem label="Ubuntu">
 
 1. Update system/install dependencies
 ```bash
@@ -127,13 +126,9 @@ groups
 getent group docker
 ```
 
-Continue to [Configure .env](#configure-.env) section below
+</TabItem>
 
-</details>
-
-<details>
-
-<summary>CentOS 7</summary>
+<TabItem label="CentOS 7">
 
 1. Update system/install dependencies
 
@@ -180,11 +175,9 @@ yq >= 4 is required.  See [https://github.com/mikefarah/yq/#install](https://git
 
 Continue to [Configure .env](#configure-.env) section below
 
-</details>
+</TabItem>
 
-<details>
-
-<summary>Note for WSL Systems</summary>
+<TabItem label="WSL Systems">
 
 Miniconda3 must be installed at `~/miniconda3` on WSL systems to avoid an infinite symlink loop. Add `CONDA_INSTALL = ~/miniconda3`  above `CONDA = $(CONDA_INSTALL)/bin/conda` in the Makefile to avoid this issue. You can also use the below command to move the miniconda3 installation to the correct location.
 
@@ -196,13 +189,11 @@ yq >= 4 is required, but the conda version is outdated.  Install the latest vers
 
 Continue to [Configure .env](#configure-.env) section below
 
-</details>
+</TabItem>
 
-<details>
+<TabItem label="Apple Silicon">
 
-<summary>For Apple Silicon</summary>
-
-### 1. Install OS Dependencies
+1. Install OS Dependencies
 
 - Install dependencies
 
@@ -215,58 +206,21 @@ brew install yq
 
 - Get [Docker Desktop for Apple Silicon](https://docs.docker.com/desktop/install/mac-install/). Be sure to start it.
 
-### 2. Initialize CanDIGv2 Repo
-
-```bash
-git clone -b develop https://github.com/CanDIG/CanDIGv2.git
-cd CanDIGv2
-git submodule update --init --recursive
-cp -i etc/env/example.env .env
-```
-
-### 3. Update .env file
-
-```bash
-# find out your ip and add to LOCAL_IP_ADDR
-LOCAL_IP_ADDR=xxx.xx.x.x
-# change OS
-VENV_OS=arm64mac
-```
-
-Edit /etc/hosts on the machine (`sudo nano /etc/hosts`):
-
-```bash
-::1 candig.docker.internal
-```
-
-### 4. Initialize conda
-
-```bash
-make bin-all
-make init-conda
-conda activate candig
-```
-
-### 5. Build and test
-
-```bash
-make build-all
-make test-integration
-```
-
-</details>
+</TabItem>
+</Tabs>
 
 ## Initialize CanDIGv2 Repo
 
+If you haven't done so already
 
-### 1. Initialize repo and submodules
+1. Initialize repo and submodules
 ```bash
 git clone -b develop https://github.com/CanDIG/CanDIGv2.git
 cd CanDIGv2
 git submodule update --init --recursive
 ```
 
-### 2. Copy and edit .env with your site's local configuration
+2. Copy and edit .env with your site's local configuration
 
 
 ```
@@ -316,7 +270,7 @@ services:
 
 </details>
 
-### 3. option A: install miniconda and initialize candig virtualenv
+3. option A: install miniconda and initialize candig virtualenv
 
 Use this option for systems installations. It installs miniconda in the candigv2 repo.
 
@@ -325,7 +279,7 @@ make bin-conda  # If this fails on WSL, see the Note for WSL Systems section abo
 make init-conda
 ```
 
-### 3. option B. Use an existing Conda installation
+3. option B. Use an existing Conda installation
 
 If you want to use an existing conda installation on your local at the bottom of the [.env](../etc/env/example.env#L310), set `CONDA_INSTALL` to your existing conda installation path
 
@@ -334,7 +288,7 @@ make mkdir # skip most of bin-conda, but need the dir-creating step
 make init-conda
 ```
 
-### 4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
+4. Activate the candig virtualenv. It may be necessary to restart your shell before doing this
 
 ```bash
 conda activate candig
@@ -357,17 +311,7 @@ Optional modules follow the `#` and include various monitoring components, workf
 
 ## Build and compose all the modules
 
-`install-all` will perform all of the steps to deploy CanDIG including the conda install, building images explicitly. 
-
-> [!IMPORTANT] 
-> On Mac M1, you will not be able to use make install-all; instead, use the conda installation instructions as described above. Build-all will then build and compose the containers for you.
-
-
-```bash
-make install-all
-```
-
-`build-all` will do the same without running `bin-conda` and `init-conda`:
+Use the make command `build-all` to build and compose all the CanDIG modules
 
 ```bash
 make build-all
@@ -375,17 +319,17 @@ make build-all
 
 If you can see the data portal at http://candig.docker.internal:5080/, your installation was successful.
 
-Try logging in with one of the @test.ca usernames from .env.  The passwords are found in: tmp/keycloak/.
+Try logging in with one of the @test.ca usernames from .env.  The passwords are found in: `tmp/keycloak/`.
 
-Confirm your installation with the <a href="/CanDIGv2/deployment/ingest-and-test/">automatic tests</a>:
+Confirm your installation with the automatic integration tests:
+
 ```bash
 make test-integration
 ```
 
-
 Once everything has run without errors, take a look at the documentation for
-<a href="/CanDIGv2/deployment/ingest-and-test/">ingesting data and testing the deployment</a> as well as <a href="/CanDIGv2/deployment/interact-with-the-stack/">Interacting with the stack using Make</a>
-and if you are a developer: [how to modify code and test changes](docker-and-submodules.md) in
+[ingesting data](../guides/ingest) as well as [Interacting with the stack using Make](interact-with-the-stack)
+and if you are a developer: [how to modify code and test changes](../technical/docker-and-submodules) in
 the context of the CanDIG stack.
 
 ## Troubleshooting

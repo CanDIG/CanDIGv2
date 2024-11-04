@@ -54,7 +54,7 @@ Some notes about the model:
 
  a. If fields don’t contain permissible values based on the MoHCCN data model, you will need to pre-process data to map your values to valid values. Permissible values for each field can be found in the MoHCCN data model spreadsheet. These values may be from external vocabularies
 
-### i. Mapping template configuration
+### ii. Mapping template configuration
 
 In order to use CanDIG’s data transformation functionality, a mapping template that matches the fields in your model to the fields in the CanDIG data model needs to be configured. The complete mapping template is [`moh_v3_template.csv`](https://github.com/CanDIG/clinical_ETL_code/blob/stable/moh_v3_template.csv) and can be found in the [Clinical ETL Code repository](https://github.com/CanDIG/clinical_ETL_code/tree/stable) that you cloned earlier. The README in the repo provides documentation of how to configure and use the code.
 
@@ -86,7 +86,7 @@ In a nutshell, for every field you want to map in the CanDIG MoHCCN data model, 
 
  Once the mapping template CSV is configured, you can continue with clinical data conversion.
 
-### ii. Clinical Data conversion and Validation
+### iii. Clinical Data conversion and Validation
 
 The instructions in the clinical ETL Code README go over the steps required to successfully run the CSVConvert.py script which will convert input tabular format sheets into the JSON file required to ingest into CanDIG.
 

@@ -9,8 +9,7 @@ tableOfContents:
 import { Icon } from 'astro-icon/components';
 import { Steps } from '@astrojs/starlight/components';
 
-Before any program can be ingested into CanDIG, it needs to be registered. To first register a program, you must be either a site admin or a site curator. During program registration, you can also assign program curators and team members to the program. For more information about user roles in CanDIG, see [User roles in CanDIG](#user-roles-in-candig) section below.
-
+Before any program can be ingested into CanDIG, it needs to be registered. To first register a program, you must be either a site admin or a site curator. During program registration, you can also assign program curators and team members to the program. For more information about user roles in CanDIG, see [User roles in CanDIG](../deployment/user-roles). If you need to be made a site curator or program curator, please contact your local site administrator to assign your user profile the appropriate role.
 
 ## How to register a program
 
@@ -28,7 +27,7 @@ Before any program can be ingested into CanDIG, it needs to be registered. To fi
 TOKEN=ey-pasted-jwt
 ```
 
-:::caution
+:::danger
 This token should be kept secure, it lasts for 30 mins
 :::
 
@@ -42,53 +41,3 @@ curl -s --request POST \
  -H 'Authorization: Bearer '$TOKEN \
  -d '{"program_id": "SYNTH_03", "program_curators": ["user2@test.ca"], "team_members": []}'
 ```
-
-# User roles in CanDIG
-
-In CanDIG, it is expected that the main users who will be ingesting data will be either a Site Curator or a Program Curator. Initially, a site admin must give a user either site curator or program curator privileges to enable them to ingest. Once given site curator status, a user can then register, ingest and delete any program at a site. The site curator role is intended to be used when there is a few dedicated curators who will be ingesting all data at a site and they are all authorized to see all data that will be ingested at that site.
-
-A program curator can only perform actions on the specific program they have been given program curator status on. They are not authorized to see or edit other programs at the site.
-
-| Role            | Register a new program                                  | Edit authorized users in an existing program                                 | ingest/delete data                                                           | view ingested data                                                           |
-|---------------|-------------------------------------------------------|----------------------------------------------------------------------------|----------------------------------------------------------------------------|----------------------------------------------------------------------------|
-| Site admin      | <Icon name="mdi:checkbox-marked-circle" color="green" text-align="center"/> | <Icon name="mdi:checkbox-marked-circle" color="green"/>                      | <Icon name="mdi:checkbox-marked-circle" color="green"/>                      | <Icon name="mdi:checkbox-marked-circle" color="green"/>                      |
-| Site curator    | <Icon name="mdi:do-not-disturb-alt" color="red" />      | <Icon name="mdi:checkbox-marked-circle" color="green"/>                      | <Icon name="mdi:checkbox-marked-circle" color="green"/>                      | <Icon name="mdi:checkbox-marked-circle" color="green"/>                      |
-| Program curator | <Icon name="mdi:do-not-disturb-alt" color="red" />      | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) |
-| Team member     | <Icon name="mdi:do-not-disturb-alt" color="red" />      | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) |
-
-
-## How to assign a user a site curator role
-
-This can only be done by a site admin.
-
-1. Get a token by logging into the candig data portal as site admin and copying the API token.
-
-    a. Go to the icon in the top right of the screen and click the cog
-
-    b. Click ‘ *** Get API Token’
-
-    c. Click the token to copy the text
-
-:::caution
-This token should be kept secure, it lasts for 30 mins
-:::
- 
-2. Go to a terminal and save it into a variable called TOKEN
-
-```bash
-TOKEN=ey-pasted-jwt
-```
-
-3. POST to the site-role endpoint in ingest to assign a user the site curator role, e.g. with user1@test.ca
-
-```bash
-curl --request POST \
-  --url $CANDIG_URL'/ingest/site-role/curator/email/user1@test.ca' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer '$TOKEN
-```
-
-4. You can check whether a user has the site curator role by doing the same curl call with a GET request. It should return true.
- Users can be removed as site curators by using the same endpoint with a DELETE action instead of POST/GET.
-

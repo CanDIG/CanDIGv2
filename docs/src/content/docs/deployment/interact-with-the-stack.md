@@ -29,17 +29,17 @@ Logging must be started first, postgres should be started before any relying ser
 
 When all containers are stopped the following command can be used to start all CanDIGv2 containers
 
-```
+```bash
 make start-all
 ```
 
 To start a single container, the following docker command can be used:
 
-```
+```bash
 docker container start candigv2_<name of module>_1
 ```
 e.g. for the ingest container:
-```
+```bash
 docker container start candigv2_candig-ingest_1
 ```
 
@@ -142,37 +142,3 @@ See the [Makefile](../Makefile) for the exact commands that each of these target
 2. Clean up the current containers with `make clean-all`
 
 3. When complete, build all containers again with `make build-all`
-
-
-## Troubleshooting
-
-### Conda env not activated
-
-If you get an error when running a make command, something like:
-
-```bash
-bash: python: command not found
-```
-or an error message about `dotenv` not being found.
-
-Ensure the candig conda environment is activated in your terminal with `conda activate candig`.
-
-### docker volumes not remade
-
-If you get an error where after cleaning an individual service, when composing, it gets stuck at 
-
-```bash
-waiting for x service to start ...
-```
-
-Use CTRL + c to exit the process then try running `make docker-volumes` and then try composing again with `make compose-<name of service>`
-
-### No rule to make target
-
-It is common to move around within the repo and not realise where you are. If you try to run a make command and get the error
-
-```bash
-make: *** No rule to make target `clean-candig-ingest'.  Stop.
-```
-
-Check to make sure you are in the root of the CanDIGv2 repo as the commands only work while in the same directory as the Makefile.
