@@ -64,7 +64,6 @@ export default defineConfig({
             { label: 'Architecture', slug: 'technical/architecture' },
             { label: 'Docker and submods', slug: 'technical/docker-and-submodules' },
             { label: 'Ingest API', slug: 'technical/candig-ingest-api' },
-            { label: 'Query API', slug: 'technical/candig-query-api' },
           ]
         },
       ]
