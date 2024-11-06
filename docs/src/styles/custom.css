@@ -4,3 +4,15 @@
     --sl-text-3xl:1.33rem;
     --sl-text-2xl:1.25rem;
 }
+.sl-container.astro-7nkwcw3z {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .lg\:sl-flex.astro-67yu43on {
+    width: 200em;
+  }
+#redoc-container p, #redoc-container , #redoc-container div {
+    color: white;
+}
