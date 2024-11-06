@@ -6,7 +6,7 @@ description: Modifications needed when deploying to a production server
 import { Code } from '@astrojs/starlight/components';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Apart from the basic steps in the <a href="/CanDIGv2/deployment/local">CanDIGv2 Install Guide</a> to get the candig stack up and running, there are additional settings and security recommendations that need to set up in a production level environment. We provide the following as general advice, but it is important for all CanDIG deployers to also consult with their institutional infrastructure security personnel to ensure that their deployment meets the necessary level of data security.
+Apart from the basic steps in the [Local Deployment Guide](local) to get the CanDIG stack up and running, there are additional settings and security recommendations that need to set up in a production level environment. We provide the following as general advice, but it is important for all CanDIG deployers to also consult with their institutional infrastructure security personnel to ensure that their deployment meets the necessary level of data security.
 
 ## Stable branch
 
@@ -31,7 +31,7 @@ At UHN, the candig.uhnresearch.ca domain is under a proxy, so requests to a spec
 Specifically, the UHN proxy forwards all candig.uhnresearch.ca and candigauth.uhnresearch.ca requests (port 443) to candig1:5080 (tyk) and candig1:8080 (keycloak) respectively, thereby acting as a firewall.  All CanDIGv2 microservices can only be accessed through Tyk.
 
 :::note
-BCGSC initially had an issue with having a double proxy which caused a double URL bug. Switching to a single proxy resolved this issue. Please reach out if you need help solving this.
+BCGSC initially had an issue with having a double proxy which caused a double URL bug. Switching to a single proxy resolved this issue. Please [reach out](https://github.com/CanDIG/CanDIGv2/issues/new/choose) if you need help solving this.
 :::
 
 ### OpenStack security group & nginx - C3G
@@ -54,7 +54,7 @@ The following default settings in the `.env` file should be changed when deployi
 | value in prod environment                                                                | Notes         |
 |------------------------------------------------------------------------------------------|---------------|
 | `CANDIG_DOMAIN=<your.prod.domain>`                                                       | Update to correct prod domain  |
-| `CANDIG_INTERNAL_DOMAIN=${CANDIG_DOMAIN}/internal ip address`                            | Some sites have needed to change this to `127.0.0.1` | 
+| `CANDIG_INTERNAL_DOMAIN=${CANDIG_DOMAIN}` or `internal ip address`                            | Some sites have needed to change this to `127.0.0.1` | 
 | `CANDIG_AUTH_DOMAIN=<your.prod.auth.domain>`                                             | Update to correct prod auth domain  |
 | `CANDIG_SITE_LOCATION=<your-site-location>`                                              | e.g. UHN, BC-Dev The name of your site, should be unique within a federation.  |
 | `CANDIG_DEBUG_MODE=0`                                                                    | Turn off DEBUG mode  |
@@ -119,22 +119,7 @@ If the portal is already running, copy the logo into the Docker container using 
  cp your_image_path/siteLogo.png CanDIGv2/lib/candig-data-portal/candig-data-portal/src/assets/images/users/siteLogo.png
  ```
 
-## Managing user roles in CanDIG
-
-There are currently two site level roles in CanDIG
-* Site Administrator - Can do everything: ingest, delete, read all ingest endpoints
-* Site Curator - Can do anything apart from editing site level roles. Can ingest, delete, read all programs at a site, can add/delete program level roles
-
-There are currently two program level roles
-* Program curator - can ingest/delete/read everything for a particular program
-* Team member - read-only access to a particular program
-
-Per-user authorizations
-* Authorized user - user external to the program team who has been granted temporary authorization to one or more programs
-
-Details about how to assign/remove roles from users is in the [candig-ingest README](https://github.com/CanDIG/candigv2-ingest/blob/develop/README.md)
-
-### Changing the default site admin
+## Change the default site admin
 
 When CanDIG is initially deployed, a `site_admin` user will be created by default. The username and password for this user can be found in the `env.sh` file. It is important to change this default to a real user who should have site administration privileges.
 
@@ -216,9 +201,13 @@ Run `python site_admin_token.py`. You should be prompted for your actual site ad
 
 Keep the site admin user and password secure at all times.
 
+:::tip
+See [User roles](user-roles) for a full description of the available user roles in CanDIG.
+:::
+
 ### Adding a site curator
 
-See [candig-ingest README](https://github.com/CanDIG/candigv2-ingest/blob/develop/README.md)
+See [User Roles](user-roles#how-to-assign-a-user-a-site-curator-role)
 
 ## Connecting Keycloak to institutional LDAP
 
@@ -232,7 +221,7 @@ Federation is a two way process, where you need to register another server with 
 
 Once two nodes are federated, summary data from federated nodes will appear in both nodes' data portals and will be viewable by all users who are able to login.
 
-Access to patient level data through specific program authorization is managed by the node that hosts the data for that program. For example, if a user from UHN needs to be given authorization to a program hosted within the BC node, a site administrator from BC will need to [add a program authorization](https://github.com/CanDIG/candigv2-ingest#6-adding-a-dac-style-program-authorization-for-a-user) for that UHN user to that program within the BC CanDIG node.
+Access to patient level data through specific program authorization is managed by the node that hosts the data for that program. For example, if a user from UHN needs to be given authorization to a program hosted within the BC node, a site administrator, site curator or program curator (with authorization for that program) from BC will need to [add that UHN user as a team member](../guides/ingest/register-programs) to that program within the BC CanDIG node. Alternately, if the UHN user was granted access through a DAC process,  
 
 ## Backing up production data
 
