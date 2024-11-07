@@ -590,8 +590,8 @@ def test_ingest_not_admin_htsget():
             print("\n".join(results["errors"]))
         assert len(results["errors"]) == 0
         for id in results["results"]:
-            print(id)
-            print(f"\n{results["results"][id]}\n")
+            #print(id)
+            #print(f"\n{results["results"][id]}\n")
             assert "genomic" in results["results"][id]
             assert "sample" in results["results"][id]
     # clean up before the next test
