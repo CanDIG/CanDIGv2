@@ -412,6 +412,7 @@ def clean_up_program_htsget(program_id):
         f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{program_id}",
         headers=headers
     )
+    print(delete_response.text)
     assert delete_response.status_code == 200
 
 
@@ -583,7 +584,7 @@ def test_ingest_not_admin_htsget():
     assert response.status_code == 200
     for program in response.json():
         results = response.json()[program]
-        
+
         if len(results["errors"]) > 0:
             print("Expected to get no errors when ingesting into htsget but the following errors were found:")
             print("\n".join(results["errors"]))
