@@ -390,8 +390,6 @@ def clean_up_program(test_id):
                                       headers=headers)
     print(f"program delete response status code: {delete_response.status_code}")
     assert (delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND)
-    response = delete_program_authorization(test_id)
-    print(response)
 
 
 def clean_up_program_htsget(program_id):
@@ -591,8 +589,8 @@ def test_ingest_not_admin_htsget():
             print("\n".join(results["errors"]))
         assert len(results["errors"]) == 0
         for id in results["results"]:
-            #print(id)
-            #print(f"\n{results["results"][id]}\n")
+            print(id)
+            print(f"\n{results["results"][id]}\n")
             assert "genomic" in results["results"][id]
             assert "sample" in results["results"][id]
     # clean up before the next test
