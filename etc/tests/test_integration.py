@@ -181,6 +181,7 @@ def test_add_remove_program_authorization(user, dataset):
 
     # remove the program
     response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
+    print(response.text)
     assert response.status_code == 200
 
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
@@ -368,38 +369,11 @@ def clean_up_program(test_id):
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    # delete program from katsu
-    delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/katsu/v3/ingest/program/{test_id}/",
-        headers=headers,
-    )
-    print(f"katsu delete response status code: {delete_response.status_code}")
-    assert (
-        delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
-    ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
-    f" Response content: {delete_response.content}"
-
-    # delete program from htsget
-    delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{test_id}",
-        headers=headers
-    )
-    print(f"htsget delete response status code: {delete_response.status_code}")
-    assert delete_response.status_code == 200
-
-    site_admin_token = get_site_admin_token()
-    headers = {
-        "Authorization": f"Bearer {site_admin_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
-    # delete program authorization from opa
+    # delete program
     delete_response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_id}",
                                       headers=headers)
-    print(f"program authorization delete response status code: {delete_response.status_code}")
+    print(f"program delete response status code: {delete_response.status_code}")
     assert (delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND)
-    response = delete_program_authorization(test_id)
-    print(response)
 
 
 def clean_up_program_htsget(program_id):
@@ -590,8 +564,8 @@ def test_ingest_not_admin_htsget():
             print("\n".join(results["errors"]))
         assert len(results["errors"]) == 0
         for id in results["results"]:
-            #print(id)
-            #print(f"\n{results["results"][id]}\n")
+            print(id)
+            print(f"\n{results["results"][id]}\n")
             assert "genomic" in results["results"][id]
             assert "sample" in results["results"][id]
     # clean up before the next test
