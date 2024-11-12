@@ -5,8 +5,6 @@ import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi'
 
 import icon from 'astro-icon';
 
-import tailwind from '@astrojs/tailwind';
-
 // https://astro.build/config
 export default defineConfig({
     site: 'https://candig.github.io',
@@ -17,11 +15,6 @@ export default defineConfig({
         }
     }), starlight({
     title: 'Docs',
-    components: {
-        Header: "./src/components/Header.astro",
-        ThemeSelect: "./src/components/ThemeSelect.astro",
-        Select: "./src/components/Select.astro",
-    },
     customCss: [
         './src/styles/custom.css'
     ],
@@ -41,7 +34,7 @@ export default defineConfig({
             {
                 base: 'technical/ingest',
                 label: 'ingest api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-ingest/refs/heads/mshadbolt/improve-openapi-schema/ingest_openapi.yaml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-ingest/refs/heads/develop/ingest_openapi.yaml',
                 collapsed: true
             },
             {
@@ -120,5 +113,5 @@ export default defineConfig({
             ]
         },
     ],
-		}), tailwind()]
+		})]
 });
