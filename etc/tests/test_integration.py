@@ -181,6 +181,7 @@ def test_add_remove_program_authorization(user, dataset):
 
     # remove the program
     response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
+    print(response.text)
     assert response.status_code == 200
 
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
@@ -368,38 +369,11 @@ def clean_up_program(test_id):
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    # delete program from katsu
-    delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/katsu/v3/ingest/program/{test_id}/",
-        headers=headers,
-    )
-    print(f"katsu delete response status code: {delete_response.status_code}")
-    assert (
-        delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
-    ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
-    f" Response content: {delete_response.content}"
-
-    # delete program from htsget
-    delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{test_id}",
-        headers=headers
-    )
-    print(f"htsget delete response status code: {delete_response.status_code}")
-    assert delete_response.status_code == 200
-
-    site_admin_token = get_site_admin_token()
-    headers = {
-        "Authorization": f"Bearer {site_admin_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
-    # delete program authorization from opa
+    # delete program
     delete_response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_id}",
                                       headers=headers)
-    print(f"program authorization delete response status code: {delete_response.status_code}")
+    print(f"program delete response status code: {delete_response.status_code}")
     assert (delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND)
-    response = delete_program_authorization(test_id)
-    print(response)
 
 
 def clean_up_program_htsget(program_id):
@@ -412,6 +386,7 @@ def clean_up_program_htsget(program_id):
         f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{program_id}",
         headers=headers
     )
+    print(delete_response.text)
     assert delete_response.status_code == 200
 
 
@@ -421,6 +396,7 @@ def test_ingest_not_admin_katsu():
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
     )
     programs = ['SYNTH_01', 'SYNTH_02', 'SYNTH_03', 'SYNTH_04']
+    programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
         for program in programs:
@@ -428,7 +404,7 @@ def test_ingest_not_admin_katsu():
                 print(f"cleaning up {program}")
                 clean_up_program(program)
 
-    with open("lib/candig-ingest/candigv2-ingest/tests/SYNTH_01.json", 'r') as f:
+    with open(f"lib/candig-ingest/candigv2-ingest/tests/{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01.json", 'r') as f:
         test_data = json.load(f)
 
     token = get_token(
@@ -445,7 +421,7 @@ def test_ingest_not_admin_katsu():
     assert response.status_code == 400
 
     # add program authorization
-    add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
     token = get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
         password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
@@ -466,13 +442,13 @@ def test_ingest_not_admin_katsu():
     while response.status_code == 200 and "status" in response.json():
         time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-    assert len(response.json()["SYNTH_01"]["errors"]) == 0
-    assert len(response.json()["SYNTH_01"]["results"]) == 13
+    assert len(response.json()[f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"]["errors"]) == 0
+    assert len(response.json()[f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"]["results"]) == 13
     katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
         print(f"Currently ingested katsu programs: {katsu_programs}")
-        assert 'SYNTH_01' in katsu_programs
+        assert f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01' in katsu_programs
     else:
         print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
 
@@ -485,6 +461,7 @@ def test_ingest_admin_katsu():
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
     )
     programs = ['SYNTH_01', 'SYNTH_02', 'SYNTH_03', 'SYNTH_04']
+    programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
         for program in programs:
@@ -492,50 +469,48 @@ def test_ingest_admin_katsu():
                 print(f"cleaning up {program}")
                 clean_up_program(program)
 
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    with open(f"lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
+        test_data = json.load(f)
+
+    # no program auth: should fail
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    print(response.text)
+    assert response.status_code != 200
+
     for program in programs:
-        token = get_site_admin_token()
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json; charset=utf-8",
-        }
-
-        with open(f"lib/candig-ingest/candigv2-ingest/tests/{program}.json", 'r') as f:
-            test_data = json.load(f)
-
-        # no program auth: should fail
-        response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
-        print(response.text)
-        assert response.status_code != 200
-
         add_program_authorization(program, [], team_members=[])
 
-        print(f"Sending {program} clinical data to katsu...")
-        response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
-        print(f"Ingest response code: {response.status_code}")
-        #### This section runs only if ingest responds in time while we improve ingest so it doesn't time out ####
-        try:
-            queue_id = response.json()["queue_id"]
-        except Exception as e:
-            print(f"Ingest was not successful: {type(e)} {str(e)}")
-            print(response.json())
-            assert False
-        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-        while response.status_code == 200 and "status" in response.json():
-            time.sleep(2)
-            response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    print(f"Sending {programs} clinical data to katsu...")
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    print(f"Ingest response code: {response.status_code}")
+    try:
+        queue_id = response.json()["queue_id"]
+    except KeyError as e:
+        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
         print(response.json())
-        assert len(response.json()[program]["errors"]) == 0
-        assert len(response.json()[program]["results"]) == 13
-        katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
-        if katsu_response.status_code == 200:
-            katsu_programs = [x['program_id'] for x in katsu_response.json()]
-            print(f"Currently ingested katsu programs: {katsu_programs}")
-            assert program in katsu_programs
-        else:
-            print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    while response.status_code == 200 and "status" in response.json():
+        time.sleep(2)
+        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    print(response.json())
+    assert len(response.json()[program]["errors"]) == 0
+    assert len(response.json()[program]["results"]) == 13
+    katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
+    if katsu_response.status_code == 200:
+        katsu_programs = [x['program_id'] for x in katsu_response.json()]
+        print(f"Currently ingested katsu programs: {katsu_programs}")
+        assert program in katsu_programs
+    else:
+        print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
     # Reinstate expected program authorizations
-    add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
-    add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
 
 
 ## Htsget tests:
@@ -556,8 +531,8 @@ def test_ingest_not_admin_htsget():
     # when the user has no admin access, they should not be allowed
     assert response.status_code == 400
 
-    add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
-    add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
     token = get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
         password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
@@ -583,6 +558,7 @@ def test_ingest_not_admin_htsget():
     assert response.status_code == 200
     for program in response.json():
         results = response.json()[program]
+
         if len(results["errors"]) > 0:
             print("Expected to get no errors when ingesting into htsget but the following errors were found:")
             print("\n".join(results["errors"]))
@@ -593,11 +569,12 @@ def test_ingest_not_admin_htsget():
             assert "genomic" in results["results"][id]
             assert "sample" in results["results"][id]
     # clean up before the next test
-    programs=["SYNTH_01", "SYNTH_02"]
+    programs=["SYNTH_01", "SYNTH_02", "SYNTH_03", "SYNTH_04"]
+    programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
     for program in programs:
         clean_up_program_htsget(program)
-    add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
-    add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
 
 
 
@@ -642,25 +619,25 @@ def user_access():
         (
             "CANDIG_NOT_ADMIN_USER",
             "CANDIG_NOT_ADMIN_PASSWORD",
-            "NA18537-vcf",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf",
             False,
         ),  # user1 cannot access NA18537 as part of SYNTH_02
         (
             "CANDIG_NOT_ADMIN_USER",
             "CANDIG_NOT_ADMIN_PASSWORD",
-            "test",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-test",
             True,
         ),  # user1 can access test as part of SYNTH_01
         (
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
-            "NA02102-bam",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA02102-bam",
             False
         ),  # user2 cannot access NA02102-bam
         (
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
-            "multisample_1",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_1",
             True
         )  # user2 can access multisample_1
     ]
@@ -691,16 +668,16 @@ def test_sample_metadata():
         "Authorization": f"Bearer {get_token(username=username, password=password)}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_NULL_0001", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_NULL_0001", headers=headers)
     assert "genomes" in response.json()
-    assert "multisample_2" in response.json()["genomes"]
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_0072", headers=headers)
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_2" in response.json()["genomes"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0072", headers=headers)
     assert "genomes" in response.json()
-    assert "HG00100-cram" in response.json()["genomes"]
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_ALL_0002", headers=headers)
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-HG00100-cram" in response.json()["genomes"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_ALL_0002", headers=headers)
     assert "genomes" in response.json()
     pprint.pprint(response.json())
-    assert "HG02102-all" in response.json()["genomes"]
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-HG02102-all" in response.json()["genomes"]
 
 
 def test_index_success():
@@ -710,12 +687,12 @@ def test_index_success():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/NA18537-vcf", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf", headers=headers)
     tries = 0
     print(response.json())
     while response.status_code != 200 or "indexed" not in response.json() or response.json()['indexed'] != 1:
         time.sleep(2)
-        response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/NA18537-vcf", headers=headers)
+        response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf", headers=headers)
         print(response.json())
         tries = tries + 1
         if tries > 120:
@@ -729,7 +706,7 @@ def test_index_success():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/test", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-test", headers=headers)
     assert "indexed" in response.json()
     print(response.json())
     assert response.json()['indexed'] == 1
@@ -742,7 +719,7 @@ def test_index_success():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_1", headers=headers)
     assert "indexed" in response.json()
     print(response.json())
     assert response.json()['indexed'] == 1
@@ -755,14 +732,14 @@ def beacon_access():
             "CANDIG_NOT_ADMIN_USER",
             "CANDIG_NOT_ADMIN_PASSWORD",
             "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
-            ["SYNTH_01"],
-            ["SYNTH_02"],
+            [f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"],
+            [f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02"],
         ),
         (   # user2 can access NA18537-vcf, multisample_1, HG02102
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
             "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
-            ["SYNTH_02"],
+            [f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02"],
             [],
         )
     ]
@@ -783,6 +760,8 @@ def test_beacon(user, password, search, can_access, cannot_access):
         params=params,
     )
     pprint.pprint(response.json())
+    print(can_access)
+    print(cannot_access)
     for c in can_access:
         assert c in str(response.json())
     for c in cannot_access:
@@ -793,14 +772,14 @@ def test_beacon(user, password, search, can_access, cannot_access):
 def verify_samples():
     return [
         (
-            "multisample_1",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_1",
             "multisample_1.vcf.gz",
             "variant",
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD"
         ),
         (
-            "NA02102-bam",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA02102-bam",
             "NA02102.bam",
             "read",
             "CANDIG_NOT_ADMIN_USER",
@@ -858,7 +837,7 @@ def test_cohort_status():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTH_02/status", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02/status", headers=headers)
     assert "index_complete" in response.json()
     assert len(response.json()['index_complete']) > 0
 
@@ -1020,7 +999,7 @@ def test_query_donors_all():
             'Skin': 4
         },
         'patients_per_cohort': {
-            'SYNTH_02': 20
+            f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02': 20
         },
         'treatment_type_count': {
             'Bone marrow transplant': 7,
@@ -1076,7 +1055,7 @@ def test_query_donor_search():
             'Skin': 4
         },
         'patients_per_cohort': {
-            'SYNTH_02': 18
+            f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02': 18
         },
         'treatment_type_count': {
             'Bone marrow transplant': 7,
@@ -1120,8 +1099,8 @@ def test_query_genomic():
             for donor in response.json()["results"]:
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
     assert response and len(response.json()["results"]) == 1
-    assert response.json()["results"][0]['program_id'] == "SYNTH_02"
-    assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_0021"
+    assert response.json()["results"][0]['program_id'] == f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02"
+    assert response.json()["results"][0]['submitter_donor_id'] == f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-DONOR_0021"
 
     token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
                       password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
@@ -1145,8 +1124,8 @@ def test_query_genomic():
             for donor in response.json()["results"]:
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
     assert response and len(response.json()["results"]) == 1
-    assert response.json()["results"][0]['program_id'] == "SYNTH_01"
-    assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_NULL_0001"
+    assert response.json()["results"][0]['program_id'] == f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"
+    assert response.json()["results"][0]['submitter_donor_id'] == f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-DONOR_NULL_0001"
 
     token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
                       password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
@@ -1224,10 +1203,10 @@ def test_query_discovery():
 
 
 def test_clean_up():
-    clean_up_program("SYNTH_01")
-    clean_up_program("SYNTH_02")
-    clean_up_program("SYNTH_03")
-    clean_up_program("SYNTH_04")
+    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01")
+    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02")
+    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_03")
+    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_04")
 
     # clean up test_htsget
     old_val = os.environ.get("TESTENV_URL")
