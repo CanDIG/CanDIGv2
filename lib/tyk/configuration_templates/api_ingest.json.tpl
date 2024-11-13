@@ -16,7 +16,7 @@
 
     "proxy": {
         "target_url": "${TYK_INGEST_API_TARGET}",
-        "strip_listen_path": true,
+        "strip_listen_path": false,
         "disable_strip_slash": false,
         "listen_path": "/${TYK_INGEST_API_LISTEN_PATH}",
         "transport": {
