@@ -67,6 +67,7 @@ def test_tyk():
         f"federation/v1/service-info",
         f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/service/service-info",
         f"{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/service-info",
+        f"{ENV['CANDIG_ENV']['TYK_INGEST_API_LISTEN_PATH']}/service-info",
     ]
     responses = []
     for endpoint in endpoints:
