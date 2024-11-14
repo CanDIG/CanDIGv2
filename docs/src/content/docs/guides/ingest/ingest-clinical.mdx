@@ -1,0 +1,93 @@
+---
+title: Ingest clinical data
+description: A step by step guide to preparing clinical data for ingest into CanDIG
+tableOfContents:
+  minHeadingLevel: 1
+  maxHeadingLevel: 2
+---
+
+If you have gotten this far, well done! Most of the hard work is done (hopefully). The output from the CSVConvert.py called something like $INPUT_DIR_map.json is the main file we need in order to ingest the clinical data into ingest.
+
+Assuming that you have a configured ingest instance up and running and have access to a user with site curator or program curator credentials, you should be able to run through the instructions below.
+
+It is preferable to attempt ingest using the API call. The API is described in ingest_openapi.md or can be explored using a swagger ui.
+
+## Ingesting clinical data into CanDIG
+
+Before you can use the ingest endpoint, you will need an authorized bearer token. Users with site administration, site curator, or program curator for the program/s being ingested are able to ingest those programs. To get a bearer token:
+
+1. Get a token by logging into the candig data portal as site admin and copying the API token.
+
+    a. Go to the icon in the top right of the screen and click the cog
+
+    b. Click ‘ *** Get API Token’
+
+     c. Click the token to copy the text
+
+2. Open a terminal and save it into a variable called TOKEN
+
+```bash
+TOKEN=ey-pasted-jwt
+```
+
+:::danger
+This token should be kept secure, it lasts for 30 mins
+:::
+
+3. User the clinical ingest endpoint to ingest data.
+
+An example call to the clinical endpoint would look something like (note you will need to replace $CANDIG_URL with the root url of your instance):
+
+```bash
+curl -X 'POST' \
+  $CANDIG_URL'/ingest/clinical' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '@/absolute/path/to/dir_name_map.json>
+```
+
+If ingest worked correctly, you should get a response from the API giving you your queue_id to check the status of your ingest:
+
+```bash
+{"queue_id": "73c6888a-81d1-11ef-937c-0242ac12000f"}
+```
+
+Since ingest is an asynchronous process, it can take some time to complete depending on the size of your clinical data. To check on the status of your clinical ingest, use the status endpoint:
+
+```bash
+curl -X 'GET' \
+ $CANDIG_URL'/ingest/status/<your_queue_id>' \
+ -H 'accept: application/json' \
+ -H 'Content-Type: application/json' \
+ -H 'Authorization: Bearer '$TOKEN
+```
+
+While the data is still being ingested, the status will read `"status": "still in queue"`. When clinical ingest is complete, a successful ingest will have a summary of what was ingested, you should check the numbers are as expected. If any errors were found that would prevent ingest, they will be listed in the errors key in the response.
+
+Example response from the status endpoint when clinical ingest for a program is complete:
+
+```bash
+{
+  "SYNTH_01": {
+    "errors": [],
+    "results": [
+      "Of 1 programs, 1 were created",
+      "Of 24 donors, 24 were created",
+      "Of 24 primary_diagnoses, 24 were created",
+      "Of 24 specimens, 24 were created",
+      "Of 72 sample_registrations, 72 were created",
+      "Of 48 treatments, 48 were created",
+      "Of 96 systemic_therapies, 96 were created",
+      "Of 24 radiations, 24 were created",
+      "Of 24 surgeries, 24 were created",
+      "Of 14 biomarkers, 14 were created",
+      "Of 14 followups, 14 were created",
+      "Of 10 comorbidities, 10 were created",
+      "Of 10 exposures, 10 were created"
+    ]
+  }
+}
+```
+
+Once you have successfully ingested all your clinical data, you can proceed with ingesting your genomic files and linking them the the ingested Sample Registration objects.

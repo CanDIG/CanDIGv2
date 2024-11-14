@@ -1,0 +1,62 @@
+---
+title: Ingest step-by-step
+description: A step by step guide to ingesting data into CanDIG
+template: splash
+tableOfContents:
+  minHeadingLevel: 1
+  maxHeadingLevel: 2
+---
+
+import { Icon } from 'astro-icon/components';
+import { Steps } from '@astrojs/starlight/components';
+
+import { LinkCard, Card, CardGrid } from '@astrojs/starlight/components';
+
+### Intended Audience
+
+Anyone intending to upload data to a CanDIG instance.
+
+### Prerequisites
+
+- Decent working knowledge of python, JSON, docker, data transformation
+- [Optional] Locally running CanDIG stack for testing
+- Production CanDIG stack with authorization as site curator or program curator of the program(s) you are planning to ingest
+- Clinical data exported from your source database into a tabular format (CSVs or multi-tabbed xlsx)
+- Genomic data files in s3, local or NFS mounted drive available to htsget_app docker container
+- Linkage information between the sample registrations in the clinical data and the genomic data files
+
+### What stage of ingest are you up to?
+
+<CardGrid stagger>
+	<LinkCard 
+		title="Step 1. Prepare clinical data" 
+		href="prepare-clinical"
+		description="Prepare your clinical data for ingest"
+	/>
+	<LinkCard 
+		title="Step 2. Register programs"
+		href="register-programs"
+		description="Register the programs you intend to ingest."
+	/>
+	<LinkCard 
+		title="Step 3. Ingest clinical data"
+		href="ingest-clinical"
+		description="Ingest your clinical data."
+	/>
+	<LinkCard 
+		title="Step 4. Prepare Genomic data"
+		href="prepare-genomic"
+		description="Prepare you genomic data for ingest."
+	/>
+	<LinkCard 
+		title="Step 5. Link Genomic data"
+		href="ingest-genomic"
+		description="Link your clinical data to your genomic data."
+	/>
+  <LinkCard 
+		title="I need help"
+		href="ingest-help"
+		description="Get help with all aspects of ingest."
+	/>
+
+</CardGrid>

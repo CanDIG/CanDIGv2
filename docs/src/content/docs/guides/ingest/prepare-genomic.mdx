@@ -1,0 +1,109 @@
+---
+title: Prepare genomic data
+description: How to prepare genomic data for ingest
+tableOfContents:
+  minHeadingLevel: 1
+  maxHeadingLevel: 2
+---
+
+Genomic data ingest consists of storing file metadata and pointers to genomic files within the htsget_app micro-service. Your CanDIG instance needs to be connected to the place where your genomic data is stored - CanDIG does not duplicate these files into internal separate storage.
+
+## A. Configure connection to Genomic Data source/s
+
+:::tip
+All genomic data files need to be able to be ‘seen’  by the running `htsget_app` server in order for genomic file ingest to proceed. If files are in s3 compatible storage or locally available, you might need local systems help before continuing
+:::
+
+Systems may need information in the drop-downs below:
+
+<details>
+<summary>Configuring s3 authorisation</summary>
+
+#### Pre-requisites:
+
+- All files in s3-compatible storage bucket
+- Access and secret keys for the s3 storage bucket - it is recommended this has **read access only**
+- Be a site admin user and be able to get an authorization token
+
+#### Configuring credentials
+
+Add s3 credentials to CanDIG POSTing to the `ingest/s3-credential` endpoint with a JSON body following the template below:
+
+```json
+{
+  "endpoint": "<s3 compatible storage url>", # url of the s3 compatible storage
+  "bucket": "the-name-of-the-bucket", # name of the bucket within that storage
+  "access_key": "the-read-only-access-key",
+  "secret_key": "the-S3-secret-key"
+}
+```
+
+Template curl command:
+
+```bash
+curl --request POST \
+  --url $CANDIG_URL'/ingest/s3-credential' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '{"endpoint": "<s3 compatible storage url>", "bucket": "the-name-of-the-bucket", "access_key": "the-read-only-access-key", "secret_key": "the-S3-secret-key"}'
+```
+
+The Bearer `$TOKEN` must be obtained by a site admin user.
+
+Once this configuration is completed, you can refer to files in the configured s3 bucket by their s3 url in your genomic json file.
+
+</details>
+
+<details>
+<summary>Configuring an NFS mount</summary>
+
+To configure an NFS mount you will need to:
+
+1. Get permissions and assistance from system administrators to mount the volumes to the server running the CanDIG stack
+2. Add the relevant volumes to the [htsget_app docker-compose file](https://github.com/CanDIG/CanDIGv2/blob/develop/lib/htsget/docker-compose.yml)
+3. Ensure the relevant user inside the docker container has the right permissions to access the mounts and databases
+
+The volumes section in the docker compose file should look something like the following which will give read only access to each listed folder:
+
+```yaml
+volumes :
+  - htsget-data:/data
+  - /source/folder/path/dir1:/data/dir1:ro
+  - /source/folder/path/dir2:/data/dir2:ro
+  - /source/folder/path/dir3:/data/dir3:ro
+```
+
+After making this change you will need to recompose the htsget container.
+
+To test that htsget_app instance can see the mount as local files run:
+
+```bash
+docker exec -it candigv2_htsget_1 ls /data/dir1
+```
+
+If volumes are mounted this way, and files are inside the provided directory, you will need to specify the access methods for each file in the [Genomic JSON file](#b-create-genomic-json-file)
+
+The paths will be something like (note the three slashes `///`):
+
+```json
+file:///data/dir1/my_bam_file.bam
+```
+</details>
+
+Once you have a confirmed the location for all genomic files, you can move on to creating the linking file where these file paths will be used to populate the `access_method`s in the genomic JSON file.
+
+## B. Create Genomic JSON file
+
+To make the links between genomic files and the Sample registration objects they derived from as well as to show `htsget_app` where the files are located, a JSON file must be created that specifies these relationships. The [ingest README](https://github.com/CanDIG/candigv2-ingest#iii-prepare-the-genomic-json-file) provides instructions and examples to demonstrate how the file should be structured.
+
+For each genomic data file that is referenced, there must also be the appropriate index file for the file type specified. The current files supported and expected values in the genomic linking JSON file are:
+
+| filetype                                                                                               | expected file extension | expected index file | expected `data_type` |
+|--------------------------------------------------------------------------------------------------------|-------------------------|---------------------|----------------------|
+| [Variant Call Format](https://samtools.github.io/hts-specs/VCFv4.4.pdf)  (VCF)                         | `.vcf` `.vcf.gz`        | `.tbi` `.tbi.gz`    | `variant`            |
+| [Binary Alignment Map](https://samtools.github.io/hts-specs/SAMv1.pdf) (BAM)                           | `.bam`                  | `.bai`              | `read`               |
+| [Compressed Reference-oriented Alignment Map](https://samtools.github.io/hts-specs/CRAMv3.pdf)  (CRAM) | `.cram`                 | `.crai`             | `read`               |
+
+ It is recommended to write a simple script to automate the creation of the Genomic JSON file. JSON validation of this file will occur before genomic data ingest proceeds. We are also working on tools to
+help create this file, so if you need help, [reach out to the CanDIG team](https://github.com/CanDIG/candigv2-ingest/issues/new/choose).

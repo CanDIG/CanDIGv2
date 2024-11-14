@@ -18,7 +18,7 @@ export default defineConfig({
             include: {
             mdi: ["*"]
         }
-    }), 
+    }),
     starlight({
         title: 'Docs',
         customCss: [
@@ -100,7 +100,7 @@ export default defineConfig({
                 { label: 'Technical', slug: 'technical'}
             ]
         },
-        {   
+        {
             collapsed: true,
             label: 'Deployment',
             items: [
@@ -113,7 +113,7 @@ export default defineConfig({
                         { label: 'Interact using Make', slug: 'deployment/interact-with-the-stack'},
                         { label: 'Logging', slug: 'deployment/logging'},
                         { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'},
-                        { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'}, 
+                        { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'},
                         { label: 'Update CanDIG', slug: 'deployment/update-candig'}
                     ]
                 }
@@ -123,12 +123,12 @@ export default defineConfig({
             label: 'Submission',
             items: [
                 // Each item here is one entry in the navigation menu.
-                { 
-                    label: 'Data submission steps', 
-                    items: 
+                {
+                    label: 'Data submission steps',
+                    items:
                     [
-                        'ingest/prepare-clinical', 
-                        'ingest/register-programs', 
+                        'ingest/prepare-clinical',
+                        'ingest/register-programs',
                         'ingest/ingest-clinical',
                         'ingest/prepare-genomic',
                         'ingest/ingest-genomic',
@@ -151,23 +151,23 @@ export default defineConfig({
                     ]
                 }
             ]
-            
+
         },
         {
             label: 'Technical Docs',
             collapsed: true,
-            items: [ 
+            items: [
                 {
                     label: 'Tech docs',
-                    items: 
+                    items:
                     [
                         { label: 'Architecture', slug: 'technical/architecture' },
                         { label: 'Docker and submods', slug: 'technical/docker-and-submodules' },
                         ...openAPISidebarGroups,
                     ]
                 }
-                
-                
+
+
             ]
         },
     ],

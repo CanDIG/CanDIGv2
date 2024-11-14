@@ -1,0 +1,75 @@
+---
+title: Ingest genomic data
+description: How to link clinical and genomic data through genomic ingest
+tableOfContents: false
+---
+
+It is preferred to use the API to post the genomic JSON as a body to the `/ingest/genomic` endpoint.
+
+:::caution
+Genomic data cannot be ingested until the clinical data that the genomic files link to is complete. Please ensure clinical ingest is complete before attempting genomic ingest.
+:::
+
+An example post request would look something like the below which would ingest the pointers to a gzipped VCF file along with its associated tabix index file which are located within s3 storage and link it with the clinical Sample Registration sample_registration_id_1 :
+
+```bash
+curl -X 'POST' \
+ $CANDIG_URL'/ingest/genomic' \
+ -H 'accept: application/json' \
+ -H 'Content-Type: application/json' \
+ -H 'Authorization: Bearer '$TOKEN
+ -d '[ \
+ { \
+    "program_id": "string", \
+    "genomic_file_id": "HG00096", \
+    "metadata": { \
+      "sequence_type": "wgs", \
+      "data_type": "variant", \
+      "reference": "hg38" \
+    }, \
+    "main": { \
+      "name": "string", \
+      "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/HG00096.vcf.gz" \
+    }, \
+    "index": { \
+      "name": "string", \
+      "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/HG00096.tbi" \
+    }, \
+    "samples": [ \
+    { \
+      "submitter_sample_id": "sample_registration_id_1", \
+      "genomic_file_sample_id": "HG00096" \
+    } \
+    ]}]' \
+```
+
+Similar to clinical ingest, you could also specify the path to a file that contains the genomic file information, e.g.
+
+```bash
+curl -X 'POST' \
+  $CANDIG_URL'/ingest/genomic' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '@/absolute/path/to/genomic.json>
+```
+
+The post request should return with a queue id that can be used to check the status of genomic ingest.
+
+```bash
+"queue_id": "bd36048e-8661-11ef-99d4-0242ac12000f",
+```
+
+You can check the status of genomic ingest by using the ingest status endpoint:
+
+```bash
+curl -X 'GET' \
+  $CANDIG_URL'/ingest/status/<your_queue_id>' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN
+```
+
+While ingest is processing, you will see a message `"status": "still in queue"`.
+
+If you get a message such as `"no such sample": "sample SAMPLE_0600 does not exist in clinical data'` this means the sample the file is linking to cannot be found in the currently ingested clinical data. Please ensure you have ingested all samples being referred to in the genomic json file before attempting genomic ingest.

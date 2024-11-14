@@ -1,0 +1,185 @@
+---
+title: Troubleshooting
+description: Troubleshooting ingest tips and how to get help
+tableOfContents:
+  minHeadingLevel: 1
+  maxHeadingLevel: 2
+---
+
+## What if Clinical data Validation is failing?
+
+If validation fails, it is important to fix the issues. The validation should give an error message that gives you enough information to fix the problem. If you are still struggling then [reach out the CanDIG team](https://github.com/CanDIG/candigv2-ingest/issues/new/choose) and provide the error message so that we can try to help you. If all else fails, it is possible to ingest without the failing values and reingest the data with valid values at a later point.
+
+## What if I have missing values in a lot of required fields?
+
+Ingest can proceed with missing fields as long as there are identifiers that provide links between the different objects in the data model. After ingest, you will be provided errors, warnings and completeness statistics that tell you where data can be improved in the future.
+
+## What if I don’t have a schema/field from the MoHCCN data model in my clinical data?
+
+If the object is required for linking between objects that do exist in your model, or the missing schema is the Sample Registration you will still need to create these objects. The minimum amount of information you would need to provide is a `submitter_$SCHEMA_id`, which can be any text value as long as each id is unique within the program you are ingesting. Objects that are ‘leaves’ in the graph structure, that is, there is only one inward relationship to that object, can be left out of ingest, i.e. Comorbidity, Biomarker, Exposure, Follow up. 
+
+Treatment objects may be uploaded without a linked treatment specific object that describes the specific treatment (i.e. Systemic therapy, Radiation, Surgery), but the model does require these based on the field Treatment.treatment_type, so the Donor would be considered incomplete.
+
+## What if I want to ingest genomic data without clinical data?
+
+Genomic ingest will fail if you attempt to ingest genomic data that links to Sample registrations that do not exist within the ingested clinical data. All genomic data in the system must be linked to a Donor through the `submitter_sample_id`. The genomic data stores sample ids linked to genomic data and the clinical data service stores sample ids linked to Donors. So, prior to ingesting genomic data, you must first ingest enough clinical data to allow for creation of a Sample object. From the MOHCCN data model, a Sample must be linked to a Program, Donor and Specimen, and Specimen must be linked to a Primary Diagnosis, Donor, and Program. The following clinical fields are required prior to genomic data ingest:
+
+- submitter_sample_id
+- submitter_specimen_id
+- submitter_primary_diagnosis_id
+- submitter_donor_id
+- program_id
+
+## What if I want to link my objects differently?
+
+ Currently it isn’t possible to link the objects in the data model differently so you will need to transform your data into a compatible structure to match the CanDIG MoHCCN data model.
+
+## Errors when ingesting data
+
+ If you receive a 504 error or Gateway timeout something like this:
+
+ ```bash
+{'errors': ["sample_registrations: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in time.\n</body></html>\n\n", "treatments: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in time.\n</body></html>\n\n", "systemic_therapies: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in time.\n</body></html>\n\n"], 'results': ['Of 1 programs, 1 were created', 'Of 284 donors, 284 were created', 'Of 237 primary_diagnoses, 237 were created', 'Of 524
+specimens, 524 were created', 'Of 169 systemic_therapies, 169 were created', 'Of 134 radiations, 134 were created']} 201
+{
+"YOUR_PROGRAM_ID": {
+    "errors": [
+        "sample_registrations: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in time.\n</body></html>\n\n", "treatments: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in time.\n</body></html>\n\n", "systemic_therapies: \nREQUEST STATUS CODE: 504 \nRETURN MESSAGE: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in time.\n</body></html>\n\n"
+]}}
+```
+
+or 
+
+```bash
+{
+    "error": "key not authorised"
+}
+```
+
+It is likely that the token you are trying to use has expired. Try getting a fresh token and trying again.
+
+## File not found errors when ingesting genomic files
+
+If you receive a file not found error something like this:
+
+```bash
+"<Your_genomic_file_ID": {
+        "errors": "{\n \"message\": \"No file exists at /the/path/you/provided/as/access/method/genomic_file_name.bam.bai on the server.\"\n}\n"
+    },
+```
+
+This means that the `hts_get_server` cannot find the file at the path you provided. Double check that:
+
+- If using storage local to the `hts_get_server`, your access method has three slashes at the start, ie. `file:///`, the third one is important to indicate you are specifying the full path to the file
+
+- If using storage local to the `hts_get_server`, ensure the specified path is from the root of the running container
+
+- Ensure the user that is running the `hts_get_server` has the right permissions to see the file. You could test this by copying the path provided in the error message and running
+
+```bash
+docker exec ls -l /the/path/you/provided/as/access/method/
+```
+
+If you are ingesting VCF files, they take some time to be indexed. This happens after ingest is complete. Searching by variants in the data portal is not possible until indexing is complete. If you would like to check the indexing status of a particular file, use the htsget endpoint
+
+
+## Key not authorised error when ingesting genomic files
+
+If you receive an error when using the `/ingest/genomic` endpoint something like this:
+
+```bash
+"genomic_file_id": {
+"errors": "{\n \"error\": \"Key not authorised\"\n}"
+}
+```
+
+This means that the token used by ingest to submit to hts-get has expired. At the moment this happens after 30 minutes. Get a fresh token and try again.
+
+### What if I need to delete or edit data that I already ingested into the system?
+
+Currently, there is no way to edit data that is already ingested into CanDIG. To change any data, the data must be deleted and re-ingested. Follow the steps below in order to delete data in CanDIG.
+
+### A. Deleting Clinical Data
+
+First, you’ll need need to get a authentication token to delete the data from calling this command:
+
+1. Get a token by logging into the candig data portal as site admin and copying the API token.
+
+   a. Go to the icon in the top right of the screen and click the cog
+
+   b. Click ‘ *** Get API Token’
+
+   c. Click the token to copy the text
+
+2. Go to a terminal and save it into a variable called TOKEN
+
+```bash
+TOKEN=ey-pasted-jwt
+```
+
+:::danger
+This token should be kept secure, it lasts for 30 mins
+:::
+
+   Once you get the token, call this command:
+
+```bash
+curl --request DELETE \
+--url $CANDIG_URL'/katsu/v2/ingest/program/$PROGRAM_ID/' \
+-H 'accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Bearer '$TOKEN
+```
+
+   Remember to replace `PROGRAM_ID` and `CANDIG_URL` with the actual values for your program and deployment.
+
+### B. Genomic Data
+
+First, you’ll need need to get a authentication token to delete the data from calling this command:
+
+1. Get a token by logging into the candig data portal as site admin and copying the API token.
+
+   a. Go to the icon in the top right of the screen and click the cog
+
+   b. Click ‘ *** Get API Token’
+
+   c. Click the token to copy the text
+
+:::danger
+This token should be kept secure, it lasts for 30 mins
+:::
+
+2. Go to a terminal and save it into a variable called TOKEN
+
+```bash
+TOKEN=ey-pasted-jwt
+```
+
+Once you get the token, call this command:
+
+```bash
+curl --request DELETE \
+  --url {CANDIG_URL}'/genomics/ga4gh/drs/v1/cohorts/{PROGRAM_ID}' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN
+```
+
+Remember to replace `$PROGRAM_ID` and `$CANDIG_URL` with the actual values for your program and deployment.
+
+## ‘No program authorization exists’ error when attempting ingest
+
+When attempting clinical data ingest into katsu, if you get a response such as below:
+
+```bash
+{'errors': {
+    'SYNTH_01': 
+        [{'not found': 'No program authorization exists'}]
+}}
+```
+
+It means you have not yet registered your program before ingesting. Please follow the instructions in [Register Programs](register-programs/) to submit a program authorization before attempting clinical ingest again.
+
+:::danger
+This token should be kept secure, it lasts for 30 mins.
+:::
