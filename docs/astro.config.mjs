@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi'
+import starlightUtils from "@lorenzo_lewis/starlight-utils";
 
 import icon from 'astro-icon';
 
@@ -30,6 +31,14 @@ export default defineConfig({
         github: 'https://github.com/candig/CanDIGv2',
     },
     plugins: [
+        starlightUtils({
+            navLinks: {
+                leading: { useSidebarLabelled: "headerLinks" },
+            },
+            multiSidebar: {
+                switcherStyle: "hidden"
+            }
+        }),
         starlightOpenAPI([
             {
                 base: 'technical/ingest',
@@ -70,6 +79,15 @@ export default defineConfig({
         ])
     ],
     sidebar: [
+        {
+            collapsed:true,
+            label: 'headerLinks',
+            items: [
+                { label: 'Deployment', slug: 'deployment/local' },
+                { label: 'Submission', slug: 'ingest' },
+                { label: 'Technical', slug: 'technical/architecture'}
+            ]
+        },
         {   
             collapsed: true,
             label: 'Deployment',
@@ -86,22 +104,21 @@ export default defineConfig({
 
         },
         {
-            label: 'Guides',
+            label: 'Submission',
             items: [
                 // Each item here is one entry in the navigation menu.
                 { 
-                    label: 'Data ingest steps', 
+                    label: 'Data submission steps', 
                     items: 
                     [
-                        'guides/ingest/prepare-clinical', 
-                        'guides/ingest/register-programs', 
-                        'guides/ingest/ingest-clinical',
-                        'guides/ingest/prepare-genomic',
-                        'guides/ingest/ingest-genomic',
-                        'guides/ingest/ingest-help',
+                        'ingest/prepare-clinical', 
+                        'ingest/register-programs', 
+                        'ingest/ingest-clinical',
+                        'ingest/prepare-genomic',
+                        'ingest/ingest-genomic',
+                        'ingest/ingest-help',
                     ]
-                },
-                { label: 'Data Exploration', slug: 'guides/explore' },
+                }
             ],
         },
         {
