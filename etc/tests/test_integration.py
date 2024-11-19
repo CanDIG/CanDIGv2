@@ -1077,6 +1077,7 @@ def test_query_donor_search():
             assert summary_stats[category][value] == expected_response[category][value]
 
 
+# Can we can find donors by querying a specific region of the genome?
 def test_query_genomic():
     # tests that a request sent via query to htsget-beacon properly prunes the data
     token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'],
@@ -1150,29 +1151,8 @@ def test_query_genomic():
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
     assert response and len(response.json()["results"]) == 1
 
-    # token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
-    #                   password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
-    # headers = {
-    #     "Authorization": f"Bearer {token}",
-    #     "Content-Type": "application/json; charset=utf-8",
-    # }
-    # params = {
-    #     "gene": "TP53",
-    #     "assembly": "hg38"
-    # }
-    # response = requests.get(
-    #     f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
-    # )
-    # pprint.pprint(response.json())
-    # if len(response.json()["results"]) != 0:
-    #     print(f"\n\nExpected 0 results from the genomic query using gene name 'TP53' but got {len(response.json()["results"])}")
-    #     if len(response.json()["results"]) > 0:
-    #         print("Got results from:")
-    #         for donor in response.json()["results"]:
-    #             print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
-    # assert response and len(response.json()["results"]) == 0
 
-
+# Can we use a discovery query to get counts of donors we do not have access to?
 def test_query_discovery():
     katsu_response = requests.get(
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
@@ -1201,6 +1181,18 @@ def test_query_discovery():
             assert category in query_response["site"]["required_but_missing"]
             for field in program["metadata"]["required_but_missing"][category]:
                 assert field in query_response["site"]["required_but_missing"][category]
+
+
+# Can we check how many donors have genomics data?
+def test_query_completeness():
+    query_response = requests.get(
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/genomic_completeness").json()
+    pprint.pprint(query_response)
+    # Verify that the synthetic data shows up
+    assert "LOCAL-SYNTH_01" in query_response
+    assert query_response["genomes"] == 6
+    assert "LOCAL-SYNTH_02" in query_response
+    assert query_response["genomes"] == 5
 
 
 def test_clean_up():
