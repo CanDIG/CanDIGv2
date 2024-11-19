@@ -179,7 +179,10 @@ clean-all: clean-logs clean-compose clean-containers clean-secrets \
 #<<<
 .PHONY: clean-authx
 clean-authx:
+	mv tmp/vault/service_stores.txt tmp/vault_service_stores.txt
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
+	-mkdir tmp/vault
+	mv tmp/vault_service_stores.txt tmp/vault/service_stores.txt
 
 
 # Empties error and progress logs
