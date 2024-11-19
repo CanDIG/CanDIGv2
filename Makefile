@@ -418,6 +418,7 @@ docker-volumes:
 .PHONY: init-authx
 init-authx: mkdir
 	$(MAKE) docker-volumes
+	$(MAKE) authx-secrets
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE); python settings.py;)
 
 
