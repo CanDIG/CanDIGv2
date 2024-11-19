@@ -357,19 +357,34 @@ docker-push:
 
 #<<<
 .PHONY: docker-secrets
-docker-secrets: mkdir #minio-secrets
+docker-secrets: mkdir authx-secrets data-secrets #minio-secrets
+
+
+data-secrets: mkdir
+	@echo "making data secrets"
+	$(MAKE) secret-postgres-db-secret
+	$(MAKE) secret-redis-secret-key
+
+
+authx-secrets: mkdir
+	@echo "making authx secrets"
 	$(MAKE) secret-keycloak-admin-password
 
 	$(MAKE) secret-keycloak-test-site-admin-password
 	$(MAKE) secret-keycloak-test-user-password
 	$(MAKE) secret-keycloak-test-user2-password
 
-	$(MAKE) secret-postgres-db-secret
-
 	$(MAKE) secret-tyk-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
 
-	$(MAKE) secret-redis-secret-key
+
+minio-secrets: mkdir
+	@echo "making minio secrets"
+	@echo $(DEFAULT_ADMIN_USER) > tmp/secrets/minio-access-key
+	$(MAKE) secret-minio-secret-key
+	@echo '[default]' > tmp/secrets/aws-credentials
+	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> tmp/secrets/aws-credentials
+	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> tmp/secrets/aws-credentials
 
 
 #>>>
@@ -436,19 +451,6 @@ init-conda:
 #<<<
 .PHONY: init-docker
 init-docker: docker-volumes docker-secrets
-
-
-#>>>
-# generate secrets for minio server/client
-# make minio-secrets
-
-#<<<
-minio-secrets:
-	@echo $(DEFAULT_ADMIN_USER) > tmp/secrets/minio-access-key
-	$(MAKE) secret-minio-secret-key
-	@echo '[default]' > tmp/secrets/aws-credentials
-	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> tmp/secrets/aws-credentials
-	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> tmp/secrets/aws-credentials
 
 
 #>>>
