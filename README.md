@@ -9,11 +9,12 @@ dataflow for genomic data.
 
 ## Installation
 
-CanDIG uses a make-based deployment process, with services containerized in Docker. To deploy CanDIGv2, follow the installation guides in `docs/`:
+CanDIG uses a make-based deployment process, with services containerized in Docker. To deploy CanDIGv2, follow the installation guides on our [documentation website](https://candig.github.io/CanDIGv2/):
 
-* [CanDIG Deployment Guide](./docs/install-candig.md)
+* [CanDIG Local Deployment Guide](https://candig.github.io/CanDIGv2/deployment/local/)
+* [CanDIG Production Deployment Guide](https://candig.github.io/CanDIGv2/deployment/production/)
 
-See [Interact with the stack](docs/interact-with-the-stack.md) for a guide to additional options or view all Makefile options with `make help`.
+See [Interact using Make](https://candig.github.io/CanDIGv2/deployment/interact-with-the-stack/) for a guide to additional options or view all Makefile options with `make help`.
 
 ## Project Structure
 
