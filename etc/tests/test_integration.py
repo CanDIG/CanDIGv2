@@ -384,7 +384,7 @@ def clean_up_program_htsget(program_id):
         "Content-Type": "application/json; charset=utf-8",
     }
     delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{program_id}",
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/programs/{program_id}",
         headers=headers
     )
     print(delete_response.text)
@@ -832,13 +832,13 @@ def test_verify_htsget(object_id, file_name, file_type, user, password):
     assert response.json()["result"] == True
 
 
-def test_cohort_status():
+def test_program_status():
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02/status", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/programs/{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02/status", headers=headers)
     assert "index_complete" in response.json()
     assert len(response.json()['index_complete']) > 0
 
@@ -999,7 +999,7 @@ def test_query_donors_all():
             'None': 4,
             'Skin': 4
         },
-        'patients_per_cohort': {
+        'patients_per_program': {
             f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02': 20
         },
         'treatment_type_count': {
@@ -1055,7 +1055,7 @@ def test_query_donor_search():
             'None': 4,
             'Skin': 4
         },
-        'patients_per_cohort': {
+        'patients_per_program': {
             f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02': 18
         },
         'treatment_type_count': {
