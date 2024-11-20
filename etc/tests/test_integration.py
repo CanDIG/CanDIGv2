@@ -1190,9 +1190,9 @@ def test_query_completeness():
     pprint.pprint(query_response)
     # Verify that the synthetic data shows up
     assert "LOCAL-SYNTH_01" in query_response
-    assert query_response["genomes"] == 6
+    assert query_response["LOCAL-SYNTH_01"]["genomes"] == 6
     assert "LOCAL-SYNTH_02" in query_response
-    assert query_response["genomes"] == 5
+    assert query_response["LOCAL-SYNTH_02"]["genomes"] == 5
 
 
 def test_clean_up():
