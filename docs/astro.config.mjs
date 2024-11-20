@@ -41,31 +41,31 @@ export default defineConfig({
         }),
         starlightOpenAPI([
             {
-                base: 'technical/ingest',
+                base: 'technical/ingest-api',
                 label: 'ingest api',
                 schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-ingest/refs/heads/develop/ingest_openapi.yaml',
                 collapsed: true
             },
             {
-                base: 'technical/query',
+                base: 'technical/query-api',
                 label: 'query api',
                 schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-query/refs/heads/stable/query_server/openapi.yaml',
                 collapsed: true
             },
             {
-                base: 'technical/katsu',
+                base: 'technical/katsu-api',
                 label: 'katsu api',
                 schema: 'https://raw.githubusercontent.com/CanDIG/katsu/refs/heads/stable/chord_metadata_service/mohpackets/docs/schemas/schema.yml',
                 collapsed: true
             },
             {
-                base: 'technical/htsget/drs',
+                base: 'technical/htsget/drs-api',
                 label: 'htsget drs api',
                 schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/stable/htsget_server/drs_openapi.yaml',
                 collapsed: true
             },
             {
-                base: 'technical/htsget/beacon',
+                base: 'technical/htsget/beacon-api',
                 label: 'htsget beacon api',
                 schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/stable/htsget_server/beacon_openapi.yaml',
                 collapsed: true
@@ -74,6 +74,12 @@ export default defineConfig({
                 base: 'technical/htsget/operations',
                 label: 'htsget operations api',
                 schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/stable/htsget_server/htsget_openapi.yaml',
+                collapsed: true
+            },
+	    {
+                base: 'technical/federation-api',
+                label: 'htsget operations api',
+                schema: 'https://raw.githubusercontent.com/CanDIG/federation_service/refs/heads/develop/candig_federation/federation.yaml',
                 collapsed: true
             },
         ])
