@@ -16,7 +16,7 @@ Ingest can proceed with missing fields as long as there are identifiers that pro
 
 ## What if I don’t have a schema/field from the MoHCCN data model in my clinical data?
 
-If the object is required for linking between objects that do exist in your model, or the missing schema is the Sample Registration you will still need to create these objects. The minimum amount of information you would need to provide is a `submitter_$SCHEMA_id`, which can be any text value as long as each id is unique within the program you are ingesting. Objects that are ‘leaves’ in the graph structure, that is, there is only one inward relationship to that object, can be left out of ingest, i.e. Comorbidity, Biomarker, Exposure, Follow up. 
+If the object is required for linking between objects that do exist in your model, or the missing schema is the Sample Registration you will still need to create these objects. The minimum amount of information you would need to provide is a `submitter_$SCHEMA_id`, which can be any text value as long as each id is unique within the program you are ingesting. Objects that are ‘leaves’ in the graph structure, that is, there is only one inward relationship to that object, can be left out of ingest, i.e. Comorbidity, Biomarker, Exposure, Follow up.
 
 Treatment objects may be uploaded without a linked treatment specific object that describes the specific treatment (i.e. Systemic therapy, Radiation, Surgery), but the model does require these based on the field Treatment.treatment_type, so the Donor would be considered incomplete.
 
@@ -48,7 +48,7 @@ specimens, 524 were created', 'Of 169 systemic_therapies, 169 were created', 'Of
 ]}}
 ```
 
-or 
+or
 
 ```bash
 {
@@ -159,7 +159,7 @@ Once you get the token, call this command:
 
 ```bash
 curl --request DELETE \
-  --url {CANDIG_URL}'/genomics/ga4gh/drs/v1/cohorts/{PROGRAM_ID}' \
+  --url {CANDIG_URL}'/genomics/ga4gh/drs/v1/programs/{PROGRAM_ID}' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer '$TOKEN
@@ -173,7 +173,7 @@ When attempting clinical data ingest into katsu, if you get a response such as b
 
 ```bash
 {'errors': {
-    'SYNTH_01': 
+    'SYNTH_01':
         [{'not found': 'No program authorization exists'}]
 }}
 ```
