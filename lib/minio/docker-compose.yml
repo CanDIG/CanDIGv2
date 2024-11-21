@@ -5,9 +5,9 @@ volumes:
     external: true
 secrets:
   minio-access-key:
-    file: $PWD/tmp/secrets/minio-access-key
+    file: $PWD/lib/minio/access-key
   minio-secret-key:
-    file: $PWD/tmp/secrets/minio-secret-key
+    file: $PWD/lib/minio/secret-key
 services:
   minio:
     image: minio/minio:${MINIO_VERSION:-latest}

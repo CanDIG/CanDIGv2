@@ -259,7 +259,7 @@ clean-secrets:
 
 
 #>>>
-# remove all peristant volumes and local data
+# remove all persistent volumes and local data
 # make clean-volumes
 
 #<<<
@@ -383,11 +383,12 @@ authx-secrets: mkdir
 
 minio-secrets: mkdir
 	@echo "making minio secrets"
-	@echo $(DEFAULT_ADMIN_USER) > tmp/secrets/minio-access-key
+	@echo $(DEFAULT_ADMIN_USER) > lib/minio/access-key
 	$(MAKE) secret-minio-secret-key
-	@echo '[default]' > tmp/secrets/aws-credentials
-	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> tmp/secrets/aws-credentials
-	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> tmp/secrets/aws-credentials
+	mv tmp/secrets/minio-secret-key lib/minio/secret-key
+	@echo '[default]' > lib/minio/aws-credentials
+	@echo "aws_access_key_id=`cat lib/minio/access-key`" >> lib/minio/aws-credentials
+	@echo "aws_secret_access_key=`cat lib/minio/secret-key`" >> lib/minio/aws-credentials
 
 
 #>>>
