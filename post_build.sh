@@ -49,15 +49,25 @@ function print_module_logs() {
 MODULES=$(cat .env | grep CANDIG_MODULES | cut -c 16- | cut -d '#' -f 1)
 ALL_MODULES="${MODULES}"
 
-SERVICE_COUNT=0
+EXPECTED_CONTAINERS=""
 for MODULE in $ALL_MODULES; do
+  services=$(cat lib/$MODULE/docker-compose.yml | yq -ojson '.services' | jq  'keys' | jq -r @sh | sed s/\'//g)
+  EXPECTED_CONTAINERS=$(echo $EXPECTED_CONTAINERS $services)
   sc=$(cat lib/$MODULE/docker-compose.yml | yq -ojson '.services' | jq  'keys' | jq -r @sh | wc -w | tr -d ' ')
-  SERVICE_COUNT=`expr $SERVICE_COUNT + $sc`
 done
 
-RUNNING_MODULES=$(docker ps --format "{{.Names}}")
+EXPECTED_COUNT=$(echo $EXPECTED_CONTAINERS | wc -w)
 
-if [ $(docker ps -q | wc -l) == $SERVICE_COUNT ]
+RUNNING_CONTAINERS=$(docker ps --format "{{.Names}}" | sed s/candigv2_//g | sed s/_1//g)
+RUNNING_COUNT=$(echo $RUNNING_CONTAINERS | wc -w)
+
+# figure out any containers that should've been there but aren't
+for i in $EXPECTED_CONTAINERS
+do
+	[[ ! $RUNNING_CONTAINERS =~ $i  ]] && MISSING_CONTAINERS="${MISSING_CONTAINERS:+${MISSING_CONTAINERS} }$i"
+done
+
+if [[ $(echo $MISSING_CONTAINERS | wc -w | tr -d ' ') == "0"  ]]
 then
 	for MODULE in $ALL_MODULES; do
 		printf "\n\n${BLUE}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
@@ -72,7 +82,7 @@ else
 		print_module_logs $MODULE
 		printf "${RED}--------------------\n${DEFAULT}"
 	done
-	echo -e "${RED}WARNING: ${YELLOW}The number of CanDIG containers running does not match the number of expected services.\nRunning: ${BLUE}$(docker ps -q | wc -l) ${YELLOW}Expected: ${BLUE}${SERVICE_COUNT}
+	echo -e "${RED}WARNING: ${YELLOW}Some containers that are expected to be running are missing:\n${MISSING_CONTAINERS}
 ${DEFAULT}Check your build/docker logs. Potentially offending service logs shown above. View ${ERRORLOG} for more information."
 	exit 1
 fi
