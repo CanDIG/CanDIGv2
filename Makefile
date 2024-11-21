@@ -360,7 +360,7 @@ docker-push:
 
 #<<<
 .PHONY: docker-secrets
-docker-secrets: mkdir authx-secrets data-secrets #minio-secrets
+docker-secrets: mkdir authx-secrets data-secrets
 
 
 data-secrets: mkdir
@@ -399,8 +399,6 @@ minio-secrets: mkdir
 docker-volumes:
 	docker volume create grafana-data --label candigv2=volume
 	docker volume create jupyter-data --label candigv2=volume
-	# docker volume create minio-config --label candigv2=volume
-	# docker volume create minio-data $(MINIO_VOLUME_OPT) --label candigv2=volume
 	docker volume create prometheus-data --label candigv2=volume
 	docker volume create toil-jobstore --label candigv2=volume
 	docker volume create keycloak-data --label candigv2=volume
