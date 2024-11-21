@@ -426,6 +426,17 @@ init-authx: mkdir
 
 
 #>>>
+# create a minio container (that won't be removed as part of clean-all)
+# make init-minio
+
+#<<<
+init-minio: minio-secrets
+	docker volume create minio-config
+	docker volume create minio-data $(MINIO_VOLUME_OPT)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/minio/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
+
+
+#>>>
 # initialize conda environment
 # make init-conda
 
