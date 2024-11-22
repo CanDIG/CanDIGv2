@@ -6,7 +6,8 @@
 # Also prints out all relevant logs from the error logging file (i.e., all lines
 # that contain the phrases 'error' or 'warn').
 
-source <(grep --color=never "LOGFILE" .env)
+python settings.py
+source env.sh
 
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
