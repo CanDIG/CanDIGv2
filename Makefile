@@ -17,7 +17,6 @@ SHELL = bash
 CONDA = $(CONDA_INSTALL)/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/etc/profile.d/conda.sh
 
-LOGFILE = tmp/progress.txt
 
 .PHONY: all
 all:
