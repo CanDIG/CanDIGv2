@@ -58,14 +58,14 @@ ALL_MODULES="${MODULES}"
 
 EXPECTED_CONTAINERS=""
 for MODULE in $ALL_MODULES; do
-  services=$(cat lib/$MODULE/docker-compose.yml | yq -ojson '.services' | jq  'keys' | jq -r @sh | sed s/\'//g)
+  services=$(cat lib/$MODULE/docker-compose.yml | yq -ojson '.services' | jq  'keys' | jq -r @sh | sed s/^\'/candigv2_/g | sed s/\'$/_1/g | sed "s/\'\ \'/_1\\ candigv2_/g" | sed "s/'\\s'/_1\\ candigv2_/g")
   EXPECTED_CONTAINERS=$(echo $EXPECTED_CONTAINERS $services)
   sc=$(cat lib/$MODULE/docker-compose.yml | yq -ojson '.services' | jq  'keys' | jq -r @sh | wc -w | tr -d ' ')
 done
 
 EXPECTED_COUNT=$(echo $EXPECTED_CONTAINERS | wc -w)
 
-RUNNING_CONTAINERS=$(docker ps --format "{{.Names}}" | sed s/candigv2_//g | sed s/_1//g)
+RUNNING_CONTAINERS=$(docker ps --format "{{.Names}}")
 RUNNING_COUNT=$(echo $RUNNING_CONTAINERS | wc -w)
 
 # figure out any containers that should've been there but aren't
@@ -73,7 +73,9 @@ for i in $EXPECTED_CONTAINERS
 do
 	[[ ! $RUNNING_CONTAINERS =~ $i  ]] && MISSING_CONTAINERS="${MISSING_CONTAINERS:+${MISSING_CONTAINERS} }$i"
 done
-
+echo expected: $EXPECTED_CONTAINERS
+echo running: $RUNNING_CONTAINERS
+echo missing: $MISSING_CONTAINERS
 if [[ $(echo $MISSING_CONTAINERS | wc -w | tr -d ' ') == "0"  ]]
 then
 	for MODULE in $ALL_MODULES; do
