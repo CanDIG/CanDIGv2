@@ -73,9 +73,9 @@ for i in $EXPECTED_CONTAINERS
 do
 	[[ ! $RUNNING_CONTAINERS =~ $i  ]] && MISSING_CONTAINERS="${MISSING_CONTAINERS:+${MISSING_CONTAINERS} }$i"
 done
-echo expected: $EXPECTED_CONTAINERS
-echo running: $RUNNING_CONTAINERS
-echo missing: $MISSING_CONTAINERS
+# echo expected: $EXPECTED_CONTAINERS
+# echo running: $RUNNING_CONTAINERS
+# echo missing: $MISSING_CONTAINERS
 if [[ $(echo $MISSING_CONTAINERS | wc -w | tr -d ' ') == "0"  ]]
 then
 	for MODULE in $ALL_MODULES; do
