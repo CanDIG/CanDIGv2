@@ -56,7 +56,7 @@ ifndef CONDA_INSTALL
 	echo "ERROR: Conda install location not specified. Do you have a .env?"
 	exit 1
 endif
-	echo "    started bin-conda" >> $(LOGFILE)
+	@printf "\nOutput of bin-conda:\n" | tee -a $(LOGFILE)
 ifeq ($(VENV_OS), linux)
 	curl -Lo bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -84,7 +84,6 @@ endif
 	$(CONDA) config --remove channels defaults
 	$(CONDA) config --add channels conda-forge
 	$(CONDA) config --set channel_priority strict
-	echo "    finished bin-conda" >> $(LOGFILE)
 
 
 #>>>
@@ -93,7 +92,7 @@ endif
 #<<<
 .PHONY: build-all
 build-all: mkdir
-	printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG)
+	@printf "Build started at `date '+%D %T'`.\n\n" >> $(LOGFILE)
 	./pre-build-check.sh $(ARGS)
 
 # Setup the entire stack
@@ -132,15 +131,14 @@ build-images: #toil-docker
 
 #<<<
 build-%:
-	printf "\nOutput of build-$*: \n" >> $(ERRORLOG)
-	echo "    started build-$*" >> $(LOGFILE)
+	@printf "\nOutput of build-$*: \n" | tee -a $(LOGFILE)
 	source setup_hosts.sh
 	if [ -f lib/$*/$*_preflight.sh ]; then \
-	source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG); \
+	source lib/$*/$*_preflight.sh 2>&1 | tee -a $(LOGFILE); \
 	fi
 	export SERVICE_NAME=$*; \
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(ERRORLOG)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(LOGFILE)
 	echo "    finished build-$*" >> $(LOGFILE)
 
 
@@ -188,7 +186,6 @@ clean-authx:
 # Empties error and progress logs
 .PHONY: clean-logs
 clean-logs:
-	> $(ERRORLOG)
 	> $(LOGFILE)
 
 #>>>
@@ -289,20 +286,18 @@ containers=$(shell cat lib/$*/docker-compose.yml | yq -ojson '.services' | jq  '
 found=$(shell grep -ch $(containers) tmp/containers.txt)
 #<<<
 compose-%:
-	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
-	echo "    started compose-$*" >> $(LOGFILE)
+	@printf "\nOutput of compose-$*: \n" | tee -a $(LOGFILE)
 	source setup_hosts.sh; \
 	python settings.py; source env.sh; \
 	export SERVICE_NAME=$*; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(LOGFILE)
 	cat tmp/containers.txt
 	if [ $(found) -eq 0 ]; then \
 	echo $(containers) >> tmp/containers.txt; \
 	fi
 	if [ -f lib/$*/$*_setup.sh ]; then \
-	source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG); \
+	source lib/$*/$*_setup.sh 2>&1 | tee -a $(LOGFILE); \
 	fi
-	echo "    finished compose-$*" >> $(LOGFILE)
 
 
 #>>>
@@ -324,8 +319,7 @@ recompose-%:
 
 #<<<
 down-%:
-	printf "\nOutput of down-$*: \n" >> $(ERRORLOG)
-	echo "    started down-$*" >> $(LOGFILE)
+	@printf "\nOutput of down-$*: \n" | tee -a $(LOGFILE)
 	source setup_hosts.sh; \
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility down 2>&1
@@ -432,7 +426,7 @@ init-authx: mkdir
 init-minio: minio-secrets
 	docker volume create minio-config
 	docker volume create minio-data $(MINIO_VOLUME_OPT)
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/minio/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/minio/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(LOGFILE)
 
 
 #>>>
@@ -442,7 +436,7 @@ init-minio: minio-secrets
 #<<<
 .PHONY: init-conda
 init-conda:
-	echo "    started init-conda" >> $(LOGFILE)
+	@printf "\nOutput of init-conda: \n" | tee -a $(LOGFILE)
 	# source conda's script to be safe, so the conda command is found
 	source $(CONDA_ENV_SETTINGS) \
 		&& $(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
@@ -455,7 +449,6 @@ init-conda:
 #@echo "Load local conda: source bin/miniconda3/etc/profile.d/conda.sh"
 #@echo "Activate conda env: conda activate $(VENV_NAME)"
 #@echo "Install requirements: pip install -U -r etc/venv/requirements.txt"
-	echo "    finished init-conda" >> $(LOGFILE)
 
 
 #>>>
@@ -504,7 +497,7 @@ secret-%:
 #<<<
 .PHONY: toil-docker
 toil-docker:
-	echo "    started toil-docker" >> $(LOGFILE)
+	@printf "\nOutput of toil-docker: \n" | tee -a $(LOGFILE)
 	VIRTUAL_ENV=1 DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 TOIL_DOCKER_REGISTRY=$(DOCKER_REGISTRY) \
 	$(MAKE) -C lib/toil/toil-docker docker
 	$(foreach MODULE,$(TOIL_MODULES), \
@@ -514,7 +507,6 @@ toil-docker:
 		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION) \
 		$(DOCKER_REGISTRY)/$(MODULE):latest;)
 	$(foreach MODULE, $(TOIL_MODULES), docker push $(DOCKER_REGISTRY)/$(MODULE):latest;)
-	echo "    finished toil-docker" >> $(LOGFILE)
 
 
 #>>>

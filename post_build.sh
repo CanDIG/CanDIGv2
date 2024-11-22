@@ -6,7 +6,7 @@
 # Also prints out all relevant logs from the error logging file (i.e., all lines
 # that contain the phrases 'error' or 'warn').
 
-source <(grep --color=never "ERRORLOG" .env)
+source <(grep --color=never "LOGFILE" .env)
 
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -16,7 +16,7 @@ DEFAULT='\033[0m'
 
 function print_module_logs() {
 	MODULE=$1
-	BUILD_LINE=$(grep -n build-${MODULE} ${ERRORLOG} | tail -1 | cut -d ':' -f 1)
+	BUILD_LINE=$(grep -n build-${MODULE} ${LOGFILE} | tail -1 | cut -d ':' -f 1)
 	if [[ $BUILD_LINE != "" ]]; then
 		LNO=$BUILD_LINE
 		while read -r LINE; do
@@ -28,9 +28,9 @@ function print_module_logs() {
 				fi
 			fi
 			LNO=$((LNO+1))
-		done < <(tail -n "+$((BUILD_LINE + 1))" $ERRORLOG)
+		done < <(tail -n "+$((BUILD_LINE + 1))" $LOGFILE)
 	fi
-	COMPOSE_LINE=$(grep -n compose-${MODULE} ${ERRORLOG} | tail -1 | cut -d ':' -f 1)
+	COMPOSE_LINE=$(grep -n compose-${MODULE} ${LOGFILE} | tail -1 | cut -d ':' -f 1)
 	if [[ $COMPOSE_LINE != "" ]]; then
 		LNO=$COMPOSE_LINE
 		while read -r LINE; do
@@ -42,7 +42,7 @@ function print_module_logs() {
 				fi
 			fi
 			LNO=$((LNO+1))
-		done < <(tail -n "+$((COMPOSE_LINE+1))" $ERRORLOG)
+		done < <(tail -n "+$((COMPOSE_LINE+1))" $LOGFILE)
 	fi
 }
 
@@ -83,6 +83,6 @@ else
 		printf "${RED}--------------------\n${DEFAULT}"
 	done
 	echo -e "${RED}WARNING: ${YELLOW}Some containers that are expected to be running are missing:\n${MISSING_CONTAINERS}
-${DEFAULT}Check your build/docker logs. Potentially offending service logs shown above. View ${ERRORLOG} for more information."
+${DEFAULT}Check your build/docker logs. Potentially offending service logs shown above. View ${LOGFILE} for more information."
 	exit 1
 fi
