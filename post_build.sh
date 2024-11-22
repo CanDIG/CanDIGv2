@@ -17,6 +17,7 @@ DEFAULT='\033[0m'
 
 function print_module_logs() {
 	MODULE=$1
+	output=""
 	BUILD_LINE=$(grep -n build-${MODULE} ${LOGFILE} | tail -1 | cut -d ':' -f 1)
 	if [[ $BUILD_LINE != "" ]]; then
 		LNO=$BUILD_LINE
@@ -25,7 +26,7 @@ function print_module_logs() {
 				break
 			else
 				if [[ ${LINE} =~ .*([Ee]rror|[Ww]arn).* ]]; then
-					printf "${GREEN}${LNO}${DEFAULT}	${LINE}\n"
+					output="${output}${GREEN}${LNO}${DEFAULT}	${LINE}\n"
 				fi
 			fi
 			LNO=$((LNO+1))
@@ -39,11 +40,16 @@ function print_module_logs() {
 				break
 			else
 				if [[ ${LINE} =~ .*([Ee]rror|[Ww]arn).* ]]; then
-					printf "${GREEN}${LNO}${DEFAULT}	${LINE}\n"
+					output="${output}${GREEN}${LNO}${DEFAULT}	${LINE}\n"
 				fi
 			fi
 			LNO=$((LNO+1))
 		done < <(tail -n "+$((COMPOSE_LINE+1))" $LOGFILE)
+	fi
+	if [[ $output != "" ]]; then
+		printf "\n\n${RED}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
+		printf "${output}"
+		printf "${RED}--------------------\n${DEFAULT}\n"
 	fi
 }
 
@@ -71,19 +77,15 @@ done
 if [[ $(echo $MISSING_CONTAINERS | wc -w | tr -d ' ') == "0"  ]]
 then
 	for MODULE in $ALL_MODULES; do
-		printf "\n\n${BLUE}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
-		print_module_logs $MODULE
-		printf "${BLUE}--------------------\n${DEFAULT}"
+		print_module_logs $MODULE $COLOR
 	done
-	echo -e "${GREEN}Number of expected CanDIG services matches number of containers running!${DEFAULT} Potentially useful error log segments listed above for debugging."
+	echo -e "${GREEN}Number of expected CanDIG services matches number of containers running!${DEFAULT} Lines above are in ${LOGFILE} and may be helpful for debugging."
  	exit 0
 else
 	for MODULE in $ALL_MODULES; do
-		printf "\n\n${RED}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
 		print_module_logs $MODULE
-		printf "${RED}--------------------\n${DEFAULT}"
 	done
 	echo -e "${RED}WARNING: ${YELLOW}Some containers that are expected to be running are missing:\n${MISSING_CONTAINERS}
-${DEFAULT}Check your build/docker logs. Potentially offending service logs shown above. View ${LOGFILE} for more information."
+${DEFAULT}Lines above are in ${LOGFILE} and may be helpful for debugging."
 	exit 1
 fi
