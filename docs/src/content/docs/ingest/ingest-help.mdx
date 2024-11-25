@@ -95,7 +95,7 @@ If you receive an error when using the `/ingest/genomic` endpoint something like
 
 This means that the token used by ingest to submit to hts-get has expired. At the moment this happens after 30 minutes. Get a fresh token and try again.
 
-### What if I need to delete or edit data that I already ingested into the system?
+## What if I need to delete or edit data that I already ingested into the system?
 
 Currently, there is no way to edit data that is already ingested into CanDIG. To change any data, the data must be deleted and re-ingested. Follow the steps below in order to delete data in CanDIG.
 
@@ -125,7 +125,7 @@ This token should be kept secure, it lasts for 30 mins
 
 ```bash
 curl --request DELETE \
---url $CANDIG_URL'/katsu/v2/ingest/program/$PROGRAM_ID/' \
+--url $CANDIG_URL'/katsu/v3/ingest/program/$PROGRAM_ID/' \
 -H 'accept: application/json' \
 -H 'Content-Type: application/json' \
 -H 'Authorization: Bearer '$TOKEN
@@ -179,7 +179,3 @@ When attempting clinical data ingest into katsu, if you get a response such as b
 ```
 
 It means you have not yet registered your program before ingesting. Please follow the instructions in [Register Programs](register-programs/) to submit a program authorization before attempting clinical ingest again.
-
-:::danger
-This token should be kept secure, it lasts for 30 mins.
-:::

@@ -1,8 +1,16 @@
+volumes:
+  minio-data:
+    external: true
+  minio-config:
+    external: true
+secrets:
+  minio-access-key:
+    file: $PWD/lib/minio/access-key
+  minio-secret-key:
+    file: $PWD/lib/minio/secret-key
 services:
   minio:
     image: minio/minio:${MINIO_VERSION:-latest}
-    labels:
-      - "candigv2=minio"
     volumes:
       - minio-data:/data
       - minio-config:/root/.minio

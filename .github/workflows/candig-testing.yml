@@ -76,6 +76,6 @@ jobs:
         with:
           name: Post-build error log
           path: |
-                tmp/error.txt
+                tmp/progress.txt
                 tmp/container_logs.txt
                 tmp/vault_audit.log

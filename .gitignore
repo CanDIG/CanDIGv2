@@ -50,3 +50,8 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# minio-related files
+lib/minio/access-key
+lib/minio/secret-key
+lib/minio/aws-credentials
