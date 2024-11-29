@@ -86,3 +86,5 @@ jobs:
                 tmp/progress.txt
                 tmp/container_logs.txt
                 tmp/vault_audit.log
+                tmp/ingest
+                tmp/index
