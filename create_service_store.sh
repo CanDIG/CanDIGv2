@@ -52,7 +52,7 @@ create_service_store() {
             docker exec $vault sh -c "vault read -field=role_id auth/approle/role/${service}/role-id" > tmp/vault/$service-roleid
 
             echo "create a kv store for $service"
-            docker exec $vault vault secrets enable -path=$service -description="${service} kv store" kv
+            bash $PWD/exec_with_expected.sh "docker exec $vault vault secrets enable -path=$service -description=\"${service} kv store\" kv" "path is already in use"
         fi
 
         # get names of containers for service:
@@ -61,8 +61,8 @@ create_service_store() {
         do
             # copy roleid to container
             container=$(echo ${container} | tr -d "'")
-            docker cp $PWD/tmp/vault/${service}-roleid candigv2_${container}_1:/home/candig/roleid
-            docker cp $PWD/tmp/vault/approle-token candigv2_${container}_1:/home/candig/approle-token
+            bash $PWD/exec_with_expected.sh "docker cp $PWD/tmp/vault/${service}-roleid candigv2_${container}_1:/home/candig/roleid" "Error response from daemon: Could not find the file /home/candig"
+            bash $PWD/exec_with_expected.sh "docker cp $PWD/tmp/vault/approle-token candigv2_${container}_1:/home/candig/approle-token" "Error response from daemon: Could not find the file /home/candig"
         done
         # if we're not in debug mode, delete the tmp roleid file
         if [[ ${CANDIG_DEBUG_MODE:-"0"} == "0" ]]; then
