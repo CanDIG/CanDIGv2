@@ -20,4 +20,5 @@ source env.sh
 bash $PWD/create_service_store.sh "federation"
 docker restart $federation
 
+sleep 5
 python $PWD/lib/federation/initialize.py
