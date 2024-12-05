@@ -290,7 +290,6 @@ compose-%:
 	python settings.py; source env.sh; \
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(LOGFILE)
-	cat tmp/containers.txt
 	if [ $(found) -eq 0 ]; then \
 	echo $(containers) >> tmp/containers.txt; \
 	fi
