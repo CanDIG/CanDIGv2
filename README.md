@@ -5,7 +5,13 @@
 ## Overview
 
 The CanDIG v2 project is a collection of heterogeneous services designed to work together to facilitate end to end
-dataflow for genomic data.
+dataflow for genomic data. 
+
+## Branches
+
+The default `develop` branch is for developers. It undergoes nightly builds and integration testing, so should generally be deployable. 
+
+The `stable` branch is the latest stable release and is the one that you should use for production deployments. 
 
 ## Installation
 
