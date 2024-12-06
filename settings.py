@@ -66,7 +66,7 @@ def get_env():
     if os.path.isfile("tmp/tyk/secret-key"):
         with open("tmp/tyk/secret-key") as f:
             vars["TYK_SECRET_KEY"] = f.read().splitlines().pop()
-    vars["POSTGRES_PASSWORD_FILE"] = f"tmp/postgres/db-secret"
+    vars["POSTGRES_PASSWORD_FILE"] = os.path.abspath(f"tmp/postgres/db-secret")
     vars["CANDIG_ENV"] = INTERPOLATED_ENV
     vars["DB_PATH"] = "postgres-db"
 
@@ -89,6 +89,13 @@ def get_env():
     if os.path.isfile("tmp/keycloak/test-user2-password"):
         with open("tmp/keycloak/test-user2-password") as f:
             vars["CANDIG_NOT_ADMIN2_PASSWORD"] = f.read().splitlines().pop()
+
+    # test setup:
+    if os.path.isfile("tmp/vault/approle-token"):
+        vars["APPROLE_TOKEN_FILE"] = os.path.abspath("tmp/vault/approle-token")
+    if os.path.isfile("tmp/vault/opa-roleid"):
+        vars["ROLE_ID_FILE"] = os.path.abspath("tmp/vault/opa-roleid")
+        vars["SERVICE_NAME"] = "opa"
 
     return vars
 
