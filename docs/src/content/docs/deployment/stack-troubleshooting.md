@@ -3,7 +3,25 @@ title: Troubleshooting the stack
 description: Troubleshooting issues with the stack
 ---
 
-### Conda env not activated
+## Integration tests failing
+
+If any integration tests fail, it is usually best to go back to the first test that failed, as subesquent tests often rely on earlier tests passing to succeed. Therefore the root cause is usually with the first failure.
+
+If `test_tyk` fails, all other tests will fail because the stack relies on tyk being up and running as expected. If you see `test_tyk` fail, you may as well `ctrl+c` to stop the tests running and start investigating the issue with tyk. Some places to start looking for the issue are:
+- is the tyk container up and running?
+  - check your docker desktop or `docker ps` to see if tyk and all other containers are running
+- is there anything in the tyk docker logs that indicates an issue?
+  - view the logs with `docker logs candigv2_tyk_1` or in Docker desktop
+  - if anything looks amiss, make a github issue with the details
+- did anything go wrong in the build logs?
+  - the build log can be found in `tmp/error.txt` 
+- is anything else in the central logs looking weird?
+  - the central logs for all docker containers can be found in `/tmp/logs/`
+ 
+If any of the `ingest_admin_*` tests fail, the later query tests will fail since they rely on having data ingested into the system to get the expected query results.
+
+
+## Conda env not activated
 
 If you get an error when running a make command, something like:
 
@@ -14,7 +32,7 @@ or an error message about `dotenv` not being found.
 
 Ensure the candig conda environment is activated in your terminal with `conda activate candig`.
 
-### docker volumes not remade
+## docker volumes not remade
 
 If you get an error where after cleaning an individual service, when composing, it gets stuck at 
 
@@ -24,7 +42,7 @@ waiting for x service to start ...
 
 Use CTRL + c to exit the process then try running `make docker-volumes` and then try composing again with `make compose-<name of service>`
 
-### No rule to make target
+## No rule to make target
 
 It is common to move around within the repo and not realise where you are. If you try to run a make command and get the error
 
