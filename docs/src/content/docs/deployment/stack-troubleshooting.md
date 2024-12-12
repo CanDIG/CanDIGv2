@@ -22,6 +22,7 @@ If any of the `ingest_admin_*` tests fail, the later query tests will fail since
 
 If any specific test is failing, looking at the individual container for the services that is failing, or the centralized log (`/tmp/logs`) is usually the best place to start debugging. If at any stage you are unsure on where to start after integration test failures, please make a [github issue](https://github.com/CanDIG/CanDIGv2/issues/new/choose).
 
+If a failure relates to any of the services listed in the `CANDIG_AUTH_MODULES` in the `.env` file, and you find you need to rebuild any of these modules, you will need to rebuild all of these modules using `make clean-authx` and `make init-authx`. 
 
 ## Conda env not activated
 
