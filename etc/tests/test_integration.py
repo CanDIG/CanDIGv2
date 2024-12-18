@@ -85,9 +85,8 @@ def test_tyk():
 ## Can we get the correct dataset response for each user?
 def user_auth_datasets():
     return [
-        ("CANDIG_NOT_ADMIN2", "PROGRAM-2"),
-        ("CANDIG_NOT_ADMIN", "PROGRAM-1"),
-        ("CANDIG_NOT_ADMIN", "TEST_2"),
+        ("CANDIG_NOT_ADMIN2", "SYNTHETIC-2"),
+        ("CANDIG_NOT_ADMIN", "SYNTHETIC-1")
     ]
 
 def get_katsu_datasets(user):
@@ -164,7 +163,7 @@ def test_add_remove_program_authorization(user, dataset):
 
     # try adding a user to the program:
     test_data = {
-        "email": user,
+        "email": ENV[f"{user}_USER"],
         "program": dataset
     }
 
@@ -173,7 +172,7 @@ def test_add_remove_program_authorization(user, dataset):
     print(f"{response.json()}, {response.status_code}")
     assert response.status_code == 200
 
-    assert test_data["program"] in get_katsu_datasets("CANDIG_NOT_ADMIN")
+    assert test_data["program"] in get_katsu_datasets(user)
 
     # remove the user
     response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
