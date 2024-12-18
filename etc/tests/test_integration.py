@@ -164,7 +164,7 @@ def test_add_remove_program_authorization(user, dataset):
 
     # try adding a user to the program:
     test_data = {
-        "email": ENV["CANDIG_NOT_ADMIN_USER"],
+        "email": user,
         "program": dataset
     }
 
