@@ -85,8 +85,9 @@ def test_tyk():
 ## Can we get the correct dataset response for each user?
 def user_auth_datasets():
     return [
-        ("CANDIG_NOT_ADMIN2", "SYNTHETIC-2"),
-        ("CANDIG_NOT_ADMIN", "SYNTHETIC-1")
+        ("CANDIG_NOT_ADMIN2", "PROGRAM-2"),
+        ("CANDIG_NOT_ADMIN", "PROGRAM-1"),
+        ("CANDIG_NOT_ADMIN", "TEST_2")
     ]
 
 def get_katsu_datasets(user):
