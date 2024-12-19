@@ -16,7 +16,7 @@ If `test_tyk` fails, all other tests will fail because the stack relies on tyk b
 - did anything go wrong in the build logs?
   - the build log can be found in `tmp/error.txt` 
 - is anything else in the central logs looking weird?
-  - the central logs for all docker containers can be found in `/tmp/logs/`
+  - the central logs for all docker containers can be found in `/tmp/logs/`, the most current one will be named with `buffer.<uuid>.log` whereas previous days' logs are named `.yyyymmdd_0.log`
  
 If any of the `ingest_admin_*` tests fail, the later query tests will fail since they rely on having data ingested into the system to get the expected query results.
 
