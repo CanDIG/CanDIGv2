@@ -44,7 +44,8 @@ services:
       - "/app/entrypoint.sh"
 
   opa:
-    image: openpolicyagent/opa:latest-static
+    # image: openpolicyagent/opa:latest-static # branch develop should continue to use latest-static. 
+    image: openpolicyagent/opa:0.69.0-static # Do not merge this frozen version back into branch develop.
     logging:
       driver: "fluentd"
       options:
