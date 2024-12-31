@@ -1,4 +1,27 @@
 services:
+  opa:
+    image: openpolicyagent/opa:1.0.0-static
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
+    labels:
+      - "candigv2=opa"
+    ports:
+      - "${OPA_PORT}:8181"
+    volumes:
+      - opa-data:/app
+    command:
+      - "run"
+      - "--set=decision_logs.console=true"
+      - "--log-level=info"
+      - "--authentication=token"
+      - "--authorization=basic"
+      - "-s"
+      - "--addr=0.0.0.0:8181"
+      - "app/permissions_engine/"
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
   opa-runner:
     logging:
       driver: "fluentd"
@@ -39,26 +62,3 @@ services:
     entrypoint:
       - "bash"
       - "/app/entrypoint.sh"
-
-  opa:
-    image: openpolicyagent/opa:latest-static
-    logging:
-      driver: "fluentd"
-      options:
-        tag: "{{.Name}}"
-    labels:
-      - "candigv2=opa"
-    ports:
-      - "${OPA_PORT}:8181"
-    volumes:
-      - opa-data:/app
-    command:
-      - "run"
-      - "--set=decision_logs.console=true"
-      - "--log-level=info"
-      - "--authentication=token"
-      - "--authorization=basic"
-      - "-s"
-      - "app/permissions_engine/"
-    extra_hosts:
-      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
