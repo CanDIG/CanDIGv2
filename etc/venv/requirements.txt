@@ -7,7 +7,7 @@ pytest>=8.3.3
 pytz>=2024.2
 minio>=7.2.12
 GitPython>=3.1.43
-candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v2.6.1
+candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v2.6.2
 candigv2-logging@git+https://github.com/CanDIG/candigv2-logging.git@v1.0.1
 clinical_etl@git+https://github.com/CanDIG/clinical_ETL_code.git@v3.1.0
 werkzeug>=2.3.8 # not directly required, pinned by Snyk to avoid a vulnerability
