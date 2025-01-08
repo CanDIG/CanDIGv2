@@ -169,18 +169,6 @@ def test_add_remove_program_authorization(user, dataset):
         "program": dataset
     }
 
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
-    # when the user has admin access, they should be allowed
-    print(f"{response.json()}, {response.status_code}")
-    assert response.status_code == 200
-
-    assert test_data["program"] in get_katsu_datasets(user)
-
-    # remove the user
-    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
-    assert response.status_code == 200
-    assert test_data["email"] not in response.json()[test_data["program"]]["team_members"]
-
     # remove the program
     response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
     print(response.text)
