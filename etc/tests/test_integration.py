@@ -82,14 +82,15 @@ def test_tyk():
 ## Opa tests:
 ## Test DAC user authorizations
 
-## Can we get the correct dataset response for each user?
-def user_auth_datasets():
+## Can we get the correct program response for each user?
+def user_auth_programs():
     return [
         ("CANDIG_NOT_ADMIN2", "PROGRAM-2"),
         ("CANDIG_NOT_ADMIN", "PROGRAM-1"),
         ("CANDIG_NOT_ADMIN", "TEST_2"),
         ("CANDIG_SITE_ADMIN", "TEST_3"),
     ]
+
 
 def get_katsu_datasets(user):
     username = ENV[f"{user}_USER"]
@@ -117,7 +118,7 @@ def get_katsu_datasets(user):
     return response.json()["result"]
 
 
-def add_program_authorization(dataset: str, curators: list,
+def add_program_authorization(program: str, curators: list,
                               team_members: list):
     token = get_site_admin_token()
     headers = {
@@ -127,7 +128,7 @@ def add_program_authorization(dataset: str, curators: list,
 
     # create a program and its authorizations:
     test_program = {
-        "program_id": dataset,
+        "program_id": program,
         "program_curators": curators,
         "team_members": team_members
     }
@@ -142,46 +143,39 @@ def add_program_authorization(dataset: str, curators: list,
     return response.json()
 
 
-def delete_program_authorization(dataset: str):
+def delete_program_authorization(program: str):
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{dataset}", headers=headers)
+    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{program}", headers=headers)
     print(response.text)
-    return response.json()
+    return response
 
 
 ## Can we add a program authorization and modify it?
-@pytest.mark.parametrize("user, dataset", user_auth_datasets())
-def test_add_remove_program_authorization(user, dataset):
-    add_program_authorization(dataset, [], [])
+@pytest.mark.parametrize("user, program", user_auth_programs())
+def test_add_remove_program_authorization(user, program):
+    add_program_authorization(program, [], [])
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    # try adding a user to the program:
-    test_data = {
-        "email": ENV[f"{user}_USER"],
-        "program": dataset
-    }
-
     # remove the program
-    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
-    print(response.text)
+    response = delete_program_authorization(program)
     assert response.status_code == 200
 
-    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/program/{program}", headers=headers)
     assert response.status_code == 404
 
 
-@pytest.mark.parametrize("user, dataset", user_auth_datasets())
-def test_user_authorizations(user, dataset):
+@pytest.mark.parametrize("user, program", user_auth_programs())
+def test_user_authorizations(user, program):
     # set up these programs to exist at all:
-    add_program_authorization(dataset, [], [])
+    add_program_authorization(program, [], [])
 
     # add user to pending users
     username = ENV[f"{user}_USER"]
@@ -220,11 +214,11 @@ def test_user_authorizations(user, dataset):
     )
     assert response.status_code == 200
 
-    # see if user can access dataset before authorizing
+    # see if user can access program before authorizing
     katsu_datasets = get_katsu_datasets(user)
-    assert dataset not in katsu_datasets or user == "CANDIG_SITE_ADMIN"
+    assert program not in katsu_datasets or user == "CANDIG_SITE_ADMIN"
 
-    # add dataset to user's authz
+    # add program to user's authz
     from datetime import date
 
     TODAY = date.today()
@@ -233,18 +227,18 @@ def test_user_authorizations(user, dataset):
     response = requests.post(
         f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/authorize",
         headers=headers,
-        json={"program_id": dataset, "start_date": "2000-01-01", "end_date": THE_FUTURE}
+        json={"program_id": program, "start_date": "2000-01-01", "end_date": THE_FUTURE}
     )
     print(f"hi {response.text}")
     assert response.status_code == 200
 
-    # see if user can access dataset now
+    # see if user can access program now
     katsu_datasets = get_katsu_datasets(user)
-    assert dataset in katsu_datasets
+    assert program in katsu_datasets
 
-    # remove the dataset
+    # remove the program
     response = requests.delete(
-        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/authorize/{dataset}",
+        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/authorize/{program}",
         headers=headers
     )
     assert response.status_code == 200
@@ -349,7 +343,7 @@ def test_s3_credentials():
 # -----------------
 def clean_up_program(test_id):
     """
-    Deletes a dataset and all related objects in katsu, htsget and opa. Expected either
+    Deletes a program and all related objects in katsu, htsget and opa. Expected either
     successful delete or not found if the programs are not ingested.
     """
     print(f"deleting {test_id}")
