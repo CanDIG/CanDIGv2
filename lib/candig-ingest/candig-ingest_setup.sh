@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -Euo pipefail
+source env.sh
 
 LOGFILE=$PWD/tmp/progress.txt
 
@@ -20,5 +21,12 @@ sleep 5
 bash $PWD/create_service_store.sh "candig-ingest"
 
 docker restart $ingest
+
+# If present, create and authorize default site admin as CanDIG authorized user:
+site_admin_token=$(python site_admin_token.py)
+if [[ $CANDIG_SITE_ADMIN_USER != "" ]]; then
+  echo ">> approving $CANDIG_SITE_ADMIN_USER as a CanDIG authorized user"
+  bash $PWD/exec_with_expected.sh "curl -sX \"POST\" \"${CANDIG_URL}/ingest/user/pending/request\" -H \"Authorization: Bearer ${site_admin_token}\"" "$CANDIG_SITE_ADMIN_USER"
+fi
 
 python $PWD/lib/candig-ingest/candigv2-ingest/generate_test_data.py --prefix $CANDIG_SITE_LOCATION --tmp tmp/data/synthdata --delete
