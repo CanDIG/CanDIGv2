@@ -45,7 +45,7 @@ create_service_store() {
 
             if [[ $service != "opa" ]]; then
                 echo ">> add $service store to opa's policy"
-                docker exec $vault sh -c "echo 'path \"${service}/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> opa-policy.hcl; vault policy write opa opa-policy.hcl"
+                docker exec $vault sh -c "echo 'path \"${service}/token/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> opa-policy.hcl; vault policy write opa opa-policy.hcl"
             fi
 
             echo ">> save the role id to secrets"
