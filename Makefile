@@ -31,9 +31,10 @@ all:
 #<<<
 .PHONY: mkdir
 mkdir:
-	mkdir -p bin
-	mkdir -p $(CONDA_INSTALL)
-	mkdir -p tmp/secrets
+	mkdir -m=$(DIR_PERMISSIONS) -p bin
+	mkdir -m=$(DIR_PERMISSIONS) -p $(CONDA_INSTALL)
+	mkdir -m=$(DIR_PERMISSIONS) -p tmp
+	mkdir -m=$(DIR_PERMISSIONS) -p tmp/secrets
 
 
 #>>>
@@ -178,7 +179,7 @@ clean-all: clean-logs clean-compose clean-containers clean-secrets \
 clean-authx:
 	mv tmp/vault/service_stores.txt tmp/vault_service_stores.txt
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
-	-mkdir tmp/vault
+	-mkdir -m=$(DIR_PERMISSIONS) tmp/vault
 	mv tmp/vault_service_stores.txt tmp/vault/service_stores.txt
 
 

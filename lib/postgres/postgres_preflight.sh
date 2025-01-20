@@ -7,7 +7,7 @@ LOGFILE=$PWD/tmp/progress.txt
 # This script runs before the container is composed.
 
 # if there isn't already a value, store the password in tmp/postgres/db-secret
-mkdir -p tmp/postgres
+mkdir -m=$DIR_PERMISSIONS -p tmp/postgres
 if [[ ! -f "tmp/postgres/db-secret" ]]; then
     mv tmp/secrets/postgres-db-secret tmp/postgres/db-secret
 fi

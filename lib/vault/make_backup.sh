@@ -3,7 +3,7 @@
 vault=$(docker ps -a --format "{{.Names}}" | grep vault_1 | awk '{print $1}')
 vault_runner=$(docker ps -a --format "{{.Names}}" | grep vault-runner_1 | awk '{print $1}')
 
-mkdir -p $(pwd)/tmp/vault/backup
+mkdir -m=$DIR_PERMISSIONS -p $(pwd)/tmp/vault/backup
 docker exec $vault vault auth disable approle/
 stop=$(docker stop $vault)
 zip=$(docker exec $vault_runner bash -c "cd /vault; tar -cz data/ > backup.tar.gz")
