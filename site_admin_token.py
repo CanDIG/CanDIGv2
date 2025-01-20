@@ -12,7 +12,6 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
         if os.path.isfile("tmp/site-admin-refresh-token"):
             with open("tmp/site-admin-refresh-token") as f:
                 refresh_token = f.read().splitlines().pop()
-            os.remove("tmp/site-admin-refresh-token")
 
     # if no refresh token, get one:
     # check for default site admin user: if not present, check env vars
