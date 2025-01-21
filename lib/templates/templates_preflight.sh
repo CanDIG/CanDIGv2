@@ -6,7 +6,7 @@ LOGFILE=$PWD/tmp/progress.txt
 
 # This script runs before the container is composed.
 
-mkdir -m=$DIR_PERMISSIONS -p tmp/template
+mkdir -m $DIR_PERMISSIONS -p tmp/template
 if [[ ! -f "tmp/template/secret-key" ]]; then
     mv tmp/secrets/template-secret-key tmp/template/secret-key
 fi
