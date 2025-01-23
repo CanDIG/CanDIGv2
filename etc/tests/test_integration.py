@@ -337,6 +337,23 @@ def test_s3_credentials():
 # =========================|| KATSU TEST BEGIN ||============================= #
 # HELPER FUNCTIONS
 # -----------------
+def clean_up_user(user_name):
+    print(f"deleting {user_name}")
+    site_admin_token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    safe_name = urllib.parse.quote_plus(user_name)
+
+    delete_response = requests.delete(
+        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}",
+        headers=headers
+    )
+    print(f"user delete response status code: {delete_response.status_code}")
+    assert (delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND)
+
+
 def clean_up_program(test_id):
     """
     Deletes a program and all related objects in katsu, htsget and opa. Expected either
@@ -1181,6 +1198,19 @@ def test_clean_up():
     clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_03")
     clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_04")
 
+    clean_up_user(ENV['CANDIG_SITE_ADMIN_USER'])
+    clean_up_user(ENV['CANDIG_NOT_ADMIN_USER'])
+    clean_up_user(ENV['CANDIG_NOT_ADMIN2_USER'])
+
+    site_admin_token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    delete_response = requests.delete(
+        f"{ENV['CANDIG_URL']}/ingest/user/pending",
+        headers=headers
+    )
     # clean up test_htsget
     old_val = os.environ.get("TESTENV_URL")
     os.environ["TESTENV_URL"] = f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}"
