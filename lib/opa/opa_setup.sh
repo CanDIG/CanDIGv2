@@ -25,6 +25,12 @@ opa_container=$(docker ps -a --format "{{.Names}}" | grep "opa_" | awk '{print $
 bash $PWD/create_service_store.sh "opa"
 python -c "from site_admin_token import get_site_admin_token
 print(get_site_admin_token())" > bearer.txt
+grep -q "error" bearer.txt
+if [[ $? -eq 0 ]]; then
+  echo "Error on getting site admin token: " "$(<bearer.txt )"
+  exit 1
+fi
+
 docker cp bearer.txt $opa_runner:/app/
 rm bearer.txt
 
