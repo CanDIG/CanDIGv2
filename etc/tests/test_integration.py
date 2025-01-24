@@ -193,27 +193,33 @@ def test_user_authorizations(user, program):
         headers=headers
     )
     print(response.text)
-    assert response.status_code == 200
-
+    assert response.status_code in [200, 201]
     headers = {
         "Authorization": f"Bearer {get_site_admin_token()}",
         "Content-Type": "application/json; charset=utf-8"
     }
 
-    # check to see that the user is in the pending queue
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/ingest/user/pending",
-        headers=headers
-    )
-    print(response.text)
-    assert username in response.json()['results']
+    if response.status_code == 201:
+        # check to see that the user is in the pending queue
+        response = requests.get(
+            f"{ENV['CANDIG_URL']}/ingest/user/pending",
+            headers=headers
+        )
+        assert username in response.json()['results']
 
-    # approve user
-    response = requests.post(
-        f"{ENV['CANDIG_URL']}/ingest/user/pending/{safe_name}",
-        headers=headers
-    )
-    assert response.status_code == 200
+        # approve user
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/ingest/user/pending/{safe_name}",
+            headers=headers
+        )
+        assert response.status_code == 200
+    else:
+        # check to see if the user is authorized
+        response = requests.get(
+            f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}",
+            headers=headers
+        )
+        assert response.status_code == 200
 
     # see if user can access program before authorizing
     katsu_datasets = get_katsu_datasets(user)
@@ -226,7 +232,7 @@ def test_user_authorizations(user, program):
     THE_FUTURE = str(date(TODAY.year + 1, TODAY.month, TODAY.day))
 
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/authorize",
+        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/dac_authorization",
         headers=headers,
         json={"program_id": program, "start_date": "2000-01-01", "end_date": THE_FUTURE}
     )
@@ -239,7 +245,7 @@ def test_user_authorizations(user, program):
 
     # remove the program
     response = requests.delete(
-        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/authorize/{program}",
+        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/dac_authorization/{program}",
         headers=headers
     )
     assert response.status_code == 200
@@ -280,7 +286,7 @@ def test_add_remove_site_admin():
 
     # add user1 to site admins
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
+        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/user_id/{ENV['CANDIG_NOT_ADMIN_USER']}",
         headers=headers
     )
     print(response.text)
@@ -290,7 +296,7 @@ def test_add_remove_site_admin():
 
     # remove user1 from site admins
     response = requests.delete(
-        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
+        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/user_id/{ENV['CANDIG_NOT_ADMIN_USER']}",
         headers=headers
     )
     assert response.status_code == 200
