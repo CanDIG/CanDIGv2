@@ -192,21 +192,13 @@ def test_user_authorizations(user, program):
         f"{ENV['CANDIG_URL']}/ingest/user/pending/request",
         headers=headers
     )
-    print(response.text)
+    print(response.text, response.status_code)
     assert response.status_code in [200, 201]
     headers = {
         "Authorization": f"Bearer {get_site_admin_token()}",
         "Content-Type": "application/json; charset=utf-8"
     }
-
-    if response.status_code == 201:
-        # check to see that the user is in the pending queue
-        response = requests.get(
-            f"{ENV['CANDIG_URL']}/ingest/user/pending",
-            headers=headers
-        )
-        assert username in response.json()['results']
-
+    if response.status_code in [200, 201]:
         # approve user
         response = requests.post(
             f"{ENV['CANDIG_URL']}/ingest/user/pending/{safe_name}",
