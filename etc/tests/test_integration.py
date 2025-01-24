@@ -178,8 +178,11 @@ def test_user_authorizations(user, program):
     # set up these programs to exist at all:
     add_program_authorization(program, [], [])
 
-    # add user to pending users
+    # remove user from system
     username = ENV[f"{user}_USER"]
+    clean_up_user(username)
+
+    # add user to pending users
     safe_name = urllib.parse.quote_plus(username)
     password = ENV[f"{user}_PASSWORD"]
     token = get_token(username=username, password=password)
