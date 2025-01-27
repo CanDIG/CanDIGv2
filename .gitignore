@@ -2,6 +2,7 @@
 *~
 .idea
 .DS_Store
+.vscode
 
 #data files/directories
 *.bam
