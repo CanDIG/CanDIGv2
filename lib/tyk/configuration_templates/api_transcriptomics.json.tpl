@@ -1,5 +1,5 @@
 {
-    "api_id": "${TYK_TRANSCRIPTIMICS_API_ID}",
+    "api_id": "${TYK_TRANSCRIPTOMICS_API_ID}",
     "name": "${TYK_TRANSCRIPTOMICS_API_SLUG}",
     "use_openid": true,
     "active": true,
