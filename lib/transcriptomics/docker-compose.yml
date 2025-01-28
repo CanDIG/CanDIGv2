@@ -2,7 +2,7 @@ services:
   transcriptomics:
     build:
       context: $PWD/lib/transcriptomics/transcriptomics
-    # image: ghcr.io/bento-platform/transcriptomics_data_service:edge
+    image: ghcr.io/bento-platform/transcriptomics_data_service:edge
     labels:
       - "candigv2=transcriptomics"
     logging:
@@ -28,4 +28,8 @@ services:
     secrets:
       - source: postgres-db-secret
         target: db_password
-
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "${TRANSCRIPTOMICS_PRIVATE_URL}/service-info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
