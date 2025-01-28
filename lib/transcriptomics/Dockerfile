@@ -21,7 +21,6 @@ COPY LICENSE .
 COPY README.md .
 COPY create_db.sh .
 
-# Install the module itself, locally (similar to `pip install -e .`)
 RUN poetry install --without dev
 
 ENTRYPOINT [ "bash", "./entrypoint.bash" ]

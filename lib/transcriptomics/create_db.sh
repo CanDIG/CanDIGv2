@@ -22,7 +22,7 @@ until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER"; do
   sleep 1
 done
 
-# Postgres container connected, check to create or skip katsu db
+# Postgres container connected, check to create or skip tds db
 if check_db_exist; then
     echo "Database already exists. Skipping the database creation."
 else
