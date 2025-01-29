@@ -15,3 +15,8 @@ do
   transcriptomics=$(docker ps --format "{{.Names}}" | grep transcriptomics_1)
 done
 sleep 5
+
+python settings.py
+source env.sh
+bash $PWD/create_service_store.sh "transcriptomics"
+
