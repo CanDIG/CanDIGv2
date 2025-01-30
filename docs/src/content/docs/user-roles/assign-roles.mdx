@@ -1,0 +1,42 @@
+---
+title: Assign User roles
+description: How to grant a CanDIG user permissions to perform tasks and access data 
+tableOfContents: true
+---
+
+# How to assign a user a site curator role
+
+This can only be done by a site admin.
+
+1. Get a token by logging into the candig data portal as site admin and copying the API token.
+
+    a. Go to the icon in the top right of the screen and click the cog
+
+    b. Click ‘ *** Get API Token’
+
+    c. Click the token to copy the text
+
+:::danger
+This token should be kept secure, it lasts for 30 mins
+:::
+ 
+2. Go to a terminal and save it into a variable called TOKEN
+
+```bash
+TOKEN=ey-pasted-jwt
+```
+
+3. POST to the site-role endpoint in ingest to assign a user the site curator role, e.g. with user1@test.ca
+
+```bash
+curl --request POST \
+  --url $CANDIG_URL'/ingest/site-role/curator/email/user1@test.ca' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN
+```
+
+4. You can check whether a user has the site curator role by doing the same curl call with a GET request. It should return true.
+ Users can be removed as site curators by using the same endpoint with a DELETE action instead of POST/GET.
+
+## Grant an internal team member read access to a program

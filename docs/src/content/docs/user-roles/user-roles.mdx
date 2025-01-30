@@ -1,7 +1,7 @@
 ---
-title: User roles
+title: User roles overview
 description: Describes the types of user roles in CanDIG
-tableOfContents: false
+tableOfContents: true
 ---
 
 import { Icon } from 'astro-icon/components';
@@ -13,6 +13,8 @@ A program curator can only perform actions on the specific program they have bee
 
 Team members and Authorized users are similar in that they can only be granted access to read or see data in the platform. Team members are considered part of the team that owns or curated the program while an authorized user would have applied for access to a program through a Data Access Request. They get given access to a program/s for a pre-determined amount of time, as approved by the DAC that governs the program.
 
+## User roles summary table
+
 A summary of what each user role can do in CanDIG is in the table below. The full technical breakdown of which endpoints each user can access is controlled through opa and is found in [`paths.json`](https://github.com/CanDIG/candig-opa/blob/develop/defaults/paths.json) 
 
 | Role            | Register a new program                                  | Edit authorized users in an existing program                                 | ingest/delete data                                                           | view ingested data                                                           |
@@ -23,45 +25,7 @@ A summary of what each user role can do in CanDIG is in the table below. The ful
 | Team member     | <Icon name="mdi:do-not-disturb-alt" color="red" />      | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) |
 | Authorized user | <Icon name="mdi:do-not-disturb-alt" color="red" />      | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs for an amount of time) |
 
-# How to assign a user a site curator role
-
-This can only be done by a site admin.
-
-1. Get a token by logging into the candig data portal as site admin and copying the API token.
-
-    a. Go to the icon in the top right of the screen and click the cog
-
-    b. Click ‘ *** Get API Token’
-
-    c. Click the token to copy the text
-
-:::danger
-This token should be kept secure, it lasts for 30 mins
-:::
- 
-2. Go to a terminal and save it into a variable called TOKEN
-
-```bash
-TOKEN=ey-pasted-jwt
-```
-
-3. POST to the site-role endpoint in ingest to assign a user the site curator role, e.g. with user1@test.ca
-
-```bash
-curl --request POST \
-  --url $CANDIG_URL'/ingest/site-role/curator/email/user1@test.ca' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer '$TOKEN
-```
-
-4. You can check whether a user has the site curator role by doing the same curl call with a GET request. It should return true.
- Users can be removed as site curators by using the same endpoint with a DELETE action instead of POST/GET.
-
-## Grant an authorized user read access to a program
 
 
-## Approve and Reject authorized users
 
 
-## Grant an internal team member read access to a program

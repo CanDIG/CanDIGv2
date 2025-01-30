@@ -89,8 +89,9 @@ export default defineConfig({
             collapsed:true,
             label: 'headerLinks',
             items: [
-                { label: 'Deployment', slug: 'deployment/local' },
-                { label: 'Submission', slug: 'ingest' },
+                { label: 'Deploy', slug: 'deployment/local' },
+                { label: 'Submit', slug: 'ingest' },
+                { label: 'User Roles', slug: 'user-roles/user-roles' },
                 { label: 'Technical', slug: 'technical/architecture'}
             ]
         },
@@ -102,7 +103,6 @@ export default defineConfig({
                 { label: 'Production deployment', slug: 'deployment/production'},
                 { label: 'Testing', slug: 'deployment/ingest-and-test'},
                 { label: 'Interact using Make', slug: 'deployment/interact-with-the-stack'},
-                { label: 'User roles', slug: 'deployment/user-roles'},
                 { label: 'Logging', slug: 'deployment/logging'},
                 { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'},
                 { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'}, 
@@ -123,6 +123,22 @@ export default defineConfig({
                         'ingest/prepare-genomic',
                         'ingest/ingest-genomic',
                         'ingest/ingest-help',
+                    ]
+                }
+            ],
+        },
+        {
+            label: 'User Roles',
+            collapsed: true,
+            items: [
+                // Each item here is one entry in the navigation menu.
+                { 
+                    label: 'User Roles', 
+                    items: 
+                    [
+                        {label: 'Overview', slug: 'user-roles/user-roles'},
+                        {label: 'Assign user roles', slug: 'user-roles/assign-roles'},
+                        {label: 'DAC Authorization', slug: 'user-roles/dac-authorization'},
                     ]
                 }
             ],
