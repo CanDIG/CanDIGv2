@@ -6,7 +6,7 @@ LOGFILE=$PWD/tmp/progress.txt
 
 # This script runs before the container is composed.
 
-# copy folder to the transcriptomics container
+# copy folder to the rnaget container
 mkdir -p $PWD/lib/rnaget/rnaget/lib/
 cp -r $PWD/lib/rnaget/opa_plugin/* $PWD/lib/rnaget/rnaget/lib/
 cp -r $PWD/lib/rnaget/create_db.sh $PWD/lib/rnaget/rnaget/
