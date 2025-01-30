@@ -1,9 +1,9 @@
 {
-    "api_id": "${TYK_TRANSCRIPTOMICS_API_ID}",
-    "name": "${TYK_TRANSCRIPTOMICS_API_SLUG}",
+    "api_id": "${TYK_RNAGET_API_ID}",
+    "name": "${TYK_RNAGET_API_SLUG}",
     "use_openid": true,
     "active": true,
-    "slug": "${TYK_TRANSCRIPTOMICS_API_SLUG}",
+    "slug": "${TYK_RNAGET_API_SLUG}",
 
     "enable_signature_checking": false,
 
@@ -15,10 +15,10 @@
     "base_identity_provided_by": "",
 
     "proxy": {
-        "target_url": "${TYK_TRANSCRIPTOMICS_API_TARGET}",
+        "target_url": "${TYK_RNAGET_API_TARGET}",
         "strip_listen_path": true,
         "disable_strip_slash": false,
-        "listen_path": "/${TYK_TRANSCRIPTOMICS_API_LISTEN_PATH}",
+        "listen_path": "/${TYK_RNAGET_API_LISTEN_PATH}",
         "transport": {
             "ssl_insecure_skip_verify": false,
             "ssl_ciphers": [],

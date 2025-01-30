@@ -71,9 +71,9 @@ generate_key() {
               "api_name": "'"${TYK_QUERY_API_SLUG}"'",
               "Versions": ["Default"]
           },
-          "'"${TYK_TRANSCRIPTOMICS_API_ID}"'": {
-              "api_id": "'"${TYK_TRANSCRIPTOMICS_API_ID}"'",
-              "api_name": "'"${TYK_TRANSCRIPTOMICS_API_SLUG}"'",
+          "'"${TYK_RNAGET_API_ID}"'": {
+              "api_id": "'"${TYK_RNAGET_API_ID}"'",
+              "api_name": "'"${TYK_RNAGET_API_SLUG}"'",
               "Versions": ["Default"]
           }
  

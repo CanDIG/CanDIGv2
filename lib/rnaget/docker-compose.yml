@@ -1,16 +1,16 @@
 services:
   transcriptomics:
     build:
-      context: $PWD/lib/transcriptomics/transcriptomics
+      context: $PWD/lib/rnaget/rnaget
     image: ghcr.io/bento-platform/transcriptomics_data_service:edge
     labels:
-      - "candigv2=transcriptomics"
+      - "candigv2=rnaget"
     logging:
       driver: "fluentd"
       options:
         tag: "{{.Name}}"
     ports:
-      - "${TRANSCRIPTOMICS_PORT}:5000"
+      - "${RNAGET_PORT}:5000"
     environment:
       - CORS_ORIGINS="*"
       - BENTO_AUTHZ_SERVICE_URL=""
@@ -29,7 +29,7 @@ services:
       - source: postgres-db-secret
         target: db_password
     healthcheck:
-      test: ["CMD", "curl", "--fail", "${TRANSCRIPTOMICS_PRIVATE_URL}/service-info"]
+      test: ["CMD", "curl", "--fail", "${RNAGET_PRIVATE_URL}/service-info"]
       interval: 30s
       timeout: 10s
       retries: 3

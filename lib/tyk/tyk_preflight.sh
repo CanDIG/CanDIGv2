@@ -208,13 +208,13 @@ cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +
 ' > lib/tyk/tmp/tmp_policies.json.tpl
 mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
-echo "Working on api_transcriptomics.json"
-envsubst < ${PWD}/lib/tyk/configuration_templates/api_transcriptomics.json.tpl > ${CONFIG_DIR}/apps/${TYK_TRANSCRIPTOMICS_API_ID}.json
+echo "Working on api_rnaget.json"
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_rnaget.json.tpl > ${CONFIG_DIR}/apps/${TYK_RNAGET_API_ID}.json
 cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
-{"${TYK_TRANSCRIPTOMICS_API_ID}": {
+{"${TYK_RNAGET_API_ID}": {
     "allowed_urls": [],
-    "api_id": "${TYK_TRANSCRIPTOMICS_API_ID}",
-    "api_name": "${TYK_TRANSCRIPTOMICS_API_SLUG}",
+    "api_id": "${TYK_RNAGET_API_ID}",
+    "api_name": "${TYK_RNAGET_API_SLUG}",
     "versions": [
         "Default"
     ]
