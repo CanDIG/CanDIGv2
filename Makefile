@@ -33,7 +33,7 @@ all:
 mkdir:
 	mkdir -p bin
 	mkdir -p $(CONDA_INSTALL)
-
+	mkdir -p tmp/secrets
 
 #>>>
 # download all package binaries
