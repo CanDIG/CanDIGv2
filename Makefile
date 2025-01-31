@@ -31,10 +31,8 @@ all:
 #<<<
 .PHONY: mkdir
 mkdir:
-	mkdir -m $(DIR_PERMISSIONS) -p bin
-	mkdir -m $(DIR_PERMISSIONS) -p $(CONDA_INSTALL)
-	mkdir -m $(DIR_PERMISSIONS) -p tmp
-	mkdir -m $(DIR_PERMISSIONS) -p tmp/secrets
+	mkdir -p bin
+	mkdir -p $(CONDA_INSTALL)
 
 
 #>>>
@@ -179,7 +177,7 @@ clean-all: clean-logs clean-compose clean-containers clean-secrets \
 clean-authx:
 	mv tmp/vault/service_stores.txt tmp/vault_service_stores.txt
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
-	-mkdir -m $(DIR_PERMISSIONS) tmp/vault
+	-mkdir tmp/vault
 	mv tmp/vault_service_stores.txt tmp/vault/service_stores.txt
 
 
@@ -303,8 +301,8 @@ compose-%:
 	if [ -f lib/$*/$*_setup.sh ]; then \
 	source lib/$*/$*_setup.sh 2>&1 | tee -a $(LOGFILE); \
 	fi
-	-chmod -R $(DIR_PERMISSIONS) tmp/
-	-chmod -R 777 tmp/logs
+	-chmod -R $(DIR_PERMISSIONS) tmp/ 2>/dev/null
+	-chmod -R 777 tmp/logs 2>/dev/null
 
 #>>>
 # Combines the make clean/build/compose steps (and re-creates docker volumes)

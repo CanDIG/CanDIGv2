@@ -22,7 +22,7 @@ KEYCLOAK_CLIENT_ID_64_VAL=$(echo -n ${KEYCLOAK_CLIENT_ID} | base64)
 export KEYCLOAK_CLIENT_ID_64=$KEYCLOAK_CLIENT_ID_64_VAL
 
 # if there isn't already a value, store the password in tmp/tyk/secret-key
-mkdir -m $DIR_PERMISSIONS -p tmp/tyk
+mkdir -p tmp/tyk
 if [[ ! -f "tmp/tyk/secret-key" ]]; then
     mv tmp/secrets/tyk-secret-key tmp/tyk/secret-key
 fi
@@ -51,7 +51,7 @@ export KEYCLOAK_PUBLIC_KEY=$(curl ${KEYCLOAK_REALM_URL} -k 2>/dev/null | jq -r '
 REDIS_SECRET_KEY_VAL=$(cat $PWD/tmp/redis/secret-key)
 export REDIS_SECRET_KEY=$REDIS_SECRET_KEY_VAL
 
-mkdir -m $DIR_PERMISSIONS -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
+mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
 
 # Copy files from template configs
 
