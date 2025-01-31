@@ -301,8 +301,8 @@ compose-%:
 	if [ -f lib/$*/$*_setup.sh ]; then \
 	source lib/$*/$*_setup.sh 2>&1 | tee -a $(LOGFILE); \
 	fi
-	-chmod -R $(DIR_PERMISSIONS) tmp/ 2>/dev/null
-	-chmod -R 777 tmp/logs 2>/dev/null
+	-chmod -R $(DIR_PERMISSIONS) tmp/ 2>/dev/null || true
+	-chmod -R 777 tmp/logs 2>/dev/null || true
 
 #>>>
 # Combines the make clean/build/compose steps (and re-creates docker volumes)
