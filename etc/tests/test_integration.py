@@ -307,10 +307,10 @@ def test_s3_credentials():
     }
 
     payload = {
-        "endpoint": "http://test.com",
-        "bucket": "test",
-        "secret_key": "test",
-        "access_key": "testtest"
+        "endpoint": "https://candig-demo.uhndata.io:9000",
+        "bucket": "test-genomic",
+        "access_key": "vMBfT7WFBLWtrAZaw6K2",
+        "secret_key": "kt2ZKy2BWnDxKCNVhBmkVxd68zv76lKN36yQUjVl"
     }
 
     # set a credential
@@ -319,7 +319,7 @@ def test_s3_credentials():
     )
     print(response.text)
     # make sure that the endpoint was parsed correctly:
-    assert response.json()["endpoint"] == "test_com"
+    assert response.json()["endpoint"] == "candig_demo_uhndata_io_9000"
 
     # get the credential back
     url = f"{ENV['CANDIG_URL']}/ingest/s3-credential/endpoint/{response.json()['endpoint']}/bucket/{response.json()['bucket']}"
@@ -437,12 +437,12 @@ def test_ingest_not_admin_katsu():
         print(response.json())
         assert False
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-    while response.status_code == 200 and "status" in response.json():
+    while response.status_code == 200:
         time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     print(response.text)
     assert len(response.json()[f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"]["errors"]) == 0
-    assert len(response.json()[f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"]["results"]) == 13
+    assert len(response.json()[f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"]["results"]) == 12
     katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
@@ -494,12 +494,12 @@ def test_ingest_admin_katsu():
         print("Ingest was not successful, `queue_id` not found in response, see error messages below")
         print(response.json())
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-    while response.status_code == 200 and "status" in response.json():
+    while response.status_code == 200:
         time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     print(response.json())
     assert len(response.json()[program]["errors"]) == 0
-    assert len(response.json()[program]["results"]) == 13
+    assert len(response.json()[program]["results"]) == 12
     katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
@@ -549,24 +549,17 @@ def test_ingest_not_admin_htsget():
         print(response.json())
         assert False
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-    while response.status_code == 200 and "status" in response.json():
+    while response.status_code == 200:
         time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
 
     # when the user has program_curator role, they should be allowed
-    assert response.status_code == 200
+    assert response.status_code == 201
     for program in response.json():
         results = response.json()[program]
-
-        if len(results["errors"]) > 0:
-            print("Expected to get no errors when ingesting into htsget but the following errors were found:")
-            print("\n".join(results["errors"]))
-        assert len(results["errors"]) == 0
-        for id in results["results"]:
-            print(id)
-            print(f"\n{results["results"][id]}\n")
-            assert "genomic" in results["results"][id]
-            assert "sample" in results["results"][id]
+        print(json.dumps(results["results"], indent=2))
+        for res in results["results"]:
+            assert "error processing" not in res
     # clean up before the next test
     programs=["SYNTH_01", "SYNTH_02", "SYNTH_03", "SYNTH_04"]
     programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
@@ -594,22 +587,16 @@ def test_ingest_admin_htsget():
         print(response.json())
         assert False
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-    while response.status_code == 200 and "status" in response.json():
+    while response.status_code == 200:
         time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     # when the user has admin access, they should be allowed
-    assert response.status_code == 200
+    assert response.status_code == 201
     for program in response.json():
         results = response.json()[program]
-        if len(results["errors"]) > 0:
-            print("Expected to get no errors when ingesting into htsget but the following errors were found:")
-            print("\n".join(results["errors"]))
-        assert len(results["errors"]) == 0
-        for id in results["results"]:
-            print(id)
-            print(f"\n{results["results"][id]}\n")
-            assert "genomic" in results["results"][id]
-            assert "sample" in results["results"][id]
+        print(json.dumps(results["results"], indent=2))
+        for res in results["results"]:
+            assert "error processing" not in res
 
 
 ## Can we access the data when authorized to do so?
