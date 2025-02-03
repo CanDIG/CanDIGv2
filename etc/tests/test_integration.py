@@ -1187,10 +1187,10 @@ def test_query_completeness():
         f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/genomic_completeness").json()
     pprint.pprint(query_response)
     # Verify that the synthetic data shows up
-    assert "LOCAL-SYNTH_01" in query_response
-    assert query_response["LOCAL-SYNTH_01"]["genomes"] == 6
-    assert "LOCAL-SYNTH_02" in query_response
-    assert query_response["LOCAL-SYNTH_02"]["genomes"] == 5
+    assert f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01" in query_response
+    assert query_response[f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"]["genomes"] == 6
+    assert f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02" in query_response
+    assert query_response[f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02"]["genomes"] == 5
 
 
 def test_clean_up():
