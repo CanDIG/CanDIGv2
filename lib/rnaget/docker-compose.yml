@@ -20,7 +20,7 @@ services:
       - DB_HOST=postgres-db
       - DB_PORT=5432
       - DB_USER=${DEFAULT_ADMIN_USER}
-      - DB_NAME=tds_db
+      - DB_NAME=rnaget_db
       - DB_PASSWORD_FILE=/run/secrets/db_password
       - WORKERS=2
     extra_hosts:
