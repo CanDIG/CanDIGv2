@@ -6,30 +6,35 @@ import starlightUtils from "@lorenzo_lewis/starlight-utils";
 
 import icon from 'astro-icon';
 
+import d2 from 'astro-d2';
+
 // https://astro.build/config
 export default defineConfig({
     site: 'https://candig.github.io',
     base: 'CanDIGv2',
-    integrations: [icon({
-        include: {
+    integrations: [
+        d2({output: "d2"}),
+        icon({
+            include: {
             mdi: ["*"]
         }
-    }), starlight({
-    title: 'Docs',
-    customCss: [
-        './src/styles/custom.css'
-    ],
-    favicon: '/favicon.ico',
-    editLink: {
-        baseUrl: 'https://github.com/CanDIG/CanDIGv2/edit/develop/'
-    },
-    logo: {
-        src: './src/assets/my-logo.png',
-        replacesTitle: true,
-    },
-    social: {
-        github: 'https://github.com/candig/CanDIGv2',
-    },
+    }), 
+    starlight({
+        title: 'Docs',
+        customCss: [
+            './src/styles/custom.css'
+        ],
+        favicon: '/favicon.ico',
+        editLink: {
+            baseUrl: 'https://github.com/CanDIG/CanDIGv2/edit/develop/'
+        },
+        logo: {
+            src: './src/assets/my-logo.png',
+            replacesTitle: true,
+        },
+        social: {
+            github: 'https://github.com/candig/CanDIGv2',
+        },
     plugins: [
         starlightUtils({
             navLinks: {
@@ -76,7 +81,7 @@ export default defineConfig({
                 schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/stable/htsget_server/htsget_openapi.yaml',
                 collapsed: true
             },
-	    {
+        {
                 base: 'technical/federation-api',
                 label: 'htsget operations api',
                 schema: 'https://raw.githubusercontent.com/CanDIG/federation_service/refs/heads/develop/candig_federation/federation.yaml',
@@ -152,5 +157,5 @@ export default defineConfig({
             ]
         },
     ],
-		})]
+        }), d2()]
 });
