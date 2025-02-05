@@ -15,8 +15,6 @@ services:
       - CORS_ORIGINS="*"
       - BENTO_AUTHZ_SERVICE_URL=""
       - OPA_URL=${OPA_PRIVATE_URL}
-      - VAULT_URL=${VAULT_PRIVATE_URL}
-      - KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_URL}
       - DB_HOST=postgres-db
       - DB_PORT=5432
       - DB_USER=${DEFAULT_ADMIN_USER}
