@@ -10,41 +10,48 @@ import { Steps } from '@astrojs/starlight/components';
 In CanDIG, there are five main user roles, `site admin`, `site curator`, `program curator`, `team member` and `CanDIG authorized user`. It is expected that CanDIG will be configured to using an external institutional identity provider that is connected to the Keycloak instance that runs as part of the CanDIGv2 stack. While this setup allows anyone with valid credentials to authenticate to CanDIG, we have implemented the `CanDIG authorized user` which ensures only users who have either been pre-approved by a `site admin`, or request access to the specific CanDIG instance are able to login to CanDIG and view data.
 
 ### User request flow
-```d2 pad=50
+```d2 
 # User request flow
 shape: sequence_diagram
 unauth'd user: {shape: person}
+unauth'd user.style.font-size: 20
 auth'd user: {shape: person}
+auth'd user.style.font-size: 20
 data portal
+data portal.style.font-size: 20
 ingest
+ingest.style.font-size: 20
 site admin: {shape: person}
-unauth'd user -> data portal: Login with institutional credentials
-data portal -> unauth'd user: Redirect user to request access
-unauth'd user -> data portal: request access
-data portal -> ingest: add user to pending users list
-site admin -> ingest: approve user
-unauth'd user -> auth'd user: unauthorized user becomes authorized user
-auth'd user -> data portal: Authorized user can login to data portal
+site admin.style.font-size: 20
+unauth'd user -> data portal: Login with institutional credentials {style: {font-size: 24}}
+data portal -> unauth'd user: Redirect user to request access {style: {font-size: 24}}
+unauth'd user -> data portal: Request access {style: {font-size: 24}}
+data portal -> ingest: Add pending user {style: {font-size: 24}}
+site admin -> ingest: Approve {style: {font-size: 24}}
+unauth'd user -> auth'd user: Unauthorized user becomes authorized {style: {font-size: 24}}
+auth'd user -> data portal: View summary stats {style: {font-size: 24}}
 ```
 
 ### Pre-approved user flow
 ```d2 
 # User request flow
-style: {
-    font-size: 20
-}
 shape: sequence_diagram
 preauth'd user: {shape: person}
+preauth'd user.style.font-size: 20
 auth'd user: {shape: person}
+auth'd user.style.font-size: 20
 data portal
+data portal.style.font-size: 20
 ingest
+ingest.style.font-size: 20
 site admin: {shape: person}
-site admin -> ingest: Add list of users to preapproved list 
-preauth'd user -> data portal: Login with institutional credentials
-data portal -> ingest: Check for pre-approval status
-ingest -> ingest: Register pre-approved user
-preauth'd user -> auth'd user: unauthorized user becomes authorized user
-auth'd user -> data portal: user is able to login and explore the data portal
+site admin.style.font-size: 20
+site admin -> ingest: Add users to preapproved list {style: {font-size: 24}}
+preauth'd user -> data portal: Login with institutional credentials {style: {font-size: 24}}
+data portal -> ingest: Check for pre-approval {style: {font-size: 24}}
+ingest -> ingest: Register pre-approved user {style: {font-size: 24}}
+preauth'd user -> auth'd user: Unauthorized user becomes authorized {style: {font-size: 24}}
+auth'd user -> data portal: View summary stats {style: {font-size: 24}}
 ```
 
 ```d2
@@ -72,5 +79,14 @@ A summary of what each user role can do in CanDIG is in the table below. The ful
 
 
 
-
+```d2
+direction: right
+x -> y: hi {
+  style: {
+    font-size: 28
+  }
+}
+x.style.font-size: 8
+y.style.font-size: 55
+```
 
