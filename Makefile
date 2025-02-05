@@ -535,9 +535,9 @@ print-%:
 test-integration:
 	python ./settings.py
 ifeq ($(KEEP_TEST_DATA),true)
-	source ./env.sh; pytest -v ./etc/tests -k 'not test_clean_up' $(ARGS)
+	source ./env.sh; pytest -v ./etc/tests -k 'not test_clean_up' $(ARGS) | tee ./tmp/test/test-integration_$(shell date +"%Hh%Mm%Ss_%Y-%m-%d").log
 else
-	source ./env.sh; pytest -v ./etc/tests $(ARGS)
+	source ./env.sh; pytest -v ./etc/tests $(ARGS) | tee ./tmp/test/test-integration_$(shell date +"%Hh%Mm%Ss_%Y-%m-%d").log
 endif
 
 # Run a single test by using its name and print out results whether failing or passing
@@ -545,7 +545,7 @@ endif
 # Helpful when debugging issues with a specific test
 .PHONY: test-integration-%
 test-integration-%:
-	python ./settings.py; source ./env.sh; pytest ./etc/tests -s -rP -k '$*'
+	python ./settings.py; source ./env.sh; pytest ./etc/tests -s -rP -k '$*' | tee ./tmp/test/test-integration_$(shell date +"%Hh%Mm%Ss_%Y-%m-%d").log
 
 # stop all docker containers
 .PHONY: stop-all
