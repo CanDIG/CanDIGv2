@@ -92,6 +92,10 @@ def test_tyk():
                 f"{ENV['CANDIG_URL']}/{endpoint}", headers=headers, timeout=10
             )
             sc = response.status_code
+            try:
+                r = response.json()
+            except requests.JSONDecodeError as e:
+                sc = 500 # to show that the endpoint was not valid json
             responses.append(sc)
             print(f"{endpoint}: {sc == 200}")
     assert all(response == 200 for response in responses)
