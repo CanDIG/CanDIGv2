@@ -70,25 +70,30 @@ def test_get_token():
 
 ## Tyk test: can we get a response from Tyk for all of our services?
 def test_tyk():
+    modules = ENV['CANDIG_ENV']['CANDIG_MODULES'].split(" ")
     headers = {
         "Authorization": f"Bearer {get_site_admin_token()}"
     }
-    endpoints = [
-        f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v3/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_RNAGET_API_LISTEN_PATH']}/service-info",
-        f"federation/v1/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/service/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_INGEST_API_LISTEN_PATH']}/service-info",
-    ]
+    endpoints = {
+        # all of these endpoints should return JSON
+        "htsget": f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
+        "katsu": f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v3/service-info",
+        "rnaget": f"{ENV['CANDIG_ENV']['TYK_RNAGET_API_LISTEN_PATH']}/service-info",
+        "federation": f"federation/v1/service-info",
+        "opa": f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/service/service-info",
+        "query": f"{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/service-info",
+        "candig-ingest": f"{ENV['CANDIG_ENV']['TYK_INGEST_API_LISTEN_PATH']}/service-info",
+    }
     responses = []
-    for endpoint in endpoints:
-        response = requests.get(
-            f"{ENV['CANDIG_URL']}/{endpoint}", headers=headers, timeout=10
-        )
-        responses.append(response.status_code)
-        print(f"{endpoint}: {response.status_code == 200}")
+    for module in modules:
+        if module in endpoints:
+            endpoint = endpoints[module]
+            response = requests.get(
+                f"{ENV['CANDIG_URL']}/{endpoint}", headers=headers, timeout=10
+            )
+            sc = response.status_code
+            responses.append(sc)
+            print(f"{endpoint}: {sc == 200}")
     assert all(response == 200 for response in responses)
 
 
