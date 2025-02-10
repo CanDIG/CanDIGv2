@@ -112,7 +112,6 @@ export default defineConfig({
                 { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'},
                 { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'}, 
             ]
-
         },
         {
             label: 'Submission',
@@ -134,19 +133,12 @@ export default defineConfig({
         },
         {
             label: 'User Roles',
-            collapsed: true,
-            items: [
-                // Each item here is one entry in the navigation menu.
-                { 
-                    label: 'User Roles', 
-                    items: 
-                    [
-                        {label: 'Overview', slug: 'user-roles/user-roles'},
-                        {label: 'Assign user roles', slug: 'user-roles/assign-roles'},
-                        {label: 'DAC Authorization', slug: 'user-roles/dac-authorization'},
-                    ]
-                }
-            ],
+            items:
+                [
+                    {label: 'Overview', slug: 'user-roles/user-roles'},
+                    {label: 'Assign user roles', slug: 'user-roles/assign-roles'},
+                    {label: 'DAC Authorization', slug: 'user-roles/dac-authorization'},
+                ]
         },
         {
             label: 'Technical Docs',

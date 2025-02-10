@@ -23,13 +23,13 @@ ingest
 ingest.style.font-size: 20
 site admin: {shape: person}
 site admin.style.font-size: 20
-unauth'd user -> data portal: Login with institutional credentials {style: {font-size: 24}}
-data portal -> unauth'd user: Redirect user to request access {style: {font-size: 24}}
-unauth'd user -> data portal: Request access {style: {font-size: 24}}
-data portal -> ingest: Add pending user {style: {font-size: 24}}
-site admin -> ingest: Approve {style: {font-size: 24}}
-unauth'd user -> auth'd user: Unauthorized user becomes authorized {style: {font-size: 24}}
-auth'd user -> data portal: View summary stats {style: {font-size: 24}}
+unauth'd user -> data portal: 1. Login with institutional credentials {style: {font-size: 24}}
+data portal -> unauth'd user: 2. Redirect user to request access {style: {font-size: 24}}
+unauth'd user -> data portal: 3. Request access {style: {font-size: 24}}
+data portal -> ingest: 4. Add pending user {style: {font-size: 24}}
+site admin -> ingest: 5. Approve {style: {font-size: 24}}
+unauth'd user -> auth'd user: 6. Unauthorized user becomes authorized {style: {font-size: 24}}
+auth'd user -> data portal: 7. View summary stats {style: {font-size: 24}}
 ```
 
 ### Pre-approved user flow
@@ -46,17 +46,12 @@ ingest
 ingest.style.font-size: 20
 site admin: {shape: person}
 site admin.style.font-size: 20
-site admin -> ingest: Add users to preapproved list {style: {font-size: 24}}
-preauth'd user -> data portal: Login with institutional credentials {style: {font-size: 24}}
-data portal -> ingest: Check for pre-approval {style: {font-size: 24}}
-ingest -> ingest: Register pre-approved user {style: {font-size: 24}}
-preauth'd user -> auth'd user: Unauthorized user becomes authorized {style: {font-size: 24}}
-auth'd user -> data portal: View summary stats {style: {font-size: 24}}
-```
-
-```d2
-data portal -> ingest: Check for pre-approval status
-ingest -> ingest: Register pre-approved user
+site admin -> ingest: 1. Add users to preapproved list {style: {font-size: 24}}
+preauth'd user -> data portal: 2. Login with institutional credentials {style: {font-size: 24}}
+data portal -> ingest: 3. Check for pre-approval {style: {font-size: 24}}
+ingest -> ingest: 4. Register pre-approved user {style: {font-size: 24}}
+preauth'd user -> auth'd user: 5. Unauthorized user becomes authorized {style: {font-size: 24}}
+auth'd user -> data portal: 6. View summary stats {style: {font-size: 24}}
 ```
 
 It is expected that the main users who will be ingesting data will be either a Site Curator or a Program Curator. Initially, a site admin must give a user either site curator or program curator privileges to enable them to ingest. Once given site curator status, a user can then register, ingest and delete any program at a site. The site curator role is intended to be used when there is a few dedicated curators who will be ingesting all data at a site and they are all authorized to see all data that will be ingested at that site.
@@ -76,17 +71,4 @@ A summary of what each user role can do in CanDIG is in the table below. The ful
 | Program curator | <Icon name="mdi:do-not-disturb-alt" color="red" />      | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) |
 | Team member     | <Icon name="mdi:do-not-disturb-alt" color="red" />      | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) |
 | Authorized user | <Icon name="mdi:do-not-disturb-alt" color="red" />      | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs for an amount of time) |
-
-
-
-```d2
-direction: right
-x -> y: hi {
-  style: {
-    font-size: 28
-  }
-}
-x.style.font-size: 8
-y.style.font-size: 55
-```
 
