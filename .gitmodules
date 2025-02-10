@@ -22,3 +22,6 @@
 [submodule "lib/query/query"]
 	path = lib/query/query
 	url = https://github.com/CanDIG/candigv2-query
+[submodule "lib/rnaget/rnaget"]
+	path = lib/rnaget/rnaget
+	url = https://github.com/bento-platform/transcriptomics_data_service
