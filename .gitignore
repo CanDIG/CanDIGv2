@@ -14,6 +14,7 @@
 .venv
 .env
 .env-bak
+.env-*
 /nightly_env.sh
 /bin
 /etc/ssl/selfsigned-*
