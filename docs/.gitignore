@@ -24,3 +24,5 @@ pnpm-debug.log*
 package-lock.json
 package.json
 .env*
+
+public/d2/*

@@ -91,26 +91,31 @@ export default defineConfig({
     ],
     sidebar: [
         {
-            collapsed:true,
+            collapsed: true,
             label: 'headerLinks',
             items: [
                 { label: 'Deploy', slug: 'deployment/local' },
                 { label: 'Submit', slug: 'ingest' },
-                { label: 'User Roles', slug: 'user-roles/user-roles' },
-                { label: 'Technical', slug: 'technical/architecture'}
+                { label: 'User Roles', slug: 'user-roles' },
+                { label: 'Technical', slug: 'technical'}
             ]
         },
         {   
             collapsed: true,
             label: 'Deployment',
             items: [
-                { label: 'Local deployment', slug: 'deployment/local' },
-                { label: 'Production deployment', slug: 'deployment/production'},
-                { label: 'Testing', slug: 'deployment/ingest-and-test'},
-                { label: 'Interact using Make', slug: 'deployment/interact-with-the-stack'},
-                { label: 'Logging', slug: 'deployment/logging'},
-                { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'},
-                { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'}, 
+                {
+                    label: 'Deployment',
+                    items: [
+                        { label: 'Local deployment', slug: 'deployment/local' },
+                        { label: 'Production deployment', slug: 'deployment/production'},
+                        { label: 'Testing', slug: 'deployment/ingest-and-test'},
+                        { label: 'Interact using Make', slug: 'deployment/interact-with-the-stack'},
+                        { label: 'Logging', slug: 'deployment/logging'},
+                        { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'},
+                        { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'}, 
+                    ]
+                }
             ]
         },
         {
@@ -133,19 +138,35 @@ export default defineConfig({
         },
         {
             label: 'User Roles',
-            items:
-                [
-                    {label: 'Overview', slug: 'user-roles/user-roles'},
-                    {label: 'Assign user roles', slug: 'user-roles/assign-roles'},
-                    {label: 'DAC Authorization', slug: 'user-roles/dac-authorization'},
-                ]
+            collapsed: true,
+            items: [
+                {
+                    label: 'User Roles',
+                    items:
+                    [
+                        {label: 'User Roles', slug: 'user-roles/roles-overview'},
+                        {label: 'Assign user roles', slug: 'user-roles/assign-roles'},
+                        {label: 'DAC Authorization', slug: 'user-roles/dac-authorization'},
+                    ]
+                }
+            ]
+            
         },
         {
             label: 'Technical Docs',
+            collapsed: true,
             items: [ 
-                { label: 'Architecture', slug: 'technical/architecture' },
-                { label: 'Docker and submods', slug: 'technical/docker-and-submodules' },
-                ...openAPISidebarGroups,
+                {
+                    label: 'Tech docs',
+                    items: 
+                    [
+                        { label: 'Architecture', slug: 'technical/architecture' },
+                        { label: 'Docker and submods', slug: 'technical/docker-and-submodules' },
+                        ...openAPISidebarGroups,
+                    ]
+                }
+                
+                
             ]
         },
     ],
