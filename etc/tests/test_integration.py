@@ -1204,7 +1204,6 @@ def test_clean_up():
     clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_03")
     clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_04")
 
-    clean_up_user(ENV['CANDIG_SITE_ADMIN_USER'])
     clean_up_user(ENV['CANDIG_NOT_ADMIN_USER'])
     clean_up_user(ENV['CANDIG_NOT_ADMIN2_USER'])
 
