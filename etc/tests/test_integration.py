@@ -1157,11 +1157,17 @@ def test_query_genomic():
 
 # Can we use a discovery query to get counts of donors we do not have access to?
 def test_query_discovery():
+    token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'],
+                      password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
+    
     katsu_response = requests.get(
-        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
+        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/authorized/programs/", headers=headers
     ).json()
     query_response = requests.get(
-        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs").json()
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs", headers=headers).json()
     # Ensure that each category in metadata corresponds to something in the site
     for category in query_response["site"]["required_but_missing"]:
         for field in query_response["site"]["required_but_missing"][category]:
@@ -1170,7 +1176,7 @@ def test_query_discovery():
                 if type(total) == str:
                     # Can't perform this check on censored data
                     continue
-                for program in katsu_response:
+                for program in katsu_response["items"]:
                     if category in program["metadata"]['required_but_missing'] and field in program["metadata"]['required_but_missing'][category]:
                         if type(program["metadata"]['required_but_missing'][category][field][total_type]) == int:
                             total -= program["metadata"]['required_but_missing'][category][field][total_type]
@@ -1179,7 +1185,7 @@ def test_query_discovery():
                     assert False
 
     # Ensure that every category & field in Katsu exists in the response
-    for program in katsu_response:
+    for program in katsu_response["items"]:
         for category in program["metadata"]["required_but_missing"]:
             assert category in query_response["site"]["required_but_missing"]
             for field in program["metadata"]["required_but_missing"][category]:
@@ -1188,8 +1194,13 @@ def test_query_discovery():
 
 # Can we check how many donors have genomics data?
 def test_query_completeness():
+    token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'],
+                      password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
     query_response = requests.get(
-        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/genomic_completeness").json()
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/genomic_completeness", headers=headers).json()
     pprint.pprint(query_response)
     # Verify that the synthetic data shows up
     assert f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01" in query_response
