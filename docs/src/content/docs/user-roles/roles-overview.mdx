@@ -7,39 +7,70 @@ tableOfContents: true
 import { Icon } from 'astro-icon/components';
 import { Steps } from '@astrojs/starlight/components';
 
-In CanDIG, there are five main user roles, `site admin`, `site curator`, `program curator`, `team member` and `CanDIG authorized user`. It is expected that CanDIG will be configured to using an external institutional identity provider that is connected to the Keycloak instance that runs as part of the CanDIGv2 stack. While this setup allows anyone with valid credentials to authenticate to CanDIG, we have implemented the `CanDIG authorized user` which ensures only users who have either been pre-approved by a `site admin`, or request access to the specific CanDIG instance are able to login to CanDIG and view data.
+In CanDIG, there are five main user roles, from most privileged to least privileged they are:
+1. Site admin
+2. Site curator
+3. Program curator
+4. Team member
+5. CanDIG authorized user
+
+## User roles summary table
+
+A summary of what each user role can do in CanDIG is in the table below. The full technical breakdown of which endpoints each user can access is controlled through opa and is found in [`paths.json`](https://github.com/CanDIG/candig-opa/blob/develop/defaults/paths.json) 
+
+| Role                   | Register program                                 | Edit user auth                                      | submit delete data                                 | view donor data                                    | view agg. data                                |
+|------------------------|--------------------------------------------------|-----------------------------------------------------|----------------------------------------------------|----------------------------------------------------|-----------------------------------------------|
+| Site admin             | <Icon name="mdi:shield-check" color="green"/>    | <Icon name="mdi:shield-check" color="green"/>       | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/> |
+| Site curator           | <Icon name="mdi:shield-check" color="green"/>    | <Icon name="mdi:shield-check" color="green"/>       | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/> |
+| Program curator        | <Icon name="mdi:shield-off" color="red" />       | <Icon name="mdi:shield-half-full" color="orange"/>  | <Icon name="mdi:shield-half-full" color="orange"/> | <Icon name="mdi:shield-half-full" color="orange"/> | <Icon name="mdi:shield-check" color="green"/> |
+| Team member            | <Icon name="mdi:shield-off" color="red" />       | <Icon name="mdi:shield-off" color="red" />          | <Icon name="mdi:shield-off" color="red" />         | <Icon name="mdi:shield-half-full" color="orange"/> | <Icon name="mdi:shield-check" color="green"/> |
+| CanDIG Authorized User | <Icon name="mdi:shield-off" color="red" />       | <Icon name="mdi:shield-off" color="red" />          | <Icon name="mdi:shield-off" color="red" />         | <Icon name="mdi:shield-half-full" color="orange"/> | <Icon name="mdi:shield-check" color="green"/> |
+
+**Legend**
+
+|Icon                                               |Can perform action at a site? |
+|---------------------------------------------------|----------------------------------------------------------------------------------------------|
+|<Icon name="mdi:shield-check" color="green"/>      |Yes, for all data at a site|
+|<Icon name="mdi:shield-half-full" color="orange"/> |Yes, but only where the user has been specifically authorized for a particular program/dataset|
+|<Icon name="mdi:shield-off" color="red" />         |No.|
+
+## CanDIG Authorized User
+
+It is expected that CanDIG will be configured to using an external institutional identity provider that is connected to the Keycloak instance that runs as part of the CanDIGv2 stack. While this setup allows anyone with valid credentials to authenticate to CanDIG, only `CanDIG authorized user`s can access to view aggregate statistics of any data that has been ingested into the CanDIG network. To become a 'CanDIG Authorized User', users with institutional credentials need to either be pre-approved by a `site admin`, or request access to the specific CanDIG instance via the web portal, and then be approved by the `site admin`. The step-by-step flow of these processes is shown diagrammatically below:
 
 ### User request flow
+
 ```d2 
 # User request flow
 shape: sequence_diagram
-unauth'd user: {shape: person}
-unauth'd user.style.font-size: 20
-auth'd user: {shape: person}
-auth'd user.style.font-size: 20
+unauthz'd user: {shape: person}
+unauthz'd user.style.font-size: 20
+authz'd user: {shape: person}
+authz'd user.style.font-size: 20
 data portal
 data portal.style.font-size: 20
 ingest
 ingest.style.font-size: 20
 site admin: {shape: person}
 site admin.style.font-size: 20
-unauth'd user -> data portal: 1. Login with institutional credentials {style: {font-size: 24}}
-data portal -> unauth'd user: 2. Redirect user to request access {style: {font-size: 24}}
-unauth'd user -> data portal: 3. Request access {style: {font-size: 24}}
+unauthz'd user -> data portal: 1. Login with institutional credentials {style: {font-size: 24}}
+data portal -> unauthz'd user: 2. Redirect user to request access {style: {font-size: 24}}
+unauthz'd user -> data portal: 3. Request access {style: {font-size: 24}}
 data portal -> ingest: 4. Add pending user {style: {font-size: 24}}
 site admin -> ingest: 5. Approve {style: {font-size: 24}}
-unauth'd user -> auth'd user: 6. Unauthorized user becomes authorized {style: {font-size: 24}}
-auth'd user -> data portal: 7. View summary stats {style: {font-size: 24}}
+unauthz'd user -> authz'd user: 6. Unauthorized user becomes authorized {style: {font-size: 24}}
+authz'd user -> data portal: 7. View summary stats {style: {font-size: 24}}
 ```
 
 ### Pre-approved user flow
+
 ```d2 
 # User request flow
 shape: sequence_diagram
-preauth'd user: {shape: person}
-preauth'd user.style.font-size: 20
-auth'd user: {shape: person}
-auth'd user.style.font-size: 20
+preauthz'd user: {shape: person}
+preauthz'd user.style.font-size: 20
+authz'd user: {shape: person}
+authz'd user.style.font-size: 20
 data portal
 data portal.style.font-size: 20
 ingest
@@ -47,28 +78,18 @@ ingest.style.font-size: 20
 site admin: {shape: person}
 site admin.style.font-size: 20
 site admin -> ingest: 1. Add users to preapproved list {style: {font-size: 24}}
-preauth'd user -> data portal: 2. Login with institutional credentials {style: {font-size: 24}}
+preauthz'd user -> data portal: 2. Login with institutional credentials {style: {font-size: 24}}
 data portal -> ingest: 3. Check for pre-approval {style: {font-size: 24}}
 ingest -> ingest: 4. Register pre-approved user {style: {font-size: 24}}
-preauth'd user -> auth'd user: 5. Unauthorized user becomes authorized {style: {font-size: 24}}
-auth'd user -> data portal: 6. View summary stats {style: {font-size: 24}}
+preauthz'd user -> authz'd user: 5. Unauthorized user becomes authorized {style: {font-size: 24}}
+authz'd user -> data portal: 6. View summary stats {style: {font-size: 24}}
 ```
 
-It is expected that the main users who will be ingesting data will be either a Site Curator or a Program Curator. Initially, a site admin must give a user either site curator or program curator privileges to enable them to ingest. Once given site curator status, a user can then register, ingest and delete any program at a site. The site curator role is intended to be used when there is a few dedicated curators who will be ingesting all data at a site and they are all authorized to see all data that will be ingested at that site.
+## Curator roles
+
+It is expected that the main users who will be submitting data will be either a `Site Curator` or a `Program Curator`. Initially, a `site admin` must give a user either site curator or program curator privileges to enable them to submit data. Once given `site curator` status, a user can then register, ingest and delete any program at a site. The `site curator` role is intended to be used when there is a few dedicated curators who will be ingesting all data at a site and they are **all authorized** to see **all data** that will be ingested at that site.
 
 A program curator can only perform actions on the specific program they have been given program curator status on. They are not authorized to see or edit other programs at the site.
 
 Team members and Authorized users are similar in that they can only be granted access to read or see data in the platform. Team members are considered part of the team that owns or curated the program while an authorized user would have applied for access to a program through a Data Access Request. They get given access to a program/s for a pre-determined amount of time, as approved by the DAC that governs the program.
-
-## User roles summary table
-
-A summary of what each user role can do in CanDIG is in the table below. The full technical breakdown of which endpoints each user can access is controlled through opa and is found in [`paths.json`](https://github.com/CanDIG/candig-opa/blob/develop/defaults/paths.json) 
-
-| Role            | Register a new program                                  | Edit authorized users in an existing program                                 | ingest/delete data                                                           | view ingested data                                                           |
-|---------------|-------------------------------------------------------|----------------------------------------------------------------------------|----------------------------------------------------------------------------|----------------------------------------------------------------------------|
-| Site admin      | <Icon name="mdi:checkbox-marked-circle" color="green" text-align="center"/> | <Icon name="mdi:checkbox-marked-circle" color="green"/>  | <Icon name="mdi:checkbox-marked-circle" color="green"/>  | <Icon name="mdi:checkbox-marked-circle" color="green"/> |
-| Site curator    | <Icon name="mdi:checkbox-marked-circle" color="green" text-align="center"/> | <Icon name="mdi:checkbox-marked-circle" color="green"/>                      | <Icon name="mdi:checkbox-marked-circle" color="green"/>                      | <Icon name="mdi:checkbox-marked-circle" color="green"/>  |
-| Program curator | <Icon name="mdi:do-not-disturb-alt" color="red" />      | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) |
-| Team member     | <Icon name="mdi:do-not-disturb-alt" color="red" />      | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs) |
-| Authorized user | <Icon name="mdi:do-not-disturb-alt" color="red" />      | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:do-not-disturb-alt" color="red" />                           | <Icon name="mdi:checkbox-marked-circle" color="green"/>(authorized programs for an amount of time) |
 
