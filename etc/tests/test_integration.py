@@ -327,6 +327,14 @@ def test_s3_credentials():
     response = requests.post(
         f"{ENV['CANDIG_URL']}/ingest/s3-credential", headers=headers, json=payload
     )
+    # check to see if the error is SSL; if so, try again without https:
+    if "SSLError" in response.text:
+        payload["endpoint"] = "http://candig-demo.uhndata.io:9000"
+        # set a credential
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/ingest/s3-credential", headers=headers, json=payload
+        )
+
     print(response.text)
     # make sure that the endpoint was parsed correctly:
     assert response.json()["endpoint"] == "candig_demo_uhndata_io_9000"
@@ -1196,7 +1204,6 @@ def test_clean_up():
     clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_03")
     clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_04")
 
-    clean_up_user(ENV['CANDIG_SITE_ADMIN_USER'])
     clean_up_user(ENV['CANDIG_NOT_ADMIN_USER'])
     clean_up_user(ENV['CANDIG_NOT_ADMIN2_USER'])
 
