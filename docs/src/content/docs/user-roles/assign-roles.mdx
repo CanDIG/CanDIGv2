@@ -2,11 +2,21 @@
 title: Assign User roles
 description: How to grant a CanDIG user permissions to perform tasks and access data 
 tableOfContents: true
+banner:
+  content: |
+    These changes are in develop and will be part of an upcoming stable release.
 ---
 
-# How to assign a user a site curator role
+import { Badge } from '@astrojs/starlight/components';
 
-This can only be done by a site admin.
+Detailed information about what each role means can be found on the [Roles overview](roles-overview) page
+
+## Getting a token
+
+<details>
+<summary>Expand to view steps</summary>
+
+Any user can get a token using this process but the activities allowed will depend on what role(s) that user has.
 
 1. Get a token by logging into the candig data portal as site admin and copying the API token.
 
@@ -26,7 +36,30 @@ This token should be kept secure, it lasts for 30 mins
 TOKEN=ey-pasted-jwt
 ```
 
-3. POST to the site-role endpoint in ingest to assign a user the site curator role, e.g. with user1@test.ca
+</details>
+
+## How to add 1 or more pre-approved users <Badge text="Site admin" variant="caution" />
+
+This can only be performed by a site admin
+
+First [get a token](#getting-a-token), then:
+
+## How to approve a user that has requested access <Badge text="Site admin" variant="caution" />
+
+This can only be performed by a site admin. Unauthorized users can request access through clicking a button in the CanDIG Data portal. Clicking this button causes the user to be added to the `pending users` list in ingest. A site admin then needs to approve these users so they can become [CanDIG Authorized Users](roles-overview#1-candig-authorized-user). [This diagram](roles-overview#request-flow) demonstrates this process visually.
+
+First [get a token](#getting-a-token), then:
+
+1. POST to the 
+
+
+## How to assign a user a `Site curator` role <Badge text="Site admin" variant="caution" />
+
+This can only be done by a site admin.
+
+Follow the steps in [Getting a Token](#getting-a-token) above then:
+
+1. POST to the `site-role` endpoint in ingest to assign a user the site curator role, e.g. with user1@test.ca
 
 ```bash
 curl --request POST \
@@ -36,7 +69,18 @@ curl --request POST \
   -H 'Authorization: Bearer '$TOKEN
 ```
 
-4. You can check whether a user has the site curator role by doing the same curl call with a GET request. It should return true.
+2. You can check whether a user has the site curator role by doing the same curl call with a GET request. It should return true.
  Users can be removed as site curators by using the same endpoint with a DELETE action instead of POST/GET.
 
-## Grant an internal team member read access to a program
+
+## How to assign `Program Curator` and `Team member` roles <Badge text="Site admin" variant="caution" /> <Badge text="Site Curator" variant="tip" /> <Badge text="Program Curator" variant="success" />
+
+Assigning program curator and team member roles is done through program registration. See the step-by-step guide here: [Registering programs](/CanDIGv2/ingest/register-programs). For each program that a curator or team member needs to be added to, a separate program registration will need to be submitted by either a `site admin`, `site curator` or a `program curator` already named on that program.
+
+:::caution
+A POST request to the ingest/program replaces any existing program registration data for that program. It is advisable to first use a GET request to see the current users authorized to a program before adding additional program_curators and/or team_members when POSTing to this endpoint
+:::
+
+## How to change the site admin <Badge text="Site admin" variant="caution" />
+
+The site admin can be changed by following the steps on the [Production Deployment page](/CanDIGv2/deployment/production#change-the-default-site-admin).

@@ -2,23 +2,26 @@
 title: User roles overview
 description: Describes the types of user roles in CanDIG
 tableOfContents: true
+banner:
+  content: |
+    These changes are in develop and will be part of an upcoming stable release.
 ---
 
 import { Icon } from 'astro-icon/components';
 import { Steps } from '@astrojs/starlight/components';
 
 In CanDIG, there are five main user roles, from most privileged to least privileged they are:
-1. Site admin
-2. Site curator
+1. CanDIG authorized user
+2. Team member
 3. Program curator
-4. Team member
-5. CanDIG authorized user
+4. Site curator
+5. Site admin
 
 ## User roles summary table
 
-A summary of what each user role can do in CanDIG is in the table below. The full technical breakdown of which endpoints each user can access is controlled through opa and is found in [`paths.json`](https://github.com/CanDIG/candig-opa/blob/develop/defaults/paths.json) 
+A summary of what each user role can do within a deployed CanDIG site is in the table below. The full technical breakdown of which endpoints each user can access is controlled through opa and is found in [`paths.json`](https://github.com/CanDIG/candig-opa/blob/develop/defaults/paths.json) 
 
-| Role                   | Register program                                 | Edit user auth                                      | submit delete data                                 | view donor data                                    | view agg. data                                |
+| Role                   | Register program                                 | Edit user auth                                      | Submit & delete data                                 | view donor data                                    | view agg. data                                |
 |------------------------|--------------------------------------------------|-----------------------------------------------------|----------------------------------------------------|----------------------------------------------------|-----------------------------------------------|
 | Site admin             | <Icon name="mdi:shield-check" color="green"/>    | <Icon name="mdi:shield-check" color="green"/>       | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/> |
 | Site curator           | <Icon name="mdi:shield-check" color="green"/>    | <Icon name="mdi:shield-check" color="green"/>       | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/> |
@@ -34,11 +37,13 @@ A summary of what each user role can do in CanDIG is in the table below. The ful
 |<Icon name="mdi:shield-half-full" color="orange"/> |Yes, but only where the user has been specifically authorized for a particular program/dataset|
 |<Icon name="mdi:shield-off" color="red" />         |No.|
 
-## CanDIG Authorized User
+## 1. CanDIG Authorized User
 
-It is expected that CanDIG will be configured to using an external institutional identity provider that is connected to the Keycloak instance that runs as part of the CanDIGv2 stack. While this setup allows anyone with valid credentials to authenticate to CanDIG, only `CanDIG authorized user`s can access to view aggregate statistics of any data that has been ingested into the CanDIG network. To become a 'CanDIG Authorized User', users with institutional credentials need to either be pre-approved by a `site admin`, or request access to the specific CanDIG instance via the web portal, and then be approved by the `site admin`. The step-by-step flow of these processes is shown diagrammatically below:
+A CanDIG Authorized User is the base level for any user that should be able to login to and explore the CanDIG data portal. Additional roles are added on top of this base level. It is expected that CanDIG will be configured to use an external institutional identity provider that is connected to the Keycloak instance that runs as part of the CanDIGv2 stack. While this setup allows anyone with valid institutional credentials to authenticate to CanDIG, only `CanDIG authorized user`s can gain access to view aggregate statistics of any data that has been ingested into the CanDIG network. To become a `CanDIG Authorized User`, users with institutional credentials need to either be pre-approved by a `site admin`, or request access to the specific CanDIG instance via the web portal, and then be approved by the `site admin`. The step-by-step flow of these processes is shown diagrammatically below. Once given status as a `CanDIG Authorized user`, the user can explore the data portal and perform queries that return aggregate statistics only. If the user wants to gain access to details about each donor within a program, they would need to apply for access through a Data Access Request (DAR) that would be reviewed by a Data Access Committee (DAC). If granted access by the DAC, the site admin can grant access for the `CanDIG Authorized User` to access the specific programs that were applied for in the DAR for the approved amount of time.
 
-### User request flow
+### Request flow
+
+> The process for a user to become a `CanDIG Authorized User` if requesting through the data portal.
 
 ```d2 
 # User request flow
@@ -62,7 +67,9 @@ unauthz'd user -> authz'd user: 6. Unauthorized user becomes authorized {style: 
 authz'd user -> data portal: 7. View summary stats {style: {font-size: 24}}
 ```
 
-### Pre-approved user flow
+### Pre-approval flow
+
+> The process for a user to become a `CanDIG Authorized User` if they have been pre-approved.
 
 ```d2 
 # User request flow
@@ -85,11 +92,27 @@ preauthz'd user -> authz'd user: 5. Unauthorized user becomes authorized {style:
 authz'd user -> data portal: 6. View summary stats {style: {font-size: 24}}
 ```
 
-## Curator roles
+## 2. Team members
 
-It is expected that the main users who will be submitting data will be either a `Site Curator` or a `Program Curator`. Initially, a `site admin` must give a user either site curator or program curator privileges to enable them to submit data. Once given `site curator` status, a user can then register, ingest and delete any program at a site. The `site curator` role is intended to be used when there is a few dedicated curators who will be ingesting all data at a site and they are **all authorized** to see **all data** that will be ingested at that site.
+Team members can only be granted access to read specific programs/datasets in the platform, not submit or delete data. Team members are considered part of the team that owns or curated the program. They are assigned through a program registration, which can either be submitted by a [`Site Admin`](#5-site-admin), [`Site Curator`](3-site-curator) or [`Program curator`](#4-program-curator) for that particular program.
 
-A program curator can only perform actions on the specific program they have been given program curator status on. They are not authorized to see or edit other programs at the site.
+## 3. Site Curator
 
-Team members and Authorized users are similar in that they can only be granted access to read or see data in the platform. Team members are considered part of the team that owns or curated the program while an authorized user would have applied for access to a program through a Data Access Request. They get given access to a program/s for a pre-determined amount of time, as approved by the DAC that governs the program.
+To become a `Site curator`, a `Site admin` must give a user `site curator` privileges. Once given `site curator` status, a user can then register, ingest and delete any program at a site. As they can register programs, they also can give [`Program curator`](#4-program-curator) and [`Team member`](#2-team-members) privileges to users. The `site curator` role is intended to be used when there are a few dedicated curators who will be ingesting all data at a site and they are **all authorized** to see **all data** that will be ingested at that site. 
+
+:::caution
+Site curators can see and delete **all** data submitted at a CanDIG site, ensure anyone with this role has the appopriate authorization for this role.
+:::
+
+## 4. Program curator
+
+A `program curator` can only perform actions (read, ingest, delete) on the specific program(s) they have been given `program curator` status on. They are not authorized to see or edit other programs at the site.
+
+## 5. Site admin
+
+The `site admin` automatically has access to read, submit and delete all data in the platform. They also have special permissions to use particular endpoints that other user roles cannot access. They are also responsible for assigning roles to users and approving pending access requests. They have the ability to 'pre-approve' users.
+
+:::danger
+A default site admin is set up when the CanDIGv2 stack is first deployed, this should be changed to a real user as soon as possible if the deployment will be used for submitting real data
+:::
 
