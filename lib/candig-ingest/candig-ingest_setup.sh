@@ -27,6 +27,7 @@ site_admin_token=$(python site_admin_token.py)
 if [[ $CANDIG_SITE_ADMIN_USER != "" ]]; then
   echo ">> approving $CANDIG_SITE_ADMIN_USER as a CanDIG authorized user"
   bash $PWD/exec_with_expected.sh "curl -sX \"POST\" \"${CANDIG_URL}/ingest/user/pending/request\" -H \"Authorization: Bearer ${site_admin_token}\"" "$CANDIG_SITE_ADMIN_USER"
+  bash $PWD/exec_with_expected.sh "curl -sX \"POST\" \"${CANDIG_URL}/ingest/user/pending/${CANDIG_SITE_ADMIN_USER}\" -H \"Authorization: Bearer ${site_admin_token}\"" "$CANDIG_SITE_ADMIN_USER"
 fi
 
 python $PWD/lib/candig-ingest/candigv2-ingest/generate_test_data.py --prefix $CANDIG_SITE_LOCATION --tmp tmp/data/synthdata --delete
