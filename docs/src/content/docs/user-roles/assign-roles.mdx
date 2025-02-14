@@ -9,7 +9,7 @@ banner:
 
 import { Badge } from '@astrojs/starlight/components';
 
-Detailed information about what each role means can be found on the [Roles overview](roles-overview) page
+Detailed information about what each role means can be found on the [Roles overview](roles-overview) page. This page walks through how to assign, approve and reject various user roles.
 
 ## Getting a token
 
@@ -38,22 +38,179 @@ TOKEN=ey-pasted-jwt
 
 </details>
 
-## How to add 1 or more pre-approved users <Badge text="Site admin" variant="caution" />
+## Add one or more pre-approved users <Badge text="Site admin" variant="caution" />
 
-This can only be performed by a site admin
-
-First [get a token](#getting-a-token), then:
-
-## How to approve a user that has requested access <Badge text="Site admin" variant="caution" />
-
-This can only be performed by a site admin. Unauthorized users can request access through clicking a button in the CanDIG Data portal. Clicking this button causes the user to be added to the `pending users` list in ingest. A site admin then needs to approve these users so they can become [CanDIG Authorized Users](roles-overview#1-candig-authorized-user). [This diagram](roles-overview#request-flow) demonstrates this process visually.
+This can only be performed by a site admin. The site admin can add one or many users to the list via a post to the `/ingest/user/preapproved` endpoint. The first time these users login to the CanDIG data portal, they will see a page with a 'Request Access' button but will be automatically approved as CanDIG Authorized users after clicking the button. [This diagram](roles-overview/#pre-approval-flow) presents visual representation of this process.
 
 First [get a token](#getting-a-token), then:
 
-1. POST to the 
+1. You can check the current list of preapproved users with `GET`:
+
+```bash
+curl --request GET \
+  --url $CANDIG_URL'/ingest/user/preapproved' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN
+```
+
+A response where no users are on the list would look like:
+
+```
+{
+  "results": []
+}
+```
+
+2. Add users to the preapproved list with `POST` with a list of users in the body
+
+```bash
+curl --request POST \
+  --url $CANDIG_URL'/ingest/user/preapproved' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '["user2@test.ca", "user1@test.ca"]'
+```
+
+A successful response looks like:
+
+```
+{
+  "message": "Success"
+}
+```
+
+3. calling GET on the endpoint should show that the users have been added.
+
+```bash
+curl --request GET \
+  --url $CANDIG_URL'/ingest/user/preapproved' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN
+{
+  "results": [
+    "user2@test.ca",
+    "user1@test.ca"
+  ]
+}
+```
 
 
-## How to assign a user a `Site curator` role <Badge text="Site admin" variant="caution" />
+## Approve or reject a user that has requested access <Badge text="Site admin" variant="caution" />
+
+This can only be performed by a site admin. Unauthorized users can request access by clicking a button in the CanDIG Data portal. They will only see this button if they are unauthorized and are not currently on the pending users list. Clicking this button causes the user to be added to the `pending users` list. A site admin then needs to approve these users so they can become [CanDIG Authorized Users](roles-overview#1-candig-authorized-user). [This diagram](roles-overview#request-flow) demonstrates this process visually.
+
+First [get a token](#getting-a-token), then:
+
+### List pending users
+
+1. Check to see what users are on the pending users list:
+
+```bash
+curl --request GET \
+  --url $CANDIG_URL'/ingest/user/pending' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN
+```
+
+e.g. response:
+```bash
+{
+  "results": [
+    "user1@test.ca",
+    "user2@test.ca"
+  ]
+}
+```
+
+### Approve pending users
+
+2. POST to the `/user/pending` endpoint, either with a single `user_id`:
+
+```bash
+curl --request POST \
+  --url $CANDIG_URL'/ingest/user/pending/user1@test.ca' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN
+```
+
+If successful, you should get a response such as:
+```bash
+{
+  "message": "User user1@test.ca has been approved"
+}
+```
+
+Or a list of ids
+
+```bash
+curl --request POST \
+  --url $CANDIG_URL'/ingest/user/pending' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '["user2@test.ca", "user1@test.ca"]'
+```
+
+Where a successful response should be something like:
+
+```bash
+{
+  "approved": [
+    "user2@test.ca",
+    "user1@test.ca"
+  ]
+}
+```
+
+### Reject pending users 
+
+To reject users that have requested access, use the `DELETE` method, on the same endpoint. 
+
+:::caution
+`DELETE` clears the whole list of pending users so be sure to approve valid users before using the `DELETE` method to clear any remaining users.
+:::
+
+e.g.
+
+```bash
+curl --request DELETE \
+  --url $CANDIG_URL'/ingest/user/pending' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '["user2@test.ca", "user1@test.ca"]'
+```
+
+The response should show that the pending users list is now empty, i.e.:
+
+```bash
+{
+  "pending_users": {}
+}
+```
+
+## Revoke CanDIG Authorized user status <Badge text="Site admin" variant="caution" />
+
+This can only be done by a Site admin. If a user has CanDIG Authorized user status that needs to be revoked, use the `DELETE` method on the user endpoint.
+
+First [get a token](#getting-a-token) following the guide above, then:
+
+```bash
+curl --request DELETE \
+  --url $CANDIG_URL'/ingest/user/user2@test.ca' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN 
+```
+
+The user will then no longer be able to login and explore the CanDIG data portal.
+
+## Assign the `Site curator` role <Badge text="Site admin" variant="caution" />
 
 This can only be done by a site admin.
 
@@ -73,14 +230,16 @@ curl --request POST \
  Users can be removed as site curators by using the same endpoint with a DELETE action instead of POST/GET.
 
 
-## How to assign `Program Curator` and `Team member` roles <Badge text="Site admin" variant="caution" /> <Badge text="Site Curator" variant="tip" /> <Badge text="Program Curator" variant="success" />
+## Assign `Program Curator` and `Team member` roles <Badge text="Site admin" variant="caution" /> <Badge text="Site Curator" variant="tip" /> <Badge text="Program Curator" variant="success" />
 
-Assigning program curator and team member roles is done through program registration. See the step-by-step guide here: [Registering programs](/CanDIGv2/ingest/register-programs). For each program that a curator or team member needs to be added to, a separate program registration will need to be submitted by either a `site admin`, `site curator` or a `program curator` already named on that program.
+Assigning program curator and team member roles is done through program registration. See the step-by-step guide here: [Registering programs](/CanDIGv2/ingest/register-programs). 
+
+For each program that a curator or team member needs to be added to, a separate program registration will need to be submitted by either a `site admin`, `site curator` or a `program curator` already named on that program.
 
 :::caution
-A POST request to the ingest/program replaces any existing program registration data for that program. It is advisable to first use a GET request to see the current users authorized to a program before adding additional program_curators and/or team_members when POSTing to this endpoint
+A `POST` request to the `ingest/program` replaces any existing program registration data for that program. It is advisable to first use a `GET` request to see the current users authorized to a program before adding additional `program_curators` and/or `team_members` when `POST`ing to this endpoint
 :::
 
-## How to change the site admin <Badge text="Site admin" variant="caution" />
+## Change the site admin <Badge text="Site admin" variant="caution" />
 
 The site admin can be changed by following the steps on the [Production Deployment page](/CanDIGv2/deployment/production#change-the-default-site-admin).

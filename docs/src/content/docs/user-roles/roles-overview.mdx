@@ -86,10 +86,12 @@ site admin: {shape: person}
 site admin.style.font-size: 20
 site admin -> ingest: 1. Add users to preapproved list {style: {font-size: 24}}
 preauthz'd user -> data portal: 2. Login with institutional credentials {style: {font-size: 24}}
-data portal -> ingest: 3. Check for pre-approval {style: {font-size: 24}}
-ingest -> ingest: 4. Register pre-approved user {style: {font-size: 24}}
-preauthz'd user -> authz'd user: 5. Unauthorized user becomes authorized {style: {font-size: 24}}
-authz'd user -> data portal: 6. View summary stats {style: {font-size: 24}}
+data portal -> preauthz'd user: 3. Present `Request Access` button {style: {font-size: 24}}
+preauthz'd user -> data portal: 4. Click `Request Access` button {style: {font-size: 24}}
+data portal -> ingest: 5. Check for pre-approval {style: {font-size: 24}}
+ingest -> ingest: 6. Auto-approve user {style: {font-size: 24}}
+preauthz'd user -> authz'd user: 7. Unauthorized user becomes authorized {style: {font-size: 24}}
+authz'd user -> data portal: 8. View summary stats {style: {font-size: 24}}
 ```
 
 ## 2. Team members
