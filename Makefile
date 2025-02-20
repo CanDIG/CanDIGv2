@@ -535,10 +535,9 @@ print-%:
 test-integration:
 	python ./settings.py
 ifeq ($(KEEP_TEST_DATA),true)
-	source ./env.sh; script -c "pytest -v --color=yes ./etc/tests -k 'not test_clean_up' $(ARGS)" --log-out=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").log
+	source ./env.sh; pytest -v --color=yes ./etc/tests -k 'not test_clean_up' $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 else
-	source ./env.sh; script -c "pytest -v --color=yes ./etc/tests $(ARGS)" --log-out=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").log 
-
+	source ./env.sh; pytest -v --color=yes ./etc/tests $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 endif
 
 # Run a single test by using its name and print out results whether failing or passing
@@ -546,7 +545,7 @@ endif
 # Helpful when debugging issues with a specific test
 .PHONY: test-integration-%
 test-integration-%:
-	python ./settings.py; source ./env.sh; script -c "pytest -v --color=yes ./etc/tests -s -rP -k '$*'" --log-out=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").log
+	python ./settings.py; source ./env.sh; pytest -v --color=yes ./etc/tests -s -rP -k '$*' --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 
 # stop all docker containers
 .PHONY: stop-all
