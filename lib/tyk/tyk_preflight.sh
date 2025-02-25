@@ -208,6 +208,21 @@ cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +
 ' > lib/tyk/tmp/tmp_policies.json.tpl
 mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
+echo "Working on api_rnaget.json"
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_rnaget.json.tpl > ${CONFIG_DIR}/apps/${TYK_RNAGET_API_ID}.json
+cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
+{"${TYK_RNAGET_API_ID}": {
+    "allowed_urls": [],
+    "api_id": "${TYK_RNAGET_API_ID}",
+    "api_name": "${TYK_RNAGET_API_SLUG}",
+    "versions": [
+        "Default"
+    ]
+}
+}
+' > lib/tyk/tmp/tmp_policies.json.tpl
+mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
+
 echo "Working on api_query.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/api_query.json.tpl > ${CONFIG_DIR}/apps/${TYK_QUERY_API_ID}.json
 

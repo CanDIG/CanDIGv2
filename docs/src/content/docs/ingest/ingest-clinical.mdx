@@ -4,19 +4,20 @@ description: A step by step guide to preparing clinical data for ingest into Can
 tableOfContents:
   minHeadingLevel: 1
   maxHeadingLevel: 2
+prev: false
 ---
 
 If you have gotten this far, well done! Most of the hard work is done (hopefully). The output from the CSVConvert.py called something like $INPUT_DIR_map.json is the main file we need in order to ingest the clinical data into ingest.
 
-Assuming that you have a configured ingest instance up and running and have access to a user with site curator or program curator credentials, you should be able to run through the instructions below.
+Assuming that you have a configured ingest instance up and running and have access to a user with Site curator or Program curator credentials, you should be able to run through the instructions below.
 
 It is preferable to attempt ingest using the API call. The API is described in ingest_openapi.md or can be explored using a swagger ui.
 
 ## Ingesting clinical data into CanDIG
 
-Before you can use the ingest endpoint, you will need an authorized bearer token. Users with site administration, site curator, or program curator for the program/s being ingested are able to ingest those programs. To get a bearer token:
+Before you can use the ingest endpoint, you will need an authorized bearer token. Users with Site administration, Site curator, or Program curator for the program/s being ingested are able to ingest those programs. To get a bearer token:
 
-1. Get a token by logging into the candig data portal as site admin and copying the API token.
+1. Get a token by logging into the candig data portal as Site admin and copying the API token.
 
     a. Go to the icon in the top right of the screen and click the cog
 

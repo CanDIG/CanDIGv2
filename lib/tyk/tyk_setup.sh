@@ -70,7 +70,13 @@ generate_key() {
               "api_id": "'"${TYK_QUERY_API_ID}"'",
               "api_name": "'"${TYK_QUERY_API_SLUG}"'",
               "Versions": ["Default"]
+          },
+          "'"${TYK_RNAGET_API_ID}"'": {
+              "api_id": "'"${TYK_RNAGET_API_ID}"'",
+              "api_name": "'"${TYK_RNAGET_API_SLUG}"'",
+              "Versions": ["Default"]
           }
+ 
       }
   }'
 
@@ -83,3 +89,4 @@ generate_key() {
 generate_key
 
 echo "Finished Tyk key setup" | tee -a $LOGFILE
+

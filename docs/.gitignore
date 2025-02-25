@@ -19,3 +19,10 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+.vscode
+package-lock.json
+package.json
+.env*
+
+public/d2/*

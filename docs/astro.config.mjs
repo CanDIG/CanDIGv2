@@ -6,30 +6,35 @@ import starlightUtils from "@lorenzo_lewis/starlight-utils";
 
 import icon from 'astro-icon';
 
+import d2 from 'astro-d2';
+
 // https://astro.build/config
 export default defineConfig({
     site: 'https://candig.github.io',
     base: 'CanDIGv2',
-    integrations: [icon({
-        include: {
+    integrations: [
+        d2({output: "d2"}),
+        icon({
+            include: {
             mdi: ["*"]
         }
-    }), starlight({
-    title: 'Docs',
-    customCss: [
-        './src/styles/custom.css'
-    ],
-    favicon: '/favicon.ico',
-    editLink: {
-        baseUrl: 'https://github.com/CanDIG/CanDIGv2/edit/develop/'
-    },
-    logo: {
-        src: './src/assets/my-logo.png',
-        replacesTitle: true,
-    },
-    social: {
-        github: 'https://github.com/candig/CanDIGv2',
-    },
+    }), 
+    starlight({
+        title: 'Docs',
+        customCss: [
+            './src/styles/custom.css'
+        ],
+        favicon: '/favicon.ico',
+        editLink: {
+            baseUrl: 'https://github.com/CanDIG/CanDIGv2/edit/develop/'
+        },
+        logo: {
+            src: './src/assets/my-logo.png',
+            replacesTitle: true,
+        },
+        social: {
+            github: 'https://github.com/candig/CanDIGv2',
+        },
     plugins: [
         starlightUtils({
             navLinks: {
@@ -76,7 +81,7 @@ export default defineConfig({
                 schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/stable/htsget_server/htsget_openapi.yaml',
                 collapsed: true
             },
-	    {
+        {
                 base: 'technical/federation-api',
                 label: 'htsget operations api',
                 schema: 'https://raw.githubusercontent.com/CanDIG/federation_service/refs/heads/develop/candig_federation/federation.yaml',
@@ -86,28 +91,32 @@ export default defineConfig({
     ],
     sidebar: [
         {
-            collapsed:true,
+            collapsed: true,
             label: 'headerLinks',
             items: [
-                { label: 'Deployment', slug: 'deployment/local' },
-                { label: 'Submission', slug: 'ingest' },
-                { label: 'Technical', slug: 'technical/architecture'}
+                { label: 'Deploy', slug: 'deployment/local' },
+                { label: 'Submit', slug: 'ingest' },
+                { label: 'User Roles', slug: 'user-roles' },
+                { label: 'Technical', slug: 'technical'}
             ]
         },
         {   
             collapsed: true,
             label: 'Deployment',
             items: [
-                { label: 'Local deployment', slug: 'deployment/local' },
-                { label: 'Production deployment', slug: 'deployment/production'},
-                { label: 'Testing', slug: 'deployment/ingest-and-test'},
-                { label: 'Interact using Make', slug: 'deployment/interact-with-the-stack'},
-                { label: 'User roles', slug: 'deployment/user-roles'},
-                { label: 'Logging', slug: 'deployment/logging'},
-                { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'},
-                { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'}, 
+                {
+                    label: 'Deployment',
+                    items: [
+                        { label: 'Local deployment', slug: 'deployment/local' },
+                        { label: 'Production deployment', slug: 'deployment/production'},
+                        { label: 'Testing', slug: 'deployment/ingest-and-test'},
+                        { label: 'Interact using Make', slug: 'deployment/interact-with-the-stack'},
+                        { label: 'Logging', slug: 'deployment/logging'},
+                        { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'},
+                        { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'}, 
+                    ]
+                }
             ]
-
         },
         {
             label: 'Submission',
@@ -128,13 +137,38 @@ export default defineConfig({
             ],
         },
         {
+            label: 'User Roles',
+            collapsed: true,
+            items: [
+                {
+                    label: 'User Roles',
+                    items:
+                    [
+                        {label: 'Roles Overview', slug: 'user-roles/roles-overview'},
+                        {label: 'Assign user roles', slug: 'user-roles/assign-roles'},
+                        {label: 'DAC Authorization', slug: 'user-roles/dac-authorization'},
+                    ]
+                }
+            ]
+            
+        },
+        {
             label: 'Technical Docs',
+            collapsed: true,
             items: [ 
-                { label: 'Architecture', slug: 'technical/architecture' },
-                { label: 'Docker and submods', slug: 'technical/docker-and-submodules' },
-                ...openAPISidebarGroups,
+                {
+                    label: 'Tech docs',
+                    items: 
+                    [
+                        { label: 'Architecture', slug: 'technical/architecture' },
+                        { label: 'Docker and submods', slug: 'technical/docker-and-submodules' },
+                        ...openAPISidebarGroups,
+                    ]
+                }
+                
+                
             ]
         },
     ],
-		})]
+        }), d2()]
 });

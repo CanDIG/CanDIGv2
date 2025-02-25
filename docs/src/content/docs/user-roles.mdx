@@ -1,0 +1,33 @@
+---
+title: User roles landing page
+description: Landing page for user roles docs
+template: splash
+banner:
+  content: |
+    These changes are in develop and will be part of an upcoming stable release.
+prev: false
+next: false
+---
+
+import { Icon } from 'astro-icon/components';
+import { Steps } from '@astrojs/starlight/components';
+
+import { LinkCard, Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+	<LinkCard 
+		title="Overview of User roles" 
+		href="roles-overview"
+		description="Intro and overview of user roles"
+	/>
+	<LinkCard 
+		title="How to assign roles"
+		href="assign-roles"
+		description="How to use CanDIG APIs to assign roles to users."
+	/>
+	<LinkCard 
+		title="DAC authorizations"
+		href="dac-authorization"
+		description="How to give users DAC authorization for specific datasets"
+	/>
+</CardGrid>

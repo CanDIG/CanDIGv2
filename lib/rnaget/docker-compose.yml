@@ -1,0 +1,33 @@
+services:
+  rnaget:
+    build:
+      context: $PWD/lib/rnaget/rnaget
+    image: ghcr.io/bento-platform/transcriptomics_data_service:edge
+    labels:
+      - "candigv2=rnaget"
+    logging:
+      driver: "fluentd"
+      options:
+        tag: "{{.Name}}"
+    ports:
+      - "${RNAGET_PORT}:5000"
+    environment:
+      - CORS_ORIGINS="*"
+      - BENTO_AUTHZ_SERVICE_URL=""
+      - OPA_URL=${OPA_PRIVATE_URL}
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_USER=${DEFAULT_ADMIN_USER}
+      - DB_NAME=rnaget_db
+      - DB_PASSWORD_FILE=/run/secrets/db_password
+      - WORKERS=2
+    extra_hosts:
+      - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+    secrets:
+      - source: postgres-db-secret
+        target: db_password
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "${RNAGET_PRIVATE_URL}/service-info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

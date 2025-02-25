@@ -1,6 +1,7 @@
 ---
 title: Troubleshooting the stack
 description: Troubleshooting issues with the stack
+next: false
 ---
 
 ## Integration tests failing

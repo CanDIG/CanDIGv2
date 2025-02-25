@@ -4,7 +4,7 @@ on:
   # Trigger the workflow every time you push to the `main` branch
   # Using a different branch name? Replace `main` with your branch’s name
   push:
-    branches: [ develop ]
+    branches: [ develop, mshadbolt/user-auth-docs ]
   # Allows you to run this workflow manually from the Actions tab on GitHub.
   workflow_dispatch:
 
@@ -18,6 +18,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Install d2
+        run: curl -fsSL https://d2lang.com/install.sh | sh -s --
       - name: Checkout your repository using git
         uses: actions/checkout@v4
       - name: Install, build, and upload your site
