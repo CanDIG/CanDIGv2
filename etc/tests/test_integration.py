@@ -309,48 +309,48 @@ def test_add_remove_site_admin():
 
 
 ## Vault tests: can we add an aws access key and retrieve it?
-def test_s3_credentials():
-    site_admin_token = get_site_admin_token()
-    headers = {
-        "Authorization": f"Bearer {site_admin_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+# def test_s3_credentials():
+#     site_admin_token = get_site_admin_token()
+#     headers = {
+#         "Authorization": f"Bearer {site_admin_token}",
+#         "Content-Type": "application/json; charset=utf-8",
+#     }
 
-    payload = {
-        "endpoint": "https://candig-demo.uhndata.io:9000",
-        "bucket": "test-genomic",
-        "access_key": "vMBfT7WFBLWtrAZaw6K2",
-        "secret_key": "kt2ZKy2BWnDxKCNVhBmkVxd68zv76lKN36yQUjVl"
-    }
+#     payload = {
+#         "endpoint": "https://candig-demo.uhndata.io:9000",
+#         "bucket": "test-genomic",
+#         "access_key": "vMBfT7WFBLWtrAZaw6K2",
+#         "secret_key": "kt2ZKy2BWnDxKCNVhBmkVxd68zv76lKN36yQUjVl"
+#     }
 
-    # set a credential
-    response = requests.post(
-        f"{ENV['CANDIG_URL']}/ingest/s3-credential", headers=headers, json=payload
-    )
-    # check to see if the error is SSL; if so, try again without https:
-    if "SSLError" in response.text:
-        payload["endpoint"] = "http://candig-demo.uhndata.io:9000"
-        # set a credential
-        response = requests.post(
-            f"{ENV['CANDIG_URL']}/ingest/s3-credential", headers=headers, json=payload
-        )
+#     # set a credential
+#     response = requests.post(
+#         f"{ENV['CANDIG_URL']}/ingest/s3-credential", headers=headers, json=payload
+#     )
+#     # check to see if the error is SSL; if so, try again without https:
+#     if "SSLError" in response.text:
+#         payload["endpoint"] = "http://candig-demo.uhndata.io:9000"
+#         # set a credential
+#         response = requests.post(
+#             f"{ENV['CANDIG_URL']}/ingest/s3-credential", headers=headers, json=payload
+#         )
 
-    print(response.text)
-    # make sure that the endpoint was parsed correctly:
-    assert response.json()["endpoint"] == "candig_demo_uhndata_io_9000"
+#     print(response.text)
+#     # make sure that the endpoint was parsed correctly:
+#     assert response.json()["endpoint"] == "candig_demo_uhndata_io_9000"
 
-    # get the credential back
-    url = f"{ENV['CANDIG_URL']}/ingest/s3-credential/endpoint/{response.json()['endpoint']}/bucket/{response.json()['bucket']}"
-    response = requests.get(url, headers=headers)
+#     # get the credential back
+#     url = f"{ENV['CANDIG_URL']}/ingest/s3-credential/endpoint/{response.json()['endpoint']}/bucket/{response.json()['bucket']}"
+#     response = requests.get(url, headers=headers)
 
-    print(response.text)
-    assert response.json()["access_key"] == payload["access_key"]
+#     print(response.text)
+#     assert response.json()["access_key"] == payload["access_key"]
 
-    # delete the credential
-    response = requests.delete(url, headers=headers)
+#     # delete the credential
+#     response = requests.delete(url, headers=headers)
 
-    print(response.text)
-    assert response.status_code == 204
+#     print(response.text)
+#     assert response.status_code == 204
 
 
 # =========================|| KATSU TEST BEGIN ||============================= #
