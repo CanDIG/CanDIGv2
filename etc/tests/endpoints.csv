@@ -1,8 +1,8 @@
 candig-dev.hpc4healthlocal:5080/katsu/v3/discovery/programs/
 candig-dev.hpc4healthlocal:5080/katsu/v3/discovery/donors/
 candig-dev.hpc4healthlocal:5080/katsu/v3/discovery/sidebar_list/
-candig-dev.hpc4healthlocal:5080/katsu/v3/discovery/overview/cohort_count/
-candig-dev.hpc4healthlocal:5080/katsu/v3/discovery/overview/patients_per_cohort/
+candig-dev.hpc4healthlocal:5080/katsu/v3/discovery/overview/program_count/
+candig-dev.hpc4healthlocal:5080/katsu/v3/discovery/overview/patients_per_program/
 candig-dev.hpc4healthlocal:5080/katsu/v3/discovery/overview/individual_count/
 candig-dev.hpc4healthlocal:5080/katsu/v3/discovery/overview/gender_count/
 candig-dev.hpc4healthlocal:5080/katsu/v3/discovery/overview/primary_site_count/
@@ -26,8 +26,8 @@ candig-dev.hpc4healthlocal:5080/katsu/v3/explorer/donors/
 candig-dev.hpc4healthlocal:5080/genomics/ga4gh/drs/v1/service-info
 candig-dev.hpc4healthlocal:5080/genomics/ga4gh/drs/v1/objects
 candig-dev.hpc4healthlocal:5080/genomics/ga4gh/drs/v1/objects/multisample_2.vcf.gz
-candig-dev.hpc4healthlocal:5080/genomics/ga4gh/drs/v1/cohorts
-candig-dev.hpc4healthlocal:5080/genomics/ga4gh/drs/v1/cohorts/SYNTH_01
+candig-dev.hpc4healthlocal:5080/genomics/ga4gh/drs/v1/programs
+candig-dev.hpc4healthlocal:5080/genomics/ga4gh/drs/v1/programs/SYNTH_01
 candig-dev.hpc4healthlocal:5080/genomics/beacon/v2/service-info
 candig-dev.hpc4healthlocal:5080/genomics/beacon/v2/g_variants?allele=NC_000021.9:g.5030847T%3EA
 candig-dev.hpc4healthlocal:5080/genomics/htsget/v1/reads/service-info

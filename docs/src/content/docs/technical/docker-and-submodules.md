@@ -1,4 +1,7 @@
-# Docker Syncing in CanDIGv2
+---
+title: Docker Syncing in CanDIGv2
+description: Information on interacting with docker and updating submodules.
+---
 
 ## Docker
 [Docker Getting Started](https://docs.docker.com/get-started/)

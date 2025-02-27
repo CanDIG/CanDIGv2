@@ -1,0 +1,110 @@
+---
+title: DAC authorization
+description: How to give a user access based on a Data Access Request approval
+tableOfContents: true
+next: false
+banner:
+  content: |
+    These changes are in develop and will be part of an upcoming stable release.
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+## Data Access Committee process
+
+A Data Access Committee can approve access for a given user to specific data sets. Once a DAC decision is communicated to the Site admin, this documentation describes how to implement DAC Authorizations. Once granted access, a user will have full access to all donor level data, including both clinical and genomic data.
+
+DAC authorizations differ from other roles in the CanDIG system in that they are granted for a specific amount of time. 
+
+## Grant an authorized user read access to a program <Badge text="Site admin" variant="caution" />
+
+1. Get a token using the process below:
+
+<details>
+<summary>Get a token</summary>
+
+1. Get a token by logging into the candig data portal as Site admin and copying the API token.
+
+    a. Go to the icon in the top right of the screen and click the cog
+
+    b. Click ‘ *** Get API Token’
+
+    c. Click the token to copy the text
+
+:::danger
+This token should be kept secure, it lasts for 30 mins
+:::
+ 
+2. Go to a terminal and save it into a variable called TOKEN
+
+```bash
+TOKEN=ey-pasted-jwt
+```
+
+</details>
+
+2. Use the `/user/{user_id}/dac_authorization` endpoint with a body that includes the program id of the dataset the user should be given access to as well as the start and end date for the access. 
+
+:::tip
+The dates in the request must be in `YYYY-MM-DD` format.
+:::
+
+An example request that grants `user2@test.ca` access to `LOCAL-SYNTH_01` starting 28th February 2025 and expiring 28th February 2026 might look like:
+
+```bash
+curl --request POST \
+  --url $CANDIG_URL'/ingest/user/user2@test.ca/dac_authorization' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '{"program_id": "LOCAL-SYNTH_01", "start_date": "2025-02-05", "end_date": "2026-02-05"}'
+```
+
+The return from a successful request will include all the dac_authorizations for the user and should include the one that was submitted.
+
+:::note
+If you submit a subsequent `dac_authorization` for the same user and program, it will replace the information stored in the system.
+:::
+
+When logging in, the user will now have access to the given program(s) during the given time period.
+
+## Revoke a DAC Authorization <Badge text="Site admin" variant="caution" />
+
+1. Get a token using the process below:
+
+<details>
+<summary>Get a token</summary>
+
+1. Get a token by logging into the candig data portal as Site admin and copying the API token.
+
+    a. Go to the icon in the top right of the screen and click the cog
+
+    b. Click ‘ *** Get API Token’
+
+    c. Click the token to copy the text
+
+:::danger
+This token should be kept secure, it lasts for 30 mins
+:::
+ 
+2. Go to a terminal and save it into a variable called TOKEN
+
+```bash
+TOKEN=ey-pasted-jwt
+```
+
+</details>
+
+2. Use the `DELETE` method on the `/user/{user_id}/dac_authorization/{program_id}` endpoint
+
+An example request that deletes `user2@test.ca`'s access to program `LOCAL-SYNTH_01` would look like:
+
+```bash
+curl --request DELETE \
+  --url $CANDIG_URL'/ingest/user/user2@test.ca/dac_authorization/LOCAL-SYNTH_01' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN
+```
+
+The return will show all the `dac_authorizations` for the user, the deleted one should have been removed. The user will no longer be able to access the clinical and genomic data for that program.

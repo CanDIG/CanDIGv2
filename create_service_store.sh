@@ -26,10 +26,10 @@ create_service_store() {
             ips=$(collect_ips $service)
             ips+="${gateway}/32"
 
-            echo "create a policy for $service's access to the approle role and secret"
+            echo ">> create a policy for $service's access to the approle role and secret"
             docker exec $vault sh -c "echo 'path \"auth/approle/role/${service}/role-id\" {capabilities = [\"read\"]}' >> ${service}-policy.hcl; echo 'path \"auth/approle/role/${service}/secret-id\" {capabilities = [\"update\"]}' >> ${service}-policy.hcl; vault policy write ${service} ${service}-policy.hcl"
 
-            echo "create an approle for $service"
+            echo ">> create an approle for $service"
             cmd="vault write auth/approle/role/${service} secret_id_ttl=10m token_ttl=20m token_max_ttl=30m token_policies=${service}"
             if [ $CANDIG_DEBUG_MODE -eq 0 ]; then
               cmd+=" secret_id_bound_cidrs=${ips} token_bound_cidrs=${ips}"
@@ -45,14 +45,14 @@ create_service_store() {
 
             if [[ $service != "opa" ]]; then
                 echo ">> add $service store to opa's policy"
-                docker exec $vault sh -c "echo 'path \"${service}/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> opa-policy.hcl; vault policy write opa opa-policy.hcl"
+                docker exec $vault sh -c "echo 'path \"${service}/token/*\" {capabilities = [\"create\", \"update\", \"read\", \"delete\"]}' >> opa-policy.hcl; vault policy write opa opa-policy.hcl"
             fi
 
-            echo "save the role id to secrets"
+            echo ">> save the role id to secrets"
             docker exec $vault sh -c "vault read -field=role_id auth/approle/role/${service}/role-id" > tmp/vault/$service-roleid
 
-            echo "create a kv store for $service"
-            docker exec $vault vault secrets enable -path=$service -description="${service} kv store" kv
+            echo ">> create a kv store for $service"
+            bash $PWD/exec_with_expected.sh "docker exec $vault vault secrets enable -path=$service -description=\"${service} kv store\" kv" "path is already in use"
         fi
 
         # get names of containers for service:
@@ -61,7 +61,9 @@ create_service_store() {
         do
             # copy roleid to container
             container=$(echo ${container} | tr -d "'")
-            docker cp $PWD/tmp/vault/${service}-roleid candigv2_${container}_1:/home/candig/roleid
+            echo ">> create secret files in $container"
+            bash $PWD/exec_with_expected.sh "docker cp $PWD/tmp/vault/${service}-roleid candigv2_${container}_1:/home/candig/roleid" "Error response from daemon: Could not find the file /home/candig"
+            bash $PWD/exec_with_expected.sh "docker cp $PWD/tmp/vault/approle-token candigv2_${container}_1:/home/candig/approle-token" "Error response from daemon: Could not find the file /home/candig"
         done
         # if we're not in debug mode, delete the tmp roleid file
         if [[ ${CANDIG_DEBUG_MODE:-"0"} == "0" ]]; then

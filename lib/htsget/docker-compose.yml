@@ -16,8 +16,6 @@ services:
     ports:
       - "${HTSGET_PORT}:3000"
     secrets:
-      - source: vault-approle-token
-        target: vault-approle-token
       - source: postgres-db-secret
         target: postgres-db-secret
     environment:
@@ -29,6 +27,7 @@ services:
       DB_PATH: "postgres-db"
       SERVER_LOCAL_DATA: /app/htsget_server/data
       INDEXING_PATH: /home/candig/tmp
+      INDEXING_SWITCH_FILE: /home/candig/indexer_on
       TESTENV_URL: ${HTSGET_PRIVATE_URL}
       POSTGRES_DATABASE: "genomic"
       POSTGRES_HOST_FILE: "postgres-db"

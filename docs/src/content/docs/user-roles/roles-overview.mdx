@@ -1,0 +1,129 @@
+---
+title: User roles overview
+description: Describes the types of user roles in CanDIG
+tableOfContents: true
+prev: false
+banner:
+  content: |
+    These changes are in develop and will be part of an upcoming stable release.
+---
+
+import { Icon } from 'astro-icon/components';
+import { Steps } from '@astrojs/starlight/components';
+
+In CanDIG, there are five main user roles, from most privileged to least privileged they are:
+1. Site admin
+2. Site curator
+3. Program curator
+4. Team member
+5. CanDIG Authorized User
+
+## User roles summary table
+
+A summary of what each user role can do within a deployed CanDIG site is in the table below. The full technical breakdown of which endpoints each user can access is controlled through opa and is found in [`paths.json`](https://github.com/CanDIG/candig-opa/blob/develop/defaults/paths.json) 
+
+| Role                   | Register program                                 | Edit user auth                                      | Submit & delete data                                 | view donor data                                    | view agg. data                                |
+|------------------------|--------------------------------------------------|-----------------------------------------------------|----------------------------------------------------|----------------------------------------------------|-----------------------------------------------|
+| Site admin             | <Icon name="mdi:shield-check" color="green"/>    | <Icon name="mdi:shield-check" color="green"/>       | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/> |
+| Site curator           | <Icon name="mdi:shield-check" color="green"/>    | <Icon name="mdi:shield-check" color="green"/>       | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/>      | <Icon name="mdi:shield-check" color="green"/> |
+| Program curator        | <Icon name="mdi:shield-off" color="red" />       | <Icon name="mdi:shield-half-full" color="orange"/>  | <Icon name="mdi:shield-half-full" color="orange"/> | <Icon name="mdi:shield-half-full" color="orange"/> | <Icon name="mdi:shield-check" color="green"/> |
+| Team member            | <Icon name="mdi:shield-off" color="red" />       | <Icon name="mdi:shield-off" color="red" />          | <Icon name="mdi:shield-off" color="red" />         | <Icon name="mdi:shield-half-full" color="orange"/> | <Icon name="mdi:shield-check" color="green"/> |
+| CanDIG Authorized User | <Icon name="mdi:shield-off" color="red" />       | <Icon name="mdi:shield-off" color="red" />          | <Icon name="mdi:shield-off" color="red" />         | <Icon name="mdi:shield-half-full" color="orange"/> | <Icon name="mdi:shield-check" color="green"/> |
+
+**Legend**
+
+|Icon                                               |Can perform action at a site? |
+|---------------------------------------------------|----------------------------------------------------------------------------------------------|
+|<Icon name="mdi:shield-check" color="green"/>      |Yes, for all data at a site|
+|<Icon name="mdi:shield-half-full" color="orange"/> |Yes, but only where the user has been specifically authorized for a particular program/dataset|
+|<Icon name="mdi:shield-off" color="red" />         |No.|
+
+## 1. Site admin
+
+A `Site admin` automatically has access to read, submit and delete all data in the platform. They have special permissions to use particular endpoints that other user roles cannot access. They are also responsible for assigning roles to users and approving pending access requests. Additionally, they have the ability to 'pre-approve' users.
+
+:::danger
+A default `Site admin` is set up when the CanDIGv2 stack is first deployed, this should be changed to a real user as soon as possible if the deployment will be used for submitting real data. [See instructions here](/deployment/production#change-the-default-site-admin).
+:::
+
+## 2. Site curator
+
+To become a `Site curator`, a `Site admin` must give a user `Site curator` privileges. Once given `Site curator` status, a user can then register, ingest and delete any program at a site. As they can register programs, they also can give [`Program curator`](#3-program-curator) and [`Team member`](#4-team-members) privileges to users. The `Site curator` role is intended to be used when there are a few dedicated curators who will be ingesting all data at a site and they are **all authorized** to see **all data** that will be ingested at that site. 
+
+:::caution
+Site curators can see and delete **all** data submitted at a CanDIG site, ensure anyone with this role has the appopriate authorization for this role.
+:::
+
+## 3. Program curator
+
+A `Program curator` can only perform actions (read, ingest, delete) on the specific program(s) they have been given `Program curator` status on. They are not authorized to see or edit other programs at the site.
+
+## 4. Team members
+
+Team members can only be granted access to read specific programs/datasets in the platform, not submit or delete data. Team members are considered part of the team that owns or curated the program. They are assigned through a program registration, which can either be submitted by a [`Site Admin`](#1-site-admin), [`Site curator`](#2-site-curator) or [`Program curator`](#3-program-curator) for that particular program.
+
+## 5. CanDIG Authorized User
+
+A CanDIG Authorized User is the base level for any user that should be able to login to and explore the CanDIG data portal. Additional roles are added on top of this base level. It is expected that CanDIG will be configured to use an external institutional identity provider that is connected to the Keycloak instance that runs as part of the CanDIGv2 stack. While this setup allows anyone with valid institutional credentials to authenticate to CanDIG, only `CanDIG Authorized User`s can gain access to view aggregate statistics of any data that has been ingested into the CanDIG network. To become a `CanDIG Authorized User`, users with institutional credentials need to either be pre-approved by a `Site admin`, or request access to the specific CanDIG instance via the web portal, and then be approved by the `Site admin`. The step-by-step flow of these processes is shown diagrammatically below. Once given status as a `CanDIG Authorized User`, the user can explore the data portal and perform queries that return aggregate statistics only. If the user wants to gain access to details about each donor within a program, they would need to apply for access through a Data Access Request (DAR) that would be reviewed by a Data Access Committee (DAC). If granted access by the DAC, the Site admin can grant access for the `CanDIG Authorized User` to access the specific programs that were applied for in the DAR for the approved amount of time.
+
+### Request flow
+
+> The process for a user to become a `CanDIG Authorized User` if requesting through the data portal.
+
+```d2 
+# User request flow
+shape: sequence_diagram
+unauthz'd user: {shape: person}
+unauthz'd user.style.font-size: 20
+authz'd user: {shape: person}
+authz'd user.style.font-size: 20
+data portal
+data portal.style.font-size: 20
+ingest
+ingest.style.font-size: 20
+Site admin: {shape: person}
+Site admin.style.font-size: 20
+unauthz'd user -> data portal: 1. Login with institutional credentials {style: {font-size: 24}}
+data portal -> unauthz'd user: 2. Redirect user to request access {style: {font-size: 24}}
+unauthz'd user -> data portal: 3. Request access {style: {font-size: 24}}
+data portal -> ingest: 4. Add pending user {style: {font-size: 24}}
+Site admin -> ingest: 5. Approve {style: {font-size: 24}}
+unauthz'd user -> authz'd user: 6. Unauthorized user becomes authorized {style: {font-size: 24}}
+authz'd user -> data portal: 7. View summary stats {style: {font-size: 24}}
+```
+
+### Pre-approval flow
+
+> The process for a user to become a `CanDIG Authorized User` if they have been pre-approved.
+
+```d2 
+# User request flow
+shape: sequence_diagram
+preauthz'd user: {shape: person}
+preauthz'd user.style.font-size: 20
+authz'd user: {shape: person}
+authz'd user.style.font-size: 20
+data portal
+data portal.style.font-size: 20
+ingest
+ingest.style.font-size: 20
+Site admin: {shape: person}
+Site admin.style.font-size: 20
+Site admin -> ingest: 1. Add users to preapproved list {style: {font-size: 24}}
+preauthz'd user -> data portal: 2. Login with institutional credentials {style: {font-size: 24}}
+data portal -> preauthz'd user: 3. Present `Request Access` button {style: {font-size: 24}}
+preauthz'd user -> data portal: 4. Click `Request Access` button {style: {font-size: 24}}
+data portal -> ingest: 5. Check for pre-approval {style: {font-size: 24}}
+ingest -> ingest: 6. Auto-approve user {style: {font-size: 24}}
+preauthz'd user -> authz'd user: 7. Unauthorized user becomes authorized {style: {font-size: 24}}
+authz'd user -> data portal: 8. View summary stats {style: {font-size: 24}}
+```
+
+
+
+
+
+
+
+
+

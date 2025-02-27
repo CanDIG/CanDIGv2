@@ -2,7 +2,9 @@ name: Test-CanDIG-build
 run-name: Build Validation
 on:
   push:
-    branches: [develop]
+    branches:
+    - develop
+    - stable
   pull_request:
   workflow_dispatch:
     inputs:
@@ -67,6 +69,13 @@ jobs:
       - name: Save docker container logs
         if: always()
         run: ./print_logs.sh > tmp/container_logs.txt 2>&1
+      - name: Save any intermediate files in containers
+        if: always()
+        run: |
+              mkdir tmp/ingest
+              docker cp candigv2_candig-ingest_1:/home/candig/tmp tmp/ingest 2>&1
+              mkdir tmp/index
+              docker cp candigv2_htsget_1:/home/candig/tmp tmp/index 2>&1
       - name: Save vault audit logs
         if: always()
         run: docker cp candigv2_vault-runner_1:/vault/vault-audit.log tmp/vault_audit.log 2>&1
@@ -76,6 +85,8 @@ jobs:
         with:
           name: Post-build error log
           path: |
-                tmp/error.txt
+                tmp/progress.txt
                 tmp/container_logs.txt
                 tmp/vault_audit.log
+                tmp/ingest
+                tmp/index

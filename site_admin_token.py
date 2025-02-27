@@ -1,5 +1,6 @@
 import authx.auth
 import os
+import sys
 import getpass
 from settings import get_env
 
@@ -11,7 +12,6 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
         if os.path.isfile("tmp/site-admin-refresh-token"):
             with open("tmp/site-admin-refresh-token") as f:
                 refresh_token = f.read().splitlines().pop()
-            os.remove("tmp/site-admin-refresh-token")
 
     # if no refresh token, get one:
     # check for default site admin user: if not present, check env vars
@@ -34,9 +34,10 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
 
         if "error" in credentials:
             try:
-                os.remove("tmp/site-admin-refresh-token")
-            except FileNotFoundError:
-                pass
+                if os.path.isfile("tmp/site-admin-refresh-token"):
+                    os.remove("tmp/site-admin-refresh-token")
+                else:
+                    return credentials
             except Exception as e:
                 print(str(e))
                 print(type(e))
@@ -55,4 +56,7 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
 
 if __name__ == "__main__":
     result = get_site_admin_token()
+    if 'dict' in str(type(result)):
+        print(result)
+        sys.exit(1)
     print(result)

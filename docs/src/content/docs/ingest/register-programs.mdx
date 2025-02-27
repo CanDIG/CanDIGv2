@@ -1,0 +1,43 @@
+---
+title: Registering programs
+description: How to register programs you intend to ingest into CanDIG
+tableOfContents:
+  minHeadingLevel: 1
+  maxHeadingLevel: 2
+---
+
+import { Icon } from 'astro-icon/components';
+import { Steps } from '@astrojs/starlight/components';
+
+Before any program can be ingested into CanDIG, it needs to be registered. To first register a program, you must be either a site admin or a site curator. During program registration, you can also assign program curators and team members to the program. For more information about user roles in CanDIG, see [User roles in CanDIG](../deployment/user-roles). If you need to be made a site curator or program curator, please contact your local site administrator to assign your user profile the appropriate role.
+
+## How to register a program
+
+1. Get a token by logging into the CanDIG data portal as site admin or site curator and copying the API token.
+
+   a. Go to the icon in the top right of the screen and click the cog
+
+   b. Click ‘ *** Get API Token’
+
+   c. Click the token to copy the text
+
+2. Open a terminal and save it into a variable called TOKEN
+
+```bash
+TOKEN=ey-pasted-jwt
+```
+
+:::danger
+This token should be kept secure, it lasts for 30 mins
+:::
+
+3. POST to the program endpoint in ingest to assign a user the program curator role for a specific program, e.g. program SYNTH_03 with user2@test.ca
+
+```bash
+curl -s --request POST \
+ --url $CANDIG_URL'/ingest/program' \
+ -H 'accept: application/json' \
+ -H 'Content-Type: application/json' \
+ -H 'Authorization: Bearer '$TOKEN \
+ -d '{"program_id": "SYNTH_03", "program_curators": ["user2@test.ca"], "team_members": []}'
+```

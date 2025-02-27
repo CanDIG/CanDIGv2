@@ -6,7 +6,8 @@
 # Also prints out all relevant logs from the error logging file (i.e., all lines
 # that contain the phrases 'error' or 'warn').
 
-source <(grep --color=never "ERRORLOG" .env)
+python settings.py
+source env.sh
 
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -16,7 +17,8 @@ DEFAULT='\033[0m'
 
 function print_module_logs() {
 	MODULE=$1
-	BUILD_LINE=$(grep -n build-${MODULE} ${ERRORLOG} | tail -1 | cut -d ':' -f 1)
+	output=""
+	BUILD_LINE=$(grep -n build-${MODULE} ${LOGFILE} | tail -1 | cut -d ':' -f 1)
 	if [[ $BUILD_LINE != "" ]]; then
 		LNO=$BUILD_LINE
 		while read -r LINE; do
@@ -24,13 +26,13 @@ function print_module_logs() {
 				break
 			else
 				if [[ ${LINE} =~ .*([Ee]rror|[Ww]arn).* ]]; then
-					printf "${GREEN}${LNO}${DEFAULT}	${LINE}\n"
+					output="${output}${GREEN}${LNO}${DEFAULT}	${LINE}\n"
 				fi
 			fi
 			LNO=$((LNO+1))
-		done < <(tail -n "+$((BUILD_LINE + 1))" $ERRORLOG)
+		done < <(tail -n "+$((BUILD_LINE + 1))" $LOGFILE)
 	fi
-	COMPOSE_LINE=$(grep -n compose-${MODULE} ${ERRORLOG} | tail -1 | cut -d ':' -f 1)
+	COMPOSE_LINE=$(grep -n compose-${MODULE} ${LOGFILE} | tail -1 | cut -d ':' -f 1)
 	if [[ $COMPOSE_LINE != "" ]]; then
 		LNO=$COMPOSE_LINE
 		while read -r LINE; do
@@ -38,41 +40,54 @@ function print_module_logs() {
 				break
 			else
 				if [[ ${LINE} =~ .*([Ee]rror|[Ww]arn).* ]]; then
-					printf "${GREEN}${LNO}${DEFAULT}	${LINE}\n"
+					output="${output}${GREEN}${LNO}${DEFAULT}	${LINE}\n"
 				fi
 			fi
 			LNO=$((LNO+1))
-		done < <(tail -n "+$((COMPOSE_LINE+1))" $ERRORLOG)
+		done < <(tail -n "+$((COMPOSE_LINE+1))" $LOGFILE)
+	fi
+	if [[ $output != "" ]]; then
+		printf "\n\n${RED}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
+		printf "${output}"
+		printf "${RED}--------------------\n${DEFAULT}\n"
 	fi
 }
 
 MODULES=$(cat .env | grep CANDIG_MODULES | cut -c 16- | cut -d '#' -f 1)
 ALL_MODULES="${MODULES}"
 
-SERVICE_COUNT=0
+EXPECTED_CONTAINERS=""
 for MODULE in $ALL_MODULES; do
+  services=$(cat lib/$MODULE/docker-compose.yml | yq -ojson '.services' | jq  'keys' | jq -r @sh | sed s/^\'/candigv2_/g | sed s/\'$/_1/g | sed "s/\'\ \'/_1\\ candigv2_/g" | sed "s/'\\s'/_1\\ candigv2_/g")
+  EXPECTED_CONTAINERS=$(echo $EXPECTED_CONTAINERS $services)
   sc=$(cat lib/$MODULE/docker-compose.yml | yq -ojson '.services' | jq  'keys' | jq -r @sh | wc -w | tr -d ' ')
-  SERVICE_COUNT=`expr $SERVICE_COUNT + $sc`
 done
 
-RUNNING_MODULES=$(docker ps --format "{{.Names}}")
+EXPECTED_COUNT=$(echo $EXPECTED_CONTAINERS | wc -w)
 
-if [ $(docker ps -q | wc -l) == $SERVICE_COUNT ]
+RUNNING_CONTAINERS=$(docker ps --format "{{.Names}}")
+RUNNING_COUNT=$(echo $RUNNING_CONTAINERS | wc -w)
+
+# figure out any containers that should've been there but aren't
+for i in $EXPECTED_CONTAINERS
+do
+	[[ ! $RUNNING_CONTAINERS =~ $i  ]] && MISSING_CONTAINERS="${MISSING_CONTAINERS:+${MISSING_CONTAINERS} }$i"
+done
+# echo expected: $EXPECTED_CONTAINERS
+# echo running: $RUNNING_CONTAINERS
+# echo missing: $MISSING_CONTAINERS
+if [[ $(echo $MISSING_CONTAINERS | wc -w | tr -d ' ') == "0"  ]]
 then
 	for MODULE in $ALL_MODULES; do
-		printf "\n\n${BLUE}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
-		print_module_logs $MODULE
-		printf "${BLUE}--------------------\n${DEFAULT}"
+		print_module_logs $MODULE $COLOR
 	done
-	echo -e "${GREEN}Number of expected CanDIG services matches number of containers running!${DEFAULT} Potentially useful error log segments listed above for debugging."
+	echo -e "${GREEN}Number of expected CanDIG services matches number of containers running!${DEFAULT} Lines above are in ${LOGFILE} and may be helpful for debugging."
  	exit 0
 else
 	for MODULE in $ALL_MODULES; do
-		printf "\n\n${RED}Error logs for ${MODULE}:\n--------------------\n${DEFAULT}"
 		print_module_logs $MODULE
-		printf "${RED}--------------------\n${DEFAULT}"
 	done
-	echo -e "${RED}WARNING: ${YELLOW}The number of CanDIG containers running does not match the number of expected services.\nRunning: ${BLUE}$(docker ps -q | wc -l) ${YELLOW}Expected: ${BLUE}${SERVICE_COUNT}
-${DEFAULT}Check your build/docker logs. Potentially offending service logs shown above. View ${ERRORLOG} for more information."
+	echo -e "${RED}WARNING: ${YELLOW}Some containers that are expected to be running are missing:\n${MISSING_CONTAINERS}
+${DEFAULT}Lines above are in ${LOGFILE} and may be helpful for debugging."
 	exit 1
 fi

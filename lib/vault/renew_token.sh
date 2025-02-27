@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export VAULT_APPROLE_TOKEN=$(cat /run/secrets/vault-approle-token)
+export VAULT_APPROLE_TOKEN=$(cat /vault/config/approle-token)
 export KEY_ROOT=$(tail -n 1 /vault/config/keys.txt)
 
 

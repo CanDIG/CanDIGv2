@@ -28,9 +28,6 @@ services:
     environment:
       - VAULT_URL=${VAULT_PRIVATE_URL}
       - DEBUG_MODE=${CANDIG_DEBUG_MODE}
-    secrets:
-      - source: vault-approle-token
-        target: vault-approle-token
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://${CANDIG_DOMAIN}:${VAULT_SERVICE_PORT}/ui/" ]
       interval: 30s

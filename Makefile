@@ -17,7 +17,6 @@ SHELL = bash
 CONDA = $(CONDA_INSTALL)/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/etc/profile.d/conda.sh
 
-LOGFILE = tmp/progress.txt
 
 .PHONY: all
 all:
@@ -56,7 +55,7 @@ ifndef CONDA_INSTALL
 	echo "ERROR: Conda install location not specified. Do you have a .env?"
 	exit 1
 endif
-	echo "    started bin-conda" >> $(LOGFILE)
+	@printf "\nOutput of bin-conda:\n" | tee -a $(LOGFILE)
 ifeq ($(VENV_OS), linux)
 	curl -Lo bin/miniconda_install.sh \
 		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -84,7 +83,6 @@ endif
 	$(CONDA) config --remove channels defaults
 	$(CONDA) config --add channels conda-forge
 	$(CONDA) config --set channel_priority strict
-	echo "    finished bin-conda" >> $(LOGFILE)
 
 
 #>>>
@@ -93,7 +91,7 @@ endif
 #<<<
 .PHONY: build-all
 build-all: mkdir
-	printf "Build started at `date '+%D %T'`.\n\n" >> $(ERRORLOG)
+	@printf "Build started at `date '+%D %T'`.\n\n" >> $(LOGFILE)
 	./pre-build-check.sh $(ARGS)
 
 # Setup the entire stack
@@ -132,15 +130,14 @@ build-images: #toil-docker
 
 #<<<
 build-%:
-	printf "\nOutput of build-$*: \n" >> $(ERRORLOG)
-	echo "    started build-$*" >> $(LOGFILE)
+	@printf "\nOutput of build-$*: \n" | tee -a $(LOGFILE)
 	source setup_hosts.sh
 	if [ -f lib/$*/$*_preflight.sh ]; then \
-	source lib/$*/$*_preflight.sh 2>&1 | tee -a $(ERRORLOG); \
+	source lib/$*/$*_preflight.sh 2>&1 | tee -a $(LOGFILE); \
 	fi
 	export SERVICE_NAME=$*; \
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(ERRORLOG)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml build $(BUILD_OPTS) 2>&1 | tee -a $(LOGFILE)
 	echo "    finished build-$*" >> $(LOGFILE)
 
 
@@ -179,13 +176,15 @@ clean-all: clean-logs clean-compose clean-containers clean-secrets \
 #<<<
 .PHONY: clean-authx
 clean-authx:
+	mv tmp/vault/service_stores.txt tmp/vault_service_stores.txt
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
+	-mkdir tmp/vault
+	mv tmp/vault_service_stores.txt tmp/vault/service_stores.txt
 
 
 # Empties error and progress logs
 .PHONY: clean-logs
 clean-logs:
-	> $(ERRORLOG)
 	> $(LOGFILE)
 
 #>>>
@@ -256,7 +255,7 @@ clean-secrets:
 
 
 #>>>
-# remove all peristant volumes and local data
+# remove all persistent volumes and local data
 # make clean-volumes
 
 #<<<
@@ -286,20 +285,17 @@ containers=$(shell cat lib/$*/docker-compose.yml | yq -ojson '.services' | jq  '
 found=$(shell grep -ch $(containers) tmp/containers.txt)
 #<<<
 compose-%:
-	printf "\nOutput of compose-$*: \n" >> $(ERRORLOG)
-	echo "    started compose-$*" >> $(LOGFILE)
+	@printf "\nOutput of compose-$*: \n" | tee -a $(LOGFILE)
 	source setup_hosts.sh; \
 	python settings.py; source env.sh; \
 	export SERVICE_NAME=$*; \
-	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(ERRORLOG)
-	cat tmp/containers.txt
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(LOGFILE)
 	if [ $(found) -eq 0 ]; then \
 	echo $(containers) >> tmp/containers.txt; \
 	fi
 	if [ -f lib/$*/$*_setup.sh ]; then \
-	source lib/$*/$*_setup.sh 2>&1 | tee -a $(ERRORLOG); \
+	source lib/$*/$*_setup.sh 2>&1 | tee -a $(LOGFILE); \
 	fi
-	echo "    finished compose-$*" >> $(LOGFILE)
 
 
 #>>>
@@ -321,8 +317,7 @@ recompose-%:
 
 #<<<
 down-%:
-	printf "\nOutput of down-$*: \n" >> $(ERRORLOG)
-	echo "    started down-$*" >> $(LOGFILE)
+	@printf "\nOutput of down-$*: \n" | tee -a $(LOGFILE)
 	source setup_hosts.sh; \
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility down 2>&1
@@ -357,21 +352,35 @@ docker-push:
 
 #<<<
 .PHONY: docker-secrets
-docker-secrets: mkdir #minio-secrets
+docker-secrets: mkdir authx-secrets data-secrets
+
+
+data-secrets: mkdir
+	@echo "making data secrets"
+	$(MAKE) secret-postgres-db-secret
+	$(MAKE) secret-redis-secret-key
+
+
+authx-secrets: mkdir
+	@echo "making authx secrets"
 	$(MAKE) secret-keycloak-admin-password
 
 	$(MAKE) secret-keycloak-test-site-admin-password
 	$(MAKE) secret-keycloak-test-user-password
 	$(MAKE) secret-keycloak-test-user2-password
 
-	$(MAKE) secret-postgres-db-secret
-
 	$(MAKE) secret-tyk-secret-key
 	$(MAKE) secret-tyk-analytics-admin-key
 
-	$(MAKE) secret-vault-approle-token
 
-	$(MAKE) secret-redis-secret-key
+minio-secrets: mkdir
+	@echo "making minio secrets"
+	@echo $(DEFAULT_ADMIN_USER) > lib/minio/access-key
+	$(MAKE) secret-minio-secret-key
+	mv tmp/secrets/minio-secret-key lib/minio/secret-key
+	@echo '[default]' > lib/minio/aws-credentials
+	@echo "aws_access_key_id=`cat lib/minio/access-key`" >> lib/minio/aws-credentials
+	@echo "aws_secret_access_key=`cat lib/minio/secret-key`" >> lib/minio/aws-credentials
 
 
 #>>>
@@ -383,8 +392,6 @@ docker-secrets: mkdir #minio-secrets
 docker-volumes:
 	docker volume create grafana-data --label candigv2=volume
 	docker volume create jupyter-data --label candigv2=volume
-	# docker volume create minio-config --label candigv2=volume
-	# docker volume create minio-data $(MINIO_VOLUME_OPT) --label candigv2=volume
 	docker volume create prometheus-data --label candigv2=volume
 	docker volume create toil-jobstore --label candigv2=volume
 	docker volume create keycloak-data --label candigv2=volume
@@ -405,7 +412,19 @@ docker-volumes:
 .PHONY: init-authx
 init-authx: mkdir
 	$(MAKE) docker-volumes
+	$(MAKE) authx-secrets
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE); python settings.py;)
+
+
+#>>>
+# create a minio container (that won't be removed as part of clean-all)
+# make init-minio
+
+#<<<
+init-minio: minio-secrets
+	docker volume create minio-config
+	docker volume create minio-data $(MINIO_VOLUME_OPT)
+	docker compose -f lib/candigv2/docker-compose.yml -f lib/minio/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(LOGFILE)
 
 
 #>>>
@@ -415,7 +434,7 @@ init-authx: mkdir
 #<<<
 .PHONY: init-conda
 init-conda:
-	echo "    started init-conda" >> $(LOGFILE)
+	@printf "\nOutput of init-conda: \n" | tee -a $(LOGFILE)
 	# source conda's script to be safe, so the conda command is found
 	source $(CONDA_ENV_SETTINGS) \
 		&& $(CONDA) create -y -n $(VENV_NAME) python=$(VENV_PYTHON) pip=$(VENV_PIP)
@@ -428,7 +447,6 @@ init-conda:
 #@echo "Load local conda: source bin/miniconda3/etc/profile.d/conda.sh"
 #@echo "Activate conda env: conda activate $(VENV_NAME)"
 #@echo "Install requirements: pip install -U -r etc/venv/requirements.txt"
-	echo "    finished init-conda" >> $(LOGFILE)
 
 
 #>>>
@@ -438,19 +456,6 @@ init-conda:
 #<<<
 .PHONY: init-docker
 init-docker: docker-volumes docker-secrets
-
-
-#>>>
-# generate secrets for minio server/client
-# make minio-secrets
-
-#<<<
-minio-secrets:
-	@echo $(DEFAULT_ADMIN_USER) > tmp/secrets/minio-access-key
-	$(MAKE) secret-minio-secret-key
-	@echo '[default]' > tmp/secrets/aws-credentials
-	@echo "aws_access_key_id=`cat tmp/secrets/minio-access-key`" >> tmp/secrets/aws-credentials
-	@echo "aws_secret_access_key=`cat tmp/secrets/minio-secret-key`" >> tmp/secrets/aws-credentials
 
 
 #>>>
@@ -490,7 +495,7 @@ secret-%:
 #<<<
 .PHONY: toil-docker
 toil-docker:
-	echo "    started toil-docker" >> $(LOGFILE)
+	@printf "\nOutput of toil-docker: \n" | tee -a $(LOGFILE)
 	VIRTUAL_ENV=1 DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 TOIL_DOCKER_REGISTRY=$(DOCKER_REGISTRY) \
 	$(MAKE) -C lib/toil/toil-docker docker
 	$(foreach MODULE,$(TOIL_MODULES), \
@@ -500,7 +505,6 @@ toil-docker:
 		docker tag $(DOCKER_REGISTRY)/$(MODULE):$(TOIL_VERSION) \
 		$(DOCKER_REGISTRY)/$(MODULE):latest;)
 	$(foreach MODULE, $(TOIL_MODULES), docker push $(DOCKER_REGISTRY)/$(MODULE):latest;)
-	echo "    finished toil-docker" >> $(LOGFILE)
 
 
 #>>>
@@ -529,11 +533,12 @@ print-%:
 #<<<
 .PHONY: test-integration
 test-integration:
+	mkdir -p tmp/test
 	python ./settings.py
 ifeq ($(KEEP_TEST_DATA),true)
-	source ./env.sh; pytest -v ./etc/tests -k 'not test_clean_up' $(ARGS)
+	source ./env.sh; pytest -v --color=yes ./etc/tests -k 'not test_clean_up' $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 else
-	source ./env.sh; pytest -v ./etc/tests $(ARGS)
+	source ./env.sh; pytest -v --color=yes ./etc/tests $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 endif
 
 # Run a single test by using its name and print out results whether failing or passing
@@ -541,7 +546,8 @@ endif
 # Helpful when debugging issues with a specific test
 .PHONY: test-integration-%
 test-integration-%:
-	python ./settings.py; source ./env.sh; pytest ./etc/tests -s -rP -k '$*'
+	mkdir -p tmp/test
+	python ./settings.py; source ./env.sh; pytest -v --color=yes ./etc/tests -s -rP -k '$*' --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 
 # stop all docker containers
 .PHONY: stop-all

@@ -2,6 +2,7 @@
 *~
 .idea
 .DS_Store
+.vscode
 
 #data files/directories
 *.bam
@@ -14,6 +15,7 @@
 .venv
 .env
 .env-bak
+.env-*
 /nightly_env.sh
 /bin
 /etc/ssl/selfsigned-*
@@ -26,3 +28,32 @@ __pycache__/
 geckodriver.log
 env.sh
 kcadm.config
+
+## gitignores for docs
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+
+# macOS-specific files
+.DS_Store
+
+# minio-related files
+lib/minio/access-key
+lib/minio/secret-key
+lib/minio/aws-credentials
