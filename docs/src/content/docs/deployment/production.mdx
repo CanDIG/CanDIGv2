@@ -274,16 +274,16 @@ The process for updating depends on the changes contained in a particular releas
 
    This target will clean, build and compose services but will not delete any ingested data, user authorization information or logging information
 
-   b. If the release needs a full rebuild, all services will need to be cleaned, rebuilt and recomposed and any existing data reingested or restored from backups. This is done by running
-
-    ```bash
-    make clean-all
-    make build-all
-    ```  
+   b. If the release needs a full rebuild, all services will need to be cleaned, rebuilt and recomposed and any existing data reingested or restored from backups. This is done by running the following commands
 
     :::danger
     This destroys all data in the system so it is important to ensure there is a backup of all existing data before proceeding with this method.
     :::  
+    
+    ```bash
+    make clean-all
+    make build-all
+    ```  
 
 6. If you performed a destructive rebuild, it will be necessary to reingest and restore backed up data following the [guide](backup-restore-candig). This includes any clinical and genomic data as well as information about user authorizations.
 
