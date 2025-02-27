@@ -5,6 +5,8 @@ description: Modifications needed when deploying to a production server
 
 import { Code } from '@astrojs/starlight/components';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Steps } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
 
 Apart from the basic steps in the [Local Deployment Guide](local) to get the CanDIG stack up and running, there are additional settings and security recommendations that need to set up in a production level environment. We provide the following as general advice, but it is important for all CanDIG deployers to also consult with their institutional infrastructure security personnel to ensure that their deployment meets the necessary level of data security.
 
@@ -226,4 +228,68 @@ Access to patient level data through specific program authorization is managed b
 ## Backing up production data
 
 It is not expected that a CanDIG instance would hold the only copy of any ingested data. However, recognising that the ETL and ingest process takes significant time and effort, it is a good idea to regularly backup all data stored in CanDIG. Steps for how to do this can be found in [Backing up and restoring CanDIG data](backup-restore-candig.md)
+
+## Updating a CanDIG instance
+
+As new stable versions of the CanDIGv2 stack are released, it is recommended that production deployments be updated as soon as possible as deployments at different versions are unlikely to be able to be federated.
+
+The process for updating depends on the changes contained in a particular release. The release notes for a particular release should indicate whether an existing deployment needs a full reinstall or can be updated without deleting any existing data. The steps in the process should follow the following general steps:
+
+<Steps>
+
+1. Backup your existing deployment using the steps on the page: [Backing up and restoring CanDIG data](backup-restore-candig.md). This should be done regardless of wheteher you think the deployment will destroy any data, just in case anything goes wrong.
+
+2. Pull the latest stable release from the CanDIGv2 repo: https://github.com/CanDIG/CanDIGv2/releases and update submodules
+
+    ```bash
+    cd CanDIGv2
+    git checkout stable
+    git submodule update --init --recursive
+    ```
+
+3. Ensure the candig conda environment is activated and update to the latest requirements
+
+    ```bash
+    conda activate candig
+    pip install -r etc/venv/requirements.txt
+    ```
+
+4. Backup and update your `.env` file. 
+
+    ```bash
+    cp .env .env-bak
+    cp etc/env/example-production.env .env
+    ```
+    Use the backed up copy to enter any deployment specific information
+
+    :::tip
+    You can use a file comparison tool or use the bash `diff` command to see any changes between the two files
+    :::
+
+5. a. If the release allows for a non-destructive rebuild, use the `rebuild-keep-data` target to clean and recompose services without destroying any data
+
+    ```bash
+    make rebuild-keep-data
+    ```
+
+   This target will clean, build and compose services but will not delete any ingested data, user authorization information or logging information
+
+   b. If the release needs a full rebuild, all services will need to be cleaned, rebuilt and recomposed and any existing data reingested or restored from backups. This is done by running
+
+    ```bash
+    make clean-all
+    make build-all
+    ```  
+
+    :::danger
+    This destroys all data in the system so it is important to ensure there is a backup of all existing data before proceeding with this method.
+    :::  
+
+6. If you performed a destructive rebuild, it will be necessary to reingest and restore backed up data following the [guide](backup-restore-candig). This includes any clinical and genomic data as well as information about user authorizations.
+
+    :::note
+    Depending on the changes that were made, it may not be possible to directly restore from backup, e.g. if the underlying structure of the postgres databases has changed, the data will need to be reingested through ingest, rather than restored directly to the database.
+    :::
+
+</Steps>
 
