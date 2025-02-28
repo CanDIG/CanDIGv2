@@ -17,18 +17,32 @@ The process for updating depends on the changes contained in a particular releas
 <Steps>
 
 1. Backup your existing deployment using the steps on the page: [Backing up and restoring CanDIG data](backup-restore-candig.md). This should be done regardless of wheteher you think the deployment will destroy any data, just in case anything goes wrong. Things you will want to back up are:
-    - [ingested genomic and clinical data](backup-restore-candig/#backing-up-postgres-databases)
-    - [log files](backup-restore-candig/#backing-up-logs)
-    - [user authorizations](backup-restore-candig/#backing-up-secrets-and-authorization-data)
-    - federation details (if your node is federated with other nodes)
+    - ingested genomic and clinical data - Guide here: [Back up postgres databases](backup-restore-candig/#backing-up-postgres-databases)
+    - log files - Guide here: [backup logfiles](backup-restore-candig/#backing-up-logs)
+    - user authorizations - Guide here: [backup secrets and authorizations](backup-restore-candig/#backing-up-secrets-and-authorization-data)
+    - federation details (if your node is federated with other nodes) - see expandable section below:
         <details>
         <summary>How to save currently stored federation information</summary>
+        <Steps>
+        1. Get a site admin token and store in a variable called `TOKEN`, store your candig domain in a variable called `CANDIG_URL`
+
+        2. Call the GET method to list all currently federated servers:
+            ```bash
+            curl -X 'GET' \
+            $CANDIG_URL'/federation/v1/servers' \
+            -H 'accept: application/json' \
+            -H 'Content-Type: application/json' \
+            -H 'Authorization: Bearer '$TOKEN
+            ```
+
+        3. Save the output to a text file so you have the information available after you have upgraded your deployment
+        </Steps>
 
         :::note
         If a node you are federated with has performed a 'destructive rebuild' which reset their keycloak instance, you may need to ask them for a new bearer token. 
         :::
         </details>
-    - git repos diffs
+    - git repos diffs - see expandable section below:
         <details>
         <summary>Example bash script of how to save git diffs of all CanDIGv2 repos</summary>
         ```bash
@@ -132,7 +146,28 @@ The process for updating depends on the changes contained in a particular releas
 
 10. Reinstate federation with other nodes
 
-    Using the file you created in step 1 saving federation details, do the following:
+    Use the information in the file you created in step 1 to add all federated servers back to your deployment's federated network. You will need to contact the site admin at each node for a token to re-establish the connection. Your calls to add each server will be something along the lines of the code block below, or see the [federation README](https://github.com/CanDIG/federation_service#how-to-register-peer-servers)
+
+    ```bash
+    curl -X 'POST' $CANDIG_URL'/federation/v1/servers' \
+     -H 'Content-Type: application/json' \
+     -H 'Authorization: Bearer '$YOUR_TOKEN \  # the token of the site admin at the site trying to add the server
+     -d $'{ \
+      "server": { \
+        "id": "NODE1", \
+        "url": "http://www.candig-node1.ca", \
+        "location": { \
+          "name": "NODE1", \
+          "province": "ON", \
+          "province-code": "ca-on" \
+        } \
+      }, \
+      "authentication": { \
+        "issuer": "https://www.candig-node1.ca/auth/realms/candig", \
+        "token": $NODE1_TOKEN \  # any user token from the site you want to add, can be expired
+      } \
+    }'
+    ```
 
     :::note
     If you performed a destructive rebuild, you will need to send an updated site admin token to the other nodes in the network for them to update their federation details.
