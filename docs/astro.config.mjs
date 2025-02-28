@@ -114,6 +114,7 @@ export default defineConfig({
                         { label: 'Logging', slug: 'deployment/logging'},
                         { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'},
                         { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'}, 
+                        { label: 'Update CanDIG', slug: 'deployment/update-candig'}
                     ]
                 }
             ]

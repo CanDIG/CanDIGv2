@@ -1,0 +1,142 @@
+---
+title: Update Production CanDIG
+description: Steps to update a running deployment
+---
+
+import { Code } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Steps } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+
+As new stable versions of the CanDIGv2 stack are released, it is recommended that production deployments be updated as soon as possible as deployments at different versions are unlikely to be able to be federated.
+
+The process for updating depends on the changes contained in a particular release. The release notes for a particular release should indicate whether an existing deployment needs a full reinstall or can be updated without deleting any existing data. The steps in the process should follow the following general steps:
+
+## Step-by-step guide to updating CanDIG
+
+<Steps>
+
+1. Backup your existing deployment using the steps on the page: [Backing up and restoring CanDIG data](backup-restore-candig.md). This should be done regardless of wheteher you think the deployment will destroy any data, just in case anything goes wrong. Things you will want to back up are:
+    - [ingested genomic and clinical data](backup-restore-candig/#backing-up-postgres-databases)
+    - [log files](backup-restore-candig/#backing-up-logs)
+    - [user authorizations](backup-restore-candig/#backing-up-secrets-and-authorization-data)
+    - federation details (if your node is federated with other nodes)
+        <details>
+        <summary>How to save currently stored federation information</summary>
+
+        :::note
+        If a node you are federated with has performed a 'destructive rebuild' which reset their keycloak instance, you may need to ask them for a new bearer token. 
+        :::
+        </details>
+    - git repos diffs
+        <details>
+        <summary>Example bash script of how to save git diffs of all CanDIGv2 repos</summary>
+        ```bash
+        #!/bin/bash
+
+        current_date=$(date +%F)
+
+        # Set the output file path in the tmp/logs directory
+        output_file="tmp/logs/diff-$current_date.diff"
+
+        # Create the tmp/logs directory if it doesn't exist
+        mkdir -p tmp/logs
+
+        # Clear the output file if it exists
+        > $output_file
+
+        # Get the diff of the main repo and append to the file
+        echo "Diff for the main repo:" >> $output_file
+        git diff --no-ext-diff --submodule=diff >> $output_file
+        echo "---------------------------------------------------" >> $output_file
+
+        # Loop through each subrepo in the 'lib' directory
+        for dir in lib/*/; do
+            if [ -d "$dir/.git" ]; then
+                # Enter the subrepo directory and get the diff
+                echo "Diff for subrepo $dir:" >> $output_file
+                (cd "$dir" && git diff) >> $output_file
+                echo "---------------------------------------------------" >> $output_file
+            fi
+        done
+
+        echo "Git diff for main repo and subrepos has been saved to $output_file."
+
+        ```
+        </details>
+
+2. Pull the latest stable release from the CanDIGv2 repo and update submodules
+
+    ```bash
+    cd CanDIGv2
+    git checkout stable
+    git pull 
+    git submodule update --init --recursive
+    ```
+
+3. Ensure the candig conda environment is activated and update to the latest requirements
+
+    ```bash
+    conda activate candig
+    pip install -r etc/venv/requirements.txt
+    ```
+
+4. Backup your current `.env` and modify the latest `example.env`
+
+    ```bash
+    cp .env .env-bak
+    cp etc/env/example-production.env .env
+    ```
+    Use the backed up copy to enter any deployment specific information
+
+    :::tip
+    You can use a file comparison tool or use the bash `diff` command to see any changes between the two files
+    :::
+
+5. Apply any other deployment specific changes such as those found when performing a `git diff` in step 1
+
+6. If the release allows for a non-destructive rebuild, use the `rebuild-keep-data` target to clean and recompose services without destroying any data
+
+    ```bash
+    make rebuild-keep-data
+    ```
+
+   This target will clean, build and compose services but will not delete any ingested data, user authorization information or logging information.
+
+   Proceed to step 9.
+
+7. If the release needs a full rebuild, all services will need to be cleaned, rebuilt and recomposed and any existing data reingested or restored from backups. This is done by running the following commands
+
+    :::danger
+    This destroys all data in the system so it is important to ensure there is a backup of all existing data before proceeding with this method.
+    :::  
+    
+    ```bash
+    make clean-all
+    make build-all
+    ```  
+
+8. If you performed a destructive rebuild, it will be necessary to reingest and restore backed up data following the [guide](backup-restore-candig). This includes any clinical and genomic data as well as information about user authorizations. Federating to other nodes will also need to be reinitiated with all other nodes in the network. Federating with nodes at a different stable version may not be possible.
+
+    :::note
+    Depending on the changes that were made, it may not be possible to directly restore from backup, e.g. if the underlying structure of the postgres databases has changed, the data will need to be reingested through ingest, rather than restored directly to the database.
+    :::
+    
+9. Run integration tests to ensure all the services are running as expected
+
+    ```bash
+    make test-integration
+    ```
+
+    If tests fail, check out the [troubleshooting section](stack-troubleshooting) or [reach out for help](https://github.com/CanDIG/CanDIGv2/issues/new/choose).
+
+10. Reinstate federation with other nodes
+
+    Using the file you created in step 1 saving federation details, do the following:
+
+    :::note
+    If you performed a destructive rebuild, you will need to send an updated site admin token to the other nodes in the network for them to update their federation details.
+    :::
+
+</Steps>
+
