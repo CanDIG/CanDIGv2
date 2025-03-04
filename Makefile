@@ -565,18 +565,19 @@ start-all:
 
 .PHONY: rebuild-keep-data
 rebuild-keep-data:
-	# Remove the module from the .env
-	$(eval CANDIG_MODULES := $(filter-out $(CANDIG_DATA_MODULES),$(CANDIG_MODULES)))
-	# Clean everything
-	$(MAKE) clean-all CANDIG_MODULES="$(CANDIG_MODULES)"
+	# Remove the data modules from CANDIG_MODULES
+	$(eval REBUILD_CANDIG_MODULES := $(filter-out $(CANDIG_DATA_MODULES),$(CANDIG_MODULES)))
+	# Clean only the remaining modules
+	$(foreach MODULE, $(REBUILD_CANDIG_MODULES), $(MAKE) clean-$(MODULE);)
+	# Prune unused Docker resources
 	docker system prune -af
 	# Start build-all
 	./pre-build-check.sh $(ARGS)
 	$(MAKE) init-docker
-	# Rebuild everything
-	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
+	# Rebuild deleted modules
+	$(foreach MODULE, $(REBUILD_CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
+	# Run post-build tasks
 	./post_build.sh
-
 
 # wrapper for make_backup.sh to make sure we're running it from the right directory
 backup-vault:
