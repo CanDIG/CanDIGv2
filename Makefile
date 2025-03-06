@@ -286,14 +286,14 @@ found=$(shell grep -ch $(containers) tmp/containers.txt)
 #<<<
 compose-%:
 	@printf "\nOutput of compose-$*: \n" | tee -a $(LOGFILE)
-	@if [ $* != "keycloak" ]; then \
+	@source setup_hosts.sh; \
+	python settings.py; source env.sh; \
+	if [ $* != "keycloak" ]; then \
 	if [ $* != "logging" ]; then \
 	echo "getting site admin token"; \
 	python site_admin_token.py ; \
 	fi \
-	fi
-	source setup_hosts.sh; \
-	python settings.py; source env.sh; \
+	fi; \
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(LOGFILE)
 	if [ $(found) -eq 0 ]; then \
