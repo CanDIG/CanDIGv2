@@ -12,15 +12,15 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
         if os.path.isfile("tmp/site-admin-refresh-token"):
             with open("tmp/site-admin-refresh-token") as f:
                 refresh_token = f.read().splitlines().pop()
-
-    # if no refresh token, get one:
-    # check for default site admin user: if not present, check env vars
-    username = os.getenv("CANDIG_SITE_ADMIN_USER")
-    password = os.getenv("CANDIG_SITE_ADMIN_PASSWORD")
-    # site admin user/password need to be inputted on stdin if not default:
-    if password is None or password == "":
-        username = input("Enter username: ")
-        password = getpass.getpass("Enter password: ")
+        else:
+            # if no refresh token saved:
+            # check for default site admin user: if not present, check env vars
+            username = os.getenv("CANDIG_SITE_ADMIN_USER")
+            password = os.getenv("CANDIG_SITE_ADMIN_PASSWORD")
+            # site admin user/password need to be inputted on stdin if not default:
+            if password is None or password == "":
+                username = input("Enter username: ")
+                password = getpass.getpass("Enter password: ")
 
     try:
         credentials = authx.auth.get_oauth_response(
