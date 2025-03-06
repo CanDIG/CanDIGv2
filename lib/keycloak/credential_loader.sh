@@ -8,6 +8,7 @@ fi
 export KEYCLOAK_ADMIN_PASSWORD=$(< /run/secrets/keycloak-admin-password)
 
 if [ "$CANDIG_PRODUCTION_MODE" = 1 ]; then
+  cli_settings+=" --https-port=$KEYCLOAK_HTTPS_PORT"
   exec /opt/keycloak/bin/kc.sh start $cli_settings
 else
   exec /opt/keycloak/bin/kc.sh start-dev
