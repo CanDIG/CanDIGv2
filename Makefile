@@ -286,6 +286,12 @@ found=$(shell grep -ch $(containers) tmp/containers.txt)
 #<<<
 compose-%:
 	@printf "\nOutput of compose-$*: \n" | tee -a $(LOGFILE)
+	@if [ $* != "keycloak" ]; then \
+	if [ $* != "logging" ]; then \
+	echo "getting site admin token"; \
+	python site_admin_token.py ; \
+	fi \
+	fi
 	source setup_hosts.sh; \
 	python settings.py; source env.sh; \
 	export SERVICE_NAME=$*; \
