@@ -138,9 +138,29 @@ The process for updating depends on the changes contained in a particular releas
     
 9. Run integration tests to ensure all the services are running as expected
 
+    :::note
+    If you have removed the default site admin, integration tests will not work see expandable section below for options
+    :::
+
+    <details>
+    <summary> Running integration tests when default site admin is removed </summary>
+    
+    Note that neither of these options are very secure and it is important to revert these changes as soon as possible after running tests.
+    
+        ### Option 1: reinstate default site admin
+        If you simply revoked site admin rights from `site_admin@test.ca` you can temporarily reinstate rights to run the tests and then revoke them again
+
+        ### Option 2: Save your own credentials temporarily
+        Save the credentials
+
+
+    </details> 
+
     ```bash
     make test-integration
     ```
+
+    If you have removed the
 
     If tests fail, check out the [troubleshooting section](stack-troubleshooting) or [reach out for help](https://github.com/CanDIG/CanDIGv2/issues/new/choose).
 
