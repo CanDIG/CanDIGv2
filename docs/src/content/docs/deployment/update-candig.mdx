@@ -181,7 +181,11 @@ The process for updating depends on the changes contained in a particular releas
         curl -X POST $CANDIG_URL'/ingest/site-role/admin/user_id/site_admin@test.ca' -H 'Authorization: Bearer '$TOKEN
         ```
 
-        3. Uncomment the default site admin lines in the `env.sh` file, or manually add them back from the files in `tmp/keycloak`
+        3. Uncomment the default site admin lines in the `env.sh` and `.env` file
+        
+        :::tip
+        If the default site admin password was deleted from `env.sh`, you can copy it from `tmp/keycloak/test-site-admin-password`
+        :::
 
         4. Run integration tests
         ```bash
