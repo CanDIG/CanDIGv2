@@ -18,6 +18,8 @@ done
 python settings.py
 source env.sh
 bash $PWD/create_service_store.sh "federation"
+docker exec $federation touch /app/initial_setup
+
 docker restart $federation
 
 sleep 5
