@@ -11,8 +11,6 @@ secrets:
 services:
   minio:
     image: minio/minio:${MINIO_VERSION:-latest}
-    labels:
-      - "candigv2=minio"
     volumes:
       - minio-data:/data
       - minio-config:/root/.minio
