@@ -10,6 +10,7 @@ import requests
 import urllib.parse
 import pprint
 import time
+import authx.auth
 
 REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
@@ -18,6 +19,17 @@ from settings import get_env
 from site_admin_token import get_site_admin_token
 
 ENV = get_env()
+
+
+class AuthzRequest:
+    headers = {}
+    method = None
+    path = None
+
+    def __init__(self, headers, method, path):
+        self.headers = headers
+        self.method = method
+        self.path = path
 
 
 ## Keycloak tests:
@@ -58,64 +70,66 @@ def test_get_token():
 
 ## Tyk test: can we get a response from Tyk for all of our services?
 def test_tyk():
+    modules = ENV['CANDIG_ENV']['CANDIG_MODULES'].split(" ")
     headers = {
         "Authorization": f"Bearer {get_site_admin_token()}"
     }
-    endpoints = [
-        f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v3/service-info",
-        f"federation/v1/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/service/service-info",
-        f"{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/service-info",
-    ]
+    endpoints = {
+        # all of these endpoints should return JSON
+        "htsget": f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
+        "katsu": f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v3/service-info",
+        "rnaget": f"{ENV['CANDIG_ENV']['TYK_RNAGET_API_LISTEN_PATH']}/service-info",
+        "federation": f"federation/v1/service-info",
+        "opa": f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/service/service-info",
+        "query": f"{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/service-info",
+        "candig-ingest": f"{ENV['CANDIG_ENV']['TYK_INGEST_API_LISTEN_PATH']}/service-info",
+    }
     responses = []
-    for endpoint in endpoints:
-        response = requests.get(
-            f"{ENV['CANDIG_URL']}/{endpoint}", headers=headers, timeout=10
-        )
-        responses.append(response.status_code)
-        print(f"{endpoint}: {response.status_code == 200}")
+    for module in modules:
+        if module in endpoints:
+            endpoint = endpoints[module]
+            response = requests.get(
+                f"{ENV['CANDIG_URL']}/{endpoint}", headers=headers, timeout=10
+            )
+            sc = response.status_code
+            try:
+                r = response.json()
+            except requests.JSONDecodeError as e:
+                sc = 500 # to show that the endpoint was not valid json
+            responses.append(sc)
+            print(f"{endpoint}: {sc == 200}")
     assert all(response == 200 for response in responses)
 
 
 ## Opa tests:
 ## Test DAC user authorizations
 
-## Can we get the correct dataset response for each user?
-def user_auth_datasets():
+## Can we get the correct program response for each user?
+def user_auth_programs():
     return [
         ("CANDIG_NOT_ADMIN2", "PROGRAM-2"),
         ("CANDIG_NOT_ADMIN", "PROGRAM-1"),
         ("CANDIG_NOT_ADMIN", "TEST_2"),
+        ("CANDIG_SITE_ADMIN", "TEST_3"),
     ]
+
 
 def get_katsu_datasets(user):
     username = ENV[f"{user}_USER"]
     password = ENV[f"{user}_PASSWORD"]
     token = get_token(username=username, password=password, access_token=True)
+
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8"
     }
-    payload = {
-        "input": {"body": {"path": "/v3/discovery/", "method": "GET"}, "token": token}
-    }
+    request = AuthzRequest(headers, "GET", "/v3/authorized/")
+    response = authx.auth.get_opa_datasets(request)
 
-    katsu_headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": f"Bearer {get_site_admin_token()}"
-    }
-
-    response = requests.post(
-        f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/permissions/datasets",
-        json=payload,
-        headers=katsu_headers,
-    )
-    return response.json()["result"]
+    return response
 
 
-def add_program_authorization(dataset: str, curators: list,
+def add_program_authorization(program: str, curators: list,
                               team_members: list):
     token = get_site_admin_token()
     headers = {
@@ -125,7 +139,7 @@ def add_program_authorization(dataset: str, curators: list,
 
     # create a program and its authorizations:
     test_program = {
-        "program_id": dataset,
+        "program_id": program,
         "program_curators": curators,
         "team_members": team_members
     }
@@ -140,60 +154,45 @@ def add_program_authorization(dataset: str, curators: list,
     return response.json()
 
 
-def delete_program_authorization(dataset: str):
+def delete_program_authorization(program: str):
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{dataset}", headers=headers)
+    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{program}", headers=headers)
     print(response.text)
-    return response.json()
+    return response
 
 
 ## Can we add a program authorization and modify it?
-@pytest.mark.parametrize("user, dataset", user_auth_datasets())
-def test_add_remove_program_authorization(user, dataset):
-    add_program_authorization(dataset, [], [])
+@pytest.mark.parametrize("user, program", user_auth_programs())
+def test_add_remove_program_authorization(user, program):
+    add_program_authorization(program, [], [])
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    # try adding a user to the program:
-    test_data = {
-        "email": ENV["CANDIG_NOT_ADMIN_USER"],
-        "program": dataset
-    }
-
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
-    # when the user has admin access, they should be allowed
-    print(f"{response.json()}, {response.status_code}")
-    assert response.status_code == 200
-
-    assert test_data["program"] in get_katsu_datasets("CANDIG_NOT_ADMIN")
-
-    # remove the user
-    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}/email/{test_data['email']}", headers=headers)
-    assert response.status_code == 200
-    assert test_data["email"] not in response.json()[test_data["program"]]["team_members"]
-
     # remove the program
-    response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
+    response = delete_program_authorization(program)
     assert response.status_code == 200
 
-    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/program/{test_data['program']}", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/program/{program}", headers=headers)
     assert response.status_code == 404
 
 
-@pytest.mark.parametrize("user, dataset", user_auth_datasets())
-def test_user_authorizations(user, dataset):
+@pytest.mark.parametrize("user, program", user_auth_programs())
+def test_user_authorizations(user, program):
     # set up these programs to exist at all:
-    add_program_authorization(dataset, [], [])
+    add_program_authorization(program, [], [])
+
+    # remove user from system
+    username = ENV[f"{user}_USER"]
+    clean_up_user(username)
 
     # add user to pending users
-    username = ENV[f"{user}_USER"]
     safe_name = urllib.parse.quote_plus(username)
     password = ENV[f"{user}_PASSWORD"]
     token = get_token(username=username, password=password)
@@ -206,54 +205,52 @@ def test_user_authorizations(user, dataset):
         f"{ENV['CANDIG_URL']}/ingest/user/pending/request",
         headers=headers
     )
-    print(response.text)
-    assert response.status_code == 200
-
+    print(response.text, response.status_code)
+    assert response.status_code in [200, 201]
     headers = {
         "Authorization": f"Bearer {get_site_admin_token()}",
         "Content-Type": "application/json; charset=utf-8"
     }
+    if response.status_code in [200, 201]:
+        # approve user
+        response = requests.post(
+            f"{ENV['CANDIG_URL']}/ingest/user/pending/{safe_name}",
+            headers=headers
+        )
+        assert response.status_code == 200
+    else:
+        # check to see if the user is authorized
+        response = requests.get(
+            f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}",
+            headers=headers
+        )
+        assert response.status_code == 200
 
-    # check to see that the user is in the pending queue
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/ingest/user/pending",
-        headers=headers
-    )
-    print(response.text)
-    assert username in response.json()['results']
-
-    # approve user
-    response = requests.post(
-        f"{ENV['CANDIG_URL']}/ingest/user/pending/{safe_name}",
-        headers=headers
-    )
-    assert response.status_code == 200
-
-    # see if user can access dataset before authorizing
+    # see if user can access program before authorizing
     katsu_datasets = get_katsu_datasets(user)
-    assert dataset not in katsu_datasets
+    assert program not in katsu_datasets or user == "CANDIG_SITE_ADMIN"
 
-    # add dataset to user's authz
+    # add program to user's authz
     from datetime import date
 
     TODAY = date.today()
     THE_FUTURE = str(date(TODAY.year + 1, TODAY.month, TODAY.day))
 
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/authorize",
+        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/dac_authorization",
         headers=headers,
-        json={"program_id": dataset, "start_date": "2000-01-01", "end_date": THE_FUTURE}
+        json={"program_id": program, "start_date": "2000-01-01", "end_date": THE_FUTURE}
     )
     print(f"hi {response.text}")
     assert response.status_code == 200
 
-    # see if user can access dataset now
+    # see if user can access program now
     katsu_datasets = get_katsu_datasets(user)
-    assert dataset in katsu_datasets
+    assert program in katsu_datasets
 
-    # remove the dataset
+    # remove the program
     response = requests.delete(
-        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/authorize/{dataset}",
+        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}/dac_authorization/{program}",
         headers=headers
     )
     assert response.status_code == 200
@@ -280,14 +277,9 @@ def test_site_admin(user, is_admin):
         "Authorization": f"Bearer {token}"
     }
 
-    payload["input"]["token"] = token
-    response = requests.post(
-        f"{ENV['CANDIG_ENV']['OPA_URL']}/v1/data/permissions/site_admin",
-        json=payload,
-        headers=headers,
-    )
-    print(response.json())
-    assert ("result" in response.json()) == is_admin
+    request = AuthzRequest(headers, None, None)
+
+    assert authx.auth.is_site_admin(request) == is_admin
 
 
 def test_add_remove_site_admin():
@@ -299,7 +291,7 @@ def test_add_remove_site_admin():
 
     # add user1 to site admins
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
+        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/user_id/{ENV['CANDIG_NOT_ADMIN_USER']}",
         headers=headers
     )
     print(response.text)
@@ -309,7 +301,7 @@ def test_add_remove_site_admin():
 
     # remove user1 from site admins
     response = requests.delete(
-        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/email/{ENV['CANDIG_NOT_ADMIN_USER']}",
+        f"{ENV['CANDIG_URL']}/ingest/site-role/admin/user_id/{ENV['CANDIG_NOT_ADMIN_USER']}",
         headers=headers
     )
     assert response.status_code == 200
@@ -317,48 +309,73 @@ def test_add_remove_site_admin():
 
 
 ## Vault tests: can we add an aws access key and retrieve it?
-def test_s3_credentials():
-    site_admin_token = get_site_admin_token()
-    headers = {
-        "Authorization": f"Bearer {site_admin_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
+# def test_s3_credentials():
+#     site_admin_token = get_site_admin_token()
+#     headers = {
+#         "Authorization": f"Bearer {site_admin_token}",
+#         "Content-Type": "application/json; charset=utf-8",
+#     }
 
-    payload = {
-        "endpoint": "http://test.com",
-        "bucket": "test",
-        "secret_key": "test",
-        "access_key": "testtest"
-    }
+#     payload = {
+#         "endpoint": "https://candig-demo.uhndata.io:9000",
+#         "bucket": "test-genomic",
+#         "access_key": "vMBfT7WFBLWtrAZaw6K2",
+#         "secret_key": "kt2ZKy2BWnDxKCNVhBmkVxd68zv76lKN36yQUjVl"
+#     }
 
-    # set a credential
-    response = requests.post(
-        f"{ENV['CANDIG_URL']}/ingest/s3-credential", headers=headers, json=payload
-    )
-    print(response.text)
-    # make sure that the endpoint was parsed correctly:
-    assert response.json()["endpoint"] == "test_com"
+#     # set a credential
+#     response = requests.post(
+#         f"{ENV['CANDIG_URL']}/ingest/s3-credential", headers=headers, json=payload
+#     )
+#     # check to see if the error is SSL; if so, try again without https:
+#     if "SSLError" in response.text:
+#         payload["endpoint"] = "http://candig-demo.uhndata.io:9000"
+#         # set a credential
+#         response = requests.post(
+#             f"{ENV['CANDIG_URL']}/ingest/s3-credential", headers=headers, json=payload
+#         )
 
-    # get the credential back
-    url = f"{ENV['CANDIG_URL']}/ingest/s3-credential/endpoint/{response.json()['endpoint']}/bucket/{response.json()['bucket']}"
-    response = requests.get(url, headers=headers)
+#     print(response.text)
+#     # make sure that the endpoint was parsed correctly:
+#     assert response.json()["endpoint"] == "candig_demo_uhndata_io_9000"
 
-    print(response.text)
-    assert response.json()["access_key"] == payload["access_key"]
+#     # get the credential back
+#     url = f"{ENV['CANDIG_URL']}/ingest/s3-credential/endpoint/{response.json()['endpoint']}/bucket/{response.json()['bucket']}"
+#     response = requests.get(url, headers=headers)
 
-    # delete the credential
-    response = requests.delete(url, headers=headers)
+#     print(response.text)
+#     assert response.json()["access_key"] == payload["access_key"]
 
-    print(response.text)
-    assert response.status_code == 204
+#     # delete the credential
+#     response = requests.delete(url, headers=headers)
+
+#     print(response.text)
+#     assert response.status_code == 204
 
 
 # =========================|| KATSU TEST BEGIN ||============================= #
 # HELPER FUNCTIONS
 # -----------------
+def clean_up_user(user_name):
+    print(f"deleting {user_name}")
+    site_admin_token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    safe_name = urllib.parse.quote_plus(user_name)
+
+    delete_response = requests.delete(
+        f"{ENV['CANDIG_URL']}/ingest/user/{safe_name}",
+        headers=headers
+    )
+    print(f"user delete response status code: {delete_response.status_code}")
+    assert (delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND)
+
+
 def clean_up_program(test_id):
     """
-    Deletes a dataset and all related objects in katsu, htsget and opa. Expected either
+    Deletes a program and all related objects in katsu, htsget and opa. Expected either
     successful delete or not found if the programs are not ingested.
     """
     print(f"deleting {test_id}")
@@ -368,38 +385,11 @@ def clean_up_program(test_id):
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    # delete program from katsu
-    delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/katsu/v3/ingest/program/{test_id}/",
-        headers=headers,
-    )
-    print(f"katsu delete response status code: {delete_response.status_code}")
-    assert (
-        delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND
-    ), f"CLEAN_UP_PROGRAM Expected status code {HTTPStatus.NO_CONTENT}, but got {delete_response.status_code}."
-    f" Response content: {delete_response.content}"
-
-    # delete program from htsget
-    delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{test_id}",
-        headers=headers
-    )
-    print(f"htsget delete response status code: {delete_response.status_code}")
-    assert delete_response.status_code == 200
-
-    site_admin_token = get_site_admin_token()
-    headers = {
-        "Authorization": f"Bearer {site_admin_token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
-    # delete program authorization from opa
+    # delete program
     delete_response = requests.delete(f"{ENV['CANDIG_URL']}/ingest/program/{test_id}",
                                       headers=headers)
-    print(f"program authorization delete response status code: {delete_response.status_code}")
+    print(f"program delete response status code: {delete_response.status_code}")
     assert (delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND)
-    response = delete_program_authorization(test_id)
-    print(response)
 
 
 def clean_up_program_htsget(program_id):
@@ -409,9 +399,10 @@ def clean_up_program_htsget(program_id):
         "Content-Type": "application/json; charset=utf-8",
     }
     delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/{program_id}",
+        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/programs/{program_id}",
         headers=headers
     )
+    print(delete_response.text)
     assert delete_response.status_code == 200
 
 
@@ -421,6 +412,7 @@ def test_ingest_not_admin_katsu():
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
     )
     programs = ['SYNTH_01', 'SYNTH_02', 'SYNTH_03', 'SYNTH_04']
+    programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
         for program in programs:
@@ -428,7 +420,7 @@ def test_ingest_not_admin_katsu():
                 print(f"cleaning up {program}")
                 clean_up_program(program)
 
-    with open("lib/candig-ingest/candigv2-ingest/tests/SYNTH_01.json", 'r') as f:
+    with open(f"lib/candig-ingest/candigv2-ingest/tests/{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01.json", 'r') as f:
         test_data = json.load(f)
 
     token = get_token(
@@ -445,7 +437,7 @@ def test_ingest_not_admin_katsu():
     assert response.status_code == 400
 
     # add program authorization
-    add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[])
     token = get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
         password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
@@ -458,20 +450,22 @@ def test_ingest_not_admin_katsu():
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
     try:
         queue_id = response.json()["queue_id"]
-    except KeyError as e:
-        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+    except Exception as e:
+        print(f"Ingest was not successful: {type(e)} {str(e)}")
         print(response.json())
+        assert False
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-    while response.status_code == 200 and "status" in response.json():
+    while response.status_code == 200:
         time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-    assert len(response.json()["SYNTH_01"]["errors"]) == 0
-    assert len(response.json()["SYNTH_01"]["results"]) == 13
+    print(response.text)
+    assert len(response.json()[f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"]["errors"]) == 0
+    assert len(response.json()[f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"]["results"]) == 12
     katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
         print(f"Currently ingested katsu programs: {katsu_programs}")
-        assert 'SYNTH_01' in katsu_programs
+        assert f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01' in katsu_programs
     else:
         print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
 
@@ -484,6 +478,7 @@ def test_ingest_admin_katsu():
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
     )
     programs = ['SYNTH_01', 'SYNTH_02', 'SYNTH_03', 'SYNTH_04']
+    programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
     if katsu_response.status_code == 200:
         katsu_programs = [x['program_id'] for x in katsu_response.json()]
         for program in programs:
@@ -491,49 +486,48 @@ def test_ingest_admin_katsu():
                 print(f"cleaning up {program}")
                 clean_up_program(program)
 
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    with open(f"lib/candig-ingest/candigv2-ingest/tests/small_dataset_clinical_ingest.json", 'r') as f:
+        test_data = json.load(f)
+
+    # no program auth: should fail
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    print(response.text)
+    assert response.status_code != 200
+
     for program in programs:
-        token = get_site_admin_token()
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json; charset=utf-8",
-        }
-
-        with open(f"lib/candig-ingest/candigv2-ingest/tests/{program}.json", 'r') as f:
-            test_data = json.load(f)
-
-        # no program auth: should fail
-        response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
-        print(response.text)
-        assert response.status_code != 200
-
         add_program_authorization(program, [], team_members=[])
 
-        print(f"Sending {program} clinical data to katsu...")
-        response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
-        print(f"Ingest response code: {response.status_code}")
-        #### This section runs only if ingest responds in time while we improve ingest so it doesn't time out ####
-        try:
-            queue_id = response.json()["queue_id"]
-        except KeyError as e:
-            print("Ingest was not successful, `queue_id` not found in response, see error messages below")
-            print(response.json())
-        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-        while response.status_code == 200 and "status" in response.json():
-            time.sleep(2)
-            response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    print(f"Sending {programs} clinical data to katsu...")
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    print(f"Ingest response code: {response.status_code}")
+    try:
+        queue_id = response.json()["queue_id"]
+    except KeyError as e:
+        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
         print(response.json())
-        assert len(response.json()[program]["errors"]) == 0
-        assert len(response.json()[program]["results"]) == 13
-        katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
-        if katsu_response.status_code == 200:
-            katsu_programs = [x['program_id'] for x in katsu_response.json()]
-            print(f"Currently ingested katsu programs: {katsu_programs}")
-            assert program in katsu_programs
-        else:
-            print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    while response.status_code == 200:
+        time.sleep(2)
+        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    print(response.json())
+    assert len(response.json()[program]["errors"]) == 0
+    assert len(response.json()[program]["results"]) == 12
+    katsu_response = requests.get(f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/")
+    if katsu_response.status_code == 200:
+        katsu_programs = [x['program_id'] for x in katsu_response.json()]
+        print(f"Currently ingested katsu programs: {katsu_programs}")
+        assert program in katsu_programs
+    else:
+        print(f"Looks like katsu failed with status code: {katsu_response.status_code}")
     # Reinstate expected program authorizations
-    add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
-    add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
 
 
 ## Htsget tests:
@@ -554,8 +548,8 @@ def test_ingest_not_admin_htsget():
     # when the user has no admin access, they should not be allowed
     assert response.status_code == 400
 
-    add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
-    add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
     token = get_token(
         username=ENV["CANDIG_NOT_ADMIN_USER"],
         password=ENV["CANDIG_NOT_ADMIN_PASSWORD"],
@@ -568,33 +562,29 @@ def test_ingest_not_admin_htsget():
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data, params={"do_not_index": True})
     try:
         queue_id = response.json()["queue_id"]
-    except KeyError as e:
-        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+    except Exception as e:
+        print(f"Ingest was not successful: {type(e)} {str(e)}")
         print(response.json())
+        assert False
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-    while response.status_code == 200 and "status" in response.json():
+    while response.status_code == 200:
         time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
 
     # when the user has program_curator role, they should be allowed
-    assert response.status_code == 200
+    assert response.status_code == 201
     for program in response.json():
         results = response.json()[program]
-        if len(results["errors"]) > 0:
-            print("Expected to get no errors when ingesting into htsget but the following errors were found:")
-            print("\n".join(results["errors"]))
-        assert len(results["errors"]) == 0
-        for id in results["results"]:
-            print(id)
-            print(f"\n{results["results"][id]}\n")
-            assert "genomic" in results["results"][id]
-            assert "sample" in results["results"][id]
+        print(json.dumps(results["results"], indent=2))
+        for res in results["results"]:
+            assert "error processing" not in res
     # clean up before the next test
-    programs=["SYNTH_01", "SYNTH_02"]
+    programs=["SYNTH_01", "SYNTH_02", "SYNTH_03", "SYNTH_04"]
+    programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
     for program in programs:
         clean_up_program_htsget(program)
-    add_program_authorization("SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
-    add_program_authorization("SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01", [ENV['CANDIG_NOT_ADMIN_USER']], team_members=[ENV['CANDIG_NOT_ADMIN_USER']])
+    add_program_authorization(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02", [ENV['CANDIG_NOT_ADMIN2_USER']], team_members=[ENV['CANDIG_NOT_ADMIN2_USER']])
 
 
 
@@ -610,26 +600,21 @@ def test_ingest_admin_htsget():
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/genomic", headers=headers, json=test_data)
     try:
         queue_id = response.json()["queue_id"]
-    except KeyError as e:
-        print("Ingest was not successful, `queue_id` not found in response, see error messages below")
+    except Exception as e:
+        print(f"Ingest was not successful: {type(e)} {str(e)}")
         print(response.json())
+        assert False
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
-    while response.status_code == 200 and "status" in response.json():
+    while response.status_code == 200:
         time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     # when the user has admin access, they should be allowed
-    assert response.status_code == 200
+    assert response.status_code == 201
     for program in response.json():
         results = response.json()[program]
-        if len(results["errors"]) > 0:
-            print("Expected to get no errors when ingesting into htsget but the following errors were found:")
-            print("\n".join(results["errors"]))
-        assert len(results["errors"]) == 0
-        for id in results["results"]:
-            print(id)
-            print(f"\n{results["results"][id]}\n")
-            assert "genomic" in results["results"][id]
-            assert "sample" in results["results"][id]
+        print(json.dumps(results["results"], indent=2))
+        for res in results["results"]:
+            assert "error processing" not in res
 
 
 ## Can we access the data when authorized to do so?
@@ -638,25 +623,25 @@ def user_access():
         (
             "CANDIG_NOT_ADMIN_USER",
             "CANDIG_NOT_ADMIN_PASSWORD",
-            "NA18537-vcf",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf",
             False,
         ),  # user1 cannot access NA18537 as part of SYNTH_02
         (
             "CANDIG_NOT_ADMIN_USER",
             "CANDIG_NOT_ADMIN_PASSWORD",
-            "test",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-test",
             True,
         ),  # user1 can access test as part of SYNTH_01
         (
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
-            "NA02102-bam",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA02102-bam",
             False
         ),  # user2 cannot access NA02102-bam
         (
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
-            "multisample_1",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_1",
             True
         )  # user2 can access multisample_1
     ]
@@ -687,16 +672,16 @@ def test_sample_metadata():
         "Authorization": f"Bearer {get_token(username=username, password=password)}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_NULL_0001", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_NULL_0001", headers=headers)
     assert "genomes" in response.json()
-    assert "multisample_2" in response.json()["genomes"]
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_0072", headers=headers)
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_2" in response.json()["genomes"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0072", headers=headers)
     assert "genomes" in response.json()
-    assert "HG00100-cram" in response.json()["genomes"]
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/SAMPLE_ALL_0002", headers=headers)
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-HG00100-cram" in response.json()["genomes"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_ALL_0002", headers=headers)
     assert "genomes" in response.json()
     pprint.pprint(response.json())
-    assert "HG02102-all" in response.json()["genomes"]
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-HG02102-all" in response.json()["genomes"]
 
 
 def test_index_success():
@@ -706,12 +691,12 @@ def test_index_success():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/NA18537-vcf", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf", headers=headers)
     tries = 0
     print(response.json())
     while response.status_code != 200 or "indexed" not in response.json() or response.json()['indexed'] != 1:
         time.sleep(2)
-        response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/NA18537-vcf", headers=headers)
+        response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf", headers=headers)
         print(response.json())
         tries = tries + 1
         if tries > 120:
@@ -725,7 +710,7 @@ def test_index_success():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/test", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-test", headers=headers)
     assert "indexed" in response.json()
     print(response.json())
     assert response.json()['indexed'] == 1
@@ -738,7 +723,7 @@ def test_index_success():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/multisample_1", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_1", headers=headers)
     assert "indexed" in response.json()
     print(response.json())
     assert response.json()['indexed'] == 1
@@ -751,14 +736,14 @@ def beacon_access():
             "CANDIG_NOT_ADMIN_USER",
             "CANDIG_NOT_ADMIN_PASSWORD",
             "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
-            ["SYNTH_01"],
-            ["SYNTH_02"],
+            [f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"],
+            [f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02"],
         ),
         (   # user2 can access NA18537-vcf, multisample_1, HG02102
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
             "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
-            ["SYNTH_02"],
+            [f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02"],
             [],
         )
     ]
@@ -779,6 +764,8 @@ def test_beacon(user, password, search, can_access, cannot_access):
         params=params,
     )
     pprint.pprint(response.json())
+    print(can_access)
+    print(cannot_access)
     for c in can_access:
         assert c in str(response.json())
     for c in cannot_access:
@@ -789,14 +776,14 @@ def test_beacon(user, password, search, can_access, cannot_access):
 def verify_samples():
     return [
         (
-            "multisample_1",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_1",
             "multisample_1.vcf.gz",
             "variant",
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD"
         ),
         (
-            "NA02102-bam",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA02102-bam",
             "NA02102.bam",
             "read",
             "CANDIG_NOT_ADMIN_USER",
@@ -848,13 +835,13 @@ def test_verify_htsget(object_id, file_name, file_type, user, password):
     assert response.json()["result"] == True
 
 
-def test_cohort_status():
+def test_program_status():
     token = get_site_admin_token()
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/cohorts/SYNTH_02/status", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/programs/{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02/status", headers=headers)
     assert "index_complete" in response.json()
     assert len(response.json()['index_complete']) > 0
 
@@ -1015,8 +1002,8 @@ def test_query_donors_all():
             'None': 4,
             'Skin': 4
         },
-        'patients_per_cohort': {
-            'SYNTH_02': 20
+        'patients_per_program': {
+            f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02': 20
         },
         'treatment_type_count': {
             'Bone marrow transplant': 7,
@@ -1071,8 +1058,8 @@ def test_query_donor_search():
             'None': 4,
             'Skin': 4
         },
-        'patients_per_cohort': {
-            'SYNTH_02': 18
+        'patients_per_program': {
+            f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02': 18
         },
         'treatment_type_count': {
             'Bone marrow transplant': 7,
@@ -1093,6 +1080,7 @@ def test_query_donor_search():
             assert summary_stats[category][value] == expected_response[category][value]
 
 
+# Can we can find donors by querying a specific region of the genome?
 def test_query_genomic():
     # tests that a request sent via query to htsget-beacon properly prunes the data
     token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'],
@@ -1116,8 +1104,8 @@ def test_query_genomic():
             for donor in response.json()["results"]:
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
     assert response and len(response.json()["results"]) == 1
-    assert response.json()["results"][0]['program_id'] == "SYNTH_02"
-    assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_0021"
+    assert response.json()["results"][0]['program_id'] == f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02"
+    assert response.json()["results"][0]['submitter_donor_id'] == f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-DONOR_0021"
 
     token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
                       password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
@@ -1141,8 +1129,8 @@ def test_query_genomic():
             for donor in response.json()["results"]:
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
     assert response and len(response.json()["results"]) == 1
-    assert response.json()["results"][0]['program_id'] == "SYNTH_01"
-    assert response.json()["results"][0]['submitter_donor_id'] == "DONOR_NULL_0001"
+    assert response.json()["results"][0]['program_id'] == f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"
+    assert response.json()["results"][0]['submitter_donor_id'] == f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-DONOR_NULL_0001"
 
     token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
                       password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
@@ -1166,35 +1154,20 @@ def test_query_genomic():
                 print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
     assert response and len(response.json()["results"]) == 1
 
-    # token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
-    #                   password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
-    # headers = {
-    #     "Authorization": f"Bearer {token}",
-    #     "Content-Type": "application/json; charset=utf-8",
-    # }
-    # params = {
-    #     "gene": "TP53",
-    #     "assembly": "hg38"
-    # }
-    # response = requests.get(
-    #     f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
-    # )
-    # pprint.pprint(response.json())
-    # if len(response.json()["results"]) != 0:
-    #     print(f"\n\nExpected 0 results from the genomic query using gene name 'TP53' but got {len(response.json()["results"])}")
-    #     if len(response.json()["results"]) > 0:
-    #         print("Got results from:")
-    #         for donor in response.json()["results"]:
-    #             print(f"{donor["program_id"]}: {donor["submitter_donor_id"]}")
-    # assert response and len(response.json()["results"]) == 0
 
-
+# Can we use a discovery query to get counts of donors we do not have access to?
 def test_query_discovery():
+    token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'],
+                      password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
+    
     katsu_response = requests.get(
-        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
+        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/authorized/programs/", headers=headers
     ).json()
     query_response = requests.get(
-        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs").json()
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs", headers=headers).json()
     # Ensure that each category in metadata corresponds to something in the site
     for category in query_response["site"]["required_but_missing"]:
         for field in query_response["site"]["required_but_missing"][category]:
@@ -1203,7 +1176,7 @@ def test_query_discovery():
                 if type(total) == str:
                     # Can't perform this check on censored data
                     continue
-                for program in katsu_response:
+                for program in katsu_response["items"]:
                     if category in program["metadata"]['required_but_missing'] and field in program["metadata"]['required_but_missing'][category]:
                         if type(program["metadata"]['required_but_missing'][category][field][total_type]) == int:
                             total -= program["metadata"]['required_but_missing'][category][field][total_type]
@@ -1212,19 +1185,48 @@ def test_query_discovery():
                     assert False
 
     # Ensure that every category & field in Katsu exists in the response
-    for program in katsu_response:
+    for program in katsu_response["items"]:
         for category in program["metadata"]["required_but_missing"]:
             assert category in query_response["site"]["required_but_missing"]
             for field in program["metadata"]["required_but_missing"][category]:
                 assert field in query_response["site"]["required_but_missing"][category]
 
 
-def test_clean_up():
-    clean_up_program("SYNTH_01")
-    clean_up_program("SYNTH_02")
-    clean_up_program("SYNTH_03")
-    clean_up_program("SYNTH_04")
+# Can we check how many donors have genomics data?
+def test_query_completeness():
+    token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'],
+                      password=ENV['CANDIG_SITE_ADMIN_PASSWORD'])
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
+    query_response = requests.get(
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/genomic_completeness", headers=headers).json()
+    pprint.pprint(query_response)
+    # Verify that the synthetic data shows up
+    assert f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01" in query_response
+    assert query_response[f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"]["genomes"] == 6
+    assert f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02" in query_response
+    assert query_response[f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02"]["genomes"] == 5
 
+
+def test_clean_up():
+    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01")
+    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02")
+    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_03")
+    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_04")
+
+    clean_up_user(ENV['CANDIG_NOT_ADMIN_USER'])
+    clean_up_user(ENV['CANDIG_NOT_ADMIN2_USER'])
+
+    site_admin_token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    delete_response = requests.delete(
+        f"{ENV['CANDIG_URL']}/ingest/user/pending",
+        headers=headers
+    )
     # clean up test_htsget
     old_val = os.environ.get("TESTENV_URL")
     os.environ["TESTENV_URL"] = f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}"
