@@ -20,6 +20,7 @@ services:
       KC_HTTP_ENABLED: true
       KEYCLOAK_PROXY_HEADERS: ${KEYCLOAK_PROXY_HEADERS}
       CANDIG_PRODUCTION_MODE: ${CANDIG_PRODUCTION_MODE}
+      KEYCLOAK_HTTPS_PORT: ${KEYCLOAK_HTTPS_PORT}
     secrets:
       - keycloak-admin-password
     ports:

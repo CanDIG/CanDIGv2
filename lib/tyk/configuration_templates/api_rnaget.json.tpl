@@ -1,9 +1,25 @@
 {
+<<<<<<<< HEAD:lib/tyk/configuration_templates/api_rnaget.json.tpl
     "api_id": "${TYK_RNAGET_API_ID}",
     "name": "${TYK_RNAGET_API_SLUG}",
     "use_openid": true,
     "active": true,
     "slug": "${TYK_RNAGET_API_SLUG}",
+========
+<<<<<<<< HEAD:lib/tyk/configuration_templates/api_template.json.tpl
+    "api_id": "${TYK_TEMPLATE_API_ID}",
+    "name": "${TYK_TEMPLATE_API_SLUG}",
+    "use_openid": true,
+    "active": true,
+    "slug": "${TYK_TEMPLATE_API_SLUG}",
+========
+    "api_id": "${TYK_RNAGET_API_ID}",
+    "name": "${TYK_RNAGET_API_SLUG}",
+    "use_openid": true,
+    "active": true,
+    "slug": "${TYK_RNAGET_API_SLUG}",
+>>>>>>>> develop:lib/tyk/configuration_templates/api_rnaget.json.tpl
+>>>>>>>> stable:lib/tyk/configuration_templates/api_template.json.tpl
 
     "enable_signature_checking": false,
 
@@ -15,10 +31,24 @@
     "base_identity_provided_by": "",
 
     "proxy": {
+<<<<<<<< HEAD:lib/tyk/configuration_templates/api_rnaget.json.tpl
         "target_url": "${TYK_RNAGET_API_TARGET}",
         "strip_listen_path": true,
         "disable_strip_slash": false,
         "listen_path": "/${TYK_RNAGET_API_LISTEN_PATH}",
+========
+<<<<<<<< HEAD:lib/tyk/configuration_templates/api_template.json.tpl
+        "target_url": "${TYK_TEMPLATE_API_TARGET}",
+        "strip_listen_path": true,
+        "disable_strip_slash": false,
+        "listen_path": "/${TYK_TEMPLATE_API_LISTEN_PATH}",
+========
+        "target_url": "${TYK_RNAGET_API_TARGET}",
+        "strip_listen_path": true,
+        "disable_strip_slash": false,
+        "listen_path": "/${TYK_RNAGET_API_LISTEN_PATH}",
+>>>>>>>> develop:lib/tyk/configuration_templates/api_rnaget.json.tpl
+>>>>>>>> stable:lib/tyk/configuration_templates/api_template.json.tpl
         "transport": {
             "ssl_insecure_skip_verify": false,
             "ssl_ciphers": [],
@@ -60,7 +90,16 @@
                 "require_session": false
             }
             ],
+<<<<<<<< HEAD:lib/tyk/configuration_templates/api_rnaget.json.tpl
         "post": [],
+========
+<<<<<<<< HEAD:lib/tyk/configuration_templates/api_template.json.tpl
+        "post": [
+        ],
+========
+        "post": [],
+>>>>>>>> develop:lib/tyk/configuration_templates/api_rnaget.json.tpl
+>>>>>>>> stable:lib/tyk/configuration_templates/api_template.json.tpl
         "id_extractor": {
             "extract_with": "",
             "extract_from": "",
