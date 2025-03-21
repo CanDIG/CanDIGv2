@@ -286,8 +286,14 @@ found=$(shell grep -ch $(containers) tmp/containers.txt)
 #<<<
 compose-%:
 	@printf "\nOutput of compose-$*: \n" | tee -a $(LOGFILE)
-	source setup_hosts.sh; \
+	@source setup_hosts.sh; \
 	python settings.py; source env.sh; \
+	if [ $* != "keycloak" ]; then \
+	if [ $* != "logging" ]; then \
+	echo "getting site admin token"; \
+	python site_admin_token.py ; \
+	fi \
+	fi; \
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml --compatibility up -d 2>&1 | tee -a $(LOGFILE)
 	if [ $(found) -eq 0 ]; then \
@@ -561,22 +567,24 @@ start-all:
 
 #>>>
 # rebuild the entire stack without touching the data containers, defined in .env
+### $(MAKE) clean-all CANDIG_MODULES="$(CANDIG_MODULES)"
 #<<<
 
 .PHONY: rebuild-keep-data
 rebuild-keep-data:
-	# Remove the module from the .env
-	$(eval CANDIG_MODULES := $(filter-out $(CANDIG_DATA_MODULES),$(CANDIG_MODULES)))
-	# Clean everything
-	$(MAKE) clean-all CANDIG_MODULES="$(CANDIG_MODULES)"
+	# Remove the data modules from CANDIG_MODULES
+	$(eval REBUILD_CANDIG_MODULES := $(filter-out $(CANDIG_DATA_MODULES),$(CANDIG_MODULES)))
+	# Clean only the remaining modules
+	$(foreach MODULE, $(REBUILD_CANDIG_MODULES), $(MAKE) clean-$(MODULE);)
+	# Prune unused Docker resources
 	docker system prune -af
 	# Start build-all
 	./pre-build-check.sh $(ARGS)
 	$(MAKE) init-docker
-	# Rebuild everything
-	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
+	# Rebuild deleted modules
+	$(foreach MODULE, $(REBUILD_CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
+	# Run post-build tasks
 	./post_build.sh
-
 
 # wrapper for make_backup.sh to make sure we're running it from the right directory
 backup-vault:
