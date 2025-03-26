@@ -38,7 +38,7 @@ class AuthzRequest:
 ## Does Keycloak respond?
 def test_keycloak():
     response = requests.get(
-        f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/candig/.well-known/openid-configuration"
+        f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/{ENV['KEYCLOAK_REALM']}/.well-known/openid-configuration"
     )
     assert response.status_code == 200
     assert "grant_types_supported" in response.json()
@@ -55,7 +55,7 @@ def get_token(username=None, password=None, access_token=False):
         "scope": "openid",
     }
     response = requests.post(
-        f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/candig/protocol/openid-connect/token",
+        f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/{ENV['KEYCLOAK_REALM']}/protocol/openid-connect/token",
         data=payload,
     )
     if response.status_code == 200:
