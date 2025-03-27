@@ -69,6 +69,7 @@ def get_env():
     vars["POSTGRES_PASSWORD_FILE"] = os.path.abspath(f"tmp/postgres/db-secret")
     vars["CANDIG_ENV"] = INTERPOLATED_ENV
     vars["DB_PATH"] = "postgres-db"
+    vars["FEDERATION_SELF_SERVER_ID"] = get_env_value("FEDERATION_SELF_SERVER_ID")
 
     # test users:
     if get_env_value("DEFAULT_SITE_ADMIN_USER") is not None:
