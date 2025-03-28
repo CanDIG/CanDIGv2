@@ -4,7 +4,7 @@ import re
 import requests
 
 from add_federated_server import add_federated_server
-
+from site_admin_token import get_site_admin_token
 
 # We need a unix timestamp from the start of the day
 today = datetime.datetime.combine(
@@ -22,7 +22,6 @@ r = requests.get(f"https://slack.com/api/conversations.history" +
 messages = r.json()['messages']
 federation_re = r'```federate (.+)```'  # Find messages about federation
 url_re = r'<(.+)>'  # URLs from Slack always end up enclosed in <>s
-federated_urls = []
 for message in messages:
     match = re.match(federation_re, message['text'])
     if match:
@@ -38,17 +37,20 @@ for message in messages:
         server_id = groups[6]
         keycloak_url = re.match(url_re, groups[7]).group(1)
 
-        # Debugging line because I messed up the first time:
-        keycloak_url += "/auth/realms/candig"
-
         # Actually add the server
         add_federated_server(token, server_id, url, keycloak_url, server_id, province,
-                province_code)
-        federated_urls.append(server_id)
+                province_code, verbose=False)
+
+# Check the federation
+site_token = get_site_admin_token()
+candig_headers = { "Authorization": f"Bearer {site_token}" }
+servers = requests.get(f"{os.environ['CANDIG_URL']}/federation/v1/servers",
+        headers=candig_headers).json()
+server_ids = [server['id'] for server in servers]
 
 success_payload = {
     "text": f"{os.environ['FEDERATION_SELF_SERVER_ID']} successfully added: " +
-            f"{', '.join(federated_urls)}"
+            f"{', '.join(server_ids)}"
 }
 requests.post(os.environ['HOOK_URL'], json=success_payload)
 

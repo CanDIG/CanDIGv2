@@ -29,14 +29,18 @@ def add_federated_server(token, id, url, keycloak_url, name, province, code, ver
 #            password=os.getenv("CANDIG_SITE_ADMIN_PASSWORD"))
     headers = { "Authorization": f"Bearer {site_token}"}
 
-    print(f"Adding {id} to federation...")
+    if verbose:
+        print(f"Adding {id} to federation...")
     url = f"{get_env_value('FEDERATION_SERVICE_URL')}/federation/v1/servers"
     response = requests.request("POST", url, headers=headers, json=server)
-    if response.status_code != 200:
+    if response.status_code != 200 and verbose:
         print(f"POST response: {response.status_code} {response.text}")
+        return response.status_code, response.text
     url = f"{get_env_value('FEDERATION_SERVICE_URL')}/federation/v1/servers"
     response = requests.request("GET", url, headers=headers)
-    print(response.text)
+    if verbose:
+        print(response.text)
+    return 200, 'ok'
 
 def main():
     parser = argparse.ArgumentParser(
