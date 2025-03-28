@@ -76,7 +76,7 @@ def main():
         default='ca-on')
 
     args = parser.parse_args()
-    add_federated_server(args.token, args.id, args.url, args.keycloak_url,
+    add_federated_server(args.token, args.id, args.url, args.keycloak,
             args.name, args.province, args.code, verbose=True)
 
 if __name__ == "__main__":

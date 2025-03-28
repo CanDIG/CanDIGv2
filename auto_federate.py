@@ -37,6 +37,10 @@ for message in messages:
         server_id = groups[6]
         keycloak_url = re.match(url_re, groups[7]).group(1)
 
+        # Don't overwrite our own federation
+        if os.environ['FEDERATION_SELF_SERVER_ID'] == server_id:
+                continue
+
         # Actually add the server
         add_federated_server(token, server_id, url, keycloak_url, server_id, province,
                 province_code, verbose=False)
