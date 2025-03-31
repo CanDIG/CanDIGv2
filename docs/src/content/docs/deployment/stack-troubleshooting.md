@@ -64,3 +64,8 @@ If you are still having trouble, feel free to [reach out to us](https://github.c
 #### Uncaught server error: java.lang.NullPointerException: Cannot invoke "String.equals(Object)" because "requestHost" is null
 
 This error occurs when a service tries to access Keycloak through [a URL that includes an underscore](https://stackoverflow.com/a/76991211/2148998). This has been known to occur when setting up reverse proxies that attempt to redirect requests to Keycloak via the container name `candigv2_keycloak_1` -- instead it is much better to use its alias `keycloak`.
+
+#### Unauthorized {'type': 'about:blank', 'title': 'Method Not Allowed', 'detail': 'Method Not Allowed', 'status': 405}
+
+On federated systems, this may occur when the URL given to Federation contains a trailing `'/'` in it. It is currently unknown why this occurs
+
