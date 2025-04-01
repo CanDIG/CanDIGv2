@@ -71,24 +71,47 @@ On federated systems, this may occur when the URL given to Federation contains a
 
 ## Tyk provider issues
 
+In the logs you are getting errors such as the below when trying to access any endpoints.
+
 e.g.:
-```
-level=warning msg="JWT Invalid" api_id=91 api_name=federation error="Validation error. Validation error. The provider https://<authdomain>/auth/realms/candig does not have a client id matching any of the token audiences [https://<authdomain>/auth/realms/candig]" mw=OpenIDMW org_id= origin=10.9.234.195 path=/federation/v1/service-info
+```bash
+level=warning msg="JWT Invalid" api_id=91 api_name=federation error="Validation error. Validation error. The provider https://<$CANDIG_AUTH_DOMAIN>/auth/realms/candig does not have a client id matching any of the token audiences [https://<$CANDIG_AUTH_DOMAIN>/auth/realms/candig]" mw=OpenIDMW org_id= origin=10.9.234.195 path=/federation/v1/service-info
 time="Apr 01 18:45:40" level=warning msg="Attempted access with invalid key." api_id=91 api_name=federation key="****JWT]" mw=OpenIDMW org_id= origin=10.9.234.195 path=/federation/v1/service-info
 ```
 Check your tyk config files for anything that looks weird, e.g.
 `lib/tyk/tmp/apps/91.json` has the correct issuer and client_ids as configured in your `.env`
 
-Check your `.env` does not have any issues with parsing invisible white space or comments 
+Should be something like:
+
+```json
+"providers": [
+            {
+                "issuer": "https://<$CANDIG_AUTH_DOMAIN>",
+                "client_ids": {
+                    "<$KEYCLOAK_CLIENT_ID in base64 encoding>": "candig_policy"
+                }
+            }
+        ]
+```
+
+For the client id, as an example, if you kept the default value for `KEYCLOAK_CLIENT_ID` (`local_candig`) in the `example.env`, the value would be 
+
+```bash
+echo -n "local_candig" | base64
+bG9jYWxfY2FuZGln
+```
+
+Check your `.env` does not have any issues with parsing invisible white space or comments.
 
 ## Tyk cannot find secret key
 
-e.g. you get messages such as: 
+Your stack doesn't seem to be working and there are tyk related error messages such as `Key not authorised` even though you believe you are using a valid token.
+
+Double check your build log (`tmp/progress.txt`) for messages such as: 
 ```
 cat: /opt/CanDIGv2/tmp/tyk/secret-key: No such file or directory
 mv: cannot stat 'tmp/secrets/tyk-secret-key': No such file or directory
 cat: /opt/CanDIGv2/tmp/tyk/secret-key: No such file or directory
 ```
-during the build log
 
-Try regenerating the tyk secret with `make secret-tyk-secret-key`
+To fix, try regenerating the tyk secret with `make secret-tyk-secret-key`.
