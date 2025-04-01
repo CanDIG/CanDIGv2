@@ -674,14 +674,15 @@ def test_experiment_metadata():
     }
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_NULL_0001", headers=headers)
     assert "genomes" in response.json()
-    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_2" in response.json()["genomes"]
+    # the experiment is what is listed in the genomes as wgs
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_NULL_0001" in response.json()["genomes"]
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0072", headers=headers)
     assert "genomes" in response.json()
-    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-HG00100-cram" in response.json()["genomes"]
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0072" in response.json()["genomes"]
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_ALL_0002", headers=headers)
     assert "genomes" in response.json()
     pprint.pprint(response.json())
-    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-HG02102-all" in response.json()["genomes"]
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_ALL_0002" in response.json()["genomes"]
 
 
 def test_index_success():
