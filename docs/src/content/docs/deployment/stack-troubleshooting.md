@@ -69,3 +69,26 @@ This error occurs when a service tries to access Keycloak through [a URL that in
 
 On federated systems, this may occur when the URL given to Federation contains a trailing `'/'` in it. It is currently unknown why this occurs
 
+## Tyk provider issues
+
+e.g.:
+```
+level=warning msg="JWT Invalid" api_id=91 api_name=federation error="Validation error. Validation error. The provider https://<authdomain>/auth/realms/candig does not have a client id matching any of the token audiences [https://<authdomain>/auth/realms/candig]" mw=OpenIDMW org_id= origin=10.9.234.195 path=/federation/v1/service-info
+time="Apr 01 18:45:40" level=warning msg="Attempted access with invalid key." api_id=91 api_name=federation key="****JWT]" mw=OpenIDMW org_id= origin=10.9.234.195 path=/federation/v1/service-info
+```
+Check your tyk config files for anything that looks weird, e.g.
+`lib/tyk/tmp/apps/91.json` has the correct issuer and client_ids as configured in your `.env`
+
+Check your `.env` does not have any issues with parsing invisible white space or comments 
+
+## Tyk cannot find secret key
+
+e.g. you get messages such as: 
+```
+cat: /opt/CanDIGv2/tmp/tyk/secret-key: No such file or directory
+mv: cannot stat 'tmp/secrets/tyk-secret-key': No such file or directory
+cat: /opt/CanDIGv2/tmp/tyk/secret-key: No such file or directory
+```
+during the build log
+
+Try regenerating the tyk secret with `make secret-tyk-secret-key`
