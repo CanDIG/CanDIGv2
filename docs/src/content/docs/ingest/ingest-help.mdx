@@ -64,8 +64,8 @@ It is likely that the token you are trying to use has expired. Try getting a fre
 If you receive a file not found error something like this:
 
 ```bash
-"<Your_genomic_file_ID": {
-        "errors": "{\n \"message\": \"No file exists at /the/path/you/provided/as/access/method/genomic_file_name.bam.bai on the server.\"\n}\n"
+"<Your_analysis_ID": {
+        "errors": "{\n \"message\": \"No file exists at /the/path/you/provided/as/access/method/analysis_name.bam.bai on the server.\"\n}\n"
     },
 ```
 
@@ -89,7 +89,7 @@ If you are ingesting VCF files, they take some time to be indexed. This happens 
 If you receive an error when using the `/ingest/genomic` endpoint something like this:
 
 ```bash
-"genomic_file_id": {
+"analysis_id": {
 "errors": "{\n \"error\": \"Key not authorised\"\n}"
 }
 ```
