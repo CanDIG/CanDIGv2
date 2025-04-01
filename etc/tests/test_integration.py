@@ -665,23 +665,24 @@ def test_htsget_access_data(user, password, obj, access):
     assert (response.status_code == 200) == access
 
 
-def test_sample_metadata():
+def test_experiment_metadata():
     username = ENV["CANDIG_NOT_ADMIN2_USER"]
     password = ENV["CANDIG_NOT_ADMIN2_PASSWORD"]
     headers = {
         "Authorization": f"Bearer {get_token(username=username, password=password)}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_NULL_0001", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_NULL_0001", headers=headers)
     assert "genomes" in response.json()
-    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_2" in response.json()["genomes"]
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0072", headers=headers)
+    # the experiment is what is listed in the genomes as wgs
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_NULL_0001" in response.json()["genomes"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0072", headers=headers)
     assert "genomes" in response.json()
-    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-HG00100-cram" in response.json()["genomes"]
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/samples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_ALL_0002", headers=headers)
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0072" in response.json()["genomes"]
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_ALL_0002", headers=headers)
     assert "genomes" in response.json()
     pprint.pprint(response.json())
-    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-HG02102-all" in response.json()["genomes"]
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_ALL_0002" in response.json()["genomes"]
 
 
 def test_index_success():
@@ -1162,7 +1163,7 @@ def test_query_discovery():
     headers = {
         "Authorization": f"Bearer {token}",
     }
-    
+
     katsu_response = requests.get(
         f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/authorized/programs/", headers=headers
     ).json()
