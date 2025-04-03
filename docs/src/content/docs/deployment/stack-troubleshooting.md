@@ -115,3 +115,10 @@ cat: /opt/CanDIGv2/tmp/tyk/secret-key: No such file or directory
 ```
 
 To fix, try regenerating the tyk secret with `make secret-tyk-secret-key`.
+
+Then recompose both tyk and federation with:
+
+```
+make recompose-tyk
+make recompose-federation
+```
