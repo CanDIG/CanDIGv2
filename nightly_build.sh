@@ -82,6 +82,8 @@ fi
 
 source env.sh
 
+export TOKEN=$(python site_admin_token.py)
+
 cd $BUILD_PATH
 
 PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\`\`\`"
