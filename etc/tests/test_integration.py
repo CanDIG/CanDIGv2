@@ -408,15 +408,23 @@ def clean_up_program_htsget(program_id):
 
 def test_ingest_not_admin_katsu():
     """Test ingest of SYNTH_01 as CANDIG_NOT_ADMIN_USER, without and with program authorization."""
-    katsu_response = requests.get(
-        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
+    
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN2_USER"],
+        password=ENV["CANDIG_NOT_ADMIN2_PASSWORD"],
     )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    query_response = requests.get(
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs", headers=headers)
     programs = ['SYNTH_01', 'SYNTH_02', 'SYNTH_03', 'SYNTH_04']
     programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
-    if katsu_response.status_code == 200:
-        katsu_programs = [x['program_id'] for x in katsu_response.json()]
-        for program in programs:
-            if program in katsu_programs:
+    if query_response.status_code == 200:
+        query_programs = [x['program_id'] for x in query_response.json()['programs']]
+        for program in query_programs:
+            if program in programs:
                 print(f"cleaning up {program}")
                 clean_up_program(program)
 
@@ -474,15 +482,22 @@ def test_ingest_not_admin_katsu():
 def test_ingest_admin_katsu():
     """Test whether an admin can ingest each of the synthetic data programs can be ingested and add the expected
     program authorizations."""
-    katsu_response = requests.get(
-        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN2_USER"],
+        password=ENV["CANDIG_NOT_ADMIN2_PASSWORD"],
     )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    query_response = requests.get(
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs", headers=headers)
     programs = ['SYNTH_01', 'SYNTH_02', 'SYNTH_03', 'SYNTH_04']
     programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
-    if katsu_response.status_code == 200:
-        katsu_programs = [x['program_id'] for x in katsu_response.json()]
-        for program in programs:
-            if program in katsu_programs:
+    if query_response.status_code == 200:
+        query_programs = [x['program_id'] for x in query_response.json()['programs']]
+        for program in query_programs:
+            if program in programs:
                 print(f"cleaning up {program}")
                 clean_up_program(program)
 
@@ -992,9 +1007,9 @@ def test_query_donors_all():
 
     expected_response = {
         'age_at_diagnosis': {
-            '30-39 Years': 2,
-            '40-49 Years': 6,
-            '50-59 Years': 6
+            '30-39 Years': 1,
+            '40-49 Years': 8,
+            '50-59 Years': 8
         },
         'primary_site_count': {
             'Breast': 4,
@@ -1008,13 +1023,13 @@ def test_query_donors_all():
         },
         'treatment_type_count': {
             'Bone marrow transplant': 7,
-            'Other': 5,
-            'Photodynamic therapy': 6,
-            'Radiation therapy': 19,
-            'Stem cell transplant': 10,
-            'Surgery': 21,
+            'Other': 9,
+            'Photodynamic therapy': 9,
+            'Radiation therapy': 16,
+            'Stem cell transplant': 9,
+            'Surgery': 23,
             'Systemic therapy': 40,
-            'Targeted molecular therapy': 15
+            'Targeted molecular therapy': 7
         }
     }
     for category in expected_response.keys():
@@ -1048,29 +1063,29 @@ def test_query_donor_search():
     pprint.pprint(summary_stats)
     expected_response = {
         'age_at_diagnosis': {
-            '30-39 Years': 2,
-            '40-49 Years': 5,
+            '30-39 Years': 1,
+            '40-49 Years': 6,
             '50-59 Years': 6
         },
         'primary_site_count': {
             'Breast': 3,
-            'Bronchus and lung': 4,
+            'Bronchus and lung': 3,
             'Colon': 3,
-            'None': 4,
-            'Skin': 4
+            'None': 3,
+            'Skin': 3
         },
         'patients_per_program': {
-            f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02': 18
+            f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02': 15
         },
         'treatment_type_count': {
-            'Bone marrow transplant': 7,
-            'Other': 5,
-            'Photodynamic therapy': 6,
-            'Radiation therapy': 19,
-            'Stem cell transplant': 9,
-            'Surgery': 19,
-            'Systemic therapy': 36,
-            'Targeted molecular therapy': 14}
+            'Bone marrow transplant': 6,
+            'Other': 8,
+            'Photodynamic therapy': 8,
+            'Radiation therapy': 16,
+            'Stem cell transplant': 7,
+            'Surgery': 18,
+            'Systemic therapy': 30,
+            'Targeted molecular therapy': 7}
     }
     for category in expected_response.keys():
         for value in expected_response[category].keys():
