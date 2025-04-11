@@ -70,6 +70,7 @@ def get_env():
     vars["CANDIG_ENV"] = INTERPOLATED_ENV
     vars["DB_PATH"] = "postgres-db"
     vars["FEDERATION_SELF_SERVER_ID"] = get_env_value("FEDERATION_SELF_SERVER_ID")
+    vars["CANDIG_SITE_LOCATION"] = get_env_value("CANDIG_SITE_LOCATION")
 
     # test users:
     if get_env_value("DEFAULT_SITE_ADMIN_USER") is not None:

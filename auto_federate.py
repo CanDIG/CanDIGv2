@@ -24,26 +24,31 @@ federation_re = r'```federate (.+)```'  # Find messages about federation
 url_re = r'<(.+)>'  # URLs from Slack always end up enclosed in <>s
 for message in messages:
     match = re.match(federation_re, message['text'])
-    if match:
-        groups = match.group(1).split('|')
+    try:
+        if match:
+            groups = match.group(1).split('|')
 
-        # For ease of understanding
-        token = groups[0]
-        name = groups[1]
-        url = re.match(url_re, groups[2]).group(1)
-        client_id = groups[3]
-        province = groups[4]
-        province_code = groups[5]
-        server_id = groups[6]
-        keycloak_url = re.match(url_re, groups[7]).group(1)
+            # For ease of understanding
+            token = groups[0]
+            name = groups[1]
+            url = re.match(url_re, groups[2]).group(1)
+            client_id = groups[3]
+            province = groups[4]
+            province_code = groups[5]
+            server_id = groups[6]
+            keycloak_url = re.match(url_re, groups[7]).group(1)
 
-        # Don't overwrite our own federation
-        if os.environ['FEDERATION_SELF_SERVER_ID'] == server_id:
-                continue
+            # Don't overwrite our own federation
+            if os.environ['FEDERATION_SELF_SERVER_ID'] == server_id:
+                    continue
 
-        # Actually add the server
-        add_federated_server(token, server_id, url, keycloak_url, server_id, province,
-                province_code, verbose=False)
+            # Actually add the server
+            add_federated_server(token, server_id, url, keycloak_url, server_id, province,
+                    province_code, verbose=False)
+    except:
+        # Don't bother if we're trying to add a server but it doesn't look right
+        # This is probably just another user saying something
+        pass
 
 # Check the federation
 site_token = get_site_admin_token()
