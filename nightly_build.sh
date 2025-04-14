@@ -4,6 +4,7 @@ PostToSlack () {
     # Single quoting the string breaks formatting, so instead we rely on the \" -> \\" to make sure this doesn't break the curl
     # SAFE_TEXT=${1@Q}
     SAFE_TEXT=${1//\"/\\\"}
+    echo $SAFE_TEXT
     curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$SAFE_TEXT\"}" $HOOK_URL
 }
 
@@ -85,6 +86,6 @@ export TOKEN=$(python site_admin_token.py)
 
 cd $BUILD_PATH
 
+PostToSlack "\`\`\`\nBuild success:\n$TYK_LOGIN_TARGET_URL\nusername: $CANDIG_SITE_ADMIN_USER\npassword $CANDIG_SITE_ADMIN_PASSWORD\nusername: $CANDIG_NOT_ADMIN_USER\npassword $CANDIG_NOT_ADMIN_PASSWORD\nusername: $CANDIG_NOT_ADMIN2_USER\npassword $CANDIG_NOT_ADMIN2_PASSWORD\n\`\`\`"
 FEDERATE_STRING="federate $TOKEN|$CANDIG_CLIENT_ID|$CANDIG_URL|$CANDIG_CLIENT_ID|ON|ca-on|$FEDERATION_SELF_SERVER_ID|$KEYCLOAK_PUBLIC_URL/auth/realms/$KEYCLOAK_REALM"
 PostToSlack "\`\`\`$FEDERATE_STRING\`\`\`"
-PostToSlack "\`\`\`\nBuild success:\n$TYK_LOGIN_TARGET_URL\nusername: $CANDIG_SITE_ADMIN_USER\npassword $CANDIG_SITE_ADMIN_PASSWORD\nusername: $CANDIG_NOT_ADMIN_USER\npassword $CANDIG_NOT_ADMIN_PASSWORD\nusername: $CANDIG_NOT_ADMIN2_USER\npassword $CANDIG_NOT_ADMIN2_PASSWORD\n\`\`\`"
