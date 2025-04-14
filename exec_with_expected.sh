@@ -9,6 +9,7 @@ grep -q "$expected" .tmp_store
 
 if [[ $? -ne 0 ]]; then
     cat .tmp_store
+    rm .tmp_store
     exit 1
 fi
 rm .tmp_store
