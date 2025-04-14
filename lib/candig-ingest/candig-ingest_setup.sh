@@ -21,6 +21,15 @@ sleep 5
 bash $PWD/create_service_store.sh "candig-ingest"
 
 docker restart $ingest
+echo ">> waiting for candig-ingest to restart"
+ingest=$(docker ps --format "{{.Names}}" | grep candig-ingest_1)
+while [ $? -ne 0 ]
+do
+  echo "..."
+  sleep 1
+  ingest=$(docker ps --format "{{.Names}}" | grep candig-ingest_1)
+done
+sleep 2
 
 # If present, create and authorize default site admin as CanDIG authorized user:
 site_admin_token=$(python site_admin_token.py)
