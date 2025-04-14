@@ -373,7 +373,8 @@ sudo nano /etc/hosts
 Then add the following line at the bottom of the file and save the changes:
 
 ```bash
-::1	candig.docker.internal
+::1	      candig.docker.internal
+127.0.0.1 candig.docker.internal  # only if you need ipv4
 ```
 
 In some other cases, it may be necessary to add your local/internal (network) IP manually, if the build process complains that it could not find the right IP (`ERROR: Your internet adapter could not be found automatically.` or `ERROR: More than one IP has been detected.`). In this case, find out what your local IP address is
