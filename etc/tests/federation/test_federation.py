@@ -6,7 +6,7 @@ import requests
 import subprocess
 import sys
 
-REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../..")
+REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../../..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
 
 from settings import get_env
