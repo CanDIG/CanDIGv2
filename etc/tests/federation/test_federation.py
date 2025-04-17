@@ -67,7 +67,7 @@ def get_token(username=None, password=None, access_token=False, realm=ENV['KEYCL
         data=payload,
     )
 
-    assert response.status_code == 200, f"Getting token for {username} failed with: {response.text}"
+    assert response.ok, f"Getting token for {username} failed with: {response.text}"
 
     if access_token:
         return response.json()["access_token"]
@@ -201,7 +201,7 @@ def approve_user_into_candig(username, password):
     response = requests.post(
         preapproval_url, headers=headers, json=body, timeout=10
     )
-    assert response.status_code == 200, f"Preapproval to {preapproval_url} failed with: {response.text}"
+    assert response.ok, f"Preapproval to {preapproval_url} failed with: {response.text}"
 
     # Step 2: request approval via user
     headers = {
@@ -211,12 +211,12 @@ def approve_user_into_candig(username, password):
     response = requests.post(
         request_url, headers=headers, timeout=10
     )
-    assert response.status_code == 200, f"Requesting user {username} approval failed with: {response.text}"
+    assert response.ok, f"Requesting user {username} approval failed with: {response.text}"
 
     # Step 3: check that requests are ok
     response = requests.get(
         f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs", headers=headers)
-    assert response.status_code == 200, f"User {username} went through approval but did not succeed: {response.text}"
+    assert response.ok, f"User {username} went through approval but did not succeed: {response.text}"
 
 
 def check_unauthorized_user(username, password):
@@ -251,7 +251,7 @@ def test_ingest_local_test_dataset():
         headers=headers,
         json=test_program
     )
-    assert response.status_code == 200
+    assert response.ok
 
     # Load the test data file
     data_file = f"{REPO_DIR}/lib/candig-ingest/candigv2-ingest/tests/{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01.json"
@@ -268,7 +268,7 @@ def test_ingest_local_test_dataset():
         headers=headers,
         json=ingest_data
     )
-    assert response.status_code == 200
+    assert response.ok
 
 
 ### RUN ONLY ON QUERYING SITE
@@ -303,7 +303,7 @@ def test_query_authorized_remote_test_dataset():
     response = make_fanout(headers, body)
     
     # Verify response
-    assert response.status_code == 200, f"Query discovery endpoint failed with: {response.text}"
+    assert response.ok, f"Query discovery endpoint failed with: {response.text}"
     
     programs = set(())
     try:
@@ -329,7 +329,7 @@ def test_query_authorized_remote_test_dataset():
     response = make_fanout(headers, body)
     
     # Verify response
-    assert response.status_code == 200, f"Query authorized failed with: {response.text}"
+    assert response.ok, f"Query authorized failed with: {response.text}"
     try:
         r = response.json()
         print(r)
@@ -359,7 +359,7 @@ def test_query_unauthorized_remote_test_dataset():
     response = make_fanout(headers, body)
     
     # Verify response
-    assert response.status_code == 200, f"Query discovery endpoint failed with: {response.text}"
+    assert response.ok, f"Query discovery endpoint failed with: {response.text}"
     
     programs = set(())
     try:
@@ -385,7 +385,7 @@ def test_query_unauthorized_remote_test_dataset():
     response = make_fanout(headers, body)
     
     # Verify response
-    assert response.status_code == 200, f"Query authorized failed with: {response.text}"
+    assert response.ok, f"Query authorized failed with: {response.text}"
     try:
         r = response.json()
         print(r)
