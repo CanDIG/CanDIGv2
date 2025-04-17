@@ -14,7 +14,7 @@ from site_admin_token import get_site_admin_token
 
 ENV = get_env()
 
-def test_get_token():
+def test_all_get_token():
     """
     Test to see if the local site admin token can be obtained.
 
@@ -74,7 +74,7 @@ def get_token(username=None, password=None, access_token=False, realm=ENV['KEYCL
     return response.json()["refresh_token"]
 
 
-def test_service_info():
+def test_all_service_info():
     """
     Test whether we can get a response from Federation for all of our services.
 
@@ -273,19 +273,19 @@ def test_ingest_local_test_dataset():
 
 ### RUN ONLY ON QUERYING SITE
 
-def test_create_federated_user():
+def test_querying_site_create_federated_user():
     create_keycloak_user("federated@test.ca", "testfederation", "federated@test.ca", "federated", "test")
     check_unauthorized_user("federated@test.ca", "testfederation")
     approve_user_into_candig("federated@test.ca", "testfederation")
 
 
-def test_create_unfederated_curator():
+def test_querying_site__unfederated_curator():
     create_keycloak_user("unfederated@test.ca", "testfederation", "unfederated@test.ca", "unfederated", "test")
     check_unauthorized_user("unfederated@test.ca", "testfederation")
     approve_user_into_candig("unfederated@test.ca", "testfederation")
 
 
-def test_query_authorized_remote_test_dataset():
+def test_querying_site_query_authorized_remote_test_dataset():
     """
     Test querying the TEST_FEDERATE dataset with a user that should have access, seeing whether or not we can access it
     """
@@ -340,7 +340,7 @@ def test_query_authorized_remote_test_dataset():
         assert False, f"Invalid JSON response: {response.text}"
 
 
-def test_query_unauthorized_remote_test_dataset():
+def test_querying_site_query_unauthorized_remote_test_dataset():
     """
     Test querying the TEST_FEDERATE dataset with a user that should not have access, seeing whether or not we can access it
     """

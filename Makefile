@@ -553,6 +553,28 @@ test-integration-%:
 	mkdir -p tmp/test
 	python ./settings.py; source ./env.sh; pytest -v --color=yes ./etc/tests -s -rP -k '$*' --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 
+#>>>
+# run local federation setup tests
+# these aren't really federation tests, but instead setup datasets for another site to test their federation
+
+#<<<
+.PHONY: test-local-federation
+test-local-federation:
+	mkdir -p tmp/test
+	python ./settings.py
+	source ./env.sh; pytest -v --color=yes ./etc/tests/federation -k "all or local" $(ARGS) --report-log=./tmp/test/test-federation_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
+
+#>>>
+# run querying federation setup tests
+# these require other, federated sites to have run test-local-federation
+
+#<<<
+.PHONY: test-querying-federation
+test-querying-federation:
+	mkdir -p tmp/test
+	python ./settings.py
+	source ./env.sh; pytest -v --color=yes ./etc/tests/federation -k "all or querying_site" $(ARGS) --report-log=./tmp/test/test-federation_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
+
 # stop all docker containers
 .PHONY: stop-all
 stop-all:
