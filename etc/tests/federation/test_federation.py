@@ -219,7 +219,7 @@ def approve_user_into_candig(username, password):
     assert response.status_code == 200, f"User {username} went through approval but did not succeed: {response.text}"
 
 
-def test_unauthorized_user(username, password):
+def check_unauthorized_user(username, password):
     # Ensure that we cannot access the frontend
     headers = {
         "Authorization": f"Bearer {get_token(username, password, True)}"
@@ -275,13 +275,13 @@ def test_ingest_local_test_dataset():
 
 def test_create_federated_user():
     create_keycloak_user("federated@test.ca", "testfederation", "federated@test.ca", "federated", "test")
-    test_unauthorized_user("federated@test.ca", "testfederation")
+    check_unauthorized_user("federated@test.ca", "testfederation")
     approve_user_into_candig("federated@test.ca", "testfederation")
 
 
 def test_create_unfederated_curator():
     create_keycloak_user("unfederated@test.ca", "testfederation", "unfederated@test.ca", "unfederated", "test")
-    test_unauthorized_user("unfederated@test.ca", "testfederation")
+    check_unauthorized_user("unfederated@test.ca", "testfederation")
     approve_user_into_candig("unfederated@test.ca", "testfederation")
 
 
