@@ -99,63 +99,89 @@ To make the links between genomic files and the Sample registration objects they
 
 Metadata about each genomic file should be specified in a `JSON` file.
 
-The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary is specified in the ingest [openapi schema](https://github.com/CanDIG/candigv2-ingest/blob/develop/ingest_openapi.yaml), an [example file](https://github.com/CanDIG/candigv2-ingest/blob/develop/tests/genomic_ingest.json) exists within the test files and a commented example in the expandable section below:
+The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary is specified in the SequencingIngest [openapi schema](https://github.com/CanDIG/candigv2-ingest/blob/develop/ingest_openapi.yaml), an [example file](https://github.com/CanDIG/candigv2-ingest/blob/develop/tests/genomic_ingest.json) exists within the test files and a commented example in the expandable section below:
 
 <details>
 <summary>Example genomic json file</summary>
 ```json
-[
-    {   ## Example linking to genomic and index files in s3 storage to a single sample
-        "program_id": "SYNTHETIC-2",      # The name of the program
-        "analysis_id": "HG00096.cnv",  # The identifier used to identify the genomic file, usually the filename, minus extensions
-        "main": {                         # location and name of the main genomic file, bam/cram/vcf
-            "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
-            "name": "HG00096.cnv.vcf.gz"
-        },
-        "index": {                        # location and name of the index for the main genomic file, bai/crai/
-            "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
-            "name": "HG00096.cnv.vcf.gz.tbi"
-        },
-        "metadata": {                     # Metadata about the file
-            "sequence_type": "wgs",       # type of data sequenced (whole genome or whole transcriptome), allowed values: [wgs, wts]
-            "data_type": "variant",       # type of data represented, allowed values: [variant, read]
-            "reference": "hg37"           # which reference genome was used for alignment, allowed values: [hg37, hg38]
-        },
-        "samples": [                      # Linkage to one or more samples that the genomic file was derived from
-            {
-                "analysis_sample_id": "HG00096",  # The name of the sample in the genomic file
-                "submitter_sample_id": "SAMPLE_REGISTRATION_1"   # The submitter_sample_id to link to
+{
+    "experiments": [
+        {
+            "program_id": "SYNTHETIC-2",      # The name of the program
+            "experiment_id": "SEQ_0001",      # the name given by the sequencing centre
+            "submitter_sample_id": "SAMPLE_REGISTRATION_1", # The submitter_sample_id to link to
+            "metadata": {
+                "library_strategy": "WGS"     # type of data sequenced (whole genome or whole transcriptome), allowed values: [WGS, WTS]
             }
-        ]
-    },
-    {  ## Example linking genomic and index files in local storage to multiple samples
-        "program_id": "SYNTHETIC-2",
-        "analysis_id": "multisample",
-        "main": {
-            "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz",
-            "name": "multisample_1.vcf.gz"
         },
-        "index": {
-            "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz.tbi",
-            "name": "multisample_1.vcf.gz.tbi"
+        {
+            "program_id": "SYNTHETIC-2",
+            "experiment_id": "SEQ_0002",
+            "submitter_sample_id": "SAMPLE_REGISTRATION_4",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
         },
-        "metadata": {
-            "sequence_type": "wgs",
-            "data_type": "variant",
-            "reference": "hg37"
-        },
-        "samples": [
-            {
-                "analysis_sample_id": "TUMOR",
-                "submitter_sample_id": "SAMPLE_REGISTRATION_4"
+        {
+            "program_id": "SYNTHETIC-2",
+            "experiment_id": "SEQ_0003",
+            "submitter_sample_id": "SPECIMEN_5",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
+        }
+    ],
+    "analyses": [
+        {   ## Example linking to genomic and index files in s3 storage to a single sample
+            "program_id": "SYNTHETIC-2",      # The name of the program
+            "analysis_id": "HG00096.cnv",     # The identifier used to identify the genomic file, usually the filename, minus extensions
+            "main": {                         # location and name of the main genomic file, bam/cram/vcf
+                "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
+                "name": "HG00096.cnv.vcf.gz"
             },
-            {
-		"analysis_sample_id": "NORMAL",
-		"submitter_sample_id": "SPECIMEN_5"
-	    }
-        ]
-    }
-]
+            "index": {                        # location and name of the index for the main genomic file, bai/crai/
+                "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
+                "name": "HG00096.cnv.vcf.gz.tbi"
+            },
+            "metadata": {                     # Metadata about the file
+                "analysis_type": "sequence_variation",   # type of data represented
+                "reference": "hg37"           # which reference genome was used for alignment, allowed values: [hg37, hg38]
+            },
+            "samples": [                      # Linkage to one or more samples that the genomic file was derived from
+                {
+                    "analysis_sample_id": "HG00096",  # The name of the sample in the genomic file
+                    "experiment_id": "SEQ_0001"       # The submitter_sample_id to link to
+                }
+            ]
+        },
+        {  ## Example linking genomic and index files in local storage to multiple samples
+            "program_id": "SYNTHETIC-2",
+            "analysis_id": "multisample",
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz",
+                "name": "multisample_1.vcf.gz"
+            },
+            "index": {
+                "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz.tbi",
+                "name": "multisample_1.vcf.gz.tbi"
+            },
+            "metadata": {
+                "analysis_type": "sequence_variation",   # type of data represented
+                "reference": "hg37"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "TUMOR",
+                    "experiment_id": "SEQ_0002"
+                },
+                {
+                    "analysis_sample_id": "NORMAL",
+                    "experiment_id": "SEQ_0003"
+                }
+            ]
+        }
+    ]
+}
 ```
 </details>
 
