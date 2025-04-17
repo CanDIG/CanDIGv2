@@ -171,7 +171,7 @@ def create_keycloak_user(username, password, email, first_name, last_name):
     assert run.returncode == 0, "Could not login as admin for into Keycloak"
     # b. create the user
     run = subprocess.run(["docker", "exec", container_name, "/opt/keycloak/bin/kcadm.sh",
-                   "create", "users", "-r", ENV["KEYCLOAK_REALM"], "-s", f"username=\"{username}\"",
+                   "create", "users", "-r", ENV["KEYCLOAK_REALM"], "-s", f"username=\"{username}\"", "-s", "enabled=true",
                    "-s", f"email=\"{email}\"", "-s", f"firstName=\"{first_name}\"", "-s", f"lastName=\"{last_name}\""])
     assert run.returncode == 0, "Could not create user with the admin Keycloak session"
     # c. set their password --username "$USERNAME" --new-password "$PASSWORD"
