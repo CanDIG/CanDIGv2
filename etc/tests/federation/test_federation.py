@@ -219,6 +219,15 @@ def approve_user_into_candig(username, password):
     assert response.status_code == 200, f"User {username} went through approval but did not succeed: {response.text}"
 
 
+def test_unauthorized_user(username, password):
+    # Ensure that we cannot access the frontend
+    headers = {
+        "Authorization": f"Bearer {get_token(username, password, True)}"
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/user/me", headers=headers)
+    assert response == 404, f"User {username} can access the frontend without being authorized"
+
+
 #### RUN ONLY AT TARGET SITE
 
 def test_ingest_local_test_dataset():
@@ -233,7 +242,7 @@ def test_ingest_local_test_dataset():
     test_program = {
         "program_id": "TEST_FEDERATE",
         "program_curators": [],
-        "team_members": ["user3@test.ca"]
+        "team_members": ["federated@test.ca"]
     }
 
     # Add the program
@@ -266,18 +275,23 @@ def test_ingest_local_test_dataset():
 
 def test_create_federated_user():
     create_keycloak_user("federated@test.ca", "testfederation", "federated@test.ca", "federated", "test")
+    test_unauthorized_user("federated@test.ca", "testfederation")
     approve_user_into_candig("federated@test.ca", "testfederation")
 
 
 def test_create_unfederated_curator():
     create_keycloak_user("unfederated@test.ca", "testfederation", "unfederated@test.ca", "unfederated", "test")
+    test_unauthorized_user("unfederated@test.ca", "testfederation")
     approve_user_into_candig("unfederated@test.ca", "testfederation")
 
 
 def test_query_authorized_remote_test_dataset():
-    # Get user3@test.ca token
+    """
+    Test querying the TEST_FEDERATE dataset with a user that should have access, seeing whether or not we can access it
+    """
+    # Get token for 'federated@test.ca' user
     headers = {
-        "Authorization": f"Bearer {get_token('user3@test.ca', 'testfederation')}"
+        "Authorization": f"Bearer {get_token('federated@test.ca', 'testfederation')}"
     }
     # Step 1: can we do a discovery query successfully to all sites?
     body = {
@@ -327,9 +341,12 @@ def test_query_authorized_remote_test_dataset():
 
 
 def test_query_unauthorized_remote_test_dataset():
-    # Get user4@test.ca token
+    """
+    Test querying the TEST_FEDERATE dataset with a user that should not have access, seeing whether or not we can access it
+    """
+    # Get unfederated@test.ca token
     headers = {
-        "Authorization": f"Bearer {get_token('user4@test.ca', 'testfederation')}"
+        "Authorization": f"Bearer {get_token('unfederated@test.ca', 'testfederation')}"
     }
 
     # Step 1: can we do a discovery query successfully to all sites?
@@ -374,5 +391,8 @@ def test_query_unauthorized_remote_test_dataset():
         print(r)
         for server in r:
             assert server["status"] == 200, f"Server {server['location']['name']} failed with: {server['message']}"
+
+            # Ensure that we do not have access to this dataset
+            assert len(server["results"]["results"]) == 0, f"Server {server['location']['name']} improperly authorized unfederated@test.ca"
     except requests.JSONDecodeError:
         assert False, f"Invalid JSON response: {response.text}"
