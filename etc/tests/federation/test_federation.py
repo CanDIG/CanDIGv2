@@ -15,15 +15,45 @@ from site_admin_token import get_site_admin_token
 ENV = get_env()
 
 def test_get_token():
+    """
+    Test to see if the local site admin token can be obtained.
+
+    Raises:
+        AssertionError: If token request fails
+    """
     assert get_site_admin_token()
 
 def make_fanout(headers, body):
+    """
+    Make a fanout call to the local Federation.
+
+    Args:
+        headers: Headers (usually must include an access token)
+        body: Body to call with (see federation.yaml in the Federation microservice for details)
+
+    Returns:
+        A Requests object with the response
+    """
     return requests.post(
         f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body, timeout=10
     )
 
-## Can we get an access token for a user?
 def get_token(username=None, password=None, access_token=False, realm=ENV['KEYCLOAK_REALM']):
+    """
+    Get a token from Keycloak for a user.
+
+    Args:
+        username: Username to get token for
+        password: Password for the user
+        access_token: If True, return access token instead of refresh token
+        realm: Keycloak realm to authenticate against (defaults to ENV['KEYCLOAK_REALM'])
+
+    Returns:
+        str: Either the refresh token (default) or access token if access_token=True
+
+    Raises:
+        AssertionError: If token request fails
+    """
     payload = {
         "client_id": ENV["CANDIG_CLIENT_ID"],
         "client_secret": ENV["CANDIG_CLIENT_SECRET"],
@@ -44,8 +74,13 @@ def get_token(username=None, password=None, access_token=False, realm=ENV['KEYCL
     return response.json()["refresh_token"]
 
 
-## Service info test: can we get a response from Tyk for all of our services?
 def test_service_info():
+    """
+    Test whether we can get a response from Federation for all of our services.
+
+    Raises:
+        AssertionError: If any of the services are unavailable
+    """
     modules = ENV['CANDIG_ENV']['CANDIG_MODULES'].split(" ")
     headers = {
         "Authorization": f"Bearer {get_site_admin_token()}"
@@ -55,10 +90,7 @@ def test_service_info():
         "htsget": f"ga4gh/drs/v1/service-info",
         "katsu": f"v3/service-info",
         # "rnaget": f"service-info",
-        # "federation": f"v1/service-info",
-        # "opa": f"v1/data/service/service-info",
         "query": f"service-info",
-        # "candig-ingest": f"service-info",
     }
     responses = []
     for module in modules:
@@ -97,7 +129,7 @@ def test_service_info():
 
 def create_keycloak_user(username, password, email, first_name, last_name):
     """
-    Create a user in Keycloak directly using the admin API.
+    Create a user in Keycloak directly using the Keycloak CLI.
     
     Args:
         username (str): The username for the new user
@@ -107,7 +139,7 @@ def create_keycloak_user(username, password, email, first_name, last_name):
         last_name (str): The last name of the user
     
     Returns:
-        dict: The response from the Keycloak API
+        None
     """
     # Step 1: Get Keycloak admin token
     with open(f"{REPO_DIR}/tmp/keycloak/admin-password") as f:
@@ -149,8 +181,17 @@ def create_keycloak_user(username, password, email, first_name, last_name):
     assert run.returncode == 0, "Could not change password for the new user with Keycloak admin"
 
 
-# Need to call this from the other server somehow?
 def approve_user_into_candig(username, password):
+    """
+    Approve a user into the local CanDIG instance by preapproving them and having them request access.
+
+    Args:
+        username (str): The username of the user to approve
+        password (str): The password of the user to approve
+
+    Raises:
+        AssertionError: If any step of the approval process fails
+    """
     # Step 1: preapprove user
     headers = {
         "Authorization": f"Bearer {get_site_admin_token()}"
@@ -176,6 +217,7 @@ def approve_user_into_candig(username, password):
     response = requests.get(
         f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs", headers=headers)
     assert response.status_code == 200, f"User {username} went through approval but did not succeed: {response.text}"
+
 
 #### RUN ONLY AT TARGET SITE
 
