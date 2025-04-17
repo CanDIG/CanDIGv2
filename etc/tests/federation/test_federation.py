@@ -225,7 +225,7 @@ def check_unauthorized_user(username, password):
         "Authorization": f"Bearer {get_token(username, password, True)}"
     }
     response = requests.get(f"{ENV['CANDIG_URL']}/ingest/user/me", headers=headers)
-    assert response == 404, f"User {username} can access the frontend without being authorized"
+    assert response.status_code == 404, f"User {username} can access the frontend without being authorized"
 
 
 #### RUN ONLY AT TARGET SITE
