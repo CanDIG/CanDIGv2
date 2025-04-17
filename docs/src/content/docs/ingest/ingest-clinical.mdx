@@ -35,13 +35,13 @@ TOKEN=ey-pasted-jwt
 This token should be kept secure, it lasts for 30 mins
 :::
 
-3. User the clinical ingest endpoint to ingest data.
+3. Use the ingest endpoint to ingest data.
 
-An example call to the clinical endpoint would look something like (note you will need to replace $CANDIG_URL with the root url of your instance):
+An example call to the ingest endpoint would look something like (note you will need to replace $CANDIG_URL with the root url of your instance):
 
 ```bash
 curl -X 'POST' \
-  $CANDIG_URL'/ingest/clinical' \
+  $CANDIG_URL'/ingest/ingest' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer '$TOKEN \
@@ -54,7 +54,7 @@ If ingest worked correctly, you should get a response from the API giving you yo
 {"queue_id": "73c6888a-81d1-11ef-937c-0242ac12000f"}
 ```
 
-Since ingest is an asynchronous process, it can take some time to complete depending on the size of your clinical data. To check on the status of your clinical ingest, use the status endpoint:
+Since ingest is an asynchronous process, it can take some time to complete depending on the size of your clinical data. To check on the status of your ingest, use the status endpoint:
 
 ```bash
 curl -X 'GET' \
@@ -64,9 +64,9 @@ curl -X 'GET' \
  -H 'Authorization: Bearer '$TOKEN
 ```
 
-While the data is still being ingested, the status will read `"status": "still in queue"`. When clinical ingest is complete, a successful ingest will have a summary of what was ingested, you should check the numbers are as expected. If any errors were found that would prevent ingest, they will be listed in the errors key in the response.
+While the data is still being ingested, the status will read `"status": "still in queue"`. When ingest is complete, a successful ingest will have a summary of what was ingested, you should check the numbers are as expected. If any errors were found that would prevent ingest, they will be listed in the errors key in the response.
 
-Example response from the status endpoint when clinical ingest for a program is complete:
+Example response from the status endpoint when ingest for a program is complete:
 
 ```bash
 {
