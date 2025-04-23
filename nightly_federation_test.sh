@@ -5,7 +5,7 @@ PostToSlack () {
     # SAFE_TEXT=${1@Q}
     SAFE_TEXT=${1//\"/\\\"}
     echo $SAFE_TEXT
-    curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$SAFE_TEXT\"}" $HOOK_URL
+    # curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$SAFE_TEXT\"}" $HOOK_URL
 }
 
 # Make sure all of our necessary configuration works
