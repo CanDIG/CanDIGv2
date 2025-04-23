@@ -145,12 +145,15 @@ The file should contain an array of dictionaries, where each item represents a s
             },
             "metadata": {                     # Metadata about the file
                 "analysis_type": "sequence_variation",   # type of data represented
+                "analysis_attribute": {
+                    "subtype": "mutation"
+                },
                 "reference": "hg37"           # which reference genome was used for alignment, allowed values: [hg37, hg38]
             },
             "samples": [                      # Linkage to one or more samples that the genomic file was derived from
                 {
                     "analysis_sample_id": "HG00096",  # The name of the sample in the genomic file
-                    "experiment_id": "SEQ_0001"       # The submitter_sample_id to link to
+                    "experiment_id": "SEQ_0001"       # The experiment ID to link to
                 }
             ]
         },
@@ -167,6 +170,9 @@ The file should contain an array of dictionaries, where each item represents a s
             },
             "metadata": {
                 "analysis_type": "sequence_variation",   # type of data represented
+                "analysis_attribute": {
+                    "subtype": "mutation"
+                },
                 "reference": "hg37"
             },
             "samples": [
@@ -201,11 +207,11 @@ It is important to ensure no donor identifiable information is contained within 
 
 For each genomic data file that is referenced, there must also be the appropriate index file for the file type specified. The current files supported and expected values in the genomic linking JSON file are:
 
-| filetype                                                                                               | expected file extension | expected index file | expected `data_type` |
+| filetype                                                                                               | expected file extension | expected index file | expected `analysis_type` |
 |--------------------------------------------------------------------------------------------------------|-------------------------|---------------------|----------------------|
-| [Variant Call Format](https://samtools.github.io/hts-specs/VCFv4.4.pdf)  (VCF)                         | `.vcf` `.vcf.gz`        | `.tbi` `.tbi.gz`    | `variant`            |
-| [Binary Alignment Map](https://samtools.github.io/hts-specs/SAMv1.pdf) (BAM)                           | `.bam`                  | `.bai`              | `read`               |
-| [Compressed Reference-oriented Alignment Map](https://samtools.github.io/hts-specs/CRAMv3.pdf)  (CRAM) | `.cram`                 | `.crai`             | `read`               |
+| [Variant Call Format](https://samtools.github.io/hts-specs/VCFv4.4.pdf)  (VCF)                         | `.vcf` `.vcf.gz`        | `.tbi` `.tbi.gz`    | `sequence_variation`            |
+| [Binary Alignment Map](https://samtools.github.io/hts-specs/SAMv1.pdf) (BAM)                           | `.bam`                  | `.bai`              | `reference_alignment`               |
+| [Compressed Reference-oriented Alignment Map](https://samtools.github.io/hts-specs/CRAMv3.pdf)  (CRAM) | `.cram`                 | `.crai`             | `reference_alignment`               |
 
  It is recommended to write a simple script to automate the creation of the Genomic JSON file. JSON validation of this file will occur before genomic data ingest proceeds. We are also working on tools to
 help create this file, so if you need help, [reach out to the CanDIG team](https://github.com/CanDIG/candigv2-ingest/issues/new/choose).
