@@ -16,7 +16,7 @@ if [ -z "$HOOK_URL" ] || [ -z "$BOT_TOKEN" ]; then
 fi
 
 # Attempt to run the nightly federation, depending on what we do
-if [[ $LOCAL_FEDERATION -eq 1]]; then
+if [ $LOCAL_FEDERATION -eq 1 ]; then
     make test-local-federation
 else
     make test-querying-federation ARGS="--color=no" >tmp/federation-test.txt 2<&1
