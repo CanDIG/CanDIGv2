@@ -65,7 +65,7 @@ TYK_TESTS=""
 TRIES=0
 while [ -z "$TYK_TESTS" ];
 do
-    TYK_TESTS=$(make test-integration ARGS='-k "test_tyk" etc/tests/test_integration.py' | grep "1 passed")
+    TYK_TESTS=$(make test-integration ARGS='-k "test_tyk" etc/tests/integration/test_integration.py' | grep "1 passed")
     sleep 15
     TRIES=$TRIES+1
     if [[ $TRIES -gt 120 ]]; then
