@@ -20,5 +20,5 @@ if [ $LOCAL_FEDERATION -eq 1 ]; then
     make test-local-federation
 else
     make test-querying-federation ARGS="--color=no" >tmp/federation-test.txt 2<&1
-    PostToSlack "Federation tests:\n\`\`\`$(tail tmp/federation-test.txt)\`\`\`"
+    PostToSlack "Federation tests:\n\`\`\`$(tail -c 100 tmp/federation-test.txt)\`\`\`"
 fi
