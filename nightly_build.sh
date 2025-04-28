@@ -74,7 +74,7 @@ do
     fi
 done
 
-make test-integration >tmp/integration-build.txt 2<&1
+make test-integration ARGS="--color=no" >tmp/integration-build.txt 2<&1
 if [ $? -ne 0 ]; then
     PostToSlack "Integration tests failed:\n\`\`\`$(tail tmp/integration-build.txt)\`\`\`"
     exit
