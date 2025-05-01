@@ -408,7 +408,7 @@ def clean_up_program_htsget(program_id):
 
 def test_ingest_not_admin_katsu():
     """Test ingest of SYNTH_01 as CANDIG_NOT_ADMIN_USER, without and with program authorization."""
-    
+
     token = get_token(
         username=ENV["CANDIG_NOT_ADMIN2_USER"],
         password=ENV["CANDIG_NOT_ADMIN2_PASSWORD"],
@@ -698,6 +698,21 @@ def test_experiment_metadata():
     assert "genomes" in response.json()
     pprint.pprint(response.json())
     assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_ALL_0002" in response.json()["genomes"]
+
+
+def test_ingest_rnaget():
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-counts", headers=headers)
+    assert response.status_code == 200
+
+    assert "metadata" in response.json()
+    assert "analysis_type" in response.json()["metadata"] and response.json()["metadata"]["analysis_type"] == "sequence_annotation"
+    assert "analysis_attribute" in response.json()["metadata"]
+    assert "subtype" in response.json()["metadata"]["analysis_attribute"] and response.json()["metadata"]["analysis_attribute"]["subtype"] == "expression_count"
 
 
 def test_index_success():
