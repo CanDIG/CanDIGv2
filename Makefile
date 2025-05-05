@@ -80,7 +80,7 @@ ifeq ($(VENV_OS), arm64mac)
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init zsh
 endif
-	$(CONDA) config --remove channels defaults
+	# $(CONDA) config --remove channels defaults
 	$(CONDA) config --add channels conda-forge
 	$(CONDA) config --set channel_priority strict
 
