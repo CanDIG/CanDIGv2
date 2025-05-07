@@ -57,33 +57,30 @@ ifndef CONDA_INSTALL
 endif
 	@printf "\nOutput of bin-conda:\n" | tee -a $(LOGFILE)
 ifeq ($(VENV_OS), linux)
-	curl -Lo bin/miniconda_install.sh \
-		https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)
+	curl -Lo bin/miniforge_install.sh \
+		https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+	bash bin/miniforge_install.sh -f -b -u -p $(CONDA_INSTALL)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
 endif
 ifeq ($(VENV_OS), darwin)
-	curl -Lo bin/miniconda_install.sh \
-		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)
+	curl -Lo bin/miniforge_install.sh \
+		https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-x86_64.sh
+	bash bin/miniforge_install.sh -f -b -u -p $(CONDA_INSTALL)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init
 endif
 ifeq ($(VENV_OS), arm64mac)
-	curl -Lo bin/miniconda_install.sh \
-		https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
-	bash bin/miniconda_install.sh -f -b -u -p $(CONDA_INSTALL)
+	curl -Lo bin/miniforge_install.sh \
+		https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh
+	bash bin/miniforge_install.sh -f -b -u -p $(CONDA_INSTALL)
 	# init is needed to create bash aliases for conda but it won't work
 	# until you source the script that ships with conda
 	source $(CONDA_ENV_SETTINGS) && $(CONDA) init zsh
 endif
-	$(CONDA) config --remove channels defaults
-	$(CONDA) config --add channels conda-forge
-	$(CONDA) config --set channel_priority strict
-
+	echo `$(CONDA) config --show-sources`
 
 #>>>
 # make build-all -P
