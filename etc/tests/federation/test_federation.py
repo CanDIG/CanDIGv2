@@ -130,21 +130,21 @@ def test_all_service_info():
 def create_keycloak_user(username, password, email, first_name, last_name):
     """
     Create a user in Keycloak directly using the Keycloak CLI.
-    
+
     Args:
         username (str): The username for the new user
         password (str): The password for the new user
         email (str): The email address for the new user
         first_name (str): The first name of the user
         last_name (str): The last name of the user
-    
+
     Returns:
         None
     """
     # Step 1: Get Keycloak admin token
     with open(f"{REPO_DIR}/tmp/keycloak/admin-password") as f:
         admin_pass = f.read()
-    
+
     # Step 2: Create user
     # NB: We can't use the usual OIDC flow to grab an admin token, because we
     # cannot retrieve the admin token without a client, and don't have one
@@ -160,7 +160,7 @@ def create_keycloak_user(username, password, email, first_name, last_name):
     for container in split_docker:
         if re.search(r"keycloak\/keycloak", container):
             container_name = container.split()[-1]
-    
+
     assert container_name != "", "Coult not find the keycloak/keycloak container"
 
     # Run the commands to create the user
@@ -295,16 +295,16 @@ def test_querying_site_query_authorized_remote_test_dataset():
     }
     # Step 1: can we do a discovery query successfully to all sites?
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "discovery/programs",
         "payload": {},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query discovery endpoint failed with: {response.text}"
-    
+
     programs = set(())
     try:
         r = response.json()
@@ -321,13 +321,13 @@ def test_querying_site_query_authorized_remote_test_dataset():
     # Step 2: can we do a query and grab responses (only include the ones from the TEST_FEDERATE set)
     programs -= {"TEST_FEDERATE"}
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "query",
         "payload": {"exclude_programs": ",".join(programs)},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query authorized failed with: {response.text}"
     try:
@@ -354,16 +354,16 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
 
     # Step 1: can we do a discovery query successfully to all sites?
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "discovery/programs",
         "payload": {},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query discovery endpoint failed with: {response.text}"
-    
+
     programs = set(())
     try:
         r = response.json()
@@ -380,13 +380,13 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
     # Step 2: can we do a query and fail to grab responses (only include the ones from the TEST_FEDERATE set)
     programs -= {"TEST_FEDERATE"}
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "query",
         "payload": {"exclude_programs": ",".join(programs)},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query authorized failed with: {response.text}"
     try:
