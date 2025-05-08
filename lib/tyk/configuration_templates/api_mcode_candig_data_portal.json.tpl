@@ -60,8 +60,7 @@
                 "require_session": false
             }
             ],
-        "post": [
-        ],
+        "post": [],
         "id_extractor": {
             "extract_with": "",
             "extract_from": "",
