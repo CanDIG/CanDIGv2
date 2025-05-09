@@ -26,8 +26,9 @@ services:
       DEBUG_MODE: ${CANDIG_DEBUG_MODE}
       DB_PATH: "postgres-db"
       SERVER_LOCAL_DATA: /app/htsget_server/data
-      INDEXING_PATH: /home/candig/tmp
+      INDEXING_PATH: /home/candig/tmp/indexer
       INDEXING_SWITCH_FILE: /home/candig/indexer_on
+      SEARCH_PATH: /home/candig/tmp/search
       TESTENV_URL: ${HTSGET_PRIVATE_URL}
       POSTGRES_DATABASE: "genomic"
       POSTGRES_HOST_FILE: "postgres-db"
