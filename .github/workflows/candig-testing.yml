@@ -2,6 +2,14 @@ name: Test-CanDIG-build
 run-name: Build Validation
 on:
   push:
+    branches:
+    - develop
+    - stable
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      module:
+        type: string
 
 jobs:
   Build-CanDIG:
