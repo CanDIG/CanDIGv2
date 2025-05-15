@@ -2,7 +2,6 @@ services:
   rnaget:
     build:
       context: $PWD/lib/rnaget/rnaget
-    image: ghcr.io/bento-platform/transcriptomics_data_service:edge
     labels:
       - "candigv2=rnaget"
     logging:

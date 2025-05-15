@@ -1,10 +1,32 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2024.07.09
+ARG PYTHON_VERSION=3.12
+ARG DEBIAN_VERSION=slim-bookworm
 
-RUN apt-get update && apt-get install -y postgresql-client
+FROM python:${PYTHON_VERSION}-${DEBIAN_VERSION}
 
-RUN pip install --no-cache-dir "uvicorn[standard]==0.30.1"
+LABEL Maintainer="Bento Project"
 
+RUN apt-get update -y; \
+    apt-get upgrade -y; \
+    apt-get install -y \
+            bash \
+            build-essential \
+            curl \
+            git \
+            gosu \
+            jq \
+            libpq-dev \
+            perl \
+            postgresql-client \
+            postgresql \
+            procps \
+            vim; \
+    rm -rf /var/lib/apt/lists/*;
 
+RUN pip install --no-cache-dir -U pip; \
+    pip install --no-cache-dir poetry==1.8.5; \
+    pip install --no-cache-dir 'uvicorn[standard]>=0.34.0,<0.35'
+
+RUN mkdir /tds /run/secrets
 WORKDIR /tds
 
 COPY pyproject.toml .
@@ -15,13 +37,16 @@ RUN poetry config virtualenvs.create false && \
 
 COPY transcriptomics_data_service transcriptomics_data_service
 COPY lib lib
-COPY entrypoint.bash .
+COPY gosu_entrypoint.bash .
 COPY run.bash .
 COPY LICENSE .
 COPY README.md .
 COPY create_db.sh .
 
+# Install the module itself, locally (similar to `pip install -e .`)
 RUN poetry install --without dev
 
-ENTRYPOINT [ "bash", "./entrypoint.bash" ]
+RUN chmod +x ./*.bash
+
+ENTRYPOINT [ "bash", "./gosu_entrypoint.bash" ]
 CMD [ "bash", "./run.bash" ]
