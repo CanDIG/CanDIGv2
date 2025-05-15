@@ -25,10 +25,11 @@ services:
       AGGREGATE_COUNT_THRESHOLD: ${AGGREGATE_COUNT_THRESHOLD}
       DEBUG_MODE: ${CANDIG_DEBUG_MODE}
       KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
+      KEYCLOAK_AUTH_PREFIX: ${KEYCLOAK_AUTH_PREFIX}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
-      test: [ "CMD", "curl", "${QUERY_PRIVATE_URL}/service-info" ]
+      test: ["CMD", "curl", "${QUERY_PRIVATE_URL}/service-info"]
       interval: 30s
       timeout: 20s
       retries: 3
