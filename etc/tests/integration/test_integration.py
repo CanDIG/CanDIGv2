@@ -714,6 +714,16 @@ def test_ingest_rnaget():
     assert "analysis_attribute" in response.json()["metadata"]
     assert "subtype" in response.json()["metadata"]["analysis_attribute"] and response.json()["metadata"]["analysis_attribute"]["subtype"] == "expression_count"
 
+    query = {
+      "genes": [
+        "ENSG00000000003.14"
+      ],
+      "method": "tpm"
+    }
+    response = requests.post(f"{ENV['CANDIG_URL']}/rnaget/expressions", json=query, headers=headers)
+    assert response.status_code == 200
+    assert len(response.json()["expressions"]) > 0
+
 
 def test_index_success():
     # wait to make sure that the final vcf, NA18537.vcf.gz, has been indexed
