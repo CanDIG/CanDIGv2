@@ -167,3 +167,11 @@ if [ -f tmp/vault/service_stores.txt ]; then
         bash create_service_store.sh $service
     done <tmp/vault/service_stores.txt
 fi
+
+crontab -l | grep -q vault_setup
+if [[ $? -ne 0 ]]; then
+  echo "creating crontab"
+  echo "0 0 1 * * cd $PWD; bash vault_setup.sh" > temp_cron.txt
+  crontab temp_cron.txt
+  rm temp_cron.txt
+fi
