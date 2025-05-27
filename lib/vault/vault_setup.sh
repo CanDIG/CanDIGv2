@@ -171,5 +171,8 @@ fi
 crontab -l | grep -q vault_setup
 if [[ $? -ne 0 ]]; then
   echo "creating crontab"
-  echo "0 0 1 * * cd $PWD; bash vault_setup.sh" | crontab -
+  crontab -l > temp_crontab
+  echo "0 0 1 * * cd $PWD; bash vault_setup.sh" >> temp_crontab
+  crontab temp_crontab
+  rm temp_crontab
 fi
