@@ -24,4 +24,4 @@
 	url = https://github.com/CanDIG/candigv2-query
 [submodule "lib/rnaget/rnaget"]
 	path = lib/rnaget/rnaget
-	url = https://github.com/bento-platform/transcriptomics_data_service
+	url = https://github.com/bento-platform/takuan.git
