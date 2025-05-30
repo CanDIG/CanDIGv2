@@ -41,6 +41,7 @@ services:
       - opa-data:/app
     environment:
       KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
+      KEYCLOAK_AUTH_PREFIX: ${KEYCLOAK_AUTH_PREFIX}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
       KEYCLOAK_REALM_URL: ${KEYCLOAK_ISSUER_URL}
       KEYCLOAK_URL: ${KEYCLOAK_PRIVATE_URL}
@@ -53,7 +54,13 @@ services:
       USER2: ${TEST_USER_2}
       DEBUG_MODE: ${CANDIG_DEBUG_MODE}
     healthcheck:
-      test: ["CMD", "curl", "--fail", "${OPA_PRIVATE_URL}/v1/data/service/service-info"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "${OPA_PRIVATE_URL}/v1/data/service/service-info",
+        ]
       interval: 30s
       timeout: 20s
       retries: 3

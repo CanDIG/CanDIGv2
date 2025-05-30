@@ -45,6 +45,7 @@ def get_env():
     vars["CANDIG_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
     vars["CANDIG_CLIENT_ID"] = get_env_value("KEYCLOAK_CLIENT_ID")
     vars["KEYCLOAK_PUBLIC_URL"] = get_env_value("KEYCLOAK_PUBLIC_URL")
+    vars["KEYCLOAK_AUTH_PREFIX"] = get_env_value("KEYCLOAK_AUTH_PREFIX")
     vars["KEYCLOAK_REALM_URL"] = get_env_value("KEYCLOAK_REALM_URL")
     vars["KEYCLOAK_ISSUER_URL"] = get_env_value("KEYCLOAK_ISSUER_URL")
     vars["KEYCLOAK_REALM"] = get_env_value("KEYCLOAK_REALM")
