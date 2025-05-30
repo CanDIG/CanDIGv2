@@ -716,7 +716,7 @@ def test_ingest_rnaget():
 
     query = {
       "genes": [
-        "ENSG00000000003.14"
+        "ENSG00000000003.15"
       ],
       "method": "tpm"
     }
