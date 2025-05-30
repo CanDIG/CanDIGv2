@@ -83,7 +83,7 @@ export default defineConfig({
             },
         {
                 base: 'technical/federation-api',
-                label: 'htsget operations api',
+                label: 'federation api',
                 schema: 'https://raw.githubusercontent.com/CanDIG/federation_service/refs/heads/develop/candig_federation/federation.yaml',
                 collapsed: true
             },
