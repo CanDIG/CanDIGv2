@@ -122,3 +122,18 @@ Then recompose both tyk and federation with:
 make recompose-tyk
 make recompose-federation
 ```
+
+## Opa returns 401 Unauthorized
+
+Sometimes 401 Unauthorized errors are caused by Opa not being able to find the data it needs to validate the bearer token. These will have a message of "request rejected by administrative policy" and will not leave any decisions in the log.
+
+These are caused by Opa's master system.authz policy rejecting access to any downstream policies, including all of CanDIG's permission policies. Usually, this is happening because Opa can't access its Vault service store or the IDP. Try re-running `make compose-opa` to reconnect the Opa containers to Vault.
+
+If you are still having trouble diagnosing the problem, you can temporarily set Opa's system.authz authorization to allow all requests by default:
+```
+# Reject requests by default
+default allow := false # switch this to true
+```
+Then run `make recompose-opa`. You can then access the endpoints `/v1/data/idp`, `/v1/data/vault`, and `/v1/data/calculate`, which allows you to see more details about the internal logic of Opa's decisionmaking.
+
+Be sure to switch `default allow` back to False when you're done.
