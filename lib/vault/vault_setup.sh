@@ -128,16 +128,16 @@ cidr_block=$(docker network inspect --format "{{json .IPAM.Config}}" candigv2_de
 cidr_block=$(echo ${cidr_block} | tr -d '"')
 cidr_block="${cidr_block}/27"
 if [ $CANDIG_DEBUG_MODE -eq 1 ]; then
-  echo "{}" > lib/vault/tmp/temp.json
+  echo "{\"token_period\": \"768h\"}" > lib/vault/tmp/temp.json
 else
-  echo "{\"bound_cidrs\": [\"${cidr_block}\"]}" > lib/vault/tmp/temp.json
+  echo "{\"bound_cidrs\": [\"${cidr_block}\"], \"token_period\": \"768h\"}" > lib/vault/tmp/temp.json
 fi
 curl --request POST --header "X-Vault-Token: ${key_root}" --data @lib/vault/tmp/temp.json $VAULT_SERVICE_PUBLIC_URL/v1/auth/token/roles/approle
 rm lib/vault/tmp/temp.json
 
 echo
 echo ">> setting up approle token"
-echo "{\"policies\": [\"approle\"]}" > lib/vault/tmp/temp.json
+echo "{\"policies\": [\"approle\"], \"period\": \"768h\"}" > lib/vault/tmp/temp.json
 curl --request POST --header "X-Vault-Token: ${key_root}" --data @lib/vault/tmp/temp.json $VAULT_SERVICE_PUBLIC_URL/v1/auth/token/create/approle | jq '.auth.client_token' -r > tmp/vault/approle-token
 docker cp tmp/vault/approle-token $vault_runner:/vault/config/approle-token
 rm lib/vault/tmp/temp.json
