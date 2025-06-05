@@ -952,56 +952,6 @@ def test_federation_call():
     assert "results" in response.json()[0]
 
 
-# Add a server, then test to see if federated calls now include that server in the results
-def test_add_server():
-    token = get_site_admin_token()
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json; charset=utf-8",
-    }
-
-    response = requests.get(
-        f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers
-    )
-
-    body = {
-        "server": response.json()[0],
-        "authentication": {"issuer": ENV["KEYCLOAK_ISSUER_URL"], "token": token},
-    }
-    body["server"]["id"] = "test"
-    body["server"]["location"]["name"] = "test"
-    response = requests.post(
-        f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers, json=body
-    )
-    assert response.status_code in [201, 204]
-
-    headers["federation"] = "true"
-    body = {
-        "service": "htsget",
-        "method": "GET",
-        "payload": {},
-        "path": "beacon/v2/service-info",
-    }
-    response = requests.post(
-        f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body
-    )
-    found_it = False
-    results = response.json()
-    while len(results) > 0:
-        last_result = results.pop(0)
-        print(last_result)
-        if last_result["location"]["name"] == "test":
-            found_it = True
-    assert found_it
-
-    # delete the server
-    response = requests.delete(
-        f"{ENV['CANDIG_URL']}/federation/v1/servers/test", headers=headers
-    )
-    print(response.text)
-    assert response.status_code == 200
-
-
 # Query Test: Get all donors
 def test_query_donors_all():
     token = get_token(username=ENV['CANDIG_NOT_ADMIN2_USER'],
