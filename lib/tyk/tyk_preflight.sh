@@ -58,9 +58,6 @@ mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middlewar
 echo "Working on tyk.conf"  | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/tyk.conf.tpl > ${CONFIG_DIR}/tyk.conf
 
-echo "Working on authMiddleware.js" | tee -a $LOGFILE
-envsubst < ${PWD}/lib/tyk/configuration_templates/authMiddleware.js > ${CONFIG_DIR}/middleware/authMiddleware.js
-
 echo "Working on backendAuthMiddleware.js" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/configuration_templates/backendAuthMiddleware.js > ${CONFIG_DIR}/middleware/backendAuthMiddleware.js
 
