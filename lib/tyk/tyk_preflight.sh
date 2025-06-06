@@ -13,6 +13,10 @@ LOGFILE=$PWD/tmp/progress.txt
 
 # TODO: this image uses temp dir inside the lib/tyk which deviates from convention of this repo
 # see Makefile.authx for other details.
+
+# recreate a secret:
+make secret-tyk-secret-key; make secret-tyk-analytics-admin-key
+
 export CONFIG_DIR="$PWD/lib/tyk/tmp"
 
 KEYCLOAK_SECRET_VAL=$(cat $PWD/tmp/keycloak/client-secret)
