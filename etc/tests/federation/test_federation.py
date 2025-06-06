@@ -414,9 +414,10 @@ def test_remove_servers():
         f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers
     )
     assert response.ok and len(response.json()) > 1, "No other federated server found"
-    other_servers = response.json()[1:]
+    other_servers = [server for server in response.json() if server['id'] != ENV['FEDERATION_SELF_SERVER_ID']]
 
     for server in other_servers:
+        print(f"Removing {server}")
         # First delete the server
         response = requests.delete(
             f"{ENV['CANDIG_URL']}/federation/v1/servers/{server['id']}", headers=headers
@@ -427,15 +428,17 @@ def test_remove_servers():
     # Ensure that servers are no longer visible
     headers["federation"] = "true"
     body = {
-        "service": "query",
+        "service": "htsget",
         "method": "GET",
         "payload": {},
-        "path": "service-info",
+        "path": "beacon/v2/service-info",
     }
     response = requests.post(
         f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body
     )
-    found_it = False
-    results = response.json()
+    print(response)
     assert response.status_code == 200
+
+    results = response.json()
+    print(results)
     assert len(results) == 1, "More than one server found after removing every server"
