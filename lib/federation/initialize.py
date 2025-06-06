@@ -49,14 +49,14 @@ def main():
     if response.status_code != 200:
         print(f"POST response: {response.status_code} {response.text}")
 
-    print("Making sure our server is in federation...")
-    server = get_default_server()
-    response = requests.request("POST", url, headers=headers, json=server)
-
-    if response.status_code != 200:
-        print(f"POST response: {response.status_code} {response.text}")
     url = f"{get_env_value('FEDERATION_PUBLIC_URL')}/v1/servers"
     response = requests.request("GET", url, headers=headers)
+
+    server = get_default_server()
+    if json.dumps(server['server'], sort_keys=True) not in json.dumps(response.json(), sort_keys=True):
+        print("Adding our server to the federation")
+        response = requests.request("POST", url, headers=headers, json=server)
+        response = requests.request("GET", url, headers=headers)
     print(response.text)
 
     print("Adding services to federation...")
