@@ -399,3 +399,43 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
             assert len(server["results"]["results"]) == 0, f"Server {server['location']['name']} improperly authorized unfederated@test.ca"
     except requests.JSONDecodeError:
         assert False, f"Invalid JSON response: {response.text}"
+
+
+# Double-check that the other server can be removed freely
+def test_remove_servers():
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    # Verify that we have more than one server
+    response = requests.get(
+        f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers
+    )
+    assert response.ok and len(response.json()) > 1, "No other federated server found"
+    other_servers = response.json()[1:]
+
+    for server in other_servers:
+        # First delete the server
+        response = requests.delete(
+            f"{ENV['CANDIG_URL']}/federation/v1/servers/{server['id']}", headers=headers
+        )
+        print(response.text)
+        assert response.status_code == 200
+
+    # Ensure that servers are no longer visible
+    headers["federation"] = "true"
+    body = {
+        "service": "query",
+        "method": "GET",
+        "payload": {},
+        "path": "service-info",
+    }
+    response = requests.post(
+        f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body
+    )
+    found_it = False
+    results = response.json()
+    assert response.status_code == 200
+    assert len(results) == 1, "More than one server found after removing every server"
