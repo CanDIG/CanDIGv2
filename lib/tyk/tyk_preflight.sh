@@ -15,6 +15,7 @@ LOGFILE=$PWD/tmp/progress.txt
 # see Makefile.authx for other details.
 
 # recreate a secret:
+echo "Recreating Tyk secrets"  | tee -a $LOGFILE
 make secret-tyk-secret-key; make secret-tyk-analytics-admin-key
 
 export CONFIG_DIR="$PWD/lib/tyk/tmp"

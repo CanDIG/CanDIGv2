@@ -76,7 +76,7 @@ generate_key() {
               "api_name": "'"${TYK_RNAGET_API_SLUG}"'",
               "Versions": ["Default"]
           }
- 
+
       }
   }'
 
@@ -87,6 +87,12 @@ generate_key() {
 }
 
 generate_key
+
+docker ps --format "{{.Names}}" | grep federation
+if [[ $? -eq 0 ]]; then
+  echo "Re-run compose-federation"  | tee -a $LOGFILE
+  make compose-federation
+fi
 
 echo "Finished Tyk key setup" | tee -a $LOGFILE
 
