@@ -93,7 +93,7 @@ jobs:
                 tmp/index
 
       - name: Clone CanDIG Playwright Runbook
-        run: git clone --branch update-tests https://github.com/CanDIG/playwright-runbook.git
+        run: git clone --branch develop https://github.com/CanDIG/playwright-runbook.git
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
