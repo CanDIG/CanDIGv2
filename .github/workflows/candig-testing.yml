@@ -118,7 +118,7 @@ jobs:
       - name: Run Playwright tests
         run: |
           cd playwright-runbook
-          npx playwright test --project=ui summary
+          npx playwright test --project=ui
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
