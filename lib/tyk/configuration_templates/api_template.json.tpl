@@ -4,6 +4,7 @@
     "use_openid": true,
     "active": true,
     "slug": "${TYK_TEMPLATE_API_SLUG}",
+
     "enable_signature_checking": false,
 
     "jwt_issued_at_validation_skew": 0,
