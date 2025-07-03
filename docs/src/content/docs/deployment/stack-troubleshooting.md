@@ -9,21 +9,22 @@ next: false
 If any integration tests fail, it is usually best to go back to the first test that failed, as subesquent tests often rely on earlier tests passing to succeed. Therefore the root cause is usually with the first failure.
 
 If `test_tyk` fails, all other tests will fail because the stack relies on tyk being up and running as expected. If you see `test_tyk` fail, you may as well `ctrl+c` to stop the tests running and start investigating the issue with tyk. Some places to start looking for the issue are:
+
 - is the tyk container up and running?
   - check your docker desktop or `docker ps` to see if tyk and all other containers are running
 - is there anything in the tyk docker logs that indicates an issue?
   - view the logs with `docker logs candigv2_tyk_1` or in Docker desktop
   - if anything looks amiss, make a github issue with the details
 - did anything go wrong in the build logs?
-  - the build log can be found in `tmp/error.txt` 
+  - the build log can be found in `tmp/error.txt`
 - is anything else in the central logs looking weird?
   - the central logs for all docker containers can be found in `/tmp/logs/`, the most current one will be named with `buffer.<uuid>.log` whereas previous days' logs are named `.yyyymmdd_0.log`
- 
+
 If any of the `ingest_admin_*` tests fail, the later query tests will fail since they rely on having data ingested into the system to get the expected query results.
 
 If any specific test is failing, looking at the individual container for the services that is failing, or the centralized log (`/tmp/logs`) is usually the best place to start debugging. If at any stage you are unsure on where to start after integration test failures, please make a [github issue](https://github.com/CanDIG/CanDIGv2/issues/new/choose).
 
-If a failure relates to any of the services listed in the `CANDIG_AUTH_MODULES` in the `.env` file, and you find you need to rebuild any of these modules, you will need to rebuild all of these modules using `make clean-authx` and `make init-authx`. 
+If a failure relates to any of the services listed in the `CANDIG_AUTH_MODULES` in the `.env` file, and you find you need to rebuild any of these modules, you will need to rebuild all of these modules using `make clean-authx` and `make init-authx`.
 
 ## Conda env not activated
 
@@ -74,10 +75,12 @@ On federated systems, this may occur when the URL given to Federation contains a
 In the logs you are getting errors such as the below when trying to access any endpoints.
 
 e.g.:
+
 ```bash
 level=warning msg="JWT Invalid" api_id=91 api_name=federation error="Validation error. Validation error. The provider https://<$CANDIG_AUTH_DOMAIN>/auth/realms/candig does not have a client id matching any of the token audiences [https://<$CANDIG_AUTH_DOMAIN>/auth/realms/candig]" mw=OpenIDMW org_id= origin=10.9.234.195 path=/federation/v1/service-info
 time="Apr 01 18:45:40" level=warning msg="Attempted access with invalid key." api_id=91 api_name=federation key="****JWT]" mw=OpenIDMW org_id= origin=10.9.234.195 path=/federation/v1/service-info
 ```
+
 Check your tyk config files for anything that looks weird, e.g.
 `lib/tyk/tmp/apps/91.json` has the correct issuer and client_ids as configured in your `.env`
 
@@ -94,7 +97,7 @@ Should be something like:
         ]
 ```
 
-For the client id, as an example, if you kept the default value for `KEYCLOAK_CLIENT_ID` (`local_candig`) in the `example.env`, the value would be 
+For the client id, as an example, if you kept the default value for `KEYCLOAK_CLIENT_ID` (`local_candig`) in the `example.env`, the value would be
 
 ```bash
 echo -n "local_candig" | base64
@@ -107,7 +110,8 @@ Check your `.env` does not have any issues with parsing invisible white space or
 
 Your stack doesn't seem to be working and there are tyk related error messages such as `Key not authorised` even though you believe you are using a valid token.
 
-Double check your build log (`tmp/progress.txt`) for messages such as: 
+Double check your build log (`tmp/progress.txt`) for messages such as:
+
 ```
 cat: /opt/CanDIGv2/tmp/tyk/secret-key: No such file or directory
 mv: cannot stat 'tmp/secrets/tyk-secret-key': No such file or directory
@@ -130,10 +134,31 @@ Sometimes 401 Unauthorized errors are caused by Opa not being able to find the d
 These are caused by Opa's master system.authz policy rejecting access to any downstream policies, including all of CanDIG's permission policies. Usually, this is happening because Opa can't access its Vault service store or the IDP. Try re-running `make compose-opa` to reconnect the Opa containers to Vault.
 
 If you are still having trouble diagnosing the problem, you can temporarily set Opa's system.authz (in `permissions_engine/authz.rego`) authorization to allow all requests by default:
+
 ```
 # Reject requests by default
 default allow := false # switch this to true
 ```
+
 Then run `make recompose-opa`. You can then access the endpoints `/v1/data/idp`, `/v1/data/vault`, and `/v1/data/calculate`, which allows you to see more details about the internal logic of Opa's decisionmaking.
 
 Be sure to switch `default allow` back to False when you're done.
+
+## HTSGet not indexing files (or: genomics searching fails even though experiment metadata is loading)
+
+Sometimes, if your variant files are located on a server that isn't reachable by the host machine, ingest will silently fail, and the Candig-Ingest docker logs will show an error like the following:
+
+```
+level: WARNING, file: urllib3.connectionpool, log: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7eff58639910>: Failed to resolve 'ecs.uhn.ca' ([Errno -2] Name or service not known)")': /dhdp-ecsresgen?location=
+```
+
+As a convenience, you can add a specific hosts file entry by editing your `.env` and replacing the lines:
+
+```
+# Adjust these two if you need to setup a custom mapping from s3 bucket to ip address
+ECS_DOMAIN=your.ecs.domain
+ECS_IP_ADDR=127.0.0.1
+```
+
+If you need more than one hosts entry for this, you can edit the `extra_hosts` entries in `lib/htsget/docker-compose.yml` and `lib/candig-ingest/docker-compose.yml`.
+

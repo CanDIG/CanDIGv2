@@ -30,6 +30,7 @@ services:
       CANDIG_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
+      - "${ECS_DOMAIN}:${ECS_IP_ADDR}"
     secrets:
       - source: keycloak-client-secret
         target: /run/secrets/client_secret
