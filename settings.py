@@ -72,6 +72,8 @@ def get_env():
     vars["DB_PATH"] = "postgres-db"
     vars["FEDERATION_SELF_SERVER_ID"] = get_env_value("FEDERATION_SELF_SERVER_ID")
     vars["CANDIG_SITE_LOCATION"] = get_env_value("CANDIG_SITE_LOCATION")
+    vars["DISABLE_ROPC"] = get_env_value("DISABLE_ROPC")
+    vars["AUTH_ACCEPT_URL"] = get_env_value("AUTH_ACCEPT_URL")
 
     # test users (note that they must be all lowercase or keycloak setup fails):
     if get_env_value("DEFAULT_SITE_ADMIN_USER") is not None:
