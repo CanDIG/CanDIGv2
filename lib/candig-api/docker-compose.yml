@@ -1,0 +1,9 @@
+# docker-compose.yml file for candig-api
+# Use a minimal image
+# This module only provides database setup scripts
+
+services:
+  candig-api:
+    image: hello-world:latest
+    labels:
+      - "candigv2=candig-api"
