@@ -130,21 +130,21 @@ def test_all_service_info():
 def create_keycloak_user(username, password, email, first_name, last_name):
     """
     Create a user in Keycloak directly using the Keycloak CLI.
-    
+
     Args:
         username (str): The username for the new user
         password (str): The password for the new user
         email (str): The email address for the new user
         first_name (str): The first name of the user
         last_name (str): The last name of the user
-    
+
     Returns:
         None
     """
     # Step 1: Get Keycloak admin token
     with open(f"{REPO_DIR}/tmp/keycloak/admin-password") as f:
         admin_pass = f.read()
-    
+
     # Step 2: Create user
     # NB: We can't use the usual OIDC flow to grab an admin token, because we
     # cannot retrieve the admin token without a client, and don't have one
@@ -160,7 +160,7 @@ def create_keycloak_user(username, password, email, first_name, last_name):
     for container in split_docker:
         if re.search(r"keycloak\/keycloak", container):
             container_name = container.split()[-1]
-    
+
     assert container_name != "", "Coult not find the keycloak/keycloak container"
 
     # Run the commands to create the user
@@ -242,7 +242,7 @@ def test_ingest_local_test_dataset():
     test_program = {
         "program_id": "TEST_FEDERATE",
         "program_curators": [],
-        "team_members": ["federated@test.ca"]
+        "team_members": ["CANDIG-DEMO-federated@test.ca"]
     }
 
     # Add the program
@@ -274,15 +274,15 @@ def test_ingest_local_test_dataset():
 ### RUN ONLY ON QUERYING SITE
 
 def test_querying_site_create_federated_user():
-    create_keycloak_user("federated@test.ca", "testfederation", "federated@test.ca", "federated", "test")
-    check_unauthorized_user("federated@test.ca", "testfederation")
-    approve_user_into_candig("federated@test.ca", "testfederation")
+    create_keycloak_user("CANDIG-DEMO-federated@test.ca", "testfederation", "CANDIG-DEMO-federated@test.ca", "CANDIG-DEMO-federated", "test")
+    check_unauthorized_user("CANDIG-DEMO-federated@test.ca", "testfederation")
+    approve_user_into_candig("CANDIG-DEMO-federated@test.ca", "testfederation")
 
 
 def test_querying_site__unfederated_curator():
-    create_keycloak_user("unfederated@test.ca", "testfederation", "unfederated@test.ca", "unfederated", "test")
-    check_unauthorized_user("unfederated@test.ca", "testfederation")
-    approve_user_into_candig("unfederated@test.ca", "testfederation")
+    create_keycloak_user("CANDIG-DEMO-unfederated@test.ca", "testfederation", "CANDIG-DEMO-unfederated@test.ca", "unfederated", "test")
+    check_unauthorized_user("CANDIG-DEMO-unfederated@test.ca", "testfederation")
+    approve_user_into_candig("CANDIG-DEMO-unfederated@test.ca", "testfederation")
 
 
 def test_querying_site_query_authorized_remote_test_dataset():
@@ -291,20 +291,20 @@ def test_querying_site_query_authorized_remote_test_dataset():
     """
     # Get token for 'federated@test.ca' user
     headers = {
-        "Authorization": f"Bearer {get_token('federated@test.ca', 'testfederation')}"
+        "Authorization": f"Bearer {get_token('CANDIG-DEMO-federated@test.ca', 'testfederation')}"
     }
     # Step 1: can we do a discovery query successfully to all sites?
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "discovery/programs",
         "payload": {},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query discovery endpoint failed with: {response.text}"
-    
+
     programs = set(())
     try:
         r = response.json()
@@ -321,13 +321,13 @@ def test_querying_site_query_authorized_remote_test_dataset():
     # Step 2: can we do a query and grab responses (only include the ones from the TEST_FEDERATE set)
     programs -= {"TEST_FEDERATE"}
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "query",
         "payload": {"exclude_programs": ",".join(programs)},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query authorized failed with: {response.text}"
     try:
@@ -349,21 +349,21 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
     """
     # Get unfederated@test.ca token
     headers = {
-        "Authorization": f"Bearer {get_token('unfederated@test.ca', 'testfederation')}"
+        "Authorization": f"Bearer {get_token('CANDIG-DEMO-unfederated@test.ca', 'testfederation')}"
     }
 
     # Step 1: can we do a discovery query successfully to all sites?
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "discovery/programs",
         "payload": {},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query discovery endpoint failed with: {response.text}"
-    
+
     programs = set(())
     try:
         r = response.json()
@@ -380,13 +380,13 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
     # Step 2: can we do a query and fail to grab responses (only include the ones from the TEST_FEDERATE set)
     programs -= {"TEST_FEDERATE"}
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "query",
         "payload": {"exclude_programs": ",".join(programs)},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query authorized failed with: {response.text}"
     try:
@@ -396,7 +396,7 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
             assert server["status"] == 200, f"Server {server['location']['name']} failed with: {server['message']}"
 
             # Ensure that we do not have access to this dataset
-            assert len(server["results"]["results"]) == 0, f"Server {server['location']['name']} improperly authorized unfederated@test.ca"
+            assert len(server["results"]["results"]) == 0, f"Server {server['location']['name']} improperly authorized CANDIG-DEMO-unfederated@test.ca"
     except requests.JSONDecodeError:
         assert False, f"Invalid JSON response: {response.text}"
 
