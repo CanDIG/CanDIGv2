@@ -53,11 +53,11 @@ class CustomHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(bytes ("<html><body><h1>Login complete, please return to the command line</h1></body></html>", "utf-8"))
 
-            obtained_token = json['refresh_token']
+            obtained_token = json
         except Exception as e:
             print(e)
 
-def run(server_class=http.server.HTTPServer, handler_class=CustomHandler):
+def run(username, password, server_class=http.server.HTTPServer, handler_class=CustomHandler, refresh_token=True):
     print(ENV['CANDIG_ENV']['KEYCLOAK_CLIENT_ID'])
     server_address = (ENV['CANDIG_ENV']['CANDIG_DOMAIN'], int(ENV['CANDIG_ENV']['AUTH_ACCEPT_PORT']))
     httpd = server_class(server_address, handler_class)
@@ -67,12 +67,16 @@ def run(server_class=http.server.HTTPServer, handler_class=CustomHandler):
 
     # Tell the user what the site admin's default password is, if able
     if "DEFAULT_SITE_ADMIN_USER" in ENV['CANDIG_ENV']:
-        with open("tmp/keycloak/test-site-admin-password", "r") as f:
-            print(f"username: {ENV['CANDIG_ENV']['DEFAULT_SITE_ADMIN_USER']} password: {f.read()}")
+        print(f"username: {username} password: {password}")
     # http://candig.docker.internal:8080/auth/realms/candig/protocol/openid-connect/auth?scope=openid+email&response_type=code&client_id=local_candig&response_mode=query&redirect_uri=http://candig.docker.internal:5080/auth/login
     while not obtained_token:
         httpd.handle_request()
-    return obtained_token
+    if refresh_token:
+        return obtained_token['refresh_token']
+    else:
+        return obtained_token['access_token']
 
 if __name__ == "__main__":
-    run()
+    with open("tmp/keycloak/test-site-admin-password", "r") as f:
+        password = f.read()
+    run(ENV['CANDIG_ENV']['DEFAULT_SITE_ADMIN_USER'], password)

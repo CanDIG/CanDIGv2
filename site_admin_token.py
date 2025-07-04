@@ -25,9 +25,7 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
             # if we're not allowed to do ROPC, we need to ask the user to login
             # through keycloak
             if ENV['CANDIG_ENV']['ENABLE_ROPC'].lower() == "false":
-                auth_code_acceptor.run()
-                with open("tmp/site-admin-refresh-token") as f:
-                    refresh_token = f.read().splitlines().pop()
+                refresh_token = auth_code_acceptor.run(username, password)
     try:
         credentials = authx.auth.get_oauth_response(
             keycloak_url=ENV["KEYCLOAK_PUBLIC_URL"],

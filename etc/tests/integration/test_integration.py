@@ -15,6 +15,7 @@ import authx.auth
 REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../../..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
 
+import auth_code_acceptor
 from settings import get_env
 from site_admin_token import get_site_admin_token
 
@@ -46,22 +47,26 @@ def test_keycloak():
 
 ## Can we get an access token for a user?
 def get_token(username=None, password=None, access_token=False):
-    payload = {
-        "client_id": ENV["CANDIG_CLIENT_ID"],
-        "client_secret": ENV["CANDIG_CLIENT_SECRET"],
-        "grant_type": "password",
-        "username": username,
-        "password": password,
-        "scope": "openid",
-    }
-    response = requests.post(
-        f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/{ENV['KEYCLOAK_REALM']}/protocol/openid-connect/token",
-        data=payload,
-    )
-    if response.status_code == 200:
-        if access_token:
-            return response.json()["access_token"]
-        return response.json()["refresh_token"]
+    if ENV['CANDIG_ENV']['ENABLE_ROPC'].lower() == "false":
+        # ROPC disabled: need to setup the auth code service
+        return auth_code_acceptor.run(username, password, refresh_token=not access_token)
+    else:
+        payload = {
+            "client_id": ENV["CANDIG_CLIENT_ID"],
+            "client_secret": ENV["CANDIG_CLIENT_SECRET"],
+            "grant_type": "password",
+            "username": username,
+            "password": password,
+            "scope": "openid",
+        }
+        response = requests.post(
+            f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/{ENV['KEYCLOAK_REALM']}/protocol/openid-connect/token",
+            data=payload,
+        )
+        if response.status_code == 200:
+            if access_token:
+                return response.json()["access_token"]
+            return response.json()["refresh_token"]
 
 
 def test_get_token():
