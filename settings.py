@@ -73,7 +73,7 @@ def get_env():
     vars["FEDERATION_SELF_SERVER_ID"] = get_env_value("FEDERATION_SELF_SERVER_ID")
     vars["CANDIG_SITE_LOCATION"] = get_env_value("CANDIG_SITE_LOCATION")
 
-    # test users:
+    # test users (note that they must be all lowercase or keycloak setup fails):
     if get_env_value("DEFAULT_SITE_ADMIN_USER") is not None:
         vars["CANDIG_SITE_ADMIN_USER"] = get_env_value("DEFAULT_SITE_ADMIN_USER").lower()
         if os.path.isfile("tmp/keycloak/test-site-admin-password"):
