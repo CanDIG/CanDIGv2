@@ -9,7 +9,6 @@ create_user_and_set_password() {
     local FIRST_NAME=$4
     local LAST_NAME=$5
 
-    echo $USERNAME
     KCADM create users -r "$KEYCLOAK_REALM" \
         -s username="$USERNAME" \
         -s enabled=true \
