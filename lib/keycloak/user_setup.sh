@@ -2,6 +2,7 @@
 echo -e "${BLUE}Creating users${DEFAULT}"
 
 create_user_and_set_password() {
+    # Note: KCADM set-password fails if the username has uppercase characters
     local USERNAME=$1
     local PASSWORD=$2
     local EMAIL=$3
@@ -18,6 +19,6 @@ create_user_and_set_password() {
 }
 
 # params: username password email firstname lastname
-create_user_and_set_password "$TEST_USER_1" "$(cat tmp/keycloak/test-user-password)" "$TEST_USER_1" "One" "User"
-create_user_and_set_password "$TEST_USER_2" "$(cat tmp/keycloak/test-user2-password)" "$TEST_USER_2" "Two" "User"
+create_user_and_set_password "$CANDIG_NOT_ADMIN_USER" "$(cat tmp/keycloak/test-user-password)" "$CANDIG_NOT_ADMIN_USER" "One" "User"
+create_user_and_set_password "$CANDIG_NOT_ADMIN2_USER" "$(cat tmp/keycloak/test-user2-password)" "$CANDIG_NOT_ADMIN2_USER" "Two" "User"
 create_user_and_set_password "$DEFAULT_SITE_ADMIN_USER" "$(cat tmp/keycloak/test-site-admin-password)" "$DEFAULT_SITE_ADMIN_USER" "Site" "Admin"

@@ -73,9 +73,9 @@ def get_env():
     vars["FEDERATION_SELF_SERVER_ID"] = get_env_value("FEDERATION_SELF_SERVER_ID")
     vars["CANDIG_SITE_LOCATION"] = get_env_value("CANDIG_SITE_LOCATION")
 
-    # test users:
+    # test users (note that they must be all lowercase or keycloak setup fails):
     if get_env_value("DEFAULT_SITE_ADMIN_USER") is not None:
-        vars["CANDIG_SITE_ADMIN_USER"] = get_env_value("DEFAULT_SITE_ADMIN_USER")
+        vars["CANDIG_SITE_ADMIN_USER"] = get_env_value("DEFAULT_SITE_ADMIN_USER").lower()
         if os.path.isfile("tmp/keycloak/test-site-admin-password"):
             with open("tmp/keycloak/test-site-admin-password") as f:
                 vars["CANDIG_SITE_ADMIN_PASSWORD"] = f.read().splitlines().pop()
@@ -83,12 +83,12 @@ def get_env():
         vars["CANDIG_SITE_ADMIN_USER"] = ""
         vars["CANDIG_SITE_ADMIN_PASSWORD"] = ""
 
-    vars["CANDIG_NOT_ADMIN_USER"] = get_env_value("TEST_USER_1")
+    vars["CANDIG_NOT_ADMIN_USER"] = get_env_value("TEST_USER_1").lower()
     if os.path.isfile("tmp/keycloak/test-user-password"):
         with open("tmp/keycloak/test-user-password") as f:
             vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
 
-    vars["CANDIG_NOT_ADMIN2_USER"] = get_env_value("TEST_USER_2")
+    vars["CANDIG_NOT_ADMIN2_USER"] = get_env_value("TEST_USER_2").lower()
     if os.path.isfile("tmp/keycloak/test-user2-password"):
         with open("tmp/keycloak/test-user2-password") as f:
             vars["CANDIG_NOT_ADMIN2_PASSWORD"] = f.read().splitlines().pop()
