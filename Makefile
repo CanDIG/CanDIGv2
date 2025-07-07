@@ -297,7 +297,7 @@ compose-%:
 	echo $(containers) >> tmp/containers.txt; \
 	fi
 	if [ -f lib/$*/$*_setup.sh ]; then \
-	source lib/$*/$*_setup.sh 2>&1 | tee -a $(LOGFILE); \
+	source env.sh; source lib/$*/$*_setup.sh 2>&1 | tee -a $(LOGFILE); \
 	fi
 	-chmod -R $(DIR_PERMISSIONS) tmp/ 2>/dev/null || true
 	-chmod -R 777 tmp/logs 2>/dev/null || true
