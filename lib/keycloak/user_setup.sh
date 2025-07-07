@@ -2,12 +2,14 @@
 echo -e "${BLUE}Creating users${DEFAULT}"
 
 create_user_and_set_password() {
-    local USERNAME=$1
+    # Note: KCADM set-password fails if the username has uppercase characters
+    local USERNAME=$(echo $1 | tr '[:upper:]' '[:lower:]')
     local PASSWORD=$2
     local EMAIL=$3
     local FIRST_NAME=$4
     local LAST_NAME=$5
 
+    echo $USERNAME
     KCADM create users -r "$KEYCLOAK_REALM" \
         -s username="$USERNAME" \
         -s enabled=true \
