@@ -164,7 +164,6 @@ def add_program_authorization(program: str, curators: list,
     }
 
     print(f"{ENV['CANDIG_URL']}/ingest/program")
-    print(headers)
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program", headers=headers, json=test_program)
     print(response.text)
     # if the site user is the default user, there should be a warning
