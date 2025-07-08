@@ -15,7 +15,6 @@ import authx.auth
 REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../../..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
 
-import auth_code_acceptor
 from settings import get_env
 from site_admin_token import get_site_admin_token
 
@@ -48,8 +47,23 @@ def test_keycloak():
 ## Can we get an access token for a user?
 def get_token(username=None, password=None, access_token=False):
     if ENV['CANDIG_ENV']['ENABLE_ROPC'].lower() == "false":
-        # ROPC disabled: need to setup the auth code service
-        return auth_code_acceptor.run(username, password, refresh_token=not access_token)
+        # ROPC disabled: Makefile should have queried the user
+        # and placed the tokens inside tmp/
+        with open(f"tmp/pytest-{username}-token", "r") as f:
+            refresh_token = f.read()
+        
+        if not access_token:
+            return refresh_token
+        
+        credentials = authx.auth.get_oauth_response(
+            keycloak_url=ENV["KEYCLOAK_PUBLIC_URL"],
+            client_id=ENV["CANDIG_CLIENT_ID"],
+            client_secret=ENV["CANDIG_CLIENT_SECRET"],
+            username=username,
+            password=password,
+            refresh_token=refresh_token
+            )
+        return credentials["access_token"]
     else:
         payload = {
             "client_id": ENV["CANDIG_CLIENT_ID"],
@@ -150,6 +164,7 @@ def add_program_authorization(program: str, curators: list,
     }
 
     print(f"{ENV['CANDIG_URL']}/ingest/program")
+    print(headers)
     response = requests.post(f"{ENV['CANDIG_URL']}/ingest/program", headers=headers, json=test_program)
     print(response.text)
     # if the site user is the default user, there should be a warning

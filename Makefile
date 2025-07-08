@@ -539,6 +539,9 @@ print-%:
 test-integration:
 	mkdir -p tmp/test
 	python ./settings.py
+ifeq ($(ENABLE_ROPC),false)
+	source ./env.sh; python pytest-tokens.py
+endif
 ifeq ($(KEEP_TEST_DATA),true)
 	source ./env.sh; pytest -v --color=yes ./etc/tests/integration -k 'not test_clean_up' $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 else
