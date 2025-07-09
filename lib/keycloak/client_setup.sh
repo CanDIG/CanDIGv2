@@ -8,8 +8,8 @@ CREATE_OUTPUT=$(KCADM -full create clients -r "$KEYCLOAK_REALM" \
     -s publicClient=false \
     -s clientAuthenticatorType=client-secret \
     -s standardFlowEnabled=true \
-    -s directAccessGrantsEnabled=true \
-    -s 'redirectUris=["'"$TYK_LOGIN_TARGET_URL$KEYCLOAK_LOGIN_REDIRECT_PATH"'"]' \
+    -s directAccessGrantsEnabled=$ENABLE_ROPC \
+    -s 'redirectUris=["'"$TYK_LOGIN_TARGET_URL$KEYCLOAK_LOGIN_REDIRECT_PATH"'","'"$AUTH_ACCEPT_URL"'"]' \
     -s 'webOrigins=["'"$TYK_LOGIN_TARGET_URL"'"]' 2>&1)
 
 # Extract the client ID from the output

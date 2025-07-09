@@ -46,22 +46,41 @@ def test_keycloak():
 
 ## Can we get an access token for a user?
 def get_token(username=None, password=None, access_token=False):
-    payload = {
-        "client_id": ENV["CANDIG_CLIENT_ID"],
-        "client_secret": ENV["CANDIG_CLIENT_SECRET"],
-        "grant_type": "password",
-        "username": username,
-        "password": password,
-        "scope": "openid",
-    }
-    response = requests.post(
-        f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/{ENV['KEYCLOAK_REALM']}/protocol/openid-connect/token",
-        data=payload,
-    )
-    if response.status_code == 200:
-        if access_token:
-            return response.json()["access_token"]
-        return response.json()["refresh_token"]
+    if ENV['CANDIG_ENV']['ENABLE_ROPC'].lower() == "false":
+        # ROPC disabled: Makefile should have queried the user
+        # and placed the tokens inside tmp/
+        with open(f"tmp/pytest-{username}-token", "r") as f:
+            refresh_token = f.read()
+        
+        if not access_token:
+            return refresh_token
+        
+        credentials = authx.auth.get_oauth_response(
+            keycloak_url=ENV["KEYCLOAK_PUBLIC_URL"],
+            client_id=ENV["CANDIG_CLIENT_ID"],
+            client_secret=ENV["CANDIG_CLIENT_SECRET"],
+            username=username,
+            password=password,
+            refresh_token=refresh_token
+            )
+        return credentials["access_token"]
+    else:
+        payload = {
+            "client_id": ENV["CANDIG_CLIENT_ID"],
+            "client_secret": ENV["CANDIG_CLIENT_SECRET"],
+            "grant_type": "password",
+            "username": username,
+            "password": password,
+            "scope": "openid",
+        }
+        response = requests.post(
+            f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/{ENV['KEYCLOAK_REALM']}/protocol/openid-connect/token",
+            data=payload,
+        )
+        if response.status_code == 200:
+            if access_token:
+                return response.json()["access_token"]
+            return response.json()["refresh_token"]
 
 
 def test_get_token():
