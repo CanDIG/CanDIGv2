@@ -242,7 +242,7 @@ def test_ingest_local_test_dataset():
     test_program = {
         "program_id": "TEST_FEDERATE",
         "program_curators": [],
-        "team_members": ["CANDIG-DEMO-federated@test.ca"]
+        "team_members": ["CANDIG_DEMO_federated@test.ca"]
     }
 
     # Add the program
@@ -274,15 +274,15 @@ def test_ingest_local_test_dataset():
 ### RUN ONLY ON QUERYING SITE
 
 def test_querying_site_create_federated_user():
-    create_keycloak_user("CANDIG-DEMO-federated@test.ca", "testfederation", "CANDIG-DEMO-federated@test.ca", "CANDIG-DEMO-federated", "test")
-    check_unauthorized_user("CANDIG-DEMO-federated@test.ca", "testfederation")
-    approve_user_into_candig("CANDIG-DEMO-federated@test.ca", "testfederation")
+    create_keycloak_user("CANDIG_DEMO_federated@test.ca", "testfederation", "CANDIG_DEMO_federated@test.ca", "CANDIG_DEMO_federated", "test")
+    check_unauthorized_user("CANDIG_DEMO_federated@test.ca", "testfederation")
+    approve_user_into_candig("CANDIG_DEMO_federated@test.ca", "testfederation")
 
 
 def test_querying_site__unfederated_curator():
-    create_keycloak_user("CANDIG-DEMO-unfederated@test.ca", "testfederation", "CANDIG-DEMO-unfederated@test.ca", "unfederated", "test")
-    check_unauthorized_user("CANDIG-DEMO-unfederated@test.ca", "testfederation")
-    approve_user_into_candig("CANDIG-DEMO-unfederated@test.ca", "testfederation")
+    create_keycloak_user("CANDIG_DEMO_unfederated@test.ca", "testfederation", "CANDIG_DEMO_unfederated@test.ca", "unfederated", "test")
+    check_unauthorized_user("CANDIG_DEMO_unfederated@test.ca", "testfederation")
+    approve_user_into_candig("CANDIG_DEMO_unfederated@test.ca", "testfederation")
 
 
 def test_querying_site_query_authorized_remote_test_dataset():
@@ -291,7 +291,7 @@ def test_querying_site_query_authorized_remote_test_dataset():
     """
     # Get token for 'federated@test.ca' user
     headers = {
-        "Authorization": f"Bearer {get_token('CANDIG-DEMO-federated@test.ca', 'testfederation')}"
+        "Authorization": f"Bearer {get_token('CANDIG_DEMO_federated@test.ca', 'testfederation')}"
     }
     # Step 1: can we do a discovery query successfully to all sites?
     body = {
@@ -349,7 +349,7 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
     """
     # Get unfederated@test.ca token
     headers = {
-        "Authorization": f"Bearer {get_token('CANDIG-DEMO-unfederated@test.ca', 'testfederation')}"
+        "Authorization": f"Bearer {get_token('CANDIG_DEMO_unfederated@test.ca', 'testfederation')}"
     }
 
     # Step 1: can we do a discovery query successfully to all sites?
@@ -396,7 +396,7 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
             assert server["status"] == 200, f"Server {server['location']['name']} failed with: {server['message']}"
 
             # Ensure that we do not have access to this dataset
-            assert len(server["results"]["results"]) == 0, f"Server {server['location']['name']} improperly authorized CANDIG-DEMO-unfederated@test.ca"
+            assert len(server["results"]["results"]) == 0, f"Server {server['location']['name']} improperly authorized CANDIG_DEMO_unfederated@test.ca"
     except requests.JSONDecodeError:
         assert False, f"Invalid JSON response: {response.text}"
 
