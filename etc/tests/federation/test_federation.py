@@ -336,8 +336,8 @@ def test_querying_site_query_authorized_remote_test_dataset():
         for server in r:
             assert server["status"] == 200, f"Server {server['location']['name']} failed with: {server['message']}"
             # NB: I do not currently ingest the federated dataset at the same location that the querying tests are run from
-            # There is no reason for this to be the case, other than for speed's sake. Thus, the local server will not have anything here
-            if server['location']['name'] != 'LOCAL':
+            # There is no reason for this to be the case, other than for speed's sake. Thus, the local (demo) server will not have anything here
+            if server['location']['name'] != ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']:
                 assert server["results"]["count"] == 24, f"Server {server['location']['name']} had a strange number of results in query"
     except requests.JSONDecodeError:
         assert False, f"Invalid JSON response: {response.text}"
