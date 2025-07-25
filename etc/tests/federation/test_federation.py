@@ -127,6 +127,19 @@ def test_all_service_info():
     assert all(response[server] == "ok" for response in responses for server in response)
 
 
+def get_keycloak_container():
+    # Find the docker container
+    docker_ps = subprocess.run(["docker", "ps"], capture_output=True)
+    split_docker = docker_ps.stdout.decode('utf8').split("\n")
+    container_name = ""
+    for container in split_docker:
+        if re.search(r"keycloak\/keycloak", container):
+            container_name = container.split()[-1]
+
+    assert container_name != "", "Could not find the keycloak/keycloak container"
+    return container_name
+
+
 def create_keycloak_user(username, password, email, first_name, last_name):
     """
     Create a user in Keycloak directly using the Keycloak CLI.
@@ -153,15 +166,7 @@ def create_keycloak_user(username, password, email, first_name, last_name):
     # i.e. going through kcadm.sh. We had the code already for this in
     # keycloak_setup.sh and it's a pain to work with here so...
 
-    # Find the docker container
-    docker_ps = subprocess.run(["docker", "ps"], capture_output=True)
-    split_docker = docker_ps.stdout.decode('utf8').split("\n")
-    container_name = ""
-    for container in split_docker:
-        if re.search(r"keycloak\/keycloak", container):
-            container_name = container.split()[-1]
-
-    assert container_name != "", "Coult not find the keycloak/keycloak container"
+    container_name = get_keycloak_container()
 
     # Run the commands to create the user
     # a. login as admin
