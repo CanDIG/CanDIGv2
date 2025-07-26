@@ -49,6 +49,7 @@ def get_env():
     vars["KEYCLOAK_REALM_URL"] = get_env_value("KEYCLOAK_REALM_URL")
     vars["KEYCLOAK_ISSUER_URL"] = get_env_value("KEYCLOAK_ISSUER_URL")
     vars["KEYCLOAK_REALM"] = get_env_value("KEYCLOAK_REALM")
+    vars["KEYCLOAK_LOGIN_REDIRECT_PATH"] = get_env_value("KEYCLOAK_LOGIN_REDIRECT_PATH")
     vars["DEFAULT_ADMIN_USER"] = get_env_value("DEFAULT_ADMIN_USER")
     vars["VAULT_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
     vars["OPA_URL"] = get_env_value("OPA_URL")
