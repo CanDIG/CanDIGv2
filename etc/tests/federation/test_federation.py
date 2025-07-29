@@ -510,10 +510,11 @@ def test_create_client():
     password = ENV["CANDIG_NOT_ADMIN_PASSWORD"]
 
     user_token = get_access_token(
-    client_id=client_id,
-    client_secret=client_secret,
-    username=username,
-    password=password)
+        client_id=client_id,
+        client_secret=client_secret,
+        username=username,
+        password=password
+    )
 
 
     headers = {
