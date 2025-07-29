@@ -157,14 +157,6 @@ def create_keycloak_client(client_id):
     with open(f"{REPO_DIR}/tmp/keycloak/admin-password") as f:
         admin_pass = f.read()
 
-    # Step 2: Create user
-    # NB: We can't use the usual OIDC flow to grab an admin token, because we
-    # cannot retrieve the admin token without a client, and don't have one
-    # initially setup. Because of this, we have to go through the command-line
-    # admin tools to create our user
-    # i.e. going through kcadm.sh. We had the code already for this in
-    # keycloak_setup.sh and it's a pain to work with here so...
-
     container_name = get_keycloak_container()
 
     # Run the commands to create the new client
