@@ -292,7 +292,7 @@ def test_ingest_local_test_dataset():
     test_program = {
         "program_id": "TEST_FEDERATE",
         "program_curators": [],
-        "team_members": ["federated@test.ca"]
+        "team_members": [f"{os.getenv('QUERYING_LOCATION_ID')}_federated@test.ca"]
     }
 
     # Add the program
@@ -324,15 +324,27 @@ def test_ingest_local_test_dataset():
 ### RUN ONLY ON QUERYING SITE
 
 def test_querying_site_create_federated_user():
-    create_keycloak_user("federated@test.ca", "testfederation", "federated@test.ca", "federated", "test")
-    check_unauthorized_user("federated@test.ca", "testfederation")
-    approve_user_into_candig("federated@test.ca", "testfederation")
+    create_keycloak_user(
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated@test.ca",
+        "testfederation",
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated@test.ca",
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated",
+        "test"
+    )
+    check_unauthorized_user(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated@test.ca", "testfederation")
+    approve_user_into_candig(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated@test.ca", "testfederation")
 
 
 def test_querying_site__unfederated_curator():
-    create_keycloak_user("unfederated@test.ca", "testfederation", "unfederated@test.ca", "unfederated", "test")
-    check_unauthorized_user("unfederated@test.ca", "testfederation")
-    approve_user_into_candig("unfederated@test.ca", "testfederation")
+    create_keycloak_user(
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca",
+        "testfederation",
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca",
+        "unfederated",
+        "test"
+    )
+    check_unauthorized_user(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca", "testfederation")
+    approve_user_into_candig(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca", "testfederation")
 
 
 def test_querying_site_query_authorized_remote_test_dataset():
@@ -341,7 +353,7 @@ def test_querying_site_query_authorized_remote_test_dataset():
     """
     # Get token for 'federated@test.ca' user
     headers = {
-        "Authorization": f"Bearer {get_token('federated@test.ca', 'testfederation')}"
+        "Authorization": f"Bearer {get_token(f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated@test.ca', 'testfederation')}"
     }
     # Step 1: can we do a discovery query successfully to all sites?
     body = {
@@ -386,8 +398,8 @@ def test_querying_site_query_authorized_remote_test_dataset():
         for server in r:
             assert server["status"] == 200, f"Server {server['location']['name']} failed with: {server['message']}"
             # NB: I do not currently ingest the federated dataset at the same location that the querying tests are run from
-            # There is no reason for this to be the case, other than for speed's sake. Thus, the local server will not have anything here
-            if server['location']['name'] != 'LOCAL':
+            # There is no reason for this to be the case, other than for speed's sake. Thus, the local (demo) server will not have anything here
+            if server['location']['name'] != ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']:
                 assert server["results"]["count"] == 24, f"Server {server['location']['name']} had a strange number of results in query"
     except requests.JSONDecodeError:
         assert False, f"Invalid JSON response: {response.text}"
@@ -399,7 +411,7 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
     """
     # Get unfederated@test.ca token
     headers = {
-        "Authorization": f"Bearer {get_token('unfederated@test.ca', 'testfederation')}"
+        "Authorization": f"Bearer {get_token(f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca', 'testfederation')}"
     }
 
     # Step 1: can we do a discovery query successfully to all sites?
@@ -446,7 +458,7 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
             assert server["status"] == 200, f"Server {server['location']['name']} failed with: {server['message']}"
 
             # Ensure that we do not have access to this dataset
-            assert len(server["results"]["results"]) == 0, f"Server {server['location']['name']} improperly authorized unfederated@test.ca"
+            assert len(server["results"]["results"]) == 0, f"Server {server['location']['name']} improperly authorizedf {ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca"
     except requests.JSONDecodeError:
         assert False, f"Invalid JSON response: {response.text}"
 
