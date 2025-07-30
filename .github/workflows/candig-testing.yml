@@ -110,7 +110,7 @@ jobs:
         run: |
           CANDIG_PASSWORD=$(cat tmp/keycloak/test-user2-password)
           echo "CANDIG_URL=http://candig.docker.internal:5080/" > playwright-runbook/.env
-          echo "CANDIG_USERNAME=user2@test.ca" >> playwright-runbook/.env
+          echo "CANDIG_USERNAME=local_user2@test.ca" >> playwright-runbook/.env
           echo "CANDIG_PASSWORD=${CANDIG_PASSWORD}" >> playwright-runbook/.env
           echo "Created playwright-runbook/.env with dynamic password"
           cat playwright-runbook/.env
