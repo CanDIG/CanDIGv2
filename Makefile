@@ -297,22 +297,10 @@ compose-%:
 	echo $(containers) >> tmp/containers.txt; \
 	fi
 	if [ -f lib/$*/$*_setup.sh ]; then \
-	source lib/$*/$*_setup.sh 2>&1 | tee -a $(LOGFILE); \
+	source env.sh; source lib/$*/$*_setup.sh 2>&1 | tee -a $(LOGFILE); \
 	fi
 	-chmod -R $(DIR_PERMISSIONS) tmp/ 2>/dev/null || true
 	-chmod -R 777 tmp/logs 2>/dev/null || true
-
-#>>>
-# Combines the make clean/build/compose steps (and re-creates docker volumes)
-# $module is the name of the sub-folder in lib/
-# make recompose-$module
-
-#<<<
-recompose-%:
-	$(MAKE) clean-$*
-	$(MAKE) docker-volumes
-	$(MAKE) build-$*
-	$(MAKE) compose-$*
 
 #>>>
 # Combines the make clean/build/compose steps (and re-creates docker volumes)
@@ -551,6 +539,9 @@ print-%:
 test-integration:
 	mkdir -p tmp/test
 	python ./settings.py
+ifeq ($(ENABLE_ROPC),false)
+	source ./env.sh; python pytest-tokens.py
+endif
 ifeq ($(KEEP_TEST_DATA),true)
 	source ./env.sh; pytest -v --color=yes ./etc/tests/integration -k 'not test_clean_up' $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 else
