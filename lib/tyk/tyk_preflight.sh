@@ -58,6 +58,29 @@ export REDIS_SECRET_KEY=$REDIS_SECRET_KEY_VAL
 
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
 
+export PROVIDERS="[
+            {
+                \"issuer\": "${KEYCLOAK_ISSUER_URL}",
+                \"client_ids\": {
+                    \"${KEYCLOAK_CLIENT_ID_64}\": \"${TYK_POLICY_ID}\"
+                }
+            }
+        ]"
+
+# Under client auth, we've got to also add the site admin client as well
+if [[ ${OIDC_CHAIN,,} = "client" ]]; then
+    export KEYCLOAK_SERVICE_CLIENT_ID_64=$(echo -n ${KEYCLOAK_SERVICE_CLIENT_ID} | base64)
+    export PROVIDERS="[
+            {
+                \"issuer\": \"${KEYCLOAK_ISSUER_URL}\",
+                \"client_ids\": {
+                    \"${KEYCLOAK_CLIENT_ID_64}\": \"${TYK_POLICY_ID}\",
+                    \"${KEYCLOAK_SERVICE_CLIENT_ID_64}\": \"${TYK_POLICY_ID}\"
+                }
+            }
+        ]"
+fi
+
 # Copy files from template configs
 
 echo "Working on tyk.conf"  | tee -a $LOGFILE

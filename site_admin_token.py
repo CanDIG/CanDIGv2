@@ -24,16 +24,18 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
                 password = getpass.getpass("Enter password: ")
             # if we're not allowed to do ROPC, we need to ask the user to login
             # through keycloak
-            if ENV['CANDIG_ENV']['ENABLE_ROPC'].lower() == "false":
+            if ENV['CANDIG_ENV']['OIDC_CHAIN'].lower() == "auth_code":
                 refresh_token = auth_code_acceptor.run(username, password)
     try:
+        is_client_auth = ENV['CANDIG_ENV']['OIDC_CHAIN'].lower() == "client"
         credentials = authx.auth.get_oauth_response(
             keycloak_url=ENV["KEYCLOAK_PUBLIC_URL"],
-            client_id=ENV["CANDIG_CLIENT_ID"],
+            client_id=ENV["CANDIG_CLIENT_ID"] if not is_client_auth else ENV["KEYCLOAK_SERVICE_CLIENT_ID"],
             client_secret=ENV["CANDIG_CLIENT_SECRET"],
             username=username,
             password=password,
-            refresh_token=refresh_token
+            refresh_token=refresh_token,
+            client_account=is_client_auth
             )
 
         if "error" in credentials:
@@ -47,8 +49,10 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
                 print(type(e))
             return get_site_admin_token()
 
-        with open(f"tmp/site-admin-refresh-token", "w") as f:
-            f.write(credentials["refresh_token"])
+        # If we get a refresh token (not valid for client_auth), store it for later
+        if not is_client_auth:
+            with open(f"tmp/site-admin-refresh-token", "w") as f:
+                f.write(credentials["refresh_token"])
 
         return credentials["access_token"]
     except Exception as e:

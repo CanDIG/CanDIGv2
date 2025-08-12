@@ -88,15 +88,8 @@
         "VAULT_ROLE":"researcher"
     },
     "openid_options": {
-    "segregate_by_client": false,
-    "providers": [
-            {
-                "issuer": "${KEYCLOAK_ISSUER_URL}",
-                "client_ids": {
-                    "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
-                }
-            }
-        ]
+        "segregate_by_client": false,
+        "providers": ${PROVIDERS}
     },
 
 
