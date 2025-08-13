@@ -46,7 +46,7 @@ def test_keycloak():
 
 ## Can we get an access token for a user?
 def get_token(username=None, password=None, access_token=False):
-    if ENV['CANDIG_ENV']['ENABLE_ROPC'].lower() == "false":
+    if ENV['CANDIG_ENV']['ENABLE_ROPC'].lower() == "auth_code":
         # ROPC disabled: Makefile should have queried the user
         # and placed the tokens inside tmp/
         with open(f"tmp/pytest-{username}-token", "r") as f:
@@ -62,6 +62,14 @@ def get_token(username=None, password=None, access_token=False):
             username=username,
             password=password,
             refresh_token=refresh_token
+            )
+        return credentials["access_token"]
+    elif ENV['CANDIG_ENV']['ENABLE_ROPC'].lower() == "client":
+        credentials = authx.auth.get_oauth_response(
+            keycloak_url=ENV["KEYCLOAK_PUBLIC_URL"],
+            client_id=username,
+            client_secret=password,
+            client_account=True
             )
         return credentials["access_token"]
     else:
