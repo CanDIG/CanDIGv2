@@ -159,6 +159,9 @@ docker exec $vault sh -c "echo 'path \"opa/data\" {capabilities = [\"update\", \
 # Htsget needs access to the ingest store's aws path:
 docker exec $vault sh -c "echo 'path \"candig-ingest/aws/*\" {capabilities = [\"read\"]}' >> htsget-policy.hcl; vault policy write htsget htsget-policy.hcl"
 
+# Opa needs access to the federation store's external_services path:
+docker exec $vault sh -c "echo 'path \"federation/external_services\" {capabilities = [\"read\"]}' >> opa-policy.hcl; vault policy write opa opa-policy.hcl"
+
 docker restart $vault_runner
 
 if [ -f tmp/vault/service_stores.txt ]; then

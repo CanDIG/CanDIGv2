@@ -5,12 +5,14 @@ import re
 import requests
 import subprocess
 import sys
+import uuid
 
 REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../../..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
 
 from settings import get_env
 from site_admin_token import get_site_admin_token
+from authx.auth import get_access_token, verify_service_token
 
 ENV = get_env()
 
@@ -127,6 +129,62 @@ def test_all_service_info():
     assert all(response[server] == "ok" for response in responses for server in response)
 
 
+def get_keycloak_container():
+    # Find the docker container
+    docker_ps = subprocess.run(["docker", "ps"], capture_output=True)
+    split_docker = docker_ps.stdout.decode('utf8').split("\n")
+    container_name = ""
+    for container in split_docker:
+        if re.search(r"keycloak\/keycloak", container):
+            container_name = container.split()[-1]
+
+    assert container_name != "", "Could not find the keycloak/keycloak container"
+    return container_name
+
+
+def create_keycloak_client(client_id):
+    """
+
+    Create a new client in Keycloak directly using the Keycloak CLI.
+
+    Args:
+        client_id (str): The client_id for the new client
+
+    Returns:
+        client_secret
+    """
+    # Step 1: Get Keycloak admin token
+    with open(f"{REPO_DIR}/tmp/keycloak/admin-password") as f:
+        admin_pass = f.read()
+
+    container_name = get_keycloak_container()
+
+    # Run the commands to create the new client
+    # a. login as admin
+    run = subprocess.run(["docker", "exec", container_name, "/opt/keycloak/bin/kcadm.sh", "config", "credentials", "--server", f"{ENV["KEYCLOAK_PUBLIC_URL"]}/auth", "--user", "admin", "--password", admin_pass, "--realm", "master"])
+    assert run.returncode == 0, "Could not login as admin for into Keycloak"
+
+    # b. create the client
+    run = subprocess.run(["docker", "exec", container_name, "/opt/keycloak/bin/kcadm.sh",  "create", "clients", "-r", ENV["KEYCLOAK_REALM"], "-s", f"clientId=\"{client_id}\"", "-s", "enabled=true", "-s", "protocol=openid-connect", "-s", "publicClient=false", "-s", "clientAuthenticatorType=client-secret", "-s", "standardFlowEnabled=true"], capture_output=True, text=True)
+    assert run.returncode == 0, "Could not create user with the admin Keycloak session"
+    uuid_match = re.match(r".+'(.+)'", run.stderr)
+    client_uuid = uuid_match.group(1)
+
+    # Create client scopes
+    config = {
+        "included.client.audience" : f"{ENV["CANDIG_CLIENT_ID"]}",
+        "id.token.claim" : True,
+        "access.token.claim" : True
+    }
+    run = subprocess.run(["docker", "exec", container_name, "/opt/keycloak/bin/kcadm.sh", "create", f"clients/{client_uuid}/protocol-mappers/models", "-r", ENV["KEYCLOAK_REALM"], "-s", f"name={client_id}", "-s", "protocol=openid-connect", "-s", "protocolMapper=oidc-audience-mapper", "-s", f"config={json.dumps(config)}"], capture_output=True, text=True)
+    assert run.returncode == 0, "Could not create client with the admin Keycloak session"
+
+    run = subprocess.run(["docker", "exec", container_name, "/opt/keycloak/bin/kcadm.sh",  "get", f"clients/{client_uuid}/client-secret", "-r", ENV["KEYCLOAK_REALM"]], capture_output=True, text=True)
+
+    json_out = json.loads(run.stdout)
+    return json_out["value"]
+
+
 def create_keycloak_user(username, password, email, first_name, last_name):
     """
     Create a user in Keycloak directly using the Keycloak CLI.
@@ -153,15 +211,7 @@ def create_keycloak_user(username, password, email, first_name, last_name):
     # i.e. going through kcadm.sh. We had the code already for this in
     # keycloak_setup.sh and it's a pain to work with here so...
 
-    # Find the docker container
-    docker_ps = subprocess.run(["docker", "ps"], capture_output=True)
-    split_docker = docker_ps.stdout.decode('utf8').split("\n")
-    container_name = ""
-    for container in split_docker:
-        if re.search(r"keycloak\/keycloak", container):
-            container_name = container.split()[-1]
-
-    assert container_name != "", "Coult not find the keycloak/keycloak container"
+    container_name = get_keycloak_container()
 
     # Run the commands to create the user
     # a. login as admin
@@ -454,3 +504,46 @@ def test_remove_servers():
     results = response.json()
     print(results)
     assert len(results) == 1, "More than one server found after removing every server"
+
+
+def test_create_client():
+    client_id = uuid.uuid4()
+    client_secret = create_keycloak_client(client_id)
+
+    username = ENV["CANDIG_NOT_ADMIN_USER"]
+    password = ENV["CANDIG_NOT_ADMIN_PASSWORD"]
+
+    user_token = get_access_token(
+        client_id=client_id,
+        client_secret=client_secret,
+        username=username,
+        password=password
+    )
+
+
+    headers = {
+        "Authorization": f"Bearer {get_site_admin_token()}"
+    }
+
+    body = {
+        "service": "bitnobi",
+        "authentication": {
+            "token": user_token,
+            "issuer": "http://candig.docker.internal:8080/auth/realms/candig"
+        }
+    }
+
+    response = requests.post(
+        url=f"{ENV['CANDIG_URL']}/federation/v1/external-service",
+        headers=headers,
+        json=body
+    )
+    assert response.status_code == 201
+
+    assert verify_service_token(service="bitnobi", token=user_token)
+
+    response = requests.delete(
+        url=f"{ENV['CANDIG_URL']}/federation/v1/external-service/bitnobi",
+        headers=headers,
+    )
+    assert response.status_code == 200
