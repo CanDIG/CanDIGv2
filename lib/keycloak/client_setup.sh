@@ -48,6 +48,7 @@ if [ "${OIDC_CHAIN,,}" = "client" ]; then
         -s publicClient=false \
         -s clientAuthenticatorType=client-secret \
         -s standardFlowEnabled=false \
+        -s serviceAccountsEnabled=true \
         -s directAccessGrantsEnabled=false  2>&1)
     SERVICE_CLIENT_UUID=$(echo $CREATE_OUTPUT | grep -oE '[0-9a-fA-F-]{36}')
 
@@ -55,5 +56,8 @@ if [ "${OIDC_CHAIN,,}" = "client" ]; then
     # (without it they won't authenticate properly with Tyk)
     add_audience_scope "${SERVICE_CLIENT_UUID}" "${KEYCLOAK_CLIENT_ID}"
     add_audience_scope "${SERVICE_CLIENT_UUID}" "${KEYCLOAK_SERVICE_CLIENT_ID}"
+
+    SERVICE_CLIENT_SECRET=$(KCADM -full get clients/"$SERVICE_CLIENT_UUID"/client-secret -r "$KEYCLOAK_REALM" | sed -n '/{/,/}/p' | jq -r '.value')
+    echo -n "$SERVICE_CLIENT_SECRET" > tmp/keycloak/service-client-secret
 fi
 

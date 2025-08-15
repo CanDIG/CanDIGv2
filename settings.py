@@ -62,6 +62,9 @@ def get_env():
     if os.path.isfile("tmp/keycloak/client-secret"):
         with open("tmp/keycloak/client-secret") as f:
             vars["CANDIG_CLIENT_SECRET"] = f.read().splitlines().pop()
+    if os.path.isfile("tmp/keycloak/service-client-secret"):
+        with open("tmp/keycloak/service-client-secret") as f:
+            vars["CANDIG_SERVICE_CLIENT_SECRET"] = f.read().splitlines().pop()
     if os.path.isfile("tmp/vault/keys.txt"):
         with open("tmp/vault/keys.txt") as f:
             vars["VAULT_ROOT_TOKEN"] = f.read().splitlines().pop(-1)

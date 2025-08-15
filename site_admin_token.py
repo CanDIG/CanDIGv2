@@ -31,7 +31,7 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
         credentials = authx.auth.get_oauth_response(
             keycloak_url=ENV["KEYCLOAK_PUBLIC_URL"],
             client_id=ENV["CANDIG_CLIENT_ID"] if not is_client_auth else ENV["KEYCLOAK_SERVICE_CLIENT_ID"],
-            client_secret=ENV["CANDIG_CLIENT_SECRET"],
+            client_secret=ENV["CANDIG_CLIENT_SECRET"] if not is_client_auth else ENV["CANDIG_SERVICE_CLIENT_SECRET"],
             username=username,
             password=password,
             refresh_token=refresh_token,
