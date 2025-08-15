@@ -67,8 +67,11 @@ export PROVIDERS="[
             }
         ]"
 
+# Support older versions of bash
+OIDC_CHAIN_LOWERCASE=$(echo ${OIDC_CHAIN} | tr '[:upper:]' '[:lower:]')
+
 # Under client auth, we've got to also add the site admin client as well
-if [[ ${OIDC_CHAIN,,} = "client" ]]; then
+if [[ ${OIDC_CHAIN_LOWERCASE} = "client" ]]; then
     export KEYCLOAK_SERVICE_CLIENT_ID_64=$(echo -n ${KEYCLOAK_SERVICE_CLIENT_ID} | base64)
     export PROVIDERS="[
             {

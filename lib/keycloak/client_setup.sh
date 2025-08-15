@@ -2,7 +2,9 @@
 echo -e "${BLUE}Creating client: $KEYCLOAK_CLIENT_ID${DEFAULT}"
 
 ENABLE_ROPC="false"
-if [ "${OIDC_CHAIN,,}" = "client" ] || [ "${OIDC_CHAIN,,}" = "ropc" ]; then
+# Support older versions of bash
+OIDC_CHAIN_LOWERCASE=$(echo ${OIDC_CHAIN} | tr '[:upper:]' '[:lower:]')
+if [ "${OIDC_CHAIN_LOWERCASE}" = "client" ] || [ "${OIDC_CHAIN_LOWERCASE}" = "ropc" ]; then
     ENABLE_ROPC="true"
 fi
 
@@ -39,7 +41,7 @@ CLIENT_SECRET=$(KCADM -full get clients/"$CLIENT_UUID"/client-secret -r "$KEYCLO
 echo -n "$CLIENT_SECRET" > tmp/keycloak/client-secret
 
 # If we're using client authorization, we'll also need a client for the admin
-if [ "${OIDC_CHAIN,,}" = "client" ]; then
+if [ "${OIDC_CHAIN_LOWERCASE}" = "client" ]; then
     # Note: The terminology here is confusing, because we use the word "ID" for a couple different things
     CREATE_OUTPUT=$(KCADM -full create clients -r "$KEYCLOAK_REALM" \
         -s clientId="$KEYCLOAK_SERVICE_CLIENT_ID" \
