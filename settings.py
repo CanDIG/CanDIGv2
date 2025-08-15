@@ -62,6 +62,9 @@ def get_env():
     if os.path.isfile("tmp/keycloak/client-secret"):
         with open("tmp/keycloak/client-secret") as f:
             vars["CANDIG_CLIENT_SECRET"] = f.read().splitlines().pop()
+    if os.path.isfile("tmp/keycloak/service-client-secret"):
+        with open("tmp/keycloak/service-client-secret") as f:
+            vars["CANDIG_SERVICE_CLIENT_SECRET"] = f.read().splitlines().pop()
     if os.path.isfile("tmp/vault/keys.txt"):
         with open("tmp/vault/keys.txt") as f:
             vars["VAULT_ROOT_TOKEN"] = f.read().splitlines().pop(-1)
@@ -73,7 +76,8 @@ def get_env():
     vars["DB_PATH"] = "postgres-db"
     vars["FEDERATION_SELF_SERVER_ID"] = get_env_value("FEDERATION_SELF_SERVER_ID")
     vars["CANDIG_SITE_LOCATION"] = get_env_value("CANDIG_SITE_LOCATION")
-    vars["DISABLE_ROPC"] = get_env_value("DISABLE_ROPC")
+    vars["OIDC_CHAIN"] = get_env_value("OIDC_CHAIN").lower()
+    vars["KEYCLOAK_SERVICE_CLIENT_ID"] = get_env_value("KEYCLOAK_SERVICE_CLIENT_ID").lower()
     vars["AUTH_ACCEPT_URL"] = get_env_value("AUTH_ACCEPT_URL")
 
     # test users (note that they must be all lowercase or keycloak setup fails):

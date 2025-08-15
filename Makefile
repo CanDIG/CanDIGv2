@@ -539,7 +539,7 @@ print-%:
 test-integration:
 	mkdir -p tmp/test
 	python ./settings.py
-ifeq ($(ENABLE_ROPC),false)
+ifeq ($(ENABLE_ROPC),'AUTH_CODE')
 	source ./env.sh; python pytest-tokens.py
 endif
 ifeq ($(KEEP_TEST_DATA),true)
