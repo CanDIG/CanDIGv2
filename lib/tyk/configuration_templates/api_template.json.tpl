@@ -15,10 +15,10 @@
     "base_identity_provided_by": "",
 
     "proxy": {
-        "target_url": "${TYK_CANDIG_API_TARGET}",
+        "target_url": "${TYK_TEMPLATE_API_TARGET}",
         "strip_listen_path": true,
         "disable_strip_slash": false,
-        "listen_path": "/${TYK_CANDIG_API_LISTEN_PATH}",
+        "listen_path": "/${TYK_TEMPLATE_API_LISTEN_PATH}",
         "transport": {
             "ssl_insecure_skip_verify": false,
             "ssl_ciphers": [],
@@ -33,8 +33,8 @@
         "not_versioned": true,
         "versions": {
             "Default": {
-                "name": "Default",
-                "use_extended_paths": true
+            "name": "Default",
+            "use_extended_paths": true
             }
         },
         "extended_paths": {
@@ -90,14 +90,7 @@
     },
     "openid_options": {
         "segregate_by_client": false,
-        "providers": [
-            {
-                "issuer": "${KEYCLOAK_ISSUER_URL}",
-                "client_ids": {
-                    "${KEYCLOAK_CLIENT_ID_64}": "${TYK_POLICY_ID}"
-                }
-            }
-        ]
+        "providers": ${PROVIDERS}
     },
 
 
