@@ -60,7 +60,7 @@ mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middlewar
 
 export PROVIDERS="[
             {
-                \"issuer\": "${KEYCLOAK_ISSUER_URL}",
+                \"issuer\": \"${KEYCLOAK_ISSUER_URL}\",
                 \"client_ids\": {
                     \"${KEYCLOAK_CLIENT_ID_64}\": \"${TYK_POLICY_ID}\"
                 }
