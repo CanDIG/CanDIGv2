@@ -762,7 +762,7 @@ def test_index_success():
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf", headers=headers)
     tries = 0
     print(response.json())
-    while response.status_code != 200 or "indexed" not in response.json() or response.json()['indexed'] != 1:
+    while response.status_code != 200 or "indexed" not in response.json()['metadata'] or response.json()['metadata']['indexed'] != 1:
         time.sleep(2)
         response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf", headers=headers)
         print(response.json())
