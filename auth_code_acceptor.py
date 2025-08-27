@@ -33,7 +33,7 @@ class CustomHandler(http.server.BaseHTTPRequestHandler):
 
             # Grab the Keycloak secret
             with open('tmp/keycloak/client-secret', 'r') as f:
-                keycloak_secret = f.read()
+                keycloak_secret = f.read().strip()
 
             # Use the auth code to generate a refresh/access token
             # and also the client secret in tmp/keycloak/client-secret
