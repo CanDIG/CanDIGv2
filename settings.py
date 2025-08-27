@@ -73,7 +73,7 @@ def get_env():
     vars["FEDERATION_SELF_SERVER_ID"] = get_env_value("FEDERATION_SELF_SERVER_ID")
     vars["CANDIG_SITE_LOCATION"] = get_env_value("CANDIG_SITE_LOCATION")
 
-    vars["DISABLE_ROPC"] = get_env_value("DISABLE_ROPC")
+    vars["ENABLE_ROPC"] = get_env_value("ENABLE_ROPC")
     vars["AUTH_ACCEPT_URL"] = get_env_value("AUTH_ACCEPT_URL")
 
     # test users (note that they must be all lowercase or keycloak setup fails):
