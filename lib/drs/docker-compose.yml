@@ -1,44 +1,39 @@
 services:
-  htsget:
+  drs:
     logging:
       driver: "fluentd"
       options:
         tag: "{{.Name}}"
     build:
-      context: $PWD/lib/htsget/htsget_app
+      context: $PWD/lib/drs/drs
       args:
         venv_python: "${VENV_PYTHON}"
-    image: ${DOCKER_REGISTRY}/htsget:${HTSGET_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/drs:${HTSGET_VERSION:-latest}
     labels:
-      - "candigv2=htsget"
+      - "candigv2=drs"
     volumes:
       - htsget-data:/data
     ports:
-      - "${HTSGET_PORT}:3000"
+      - "${DRS_PORT}:3001"
     secrets:
       - source: postgres-db-secret
         target: postgres-db-secret
     environment:
       HTSGET_TEST_KEY: "hoodlebug"
-      HTSGET_URL: ${TYK_LOGIN_TARGET_URL}/${TYK_HTSGET_API_LISTEN_PATH}
+      DRS_URL: ${TYK_LOGIN_TARGET_URL}/${TYK_DRS_API_LISTEN_PATH}
+      DRS_PRIVATE_URL: ${DRS_PRIVATE_URL}
       KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
       KEYCLOAK_AUTH_PREFIX: ${KEYCLOAK_AUTH_PREFIX}
       OPA_URL: ${OPA_PRIVATE_URL}
       VAULT_URL: ${VAULT_PRIVATE_URL}
-      DRS_URL: ${DRS_PRIVATE_URL}
       DEBUG_MODE: ${CANDIG_DEBUG_MODE}
       DB_PATH: "postgres-db"
-      SERVER_LOCAL_DATA: /app/htsget_server/data
-      INDEXING_PATH: /home/candig/tmp/indexer
-      INDEXING_SWITCH_FILE: /home/candig/indexer_on
-      SEARCH_PATH: /home/candig/tmp/search
+      SERVER_LOCAL_DATA: /app/drs_server/data
       TESTENV_URL: ${HTSGET_PRIVATE_URL}
       POSTGRES_DATABASE: "genomic"
       POSTGRES_HOST_FILE: "postgres-db"
       POSTGRES_USERNAME: ${DEFAULT_ADMIN_USER}
       POSTGRES_PASSWORD_FILE: "/run/secrets/postgres-db-secret"
-      AGGREGATE_COUNT_THRESHOLD: ${AGGREGATE_COUNT_THRESHOLD}
-      CURL_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt" # this is for pysam
       SERVICE_NAME: ${SERVICE_NAME}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
@@ -49,7 +44,7 @@ services:
           "CMD",
           "curl",
           "--fail",
-          "${HTSGET_PRIVATE_URL}/htsget/v1/reads/service-info",
+          "${DRS_PRIVATE_URL}/ga4gh/drs/v1/service-info",
         ]
       interval: 30s
       timeout: 10s
