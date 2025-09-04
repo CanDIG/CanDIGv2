@@ -72,7 +72,7 @@ class CustomHandler(http.server.BaseHTTPRequestHandler):
 def run(username, password, server_class=http.server.HTTPServer, handler_class=CustomHandler, refresh_token=True):
     global obtained_token
     obtained_token = ''
-    server_address = (ENV['CANDIG_ENV']['CANDIG_DOMAIN'], int(ENV['CANDIG_ENV']['AUTH_ACCEPT_PORT']))
+    server_address = ('0.0.0.0', int(ENV['CANDIG_ENV']['AUTH_ACCEPT_PORT']))
     httpd = server_class(server_address, handler_class)
 
     # We'll need to tell the user to access the Keycloak URL to login
