@@ -58,6 +58,32 @@ export REDIS_SECRET_KEY=$REDIS_SECRET_KEY_VAL
 
 mkdir -p $CONFIG_DIR $CONFIG_DIR/apps $CONFIG_DIR/policies $CONFIG_DIR/middleware
 
+export PROVIDERS="[
+            {
+                \"issuer\": \"${KEYCLOAK_ISSUER_URL}\",
+                \"client_ids\": {
+                    \"${KEYCLOAK_CLIENT_ID_64}\": \"${TYK_POLICY_ID}\"
+                }
+            }
+        ]"
+
+# Support older versions of bash
+OIDC_CHAIN_LOWERCASE=$(echo ${OIDC_CHAIN} | tr '[:upper:]' '[:lower:]')
+
+# Under client auth, we've got to also add the site admin client as well
+if [[ ${OIDC_CHAIN_LOWERCASE} = "client" ]]; then
+    export KEYCLOAK_SERVICE_CLIENT_ID_64=$(echo -n ${KEYCLOAK_SERVICE_CLIENT_ID} | base64)
+    export PROVIDERS="[
+            {
+                \"issuer\": \"${KEYCLOAK_ISSUER_URL}\",
+                \"client_ids\": {
+                    \"${KEYCLOAK_CLIENT_ID_64}\": \"${TYK_POLICY_ID}\",
+                    \"${KEYCLOAK_SERVICE_CLIENT_ID_64}\": \"${TYK_POLICY_ID}\"
+                }
+            }
+        ]"
+fi
+
 # Copy files from template configs
 
 echo "Working on tyk.conf"  | tee -a $LOGFILE
@@ -127,6 +153,21 @@ cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +
     "allowed_urls": [],
     "api_id": "${TYK_INGEST_API_ID}",
     "api_name": "${TYK_INGEST_API_SLUG}",
+    "versions": [
+        "Default"
+    ]
+}
+}
+' > lib/tyk/tmp/tmp_policies.json.tpl
+mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
+
+echo "Working on api_drs.json" | tee -a $LOGFILE
+envsubst < ${PWD}/lib/tyk/configuration_templates/api_drs.json.tpl > ${CONFIG_DIR}/apps/${TYK_DRS_API_ID}.json
+cat lib/tyk/tmp/policies.json.tpl | jq '.["${TYK_POLICY_ID}"]["access_rights"] +=
+{"${TYK_DRS_API_ID}": {
+    "allowed_urls": [],
+    "api_id": "${TYK_DRS_API_ID}",
+    "api_name": "${TYK_DRS_API_SLUG}",
     "versions": [
         "Default"
     ]

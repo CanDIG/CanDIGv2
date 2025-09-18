@@ -46,22 +46,49 @@ def test_keycloak():
 
 ## Can we get an access token for a user?
 def get_token(username=None, password=None, access_token=False):
-    payload = {
-        "client_id": ENV["CANDIG_CLIENT_ID"],
-        "client_secret": ENV["CANDIG_CLIENT_SECRET"],
-        "grant_type": "password",
-        "username": username,
-        "password": password,
-        "scope": "openid",
-    }
-    response = requests.post(
-        f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/{ENV['KEYCLOAK_REALM']}/protocol/openid-connect/token",
-        data=payload,
-    )
-    if response.status_code == 200:
-        if access_token:
-            return response.json()["access_token"]
-        return response.json()["refresh_token"]
+    if ENV['CANDIG_ENV']['OIDC_CHAIN'].lower() == "auth_code":
+        # ROPC disabled: Makefile should have queried the user
+        # and placed the tokens inside tmp/
+        with open(f"tmp/pytest-{username}-token", "r") as f:
+            refresh_token = f.read()
+
+        if not access_token:
+            return refresh_token
+
+        credentials = authx.auth.get_oauth_response(
+            keycloak_url=ENV["KEYCLOAK_PUBLIC_URL"],
+            client_id=ENV["CANDIG_CLIENT_ID"],
+            client_secret=ENV["CANDIG_CLIENT_SECRET"],
+            username=username,
+            password=password,
+            refresh_token=refresh_token
+            )
+        return credentials["access_token"]
+    elif ENV['CANDIG_ENV']['OIDC_CHAIN'].lower() == "client" and username == ENV["CANDIG_SITE_ADMIN_USER"]:
+        credentials = authx.auth.get_oauth_response(
+            keycloak_url=ENV["KEYCLOAK_PUBLIC_URL"],
+            client_id=ENV["KEYCLOAK_SERVICE_CLIENT_ID"],
+            client_secret=ENV["CANDIG_SERVICE_CLIENT_SECRET"],
+            client_account=True
+            )
+        return credentials["access_token"]
+    else:
+        payload = {
+            "client_id": ENV["CANDIG_CLIENT_ID"],
+            "client_secret": ENV["CANDIG_CLIENT_SECRET"],
+            "grant_type": "password",
+            "username": username,
+            "password": password,
+            "scope": "openid",
+        }
+        response = requests.post(
+            f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/{ENV['KEYCLOAK_REALM']}/protocol/openid-connect/token",
+            data=payload,
+        )
+        if response.status_code == 200:
+            if access_token:
+                return response.json()["access_token"]
+            return response.json()["refresh_token"]
 
 
 def test_get_token():
@@ -76,7 +103,7 @@ def test_tyk():
     }
     endpoints = {
         # all of these endpoints should return JSON
-        "htsget": f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/ga4gh/drs/v1/service-info",
+        "htsget": f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/htsget/v1/reads/service-info",
         "katsu": f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v3/service-info",
         "rnaget": f"{ENV['CANDIG_ENV']['TYK_RNAGET_API_LISTEN_PATH']}/service-info",
         "federation": f"federation/v1/service-info",
@@ -399,7 +426,7 @@ def clean_up_program_htsget(program_id):
         "Content-Type": "application/json; charset=utf-8",
     }
     delete_response = requests.delete(
-        f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/programs/{program_id}",
+        f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/programs/{program_id}",
         headers=headers
     )
     print(delete_response.text)
@@ -587,6 +614,7 @@ def test_ingest_not_admin_htsget():
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
 
     # when the user has program_curator role, they should be allowed
+    print(response.text)
     assert response.status_code == 201
     for program in response.json():
         results = response.json()[program]
@@ -706,7 +734,7 @@ def test_ingest_rnaget():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-counts", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-counts", headers=headers)
     assert response.status_code == 200
 
     assert "metadata" in response.json()
@@ -732,12 +760,12 @@ def test_index_success():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf", headers=headers)
     tries = 0
     print(response.json())
-    while response.status_code != 200 or "indexed" not in response.json() or response.json()['indexed'] != 1:
+    while response.status_code != 200 or "indexed" not in response.json()['metadata'] or response.json()['metadata']['indexed'] != 1:
         time.sleep(2)
-        response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf", headers=headers)
+        response = requests.get(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf", headers=headers)
         print(response.json())
         tries = tries + 1
         if tries > 120:
@@ -751,7 +779,7 @@ def test_index_success():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-test", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-test", headers=headers)
     assert "indexed" in response.json()
     print(response.json())
     assert response.json()['indexed'] == 1
@@ -764,7 +792,7 @@ def test_index_success():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_1", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_1", headers=headers)
     assert "indexed" in response.json()
     print(response.json())
     assert response.json()['indexed'] == 1
@@ -843,7 +871,7 @@ def test_verify_htsget(object_id, file_name, user, password):
         "Content-Type": "application/json; charset=utf-8",
     }
     # get a GenomicDataDrsObject
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects/{file_name}", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects/{file_name}", headers=headers)
     assert response.status_code == 200
     new_json = response.json()
 
@@ -857,7 +885,7 @@ def test_verify_htsget(object_id, file_name, user, password):
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
+    response = requests.post(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
 
     # verification should give us a False result
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{object_id}/verify", headers=headers)
@@ -866,7 +894,7 @@ def test_verify_htsget(object_id, file_name, user, password):
 
     # fix it back
     new_json["access_methods"][0]["access_url"]["url"] = old_url
-    response = requests.post(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
+    response = requests.post(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
 
     # verification should give us a True result
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{object_id}/verify", headers=headers)
@@ -880,7 +908,7 @@ def test_program_status():
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/ga4gh/drs/v1/programs/{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02/status", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/programs/{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02/status", headers=headers)
     assert "index_complete" in response.json()
     assert len(response.json()['index_complete']) > 0
 

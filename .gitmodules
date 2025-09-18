@@ -25,3 +25,6 @@
 [submodule "lib/rnaget/rnaget"]
 	path = lib/rnaget/rnaget
 	url = https://github.com/bento-platform/takuan.git
+[submodule "lib/drs/drs"]
+	path = lib/drs/drs
+	url = https://github.com/CanDIG/drs-service.git

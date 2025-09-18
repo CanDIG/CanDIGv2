@@ -5,12 +5,14 @@ import re
 import requests
 import subprocess
 import sys
+import uuid
 
 REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/../../..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
 
 from settings import get_env
 from site_admin_token import get_site_admin_token
+from authx.auth import get_access_token, verify_service_token
 
 ENV = get_env()
 
@@ -127,24 +129,80 @@ def test_all_service_info():
     assert all(response[server] == "ok" for response in responses for server in response)
 
 
+def get_keycloak_container():
+    # Find the docker container
+    docker_ps = subprocess.run(["docker", "ps"], capture_output=True)
+    split_docker = docker_ps.stdout.decode('utf8').split("\n")
+    container_name = ""
+    for container in split_docker:
+        if re.search(r"keycloak\/keycloak", container):
+            container_name = container.split()[-1]
+
+    assert container_name != "", "Could not find the keycloak/keycloak container"
+    return container_name
+
+
+def create_keycloak_client(client_id):
+    """
+
+    Create a new client in Keycloak directly using the Keycloak CLI.
+
+    Args:
+        client_id (str): The client_id for the new client
+
+    Returns:
+        client_secret
+    """
+    # Step 1: Get Keycloak admin token
+    with open(f"{REPO_DIR}/tmp/keycloak/admin-password") as f:
+        admin_pass = f.read()
+
+    container_name = get_keycloak_container()
+
+    # Run the commands to create the new client
+    # a. login as admin
+    run = subprocess.run(["docker", "exec", container_name, "/opt/keycloak/bin/kcadm.sh", "config", "credentials", "--server", f"{ENV["KEYCLOAK_PUBLIC_URL"]}/auth", "--user", "admin", "--password", admin_pass, "--realm", "master"])
+    assert run.returncode == 0, "Could not login as admin for into Keycloak"
+
+    # b. create the client
+    run = subprocess.run(["docker", "exec", container_name, "/opt/keycloak/bin/kcadm.sh",  "create", "clients", "-r", ENV["KEYCLOAK_REALM"], "-s", f"clientId=\"{client_id}\"", "-s", "enabled=true", "-s", "protocol=openid-connect", "-s", "publicClient=false", "-s", "clientAuthenticatorType=client-secret", "-s", "standardFlowEnabled=true"], capture_output=True, text=True)
+    assert run.returncode == 0, "Could not create user with the admin Keycloak session"
+    uuid_match = re.match(r".+'(.+)'", run.stderr)
+    client_uuid = uuid_match.group(1)
+
+    # Create client scopes
+    config = {
+        "included.client.audience" : f"{ENV["CANDIG_CLIENT_ID"]}",
+        "id.token.claim" : True,
+        "access.token.claim" : True
+    }
+    run = subprocess.run(["docker", "exec", container_name, "/opt/keycloak/bin/kcadm.sh", "create", f"clients/{client_uuid}/protocol-mappers/models", "-r", ENV["KEYCLOAK_REALM"], "-s", f"name={client_id}", "-s", "protocol=openid-connect", "-s", "protocolMapper=oidc-audience-mapper", "-s", f"config={json.dumps(config)}"], capture_output=True, text=True)
+    assert run.returncode == 0, "Could not create client with the admin Keycloak session"
+
+    run = subprocess.run(["docker", "exec", container_name, "/opt/keycloak/bin/kcadm.sh",  "get", f"clients/{client_uuid}/client-secret", "-r", ENV["KEYCLOAK_REALM"]], capture_output=True, text=True)
+
+    json_out = json.loads(run.stdout)
+    return json_out["value"]
+
+
 def create_keycloak_user(username, password, email, first_name, last_name):
     """
     Create a user in Keycloak directly using the Keycloak CLI.
-    
+
     Args:
         username (str): The username for the new user
         password (str): The password for the new user
         email (str): The email address for the new user
         first_name (str): The first name of the user
         last_name (str): The last name of the user
-    
+
     Returns:
         None
     """
     # Step 1: Get Keycloak admin token
     with open(f"{REPO_DIR}/tmp/keycloak/admin-password") as f:
         admin_pass = f.read()
-    
+
     # Step 2: Create user
     # NB: We can't use the usual OIDC flow to grab an admin token, because we
     # cannot retrieve the admin token without a client, and don't have one
@@ -153,15 +211,7 @@ def create_keycloak_user(username, password, email, first_name, last_name):
     # i.e. going through kcadm.sh. We had the code already for this in
     # keycloak_setup.sh and it's a pain to work with here so...
 
-    # Find the docker container
-    docker_ps = subprocess.run(["docker", "ps"], capture_output=True)
-    split_docker = docker_ps.stdout.decode('utf8').split("\n")
-    container_name = ""
-    for container in split_docker:
-        if re.search(r"keycloak\/keycloak", container):
-            container_name = container.split()[-1]
-    
-    assert container_name != "", "Coult not find the keycloak/keycloak container"
+    container_name = get_keycloak_container()
 
     # Run the commands to create the user
     # a. login as admin
@@ -242,7 +292,7 @@ def test_ingest_local_test_dataset():
     test_program = {
         "program_id": "TEST_FEDERATE",
         "program_curators": [],
-        "team_members": ["federated@test.ca"]
+        "team_members": [f"{os.getenv('QUERYING_LOCATION_ID')}_federated@test.ca"]
     }
 
     # Add the program
@@ -274,15 +324,27 @@ def test_ingest_local_test_dataset():
 ### RUN ONLY ON QUERYING SITE
 
 def test_querying_site_create_federated_user():
-    create_keycloak_user("federated@test.ca", "testfederation", "federated@test.ca", "federated", "test")
-    check_unauthorized_user("federated@test.ca", "testfederation")
-    approve_user_into_candig("federated@test.ca", "testfederation")
+    create_keycloak_user(
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated@test.ca",
+        "testfederation",
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated@test.ca",
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated",
+        "test"
+    )
+    check_unauthorized_user(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated@test.ca", "testfederation")
+    approve_user_into_candig(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated@test.ca", "testfederation")
 
 
 def test_querying_site__unfederated_curator():
-    create_keycloak_user("unfederated@test.ca", "testfederation", "unfederated@test.ca", "unfederated", "test")
-    check_unauthorized_user("unfederated@test.ca", "testfederation")
-    approve_user_into_candig("unfederated@test.ca", "testfederation")
+    create_keycloak_user(
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca",
+        "testfederation",
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca",
+        "unfederated",
+        "test"
+    )
+    check_unauthorized_user(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca", "testfederation")
+    approve_user_into_candig(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca", "testfederation")
 
 
 def test_querying_site_query_authorized_remote_test_dataset():
@@ -291,20 +353,20 @@ def test_querying_site_query_authorized_remote_test_dataset():
     """
     # Get token for 'federated@test.ca' user
     headers = {
-        "Authorization": f"Bearer {get_token('federated@test.ca', 'testfederation')}"
+        "Authorization": f"Bearer {get_token(f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_federated@test.ca', 'testfederation')}"
     }
     # Step 1: can we do a discovery query successfully to all sites?
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "discovery/programs",
         "payload": {},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query discovery endpoint failed with: {response.text}"
-    
+
     programs = set(())
     try:
         r = response.json()
@@ -321,13 +383,13 @@ def test_querying_site_query_authorized_remote_test_dataset():
     # Step 2: can we do a query and grab responses (only include the ones from the TEST_FEDERATE set)
     programs -= {"TEST_FEDERATE"}
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "query",
         "payload": {"exclude_programs": ",".join(programs)},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query authorized failed with: {response.text}"
     try:
@@ -336,8 +398,8 @@ def test_querying_site_query_authorized_remote_test_dataset():
         for server in r:
             assert server["status"] == 200, f"Server {server['location']['name']} failed with: {server['message']}"
             # NB: I do not currently ingest the federated dataset at the same location that the querying tests are run from
-            # There is no reason for this to be the case, other than for speed's sake. Thus, the local server will not have anything here
-            if server['location']['name'] != 'LOCAL':
+            # There is no reason for this to be the case, other than for speed's sake. Thus, the local (demo) server will not have anything here
+            if server['location']['name'] != ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']:
                 assert server["results"]["count"] == 24, f"Server {server['location']['name']} had a strange number of results in query"
     except requests.JSONDecodeError:
         assert False, f"Invalid JSON response: {response.text}"
@@ -349,21 +411,21 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
     """
     # Get unfederated@test.ca token
     headers = {
-        "Authorization": f"Bearer {get_token('unfederated@test.ca', 'testfederation')}"
+        "Authorization": f"Bearer {get_token(f'{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca', 'testfederation')}"
     }
 
     # Step 1: can we do a discovery query successfully to all sites?
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "discovery/programs",
         "payload": {},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query discovery endpoint failed with: {response.text}"
-    
+
     programs = set(())
     try:
         r = response.json()
@@ -380,13 +442,13 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
     # Step 2: can we do a query and fail to grab responses (only include the ones from the TEST_FEDERATE set)
     programs -= {"TEST_FEDERATE"}
     body = {
-        "method": "GET", 
+        "method": "GET",
         "path": "query",
         "payload": {"exclude_programs": ",".join(programs)},
         "service": "query"
     }
     response = make_fanout(headers, body)
-    
+
     # Verify response
     assert response.ok, f"Query authorized failed with: {response.text}"
     try:
@@ -396,7 +458,7 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
             assert server["status"] == 200, f"Server {server['location']['name']} failed with: {server['message']}"
 
             # Ensure that we do not have access to this dataset
-            assert len(server["results"]["results"]) == 0, f"Server {server['location']['name']} improperly authorized unfederated@test.ca"
+            assert len(server["results"]["results"]) == 0, f"Server {server['location']['name']} improperly authorizedf {ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}_unfederated@test.ca"
     except requests.JSONDecodeError:
         assert False, f"Invalid JSON response: {response.text}"
 
@@ -442,3 +504,46 @@ def test_remove_servers():
     results = response.json()
     print(results)
     assert len(results) == 1, "More than one server found after removing every server"
+
+
+def test_create_client():
+    client_id = uuid.uuid4()
+    client_secret = create_keycloak_client(client_id)
+
+    username = ENV["CANDIG_NOT_ADMIN_USER"]
+    password = ENV["CANDIG_NOT_ADMIN_PASSWORD"]
+
+    user_token = get_access_token(
+        client_id=client_id,
+        client_secret=client_secret,
+        username=username,
+        password=password
+    )
+
+
+    headers = {
+        "Authorization": f"Bearer {get_site_admin_token()}"
+    }
+
+    body = {
+        "service": "bitnobi",
+        "authentication": {
+            "token": user_token,
+            "issuer": "http://candig.docker.internal:8080/auth/realms/candig"
+        }
+    }
+
+    response = requests.post(
+        url=f"{ENV['CANDIG_URL']}/federation/v1/external-service",
+        headers=headers,
+        json=body
+    )
+    assert response.status_code == 201
+
+    assert verify_service_token(service="bitnobi", token=user_token)
+
+    response = requests.delete(
+        url=f"{ENV['CANDIG_URL']}/federation/v1/external-service/bitnobi",
+        headers=headers,
+    )
+    assert response.status_code == 200
