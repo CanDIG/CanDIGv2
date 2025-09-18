@@ -1,3 +1,7 @@
+# 🚧 Playwright tests are temporarily disabled
+# Reason: Test user accounts (username/email) have changed, and the environment is out of sync. https://github.com/CanDIG/CanDIGv2/pull/1130
+# These tests will remain disabled until maintenance resumes and Playwright is updated
+
 name: Test-CanDIG-build
 run-name: Build Validation
 on:
@@ -92,37 +96,37 @@ jobs:
                 tmp/ingest
                 tmp/index
 
-      - name: Clone CanDIG Playwright Runbook
-        run: git clone --branch develop https://github.com/CanDIG/playwright-runbook.git
+#       - name: Clone CanDIG Playwright Runbook
+#         run: git clone --branch develop https://github.com/CanDIG/playwright-runbook.git
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: lts/*
 
-      - name: Install Playwright dependencies
-        run: |
-          cd playwright-runbook
-          npm ci
-          npx playwright install --with-deps
+#       - name: Install Playwright dependencies
+#         run: |
+#           cd playwright-runbook
+#           npm ci
+#           npx playwright install --with-deps
 
-      - name: Create .env file for Playwright
-        run: |
-          CANDIG_PASSWORD=$(cat tmp/keycloak/test-user2-password)
-          echo "CANDIG_URL=http://candig.docker.internal:5080/" > playwright-runbook/.env
-          echo "CANDIG_USERNAME=local_user2@test.ca" >> playwright-runbook/.env
-          echo "CANDIG_PASSWORD=${CANDIG_PASSWORD}" >> playwright-runbook/.env
-          echo "Created playwright-runbook/.env with dynamic password"
-          cat playwright-runbook/.env
+#       - name: Create .env file for Playwright
+#         run: |
+#           CANDIG_PASSWORD=$(cat tmp/keycloak/test-user2-password)
+#           echo "CANDIG_URL=http://candig.docker.internal:5080/" > playwright-runbook/.env
+#           echo "CANDIG_USERNAME=local_user2@test.ca" >> playwright-runbook/.env
+#           echo "CANDIG_PASSWORD=${CANDIG_PASSWORD}" >> playwright-runbook/.env
+#           echo "Created playwright-runbook/.env with dynamic password"
+#           cat playwright-runbook/.env
 
-      - name: Run Playwright tests
-        run: |
-          cd playwright-runbook
-          npx playwright test --project=ui
+#       - name: Run Playwright tests
+#         run: |
+#           cd playwright-runbook
+#           npx playwright test --project=ui
 
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: playwright-runbook/playwright-report/
-          retention-days: 30
+#       - uses: actions/upload-artifact@v4
+#         if: ${{ !cancelled() }}
+#         with:
+#           name: playwright-report
+#           path: playwright-runbook/playwright-report/
+#           retention-days: 30
