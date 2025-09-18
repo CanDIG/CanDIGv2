@@ -85,3 +85,20 @@ curl -X 'GET' \
 While ingest is processing, you will see a message `"status": "still in queue"`.
 
 If you get a message such as `"no such sample": "sample SAMPLE_0600 does not exist in clinical data'` this means the sample the file is linking to cannot be found in the currently ingested clinical data. Please ensure you have ingested all samples being referred to in the genomic json file before attempting ingest.
+
+
+## Genomic processing times
+Queues will complete and genomic files will be ingested into CanDIG (appearing in the Data Portal UI) fairly quickly (~7K files in about 30 mins).  However, the indexing of files and creating the hundreds of millions of database rows is a fairly slow process (~7K files in about 6 days, or about 1K files per day).  To monitor indexing and confirm completion, use the following psql commands (assuming variant file indexing occurs at the same time as alignment file indexing):
+
+```bash
+select indexed, count(indexed) from variantfile group by indexed;
+```
+
+Or, get approximate table sizes and monitor table them to see when the tables are no longer growing:
+```bash
+SELECT relname AS table_name, n_live_tup AS estimated_row_count
+FROM pg_stat_user_tables
+ORDER BY table_name;
+```
+
+Take note especially of the pos_bucket_variantfile_association table where most of the inserts are performed.
