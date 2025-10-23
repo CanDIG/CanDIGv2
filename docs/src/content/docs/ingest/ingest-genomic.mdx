@@ -1,8 +1,9 @@
 ---
 title: Ingest genomic data
 description: How to link clinical and genomic data through ingest
-tableOfContents: false
+tableOfContents: true
 ---
+import { Aside } from '@astrojs/starlight/components';
 
 It is preferred to use the API to post the genomic JSON as a body to the `/ingest/ingest` endpoint.
 
@@ -87,8 +88,67 @@ While ingest is processing, you will see a message `"status": "still in queue"`.
 If you get a message such as `"no such sample": "sample SAMPLE_0600 does not exist in clinical data'` this means the sample the file is linking to cannot be found in the currently ingested clinical data. Please ensure you have ingested all samples being referred to in the genomic json file before attempting ingest.
 
 
-## Genomic processing times
-Queues will complete and genomic files will be ingested into CanDIG (appearing in the Data Portal UI) fairly quickly (~7K files in about 30 mins).  However, the indexing of files and creating the hundreds of millions of database rows is a fairly slow process (~7K files in about 6 days, or about 1K files per day).  To monitor indexing and confirm completion, use the following psql commands (assuming variant file indexing occurs at the same time as alignment file indexing):
+## Checking file indexing progress
+
+Queues will complete and genomic files will be ingested into CanDIG (appearing in the Data Portal UI) fairly quickly (~7K files in about 30 mins).  However, the indexing of files and creating the hundreds of millions of database rows is a fairly slow process (~7K files in about 6 days, or about 1K files per day).  
+
+There are several ways you can monitor the indexing queue and ensure that indexing is proceeding as expected.
+
+### 1. Looking at the htsget logs
+
+The htsget logs can be inspected when you are logged into the virtual machine where the CanDIG stack is running with the following command:
+
+```bash
+docker logs candigv2_htsget_1 --since 30m
+```
+You should be able to find messages relating to indexing that are similar to the lines below:
+
+```bash
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'local-test starting indexing'}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'local-test indexed 71 headers'}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'local-test indexed 2 samples in file'}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'local-test writing 6 entries to db'}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'local-test indexing done'}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': {'message': 'Indexing complete for variantfile local-test'}}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'indexing local-SYNTH_01~local-multisample_2, 4 files left in indexing queue. For full list of files to index, run: `docker exec candigv2_htsget_1 ls /home/candig/tmp/indexer`'}
+```
+
+<Aside type="tip" >
+If indexing is not proceeding as you expect, you can check your indexer status and try turning the indexer off and on again with
+```bash
+curl --request POST \
+  --url "$CANDIG_URL/genomics/htsget/v1/indexer?status=OFF" \
+  --header "Authorization: Bearer "$TOKEN
+```
+```bash
+curl --request POST \
+  --url "$CANDIG_URL/genomics/htsget/v1/indexer?status=ON" \
+  --header "Authorization: Bearer "$TOKEN
+```
+If indexing does not start, follow the steps in 2. to check your indexing queue
+</Aside>
+
+
+### 2. Checking the file queue in the htsget container
+
+The indexer works through a queue of text files that are stored in the htsget container. If this folder is empty, it either means that indexing is complete, or something went wrong and no files were added to the queue.
+
+To check the queue run the command:
+
+```bash
+docker exec candigv2_htsget_1 ls ../../home/candig/tmp/indexer
+```
+
+or to simply count the files in the folder:
+
+```bash
+docker exec candigv2_htsget_1 ls ../../home/candig/tmp/indexer | wc -l
+```
+
+
+### 3. Accessing the genomic Postgres database
+
+To monitor indexing and confirm completion, use the following psql commands (assuming variant file indexing occurs at the same time as alignment file indexing):
 
 ```bash
 select indexed, count(indexed) from variantfile group by indexed;
