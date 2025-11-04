@@ -39,5 +39,64 @@ curl -s --request POST \
  -H 'accept: application/json' \
  -H 'Content-Type: application/json' \
  -H 'Authorization: Bearer '$TOKEN \
- -d '{"program_id": "SYNTH_03", "program_curators": ["user2@test.ca"], "team_members": []}'
+ -d '{"program_id": "local-SYNTH_03", "program_curators": ["user2@local-test.ca"], "team_members": []}'
+```
+
+:::danger
+This API call REPLACES the program registration that is currently in the system (if one already exists)
+If you are modifying a program registration that already exists, it is important to first GET the current program registration, and modify it before POSTing the updated registration
+:::
+
+As an example, if you had previously submitted the program registration above, and you then want to ADD `user1@local-test.ca` as a team member to the program `local-SYNTH_03`, you would first GET the current registration with this curl call:
+
+```bash
+curl -s --request GET \
+ --url $CANDIG_URL'/ingest/program/local-SYNTH_03' \
+ -H 'accept: application/json' \
+ -H 'Content-Type: application/json' \
+ -H 'Authorization: Bearer '$TOKEN 
+```
+
+ Your response would be:
+
+ ```bash
+ {
+  "date_created": "2025-11-04",
+  "program_curators": [
+    "user2@local-test.ca"
+  ],
+  "program_id": "local-SYNTH_03",
+  "team_members": []
+}
+ ```
+
+You would then copy and modify the program registration and POST the updated registration:
+
+```bash
+curl -s --request POST \
+ --url $CANDIG_URL'/ingest/program' \
+ -H 'accept: application/json' \
+ -H 'Content-Type: application/json' \
+ -H 'Authorization: Bearer '$TOKEN \
+ -d '{"program_id": "local-SYNTH_03", "program_curators": ["user2@local-test.ca"], "team_members": ["user1@local-test.ca"]}'
+```
+
+And you should get the response with `user2` as a program curator and `user1` as a team member:
+
+```bash
+{
+  "local-SYNTH_03": {
+    "date_created": "2025-11-04",
+    "program_curators": [
+      "user2@local-test.ca"
+    ],
+    "program_id": "local-SYNTH_03",
+    "team_members": [
+      "user1@local-test.ca"
+    ]
+  },
+  "warnings": [
+    "Default site administrator site_admin@local-test.ca is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
+  ]
+}
 ```
