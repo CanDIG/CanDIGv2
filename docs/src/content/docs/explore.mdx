@@ -1,0 +1,32 @@
+---
+title: Explore the CanDIG data portal
+description: Guide to using the CanDIG data portal.
+template: splash
+prev: false
+next: false
+---
+
+import { Icon } from 'astro-icon/components';
+import { Steps } from '@astrojs/starlight/components';
+
+import { LinkCard, Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+	<LinkCard 
+		title="Overview of Summary dashboard" 
+		href="summary"
+		description="Intro to the summary dashboard"
+	/>
+	<LinkCard 
+		title="Querying in CanDIG"
+		href="clinical-genomic-search"
+		description="How to query in CanDIG."
+	/>
+	<LinkCard 
+		title="Completeness"
+		href="completeness"
+		description="Explanation of completeness in CanDIG"
+	/>
+</CardGrid>
+
+Coming soon!
