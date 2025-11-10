@@ -84,7 +84,7 @@ export default defineConfig({
         {
                 base: 'technical/federation-api',
                 label: 'federation api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/federation_service/refs/heads/develop/candig_federation/federation.yaml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/federation_service/refs/heads/stable/candig_federation/federation.yaml',
                 collapsed: true
             },
         ])
@@ -97,6 +97,7 @@ export default defineConfig({
                 { label: 'Deploy', slug: 'deployment/local' },
                 { label: 'Submit', slug: 'ingest' },
                 { label: 'User Roles', slug: 'user-roles' },
+                { label: 'Explore', slug: 'explore' },
                 { label: 'Technical', slug: 'technical'}
             ]
         },
@@ -133,6 +134,21 @@ export default defineConfig({
                         'ingest/prepare-genomic',
                         'ingest/ingest-genomic',
                         'ingest/ingest-help',
+                    ]
+                }
+            ],
+        },
+        {
+            label: 'Explore',
+            items: [
+                // Each item here is one entry in the navigation menu.
+                { 
+                    label: 'Exploring data on the portal', 
+                    items: 
+                    [
+                        'explore/summary',
+                        'explore/clinical-genomic-search',
+                        'explore/completeness' 
                     ]
                 }
             ],
