@@ -509,15 +509,22 @@ def test_ingest_not_admin_katsu():
 def test_ingest_admin_katsu():
     """Test whether an admin can ingest each of the synthetic data programs can be ingested and add the expected
     program authorizations."""
-    katsu_response = requests.get(
-        f"{ENV['CANDIG_ENV']['KATSU_INGEST_URL']}/v3/discovery/programs/"
+    token = get_token(
+        username=ENV["CANDIG_NOT_ADMIN2_USER"],
+        password=ENV["CANDIG_NOT_ADMIN2_PASSWORD"],
     )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    query_response = requests.get(
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/discovery/programs", headers=headers)
     programs = ['SYNTH_01', 'SYNTH_02', 'SYNTH_03', 'SYNTH_04']
     programs = [ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']+ "-" + p for p in programs]
-    if katsu_response.status_code == 200:
-        katsu_programs = [x['program_id'] for x in katsu_response.json()]
-        for program in programs:
-            if program in katsu_programs:
+    if query_response.status_code == 200:
+        query_programs = [x['program_id'] for x in query_response.json()['programs']]
+        for program in query_programs:
+            if program in programs:
                 print(f"cleaning up {program}")
                 clean_up_program(program)
 
@@ -531,7 +538,7 @@ def test_ingest_admin_katsu():
         test_data = json.load(f)
 
     # no program auth: should fail
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest", headers=headers, json=test_data)
     print(response.text)
     assert response.status_code != 200
 
@@ -539,7 +546,7 @@ def test_ingest_admin_katsu():
         add_program_authorization(program, [], team_members=[])
 
     print(f"Sending {programs} clinical data to katsu...")
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/clinical", headers=headers, json=test_data)
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest", headers=headers, json=test_data)
     print(f"Ingest response code: {response.status_code}")
     try:
         queue_id = response.json()["queue_id"]

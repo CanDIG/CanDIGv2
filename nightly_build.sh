@@ -86,4 +86,6 @@ export TOKEN=$(python site_admin_token.py)
 
 cd $BUILD_PATH
 
-PostToSlack "\`\`\`Build success:\nhttp://candig-dev.hpc4healthlocal:5080/\nusername: user2\npassword $(cat ./tmp/secrets/keycloak-test-user2-password)\`\`\`"
+PostToSlack "\`\`\`\nBuild success:\n$TYK_LOGIN_TARGET_URL\nusername: $CANDIG_SITE_ADMIN_USER\npassword $CANDIG_SITE_ADMIN_PASSWORD\nusername: $CANDIG_NOT_ADMIN_USER\npassword $CANDIG_NOT_ADMIN_PASSWORD\nusername: $CANDIG_NOT_ADMIN2_USER\npassword $CANDIG_NOT_ADMIN2_PASSWORD\n\`\`\`"
+FEDERATE_STRING="federate $TOKEN|$CANDIG_CLIENT_ID|$CANDIG_URL|$CANDIG_CLIENT_ID|ON|ca-on|$FEDERATION_SELF_SERVER_ID|$KEYCLOAK_PUBLIC_URL/auth/realms/$KEYCLOAK_REALM"
+PostToSlack "\`\`\`$FEDERATE_STRING\`\`\`"
