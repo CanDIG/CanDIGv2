@@ -28,15 +28,25 @@ def get_site_admin_token(username=None, password=None, refresh_token=None):
                 refresh_token = auth_code_acceptor.run(username, password)
     try:
         is_client_auth = ENV['CANDIG_ENV']['OIDC_CHAIN'].lower() == "client"
-        credentials = authx.auth.get_oauth_response(
-            keycloak_url=ENV["KEYCLOAK_PUBLIC_URL"],
-            client_id=ENV["CANDIG_CLIENT_ID"] if not is_client_auth else ENV["KEYCLOAK_SERVICE_CLIENT_ID"],
-            client_secret=ENV["CANDIG_CLIENT_SECRET"] if not is_client_auth else ENV["CANDIG_SERVICE_CLIENT_SECRET"],
-            username=username,
-            password=password,
-            refresh_token=refresh_token,
-            client_account=is_client_auth
-            )
+        if is_client_auth:
+            credentials = authx.auth.get_oauth_response(
+                keycloak_url=ENV["KEYCLOAK_PUBLIC_URL"],
+                client_id=ENV["KEYCLOAK_SERVICE_CLIENT_ID"],
+                client_secret=ENV["CANDIG_SERVICE_CLIENT_SECRET"],
+                username=username,
+                password=password,
+                refresh_token=refresh_token,
+                client_account=is_client_auth
+                )
+        else:
+            credentials = authx.auth.get_oauth_response(
+                keycloak_url=ENV["KEYCLOAK_PUBLIC_URL"],
+                client_id=ENV["CANDIG_CLIENT_ID"],
+                client_secret=ENV["CANDIG_CLIENT_SECRET"],
+                username=username,
+                password=password,
+                refresh_token=refresh_token
+                )
 
         if "error" in credentials:
             try:
