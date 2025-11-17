@@ -24,5 +24,5 @@ create_user_and_set_password "$CANDIG_NOT_ADMIN2_USER" "$(cat tmp/keycloak/test-
 # Support older versions of bash
 OIDC_CHAIN_LOWERCASE=$(echo ${OIDC_CHAIN} | tr '[:upper:]' '[:lower:]')
 if [ "${OIDC_CHAIN_LOWERCASE}" != "client" ]; then
-    create_user_and_set_password "$DEFAULT_SITE_ADMIN_USER" "$(cat tmp/keycloak/test-site-admin-password)" "$DEFAULT_SITE_ADMIN_USER" "Site" "Admin"
+    create_user_and_set_password "$CANDIG_SITE_ADMIN_USER" "$(cat tmp/keycloak/test-site-admin-password)" "$CANDIG_SITE_ADMIN_USER" "Site" "Admin"
 fi

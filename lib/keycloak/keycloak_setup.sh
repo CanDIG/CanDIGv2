@@ -4,6 +4,7 @@
 # to setup realms, clients, and users for candig services.
 
 set -euo pipefail
+source env.sh
 
 # Terminal colors
 RED='\033[0;31m'
