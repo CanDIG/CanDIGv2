@@ -3,7 +3,7 @@ title: Interacting with the stack using Make
 description: A guide to using make commands to interact with the stack
 ---
 
-The [Makefile](Makefile) contains a number of make targets that make interacting the stack more user-friendly. All Makefile commands need to be run from the root directory of the CanDIGv2 repo.
+The `Makefile` contains a number of make targets that make interacting the stack more user-friendly. All Makefile commands need to be run from the root directory of the CanDIGv2 repo.
 
 ## Stopping services
 
@@ -133,11 +133,11 @@ make clean-volumes
 make clean-images
 ```
 
-See the [Makefile](../Makefile) for the exact commands that each of these targets runs.
+See the `Makefile` for the exact commands that each of these targets runs.
 
 ## Rebuild entire stack from scratch
 
-1. Perform any backups of data necessary if in a non-testing environment. (see [backup and restore doc](backup-restore-candig.md) for detailed instructions.)
+1. Perform any backups of data necessary if in a non-testing environment. (see [backup and restore doc](/deployment/backup-restore-candig) for detailed instructions.)
 
 2. Clean up the current containers with `make clean-all`
 
