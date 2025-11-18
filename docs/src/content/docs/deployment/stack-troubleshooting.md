@@ -161,3 +161,4 @@ ECS_IP_ADDR=127.0.0.1
 ```
 
 If you need more than one hosts entry for this, you can edit the `extra_hosts` entries in `lib/htsget/docker-compose.yml` and `lib/candig-ingest/docker-compose.yml`.
+

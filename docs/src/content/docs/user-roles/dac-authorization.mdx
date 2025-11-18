@@ -46,11 +46,11 @@ TOKEN=ey-pasted-jwt
 The dates in the request must be in `YYYY-MM-DD` format.
 :::
 
-An example request that grants `user2@test.ca` access to `LOCAL-SYNTH_01` starting 28th February 2025 and expiring 28th February 2026 might look like:
+An example request that grants `user2@local-test.ca` access to `local-SYNTH_01` starting 28th February 2025 and expiring 28th February 2026 might look like:
 
 ```bash
 curl --request POST \
-  --url $CANDIG_URL'/ingest/user/user2@test.ca/dac_authorization' \
+  --url $CANDIG_URL'/ingest/user/user2@local-test.ca/dac_authorization' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer '$TOKEN \
@@ -59,11 +59,24 @@ curl --request POST \
 
 The return from a successful request will include all the dac_authorizations for the user and should include the one that was submitted.
 
-:::note
+:::caution
 If you submit a subsequent `dac_authorization` for the same user and program, it will replace the information stored in the system.
 :::
 
 When logging in, the user will now have access to the given program(s) during the given time period.
+
+:::note
+You can submit DAC authorizations for multiple programs for a user with one call by specifying an array of DAC authorizations, e.g.:
+```bash
+curl --request POST \
+  --url $CANDIG_URL'/ingest/user/user2@local-test.ca/dac_authorization' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '[{"program_id": "local-SYNTH_01", "start_date": "2025-02-05", "end_date": "2026-02-05"}, 
+       {"program_id": "local-SYNTH_03", "start_date": "2025-02-05", "end_date": "2026-02-05"}]'
+```
+:::
 
 ## Revoke a DAC Authorization <Badge text="Site admin" variant="caution" />
 
@@ -94,14 +107,50 @@ TOKEN=ey-pasted-jwt
 
 2. Use the `DELETE` method on the `/user/{user_id}/dac_authorization/{program_id}` endpoint
 
-An example request that deletes `user2@test.ca`'s access to program `LOCAL-SYNTH_01` would look like:
+An example request that deletes `user2@local-test.ca`'s access to program `local-SYNTH_01` would look like:
 
 ```bash
 curl --request DELETE \
-  --url $CANDIG_URL'/ingest/user/user2@test.ca/dac_authorization/LOCAL-SYNTH_01' \
+  --url $CANDIG_URL'/ingest/user/user2@local-test.ca/dac_authorization/local-SYNTH_01' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer '$TOKEN
 ```
 
 The return will show all the `dac_authorizations` for the user, the deleted one should have been removed. The user will no longer be able to access the clinical and genomic data for that program.
+
+
+## View the DAC Authorizations for a program
+
+The current DAC authorizations for a program can be viewed using the `ingest/program` endpoint
+
+```bash
+curl --request GET \
+ --url $CANDIG_URL'/ingest/program/local-SYNTH_03' \
+ -H 'accept: application/json' \
+ -H 'Content-Type: application/json' \
+ -H 'Authorization: Bearer '$TOKEN 
+```
+
+The listing of DAC authorizations for the program will be listed in the response under the `dac_authorizations` key. Something like:
+
+```bash
+{
+  "dac_authorizations": {
+    "user1@local-test.ca": {
+      "end_date": "2026-02-05",
+      "program_id": "local-SYNTH_03",
+      "start_date": "2025-02-05"
+    },
+    "user2@local-test.ca": {
+      "end_date": "2026-02-05",
+      "program_id": "local-SYNTH_03",
+      "start_date": "2025-02-05"
+    }
+  },
+  "date_created": "2025-11-06",
+  "program_curators": [],
+  "program_id": "local-SYNTH_03",
+  "team_members": []
+}
+```

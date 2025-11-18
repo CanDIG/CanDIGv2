@@ -1,16 +1,17 @@
 ---
 title: Ingest genomic data
 description: How to link clinical and genomic data through ingest
-tableOfContents: false
+tableOfContents: true
 ---
+import { Aside } from '@astrojs/starlight/components';
 
-It is preferred to use the API to post the genomic JSON as a body to the `/ingest/ingest` endpoint.
+Now that you have a genomic JSON that is ready for ingest, it can be POSTed as a body to the `/ingest/ingest` endpoint.
 
 :::caution
 Genomic data cannot be ingested until the clinical data that the genomic files link to is complete. Please ensure clinical ingest is complete before attempting ingest.
 :::
 
-The format of the ingest request is specified by the SequencingIngest schema in candigv2-ingest. The schema specifies two types of objects:
+The format of the ingest request is specified by the [`SequencingIngest`](https://github.com/CanDIG/candigv2-ingest/blob/bfa5d3dcdb987d8324e6c09de72db9316e2bb48c/ingest_openapi.yaml#L646) schema in [`candigv2-ingest`](https://github.com/CanDIG/candigv2-ingest). The schema specifies two types of objects:
   * Experiments link the sequencing centre's names with the MoHCCN clinical data's Sample Registration identifiers
   * Analyses describe the particular downstream analysis performed, along with the files associated with the analysis.
 
@@ -85,3 +86,89 @@ curl -X 'GET' \
 While ingest is processing, you will see a message `"status": "still in queue"`.
 
 If you get a message such as `"no such sample": "sample SAMPLE_0600 does not exist in clinical data'` this means the sample the file is linking to cannot be found in the currently ingested clinical data. Please ensure you have ingested all samples being referred to in the genomic json file before attempting ingest.
+
+
+## Checking file indexing progress
+
+Ingest of the linkage between the clinical data and existence of the genomic/transcriptomic files completes fairly quickly and will be ingested into CanDIG (~7K files in about 30 mins).  However, in order to facilitate searching, variant files need to be indexed which creates hundreds of millions of database rows and is a fairly slow process (~7K files in about 6 days, or about 1K files per day). 
+
+There are several ways you can monitor the indexing queue and ensure that indexing is proceeding as expected.
+
+### 1. Looking at the htsget logs
+
+The htsget logs can be inspected when you are logged into the virtual machine where the CanDIG stack is running with the following command:
+
+```bash
+docker logs candigv2_htsget_1 --since 30m
+```
+You should be able to find messages relating to indexing that are similar to the lines below:
+
+```bash
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'local-test starting indexing'}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'local-test indexed 71 headers'}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'local-test indexed 2 samples in file'}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'local-test writing 6 entries to db'}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'local-test indexing done'}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': {'message': 'Indexing complete for variantfile local-test'}}
+level: INFO, file: /app/htsget_server/htsget_server/indexing.py, log: {'message': 'indexing local-SYNTH_01~local-multisample_2, 4 files left in indexing queue. For full list of files to index, run: `docker exec candigv2_htsget_1 ls /home/candig/tmp/indexer`'}
+```
+
+<Aside type="tip" >
+If indexing is not proceeding as you expect, you can check your indexer status and try turning the indexer off and on again with
+```bash
+curl --request POST \
+  --url "$CANDIG_URL/genomics/htsget/v1/indexer?status=OFF" \
+  --header "Authorization: Bearer "$TOKEN
+```
+```bash
+curl --request POST \
+  --url "$CANDIG_URL/genomics/htsget/v1/indexer?status=ON" \
+  --header "Authorization: Bearer "$TOKEN
+```
+If indexing does not start, follow the steps in 2. to check your indexing queue
+</Aside>
+
+
+### 2. Checking the file queue in the htsget container
+
+The indexer works through a queue of text files that are stored in the htsget container. If this folder is empty, it either means that indexing is complete, or something went wrong and no files were added to the queue.
+
+To check the queue run the command:
+
+```bash
+docker exec candigv2_htsget_1 ls ../../home/candig/tmp/indexer
+```
+
+or to simply count the files in the folder:
+
+```bash
+docker exec candigv2_htsget_1 ls ../../home/candig/tmp/indexer | wc -l
+```
+
+
+## 3. Checking a program's indexing status
+
+You can check the overall progress of all files on a program-by-program basis using the following call:
+
+```bash
+curl --request GET \
+  --url $CANDIG_URL'/drs/ga4gh/drs/v1/programs/'$PROGRAM_ID'/status' \
+  --header 'Authorization: Bearer '$TOKEN
+```
+
+And you will get a response back like:
+
+```bash
+curl --request GET \
+  --url http://candig.docker.internal:5080/drs/ga4gh/drs/v1/programs/local-SYNTH_01/status \
+  --header 'Authorization: Bearer TOKEN'
+{
+	"index_complete": [
+		"drs://candig.docker.internal:5080/drs/local-test",
+		"drs://candig.docker.internal:5080/drs/local-multisample_2",
+		"drs://candig.docker.internal:5080/drs/local-HG02102-all"
+	],
+	"index_errored": [],
+	"index_in_progress": []
+}
+```

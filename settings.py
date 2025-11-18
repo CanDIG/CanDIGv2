@@ -49,6 +49,7 @@ def get_env():
     vars["KEYCLOAK_REALM_URL"] = get_env_value("KEYCLOAK_REALM_URL")
     vars["KEYCLOAK_ISSUER_URL"] = get_env_value("KEYCLOAK_ISSUER_URL")
     vars["KEYCLOAK_REALM"] = get_env_value("KEYCLOAK_REALM")
+    vars["KEYCLOAK_LOGIN_REDIRECT_PATH"] = get_env_value("KEYCLOAK_LOGIN_REDIRECT_PATH")
     vars["DEFAULT_ADMIN_USER"] = get_env_value("DEFAULT_ADMIN_USER")
     vars["VAULT_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
     vars["OPA_URL"] = get_env_value("OPA_URL")
@@ -61,6 +62,9 @@ def get_env():
     if os.path.isfile("tmp/keycloak/client-secret"):
         with open("tmp/keycloak/client-secret") as f:
             vars["CANDIG_CLIENT_SECRET"] = f.read().splitlines().pop()
+    if os.path.isfile("tmp/keycloak/service-client-secret"):
+        with open("tmp/keycloak/service-client-secret") as f:
+            vars["CANDIG_SERVICE_CLIENT_SECRET"] = f.read().splitlines().pop()
     if os.path.isfile("tmp/vault/keys.txt"):
         with open("tmp/vault/keys.txt") as f:
             vars["VAULT_ROOT_TOKEN"] = f.read().splitlines().pop(-1)
@@ -72,10 +76,13 @@ def get_env():
     vars["DB_PATH"] = "postgres-db"
     vars["FEDERATION_SELF_SERVER_ID"] = get_env_value("FEDERATION_SELF_SERVER_ID")
     vars["CANDIG_SITE_LOCATION"] = get_env_value("CANDIG_SITE_LOCATION")
+    vars["OIDC_CHAIN"] = get_env_value("OIDC_CHAIN").lower()
+    vars["KEYCLOAK_SERVICE_CLIENT_ID"] = get_env_value("KEYCLOAK_SERVICE_CLIENT_ID").lower()
+    vars["AUTH_ACCEPT_URL"] = get_env_value("AUTH_ACCEPT_URL")
 
-    # test users:
+    # test users (note that they must be all lowercase or keycloak setup fails):
     if get_env_value("DEFAULT_SITE_ADMIN_USER") is not None:
-        vars["CANDIG_SITE_ADMIN_USER"] = get_env_value("DEFAULT_SITE_ADMIN_USER")
+        vars["CANDIG_SITE_ADMIN_USER"] = get_env_value("DEFAULT_SITE_ADMIN_USER").lower()
         if os.path.isfile("tmp/keycloak/test-site-admin-password"):
             with open("tmp/keycloak/test-site-admin-password") as f:
                 vars["CANDIG_SITE_ADMIN_PASSWORD"] = f.read().splitlines().pop()
@@ -83,12 +90,12 @@ def get_env():
         vars["CANDIG_SITE_ADMIN_USER"] = ""
         vars["CANDIG_SITE_ADMIN_PASSWORD"] = ""
 
-    vars["CANDIG_NOT_ADMIN_USER"] = get_env_value("TEST_USER_1")
+    vars["CANDIG_NOT_ADMIN_USER"] = get_env_value("TEST_USER_1").lower()
     if os.path.isfile("tmp/keycloak/test-user-password"):
         with open("tmp/keycloak/test-user-password") as f:
             vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
 
-    vars["CANDIG_NOT_ADMIN2_USER"] = get_env_value("TEST_USER_2")
+    vars["CANDIG_NOT_ADMIN2_USER"] = get_env_value("TEST_USER_2").lower()
     if os.path.isfile("tmp/keycloak/test-user2-password"):
         with open("tmp/keycloak/test-user2-password") as f:
             vars["CANDIG_NOT_ADMIN2_PASSWORD"] = f.read().splitlines().pop()
