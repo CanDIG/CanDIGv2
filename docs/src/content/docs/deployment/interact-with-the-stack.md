@@ -137,7 +137,7 @@ See the `Makefile` for the exact commands that each of these targets runs.
 
 ## Rebuild entire stack from scratch
 
-1. Perform any backups of data necessary if in a non-testing environment. (see [backup and restore doc](/deployment/backup-restore-candig) for detailed instructions.)
+1. Perform any backups of data necessary if in a non-testing environment. (see [backup and restore doc](/CanDIGv2/deployment/backup-restore-candig) for detailed instructions.)
 
 2. Clean up the current containers with `make clean-all`
 

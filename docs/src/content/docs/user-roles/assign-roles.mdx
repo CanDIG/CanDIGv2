@@ -6,7 +6,7 @@ tableOfContents: true
 
 import { Badge } from '@astrojs/starlight/components';
 
-Detailed information about what each role means can be found on the [Roles overview](roles-overview) page. This page walks through how to assign, approve and reject various user roles. All user management is done via API calls, there is currently no graphical user interface for this process. If using our API regularly, you may want to set up an API client such as [Postman](https://www.postman.com/), [Bruno](https://www.usebruno.com/) or [RapidAPI](https://paw.cloud/) to help with managing your frequently used API calls.
+Detailed information about what each role means can be found on the [Roles overview](/CanDIGv2/user-roles/roles-overview) page. This page walks through how to assign, approve and reject various user roles. All user management is done via API calls, there is currently no graphical user interface for this process. If using our API regularly, you may want to set up an API client such as [Postman](https://www.postman.com/), [Bruno](https://www.usebruno.com/) or [RapidAPI](https://paw.cloud/) to help with managing your frequently used API calls.
 
 ## Getting an API token
 
@@ -37,7 +37,7 @@ TOKEN=ey-pasted-jwt
 
 ## Add one or more pre-approved users <Badge text="Site admin" variant="caution" />
 
-This can only be performed by a Site admin. The Site admin can add one or many users to the list via a post to the `/ingest/user/preapproved` endpoint. The first time these users login to the CanDIG data portal, they will see a page with a 'Request Access' button but will be automatically approved as CanDIG Authorized Users after clicking the button. [This diagram](roles-overview/#pre-approval-flow) presents visual representation of this process.
+This can only be performed by a Site admin. The Site admin can add one or many users to the list via a post to the `/ingest/user/preapproved` endpoint. The first time these users login to the CanDIG data portal, they will see a page with a 'Request Access' button but will be automatically approved as CanDIG Authorized Users after clicking the button. [This diagram](/CanDIGv2/user-roles/roles-overview/#pre-approval-flow) presents visual representation of this process.
 
 First [get a token](#getting-an-api-token), then:
 
@@ -97,7 +97,7 @@ curl --request GET \
 
 ## Approve or reject a user that has requested access <Badge text="Site admin" variant="caution" />
 
-This can only be performed by a Site admin. Unauthorized users can request access by clicking a button in the CanDIG Data portal. They will only see this button if they are unauthorized and are not currently on the pending users list. Clicking this button causes the user to be added to the `pending users` list. A Site admin then needs to approve these users so they can become [CanDIG Authorized Users](roles-overview#1-candig-authorized-user). [This diagram](roles-overview#request-flow) demonstrates this process visually.
+This can only be performed by a Site admin. Unauthorized users can request access by clicking a button in the CanDIG Data portal. They will only see this button if they are unauthorized and are not currently on the pending users list. Clicking this button causes the user to be added to the `pending users` list. A Site admin then needs to approve these users so they can become [CanDIG Authorized Users](/CanDIGv2/user-roles/roles-overview#5-candig-authorized-user). [This diagram](/CanDIGv2/user-roles/roles-overview#request-flow) demonstrates this process visually.
 
 First [get a token](#getting-an-api-token), then:
 

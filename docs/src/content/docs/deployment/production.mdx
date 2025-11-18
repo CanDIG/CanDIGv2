@@ -8,7 +8,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import { Steps } from '@astrojs/starlight/components';
 import { Aside } from '@astrojs/starlight/components';
 
-Apart from the basic steps in the [Local Deployment Guide](local) to get the CanDIG stack up and running, there are additional settings and security recommendations that need to set up in a production level environment. We provide the following as general advice, but it is important for all CanDIG deployers to also consult with their institutional infrastructure security personnel to ensure that their deployment meets the necessary level of data security.
+Apart from the basic steps in the [Local Deployment Guide](/CanDIGv2/deployment/local) to get the CanDIG stack up and running, there are additional settings and security recommendations that need to set up in a production level environment. We provide the following as general advice, but it is important for all CanDIG deployers to also consult with their institutional infrastructure security personnel to ensure that their deployment meets the necessary level of data security.
 
 ## Stable branch
 
@@ -67,7 +67,7 @@ The following default settings in the `.env` file should be changed when deployi
 | `CANDIG_PRODUCTION_MODE=1`                                                               | Turn on Production mode  |
 | `LOCAL_IP_ADDR=192.168.x.x`                                                              | May need to set to your public IP, not always needed |
 | `FEDERATION_SELF_SERVER_ID=<unique-node-name>`                                           |  e.g. UHN-prod, BCGSC-prod. Uniquely identifies your node within the CanDIG federation, can be `${CANDIG_SITE_LOCATION}` |
-| `FEDERATION_SELF_SERVER` - update province, province-code see [section below](setting-location-information) | Ensures site displays properly on the map and can be federated |
+| `FEDERATION_SELF_SERVER` - update province, province-code see [section below](#setting-location-information) | Ensures site displays properly on the map and can be federated |
 | `KEYCLOAK_CLIENT_ID=<your-keycloak-identifier>`                                          | Optional to change this, more for consistency than necessity |
 | `KEYCLOAK_PUBLIC_PROTO=https`                                                            | change to https for prod |
 | `KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}`                   | Keycloak public url shouldn't have port|
@@ -210,12 +210,12 @@ Run `python site_admin_token.py`. You should be prompted for your actual site ad
 Keep the site admin user and password secure at all times.
 
 :::tip
-See [User roles](user-roles/roles-overview) for a full description of the available user roles in CanDIG.
+See [User roles](/CanDIGv2/user-roles/roles-overview) for a full description of the available user roles in CanDIG.
 :::
 
 ### Adding a site curator
 
-See [User Roles](user-roles/assign-roles#assign-the-site-curator-role)
+See [User Roles](/CanDIGv2/user-roles/assign-roles#assign-the-site-curator-role)
 
 ## Connecting Keycloak to institutional LDAP
 
@@ -229,9 +229,9 @@ Federation is a two way process, where you need to register another server with 
 
 Once two nodes are federated, summary data from federated nodes will appear in both nodes' data portals and will be viewable by all users who are able to login.
 
-Access to patient level data through specific program authorization is managed by the node that hosts the data for that program. For example, if a user from UHN needs to be given authorization to a program hosted within the BC node, a site administrator, site curator or program curator (with authorization for that program) from BC will need to [add that UHN user as a team member](../guides/ingest/register-programs) to that program within the BC CanDIG node. Alternately, if the UHN user was granted access through a DAC process,  
+Access to patient level data through specific program authorization is managed by the node that hosts the data for that program. For example, if a user from UHN needs to be given authorization to a program hosted within the BC node, a site administrator, site curator or program curator (with authorization for that program) from BC will need to [add that UHN user as a team member](/CanDIGv2/ingest/register-programs) to that program within the BC CanDIG node. Alternately, if the UHN user was granted access through a DAC process,  
 
 ## Backing up production data
 
-It is not expected that a CanDIG instance would hold the only copy of any ingested data. However, recognising that the ETL and ingest process takes significant time and effort, it is a good idea to regularly backup all data stored in CanDIG. Steps for how to do this can be found in [Backing up and restoring CanDIG data](backup-restore-candig.md)
+It is not expected that a CanDIG instance would hold the only copy of any ingested data. However, recognising that the ETL and ingest process takes significant time and effort, it is a good idea to regularly backup all data stored in CanDIG. Steps for how to do this can be found in [Backing up and restoring CanDIG data](/CanDIGv2/deployment/backup-restore-candig)
 

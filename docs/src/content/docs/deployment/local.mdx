@@ -235,7 +235,7 @@ VENV_OS=<your OS>
 ```
 
 :::danger
-If you are deploying a production level CanDIG deployment that will host real clinical data, see the [production deployment guide](production) for all the settings that need to be updated to ensure the deployed platform is secure.
+If you are deploying a production level CanDIG deployment that will host real clinical data, see the [production deployment guide](/CanDIGv2/deployment/production) for all the settings that need to be updated to ensure the deployed platform is secure.
 :::
 
 <details>
@@ -283,7 +283,7 @@ make init-conda
 
 ### 3.b: Use an existing Conda installation
 
-If you want to use an existing conda installation on your local at the bottom of the [.env](../etc/env/example.env#L310), set `CONDA_INSTALL` to your existing conda installation path
+If you want to use an existing conda installation on your local at the bottom of the [.env](https://github.com/CanDIG/CanDIGv2/blob/3dcfd2b6a47135d9b632db4c4327cb75bab0768a/etc/env/example.env#L342), set `CONDA_INSTALL` to your existing conda installation path
 
 ```bash
 make mkdir # skip most of bin-conda, but need the dir-creating step
@@ -348,7 +348,7 @@ If you want to delete the synthetic data after running these tests, use the comm
 
 If all the tests pass, well done! You have a functional CanDIG stack! 
 
-Next up, you might like to take a look at the documentation for [ingesting data](../guides/ingest) as well as [Interacting with the stack using Make](interact-with-the-stack) and if you are a developer: [how to modify code and test changes](../technical/docker-and-submodules) in the context of the CanDIG stack.
+Next up, you might like to take a look at the documentation for [ingesting data](/CanDIGv2/ingest) as well as [Interacting with the stack using Make](/CanDIGv2/deployment/interact-with-the-stack). If you are looking to set up a Production node, please read through the [production deployment guide](/CanDIGv2/deployment/production).
 
 ## Troubleshooting
 
