@@ -65,8 +65,8 @@ export default defineConfig({
             },
             {
                 base: 'technical/htsget/drs-api',
-                label: 'htsget drs api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/stable/htsget_server/drs_openapi.yaml',
+                label: 'drs api',
+                schema: 'https://raw.githubusercontent.com/CanDIG/drs-service/refs/heads/stable/drs_server/drs_openapi.yaml',
                 collapsed: true
             },
             {
