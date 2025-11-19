@@ -9,7 +9,7 @@ tableOfContents:
 import { Icon } from 'astro-icon/components';
 import { Steps } from '@astrojs/starlight/components';
 
-Before any program can be ingested into CanDIG, it needs to be registered. To first register a program, you must be either a site admin or a site curator. During program registration, you can also assign program curators and team members to the program. For more information about user roles in CanDIG, see [User roles in CanDIG](../deployment/user-roles). If you need to be made a site curator or program curator, please contact your local site administrator to assign your user profile the appropriate role.
+Before any program can be ingested into CanDIG, it needs to be registered. To first register a program, you must be either a site admin or a site curator. During program registration, you can also assign program curators and team members to the program. For more information about user roles in CanDIG, see [User roles in CanDIG](/CanDIGv2/user-roles/roles-overview). If you need to be made a site curator or program curator, please contact your local site administrator to assign your user profile the appropriate role.
 
 ## How to register a program
 
@@ -54,7 +54,7 @@ curl -s --request GET \
  --url $CANDIG_URL'/ingest/program/local-SYNTH_03' \
  -H 'accept: application/json' \
  -H 'Content-Type: application/json' \
- -H 'Authorization: Bearer '$TOKEN 
+ -H 'Authorization: Bearer '$TOKEN
 ```
 
  Your response would be:

@@ -16,15 +16,15 @@ The process for updating depends on the changes contained in a particular releas
 
 <Steps>
 
-1. Backup your existing deployment using the steps on the page: [Backing up and restoring CanDIG data](backup-restore-candig). This should be done regardless of wheteher you think the deployment will destroy any data, just in case anything goes wrong. Things you will want to back up are:
-    - ingested genomic and clinical data - Guide here: [Back up postgres databases](backup-restore-candig/#backing-up-postgres-databases)
-    - log files - Guide here: [backup logfiles](backup-restore-candig/#backing-up-logs)
-    - user authorizations - Guide here: [backup secrets and authorizations](backup-restore-candig/#backing-up-secrets-and-authorization-data)
+1. Backup your existing deployment using the steps on the page: [Backing up and restoring CanDIG data](/CanDIGv2/deployment/backup-restore-candig). This should be done regardless of wheteher you think the deployment will destroy any data, just in case anything goes wrong. Things you will want to back up are:
+    - ingested genomic and clinical data - Guide here: [Back up postgres databases](/CanDIGv2/deployment/backup-restore-candig/#backing-up-postgres-databases)
+    - log files - Guide here: [backup logfiles](/CanDIGv2/deployment/backup-restore-candig/#backing-up-logs)
+    - user authorizations - Guide here: [backup secrets and authorizations](/CanDIGv2/deployment/backup-restore-candig/#backing-up-secrets-and-authorization-data)
     - federation details (if your node is federated with other nodes) - see expandable section below:
         <details>
         <summary>How to save currently stored federation information</summary>
         <Steps>
-        1. [Get a site admin token](/user-roles/assign-roles/#getting-an-api-token) and in a terminal session, store in a variable called `TOKEN`, store your candig domain in a variable called `CANDIG_URL`
+        1. [Get a site admin token](/CanDIGv2/user-roles/assign-roles/#getting-an-api-token) and in a terminal session, store in a variable called `TOKEN`, store your candig domain in a variable called `CANDIG_URL`
 
         2. Call the GET method to list all currently federated servers:
             ```bash
@@ -39,7 +39,7 @@ The process for updating depends on the changes contained in a particular releas
         </Steps>
 
         :::note
-        If a node you are federated with has performed a 'destructive rebuild' which reset their keycloak instance, you may need to ask them for a new bearer token. 
+        If a node you are federated with has performed a 'destructive rebuild' which reset their keycloak instance, you may need to ask them for a new bearer token.
         :::
         </details>
     - git repos diffs - see expandable section below:
@@ -84,7 +84,7 @@ The process for updating depends on the changes contained in a particular releas
     ```bash
     cd CanDIGv2
     git checkout stable
-    git pull 
+    git pull
     git submodule update --init --recursive
     ```
 
@@ -127,19 +127,19 @@ The process for updating depends on the changes contained in a particular releas
 
     :::danger
     This destroys all data in the system so it is important to ensure there is a backup of all existing data before proceeding with this method.
-    :::  
-    
+    :::
+
     ```bash
     make clean-all
     make build-all
-    ```  
+    ```
 
-8. If you performed a destructive rebuild, it will be necessary to reingest and restore backed up data following the [guide](backup-restore-candig). This includes any clinical and genomic data as well as information about user authorizations. Federating to other nodes will also need to be reinitiated with all other nodes in the network. Federating with nodes at a different stable version may not be possible.
+8. If you performed a destructive rebuild, it will be necessary to reingest and restore backed up data following the [guide](/CanDIGv2/deployment/backup-restore-candig). This includes any clinical and genomic data as well as information about user authorizations. Federating to other nodes will also need to be reinitiated with all other nodes in the network. Federating with nodes at a different stable version may not be possible.
 
     :::note
     Depending on the changes that were made, it may not be possible to directly restore from backup, e.g. if the underlying structure of the postgres databases has changed, the data will need to be reingested through ingest, rather than restored directly to the database.
     :::
-    
+
 9. Run integration tests to ensure all the services are running as expected
 
     :::note
@@ -148,11 +148,11 @@ The process for updating depends on the changes contained in a particular releas
 
     <details>
     <summary> Running integration tests when default site admin is removed </summary>
-    
+
         If you revoked site admin rights from `site_admin@test.ca` you can temporarily reinstate rights to run the tests and then revoke them again
 
-        1. To reinstate `site_admin@test.ca` as a site admin user, from the CanDIGv2 repo in a terminal 
-        
+        1. To reinstate `site_admin@test.ca` as a site admin user, from the CanDIGv2 repo in a terminal
+
         First get a token:
 
         ```bash
@@ -174,7 +174,7 @@ The process for updating depends on the changes contained in a particular releas
         ```bash
         export TOKEN=$(echo $CURL_OUTPUT | grep -Eo 'access_token":"[a-zA-Z0-9._\-]+' | cut -d '"' -f3)
         ```
-        
+
         2. Add the site_admin@test.ca back as a site admin:
 
         ```bash
@@ -182,7 +182,7 @@ The process for updating depends on the changes contained in a particular releas
         ```
 
         3. Uncomment the default site admin lines in the `env.sh` and `.env` file
-        
+
         :::tip
         If the default site admin password was deleted from `env.sh`, you can copy it from `tmp/keycloak/test-site-admin-password`
         :::
@@ -193,18 +193,18 @@ The process for updating depends on the changes contained in a particular releas
         ```
 
         5. Revoke site admin rights from the default site admin
-        
+
         ```bash
         curl -X DELETE $CANDIG_URL'/ingest/site-role/admin/user_id/site_admin@test.ca' -H 'Authorization: Bearer '$TOKEN
         ```
 
-    </details> 
+    </details>
 
     ```bash
     make test-integration
     ```
 
-    If tests fail, check out the [troubleshooting section](stack-troubleshooting) or [reach out for help](https://github.com/CanDIG/CanDIGv2/issues/new/choose).
+    If tests fail, check out the [troubleshooting section](/CanDIGv2/deployment/stack-troubleshooting) or [reach out for help](https://github.com/CanDIG/CanDIGv2/issues/new/choose).
 
 10. Reinstate federation with other nodes
 

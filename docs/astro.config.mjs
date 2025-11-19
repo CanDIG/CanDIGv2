@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi'
 import starlightUtils from "@lorenzo_lewis/starlight-utils";
+import starlightLinksValidator from 'starlight-links-validator';
 
 import icon from 'astro-icon';
 
@@ -18,7 +19,7 @@ export default defineConfig({
             include: {
             mdi: ["*"]
         }
-    }), 
+    }),
     starlight({
         title: 'Docs',
         customCss: [
@@ -36,6 +37,7 @@ export default defineConfig({
             icon: 'github', label: 'GitHub', href:'https://github.com/candig/CanDIGv2',
         },],
     plugins: [
+        starlightLinksValidator(),
         starlightUtils({
             navLinks: {
                 leading: { useSidebarLabelled: "headerLinks" },
@@ -64,7 +66,7 @@ export default defineConfig({
                 collapsed: true
             },
             {
-                base: 'technical/htsget/drs-api',
+                base: 'technical/drs/drs-api',
                 label: 'drs api',
                 schema: 'https://raw.githubusercontent.com/CanDIG/drs-service/refs/heads/stable/drs_server/drs_openapi.yaml',
                 collapsed: true
@@ -101,7 +103,7 @@ export default defineConfig({
                 { label: 'Technical', slug: 'technical'}
             ]
         },
-        {   
+        {
             collapsed: true,
             label: 'Deployment',
             items: [
@@ -114,7 +116,7 @@ export default defineConfig({
                         { label: 'Interact using Make', slug: 'deployment/interact-with-the-stack'},
                         { label: 'Logging', slug: 'deployment/logging'},
                         { label: 'Back up/Restore', slug: 'deployment/backup-restore-candig'},
-                        { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'}, 
+                        { label: 'Troubleshooting', slug: 'deployment/stack-troubleshooting'},
                         { label: 'Update CanDIG', slug: 'deployment/update-candig'}
                     ]
                 }
@@ -124,12 +126,12 @@ export default defineConfig({
             label: 'Submission',
             items: [
                 // Each item here is one entry in the navigation menu.
-                { 
-                    label: 'Data submission steps', 
-                    items: 
+                {
+                    label: 'Data submission steps',
+                    items:
                     [
-                        'ingest/prepare-clinical', 
-                        'ingest/register-programs', 
+                        'ingest/prepare-clinical',
+                        'ingest/register-programs',
                         'ingest/ingest-clinical',
                         'ingest/prepare-genomic',
                         'ingest/ingest-genomic',
@@ -142,13 +144,13 @@ export default defineConfig({
             label: 'Explore',
             items: [
                 // Each item here is one entry in the navigation menu.
-                { 
-                    label: 'Exploring data on the portal', 
-                    items: 
+                {
+                    label: 'Exploring data on the portal',
+                    items:
                     [
                         'explore/summary',
                         'explore/clinical-genomic-search',
-                        'explore/completeness' 
+                        'explore/completeness'
                     ]
                 }
             ],
@@ -167,23 +169,23 @@ export default defineConfig({
                     ]
                 }
             ]
-            
+
         },
         {
             label: 'Technical Docs',
             collapsed: true,
-            items: [ 
+            items: [
                 {
                     label: 'Tech docs',
-                    items: 
+                    items:
                     [
                         { label: 'Architecture', slug: 'technical/architecture' },
                         { label: 'Docker and submods', slug: 'technical/docker-and-submodules' },
                         ...openAPISidebarGroups,
                     ]
                 }
-                
-                
+
+
             ]
         },
     ],
