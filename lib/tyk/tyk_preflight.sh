@@ -283,7 +283,7 @@ envsubst < ${PWD}/lib/tyk/configuration_templates/api_query.json.tpl > ${CONFIG_
 # }
 # }
 # ' > lib/tyk/tmp/tmp_policies.json.tpl
-mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
+# mv lib/tyk/tmp/tmp_policies.json.tpl lib/tyk/tmp/policies.json.tpl
 
 echo "Working on policies.json" | tee -a $LOGFILE
 envsubst < ${PWD}/lib/tyk/tmp/policies.json.tpl > ${CONFIG_DIR}/policies/policies.json
