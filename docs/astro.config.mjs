@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi'
 import starlightUtils from "@lorenzo_lewis/starlight-utils";
+import starlightLinksValidator from 'starlight-links-validator';
 
 import icon from 'astro-icon';
 
@@ -36,6 +37,7 @@ export default defineConfig({
             icon: 'github', label: 'GitHub', href:'https://github.com/candig/CanDIGv2',
         },],
     plugins: [
+        starlightLinksValidator(),
         starlightUtils({
             navLinks: {
                 leading: { useSidebarLabelled: "headerLinks" },

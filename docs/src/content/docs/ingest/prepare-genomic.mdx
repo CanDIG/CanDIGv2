@@ -17,7 +17,7 @@ All genomic data files need to be able to be ‘seen’  by the running `htsget_
 Systems may need information in the drop-downs below:
 
 <details>
-<summary>Configuring s3 authorisation</summary>
+<summary>Configuring s3 authorization</summary>
 
 #### Pre-requisites:
 
@@ -196,7 +196,7 @@ The file should contain an array of dictionaries, where each item represents a s
 - Access methods can either be of the format `s3://[endpoint]/[bucket name]` or `file:///[directory relative to root on htsget container]`.
 - `submitter_sample_id`(s) are the (mandatory) links to the `Sample Registration objects uploaded during clinical data ingest.
 - `index` is the file location and name of the index file; for instance a tabix (`tbi`) or cram index (`crai`)
-- If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault [(see above)](#Add-s3-credentials-to-vault), the service will scan the S3 bucket to ensure the relevant files are present.
+- If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault [(see `Configureing s3 authorization`above)](#a-configure-connection-to-genomic-data-sources), the service will scan the S3 bucket to ensure the relevant files are present.
 - There is no validation that the genomic files exist locally or are mounted to htsget. If the local (`file:///`) method is used it is important to check all files are present before proceeding with ingest.
 
 :::caution

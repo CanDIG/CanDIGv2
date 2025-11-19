@@ -16,15 +16,15 @@ The process for updating depends on the changes contained in a particular releas
 
 <Steps>
 
-1. Backup your existing deployment using the steps on the page: [Backing up and restoring CanDIG data](backup-restore-candig). This should be done regardless of wheteher you think the deployment will destroy any data, just in case anything goes wrong. Things you will want to back up are:
-    - ingested genomic and clinical data - Guide here: [Back up postgres databases](backup-restore-candig/#backing-up-postgres-databases)
-    - log files - Guide here: [backup logfiles](backup-restore-candig/#backing-up-logs)
-    - user authorizations - Guide here: [backup secrets and authorizations](backup-restore-candig/#backing-up-secrets-and-authorization-data)
+1. Backup your existing deployment using the steps on the page: [Backing up and restoring CanDIG data](/CanDIGv2/deployment/backup-restore-candig). This should be done regardless of wheteher you think the deployment will destroy any data, just in case anything goes wrong. Things you will want to back up are:
+    - ingested genomic and clinical data - Guide here: [Back up postgres databases](/CanDIGv2/deployment/backup-restore-candig/#backing-up-postgres-databases)
+    - log files - Guide here: [backup logfiles](/CanDIGv2/deployment/backup-restore-candig/#backing-up-logs)
+    - user authorizations - Guide here: [backup secrets and authorizations](/CanDIGv2/deployment/backup-restore-candig/#backing-up-secrets-and-authorization-data)
     - federation details (if your node is federated with other nodes) - see expandable section below:
         <details>
         <summary>How to save currently stored federation information</summary>
         <Steps>
-        1. [Get a site admin token](/user-roles/assign-roles/#getting-an-api-token) and in a terminal session, store in a variable called `TOKEN`, store your candig domain in a variable called `CANDIG_URL`
+        1. [Get a site admin token](/CanDIGv2/user-roles/assign-roles/#getting-an-api-token) and in a terminal session, store in a variable called `TOKEN`, store your candig domain in a variable called `CANDIG_URL`
 
         2. Call the GET method to list all currently federated servers:
             ```bash
@@ -134,7 +134,7 @@ The process for updating depends on the changes contained in a particular releas
     make build-all
     ```
 
-8. If you performed a destructive rebuild, it will be necessary to reingest and restore backed up data following the [guide](backup-restore-candig). This includes any clinical and genomic data as well as information about user authorizations. Federating to other nodes will also need to be reinitiated with all other nodes in the network. Federating with nodes at a different stable version may not be possible.
+8. If you performed a destructive rebuild, it will be necessary to reingest and restore backed up data following the [guide](/CanDIGv2/deployment/backup-restore-candig). This includes any clinical and genomic data as well as information about user authorizations. Federating to other nodes will also need to be reinitiated with all other nodes in the network. Federating with nodes at a different stable version may not be possible.
 
     :::note
     Depending on the changes that were made, it may not be possible to directly restore from backup, e.g. if the underlying structure of the postgres databases has changed, the data will need to be reingested through ingest, rather than restored directly to the database.
@@ -204,7 +204,7 @@ The process for updating depends on the changes contained in a particular releas
     make test-integration
     ```
 
-    If tests fail, check out the [troubleshooting section](stack-troubleshooting) or [reach out for help](https://github.com/CanDIG/CanDIGv2/issues/new/choose).
+    If tests fail, check out the [troubleshooting section](/CanDIGv2/deployment/stack-troubleshooting) or [reach out for help](https://github.com/CanDIG/CanDIGv2/issues/new/choose).
 
 10. Reinstate federation with other nodes
 
