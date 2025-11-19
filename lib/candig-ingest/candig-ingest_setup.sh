@@ -29,7 +29,7 @@ if [[ $CANDIG_SITE_ADMIN_USER != "" ]]; then
   while [ $? -ne 0 ]
   do
     echo "..."
-      sleep 1
+      sleep 2
       bash $PWD/exec_with_expected.sh "curl -si \"${CANDIG_URL}/ingest/service-info\" -H \"Authorization: Bearer ${site_admin_token}\"" "200 OK"
   done
 
