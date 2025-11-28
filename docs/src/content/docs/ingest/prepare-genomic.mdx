@@ -99,7 +99,7 @@ To make the links between genomic files and the Sample registration objects they
 
 Metadata about each genomic file should be specified in a `JSON` file.
 
-The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary is specified in the SequencingIngest [openapi schema](https://github.com/CanDIG/candigv2-ingest/blob/develop/ingest_openapi.yaml), an [example file](https://github.com/CanDIG/candigv2-ingest/blob/develop/tests/genomic_ingest.json) exists within the test files and a commented example in the expandable section below:
+The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary and options for enumerated fields are specified in the SequencingIngest [openapi schema](https://github.com/CanDIG/candigv2-ingest/blob/develop/ingest_openapi.yaml), an [example file](https://github.com/CanDIG/candigv2-ingest/blob/develop/tests/genomic_ingest.json) exists within the test files and a commented example in the expandable section below:
 
 <details>
 <summary>Example genomic json file</summary>
@@ -315,3 +315,7 @@ An example of a fully populated experiment and analysis object for a transcripto
     ]
 }
 ```
+
+::: tip
+All options for enumerated fields can be found in the [ingest schema](https://github.com/CanDIG/candigv2-ingest/blob/develop/ingest_openapi.yaml)
+:::
