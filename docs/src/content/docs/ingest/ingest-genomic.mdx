@@ -85,8 +85,9 @@ curl -X 'GET' \
 
 While ingest is processing, you will see a message `"status": "still in queue"`.
 
+:::tip
 If you get a message such as `"no such sample": "sample SAMPLE_0600 does not exist in clinical data'` this means the sample the file is linking to cannot be found in the currently ingested clinical data. Please ensure you have ingested all samples being referred to in the genomic json file before attempting ingest.
-
+:::
 
 ## Checking file indexing progress
 
