@@ -99,7 +99,7 @@ To make the links between genomic files and the Sample registration objects they
 
 Metadata about each genomic file should be specified in a `JSON` file.
 
-The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary is specified in the SequencingIngest [openapi schema](https://github.com/CanDIG/candigv2-ingest/blob/develop/ingest_openapi.yaml), an [example file](https://github.com/CanDIG/candigv2-ingest/blob/develop/tests/genomic_ingest.json) exists within the test files and a commented example in the expandable section below:
+The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary and options for enumerated fields are specified in the SequencingIngest [openapi schema](https://github.com/CanDIG/candigv2-ingest/blob/develop/ingest_openapi.yaml), an [example file](https://github.com/CanDIG/candigv2-ingest/blob/develop/tests/genomic_ingest.json) exists within the test files and a commented example in the expandable section below:
 
 <details>
 <summary>Example genomic json file</summary>
@@ -128,6 +128,14 @@ The file should contain an array of dictionaries, where each item represents a s
             "submitter_sample_id": "SPECIMEN_5",
             "metadata": {
                 "library_strategy": "WGS"
+            }
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "experiment_id": "LOCAL-SEQ_0009",
+            "submitter_sample_id": "LOCAL-SAMPLE_0009",
+            "metadata": {
+                "library_strategy": "WTS"
             }
         }
     ],
@@ -185,6 +193,30 @@ The file should contain an array of dictionaries, where each item represents a s
                     "experiment_id": "SEQ_0003"
                 }
             ]
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "analysis_id": "LOCAL-NA18537-counts",
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/counts.tsv",
+                "name": "counts.tsv"
+            },
+            "metadata": {
+                "analysis_type": "sequence_annotation",
+                "analysis_attribute": {
+                    "subtype": "expression_count",
+                    "gene_id_column": "gene_id",
+                    "length_column": "length",
+                    "count_column": "expected_count"
+                },
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "NA18537",
+                    "experiment_id": "LOCAL-SEQ_0009"
+                }
+            ]
         }
     ]
 }
@@ -192,12 +224,13 @@ The file should contain an array of dictionaries, where each item represents a s
 </details>
 
 ### Tips for creating the Genomic JSON file
-- `analysis_id` is the filename of the variation file (e.g. HG00096.vcf.gz, HG00096.bam)
+- `analysis_id` is the filename of the variation file (e.g. `HG00096.vcf.gz`, `HG00096.bam`)
 - Access methods can either be of the format `s3://[endpoint]/[bucket name]` or `file:///[directory relative to root on htsget container]`.
-- `submitter_sample_id`(s) are the (mandatory) links to the `Sample Registration objects uploaded during clinical data ingest.
+- `submitter_sample_id`(s) are the (mandatory) links to the `Sample Registration` objects uploaded during clinical data ingest.
 - `index` is the file location and name of the index file; for instance a tabix (`tbi`) or cram index (`crai`)
-- If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault [(see `Configureing s3 authorization`above)](#a-configure-connection-to-genomic-data-sources), the service will scan the S3 bucket to ensure the relevant files are present.
+- If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault [(see `Configuring s3 authorization`above)](#a-configure-connection-to-genomic-data-sources), the service will scan the S3 bucket to ensure the relevant files are present.
 - There is no validation that the genomic files exist locally or are mounted to htsget. If the local (`file:///`) method is used it is important to check all files are present before proceeding with ingest.
+- `analysis_sample_id` is the name that is used inside the analysis file that is used to refer to the sample/experiment. Some common ones we see are Normal, Tumour,or may be the same identifier used for the sample. If you are not sure what this is you may need to look into the bam/vcf to see what is used.
 
 :::caution
 It is important to ensure no donor identifiable information is contained within the genomic files, such as in BAM/CRAM headers or VCF metadata
@@ -215,3 +248,74 @@ For each genomic data file that is referenced, there must also be the appropriat
 
  It is recommended to write a simple script to automate the creation of the Genomic JSON file. JSON validation of this file will occur before genomic data ingest proceeds. We are also working on tools to
 help create this file, so if you need help, [reach out to the CanDIG team](https://github.com/CanDIG/candigv2-ingest/issues/new/choose).
+
+### Transcriptome files
+
+Transcriptome matrices can be ingested into CanDIG. Files must be in `.tsv` format.
+
+| filetype                                        | expected file extension | expected `analysis_type` | expected `analysis_attribute`     |
+|-------------------------------------------------|-------------------------|--------------------------|-----------------------------------|
+| Matrix with genes as rows and counts as columns | `.tsv` `.tsv.gz`        | `sequence_variation`     | see below                         |
+
+As there is no standard format for transcriptomic matrices, it is important to specify the following metadata as `analysis_attribute`s so that the file can be accurately parsed
+
+- `gene_id_column`: name of column containing gene ids
+- `length_column`: name of column containing gene lengths
+- `count_column`: name of column containing counts
+- `norm_column`: name of column containing normalized values
+- `norm_method`: normalization method used to calculate values in norm_column, one of: `tpm`, `fpkm`, `getmm`
+
+An example of a fully populated experiment and analysis object for a transcriptome file:
+
+```json
+{
+    "experiments": [
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "experiment_id": "LOCAL-SEQ_0009",
+            "submitter_sample_id": "LOCAL-SAMPLE_0009",
+            "metadata": {
+                "library_description": "<free text description of the library>",
+                "instrument": "Illumina MiSeq", # selected from enum
+                "library_selection": "cDNA", # selected from enum
+                "protocol": "<url to protocol>",
+                "library_strategy": "WTS",
+                "library_source": "transcriptomic",
+                "library_layout": "paired"
+            }
+        }
+    ],
+    "analyses": [
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "analysis_id": "LOCAL-NA18537-counts",
+            "metadata": {
+                "analysis_type": "sequence_annotation",
+                "analysis_attribute": {
+                    "subtype": "expression_count"
+                    "reference": "hg38",
+                    "gene_id_column": "<name of column containing genes in tsv>",
+                    "length_column": "<name of column containing gene lengths in tsv>",
+                    "count_column": "<name of column containing read counts in tsv>",
+                    "norm_column": "<name of column containing read counts in tsv>",
+                    "norm_method": "tpm" # selected from enum
+                }
+            }
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/counts.tsv",
+                "name": "counts.tsv"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "NA18537",
+                    "experiment_id": "LOCAL-SEQ_0009"
+                }
+            ]
+        }
+    ]
+}
+```
+
+::: tip
+All options for enumerated fields can be found in the [ingest schema](https://github.com/CanDIG/candigv2-ingest/blob/develop/ingest_openapi.yaml)
+:::
