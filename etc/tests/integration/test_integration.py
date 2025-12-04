@@ -709,20 +709,21 @@ def test_htsget_access_data(user, password, obj, access):
 
 
 def test_experiment_metadata():
-    username = ENV["CANDIG_NOT_ADMIN2_USER"]
-    password = ENV["CANDIG_NOT_ADMIN2_PASSWORD"]
+    username = ENV["CANDIG_SITE_ADMIN_USER"]
+    password = ENV["CANDIG_SITE_ADMIN_PASSWORD"]
     headers = {
         "Authorization": f"Bearer {get_token(username=username, password=password)}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_NULL_0001", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_NULL_0001", headers=headers)
+    pprint.pprint(response.json())
     assert "genomes" in response.json()
     # the experiment is what is listed in the genomes as wgs
     assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_NULL_0001" in response.json()["genomes"]
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_0072", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0072", headers=headers)
     assert "genomes" in response.json()
     assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_0072" in response.json()["genomes"]
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_ALL_0002", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/experiments/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_ALL_0002", headers=headers)
     assert "genomes" in response.json()
     pprint.pprint(response.json())
     assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_ALL_0002" in response.json()["genomes"]
