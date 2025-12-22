@@ -2,6 +2,7 @@
 
 # import global variables
 env ?= .env
+env += etc/env/versions.env
 
 include $(env)
 export $(shell sed 's/=.*//' $(env))
