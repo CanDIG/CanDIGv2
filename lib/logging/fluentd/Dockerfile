@@ -1,4 +1,4 @@
-ARG BASE_IMAGE
+ARG BASE_IMAGE=library/fluentd:latest
 FROM ${BASE_IMAGE}
 
 LABEL Maintainer="CanDIG Project"
