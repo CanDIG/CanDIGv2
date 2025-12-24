@@ -20,6 +20,10 @@ with open(".env") as f:
     INTERPOLATED_ENV = dotenv_values(fp.name, interpolate=True)
     os.unlink(fp.name)
 
+with open("etc/env/versions.env") as f:
+    versions = dotenv_values(f.name, interpolate=False)
+    for key in versions:
+        CANDIGV2_ENV[key] = versions[key]
 
 # Python-dotenv doesn't interpolate quite correctly, so get_env_value interpolates manually
 def get_env_value(key):
