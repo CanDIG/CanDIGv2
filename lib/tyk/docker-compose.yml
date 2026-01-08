@@ -18,6 +18,7 @@ services:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     environment:
       - DEBUG_MODE=${CANDIG_DEBUG_MODE}
+      - TYK_GW_PROXYDEFAULTTIMEOUT=60
     # healthcheck:
     #   test: [ "CMD", "curl", "http://0.0.0.0:8080/hello" ]
     #   interval: 30s
