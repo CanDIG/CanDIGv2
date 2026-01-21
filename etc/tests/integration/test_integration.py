@@ -846,8 +846,8 @@ def test_beacon(user, password, search, can_access, cannot_access):
 def verify_samples():
     return [
         (
-            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-multisample_1",
-            "multisample_1.vcf.gz",
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf",
+            "NA18537.vcf.gz",
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD"
         ),
