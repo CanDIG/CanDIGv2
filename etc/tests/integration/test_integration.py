@@ -799,6 +799,37 @@ def test_index_success():
     assert response.json()['indexed'] == 1
 
 
+## test analysis dates
+def analysis_dates():
+    return [
+        (
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-HG02102-all",
+            "2015-02-18"
+        ),
+        (
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-NA18537-vcf",
+            "2015-02-18"
+        ),
+        (
+            f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-test",
+            "2024-10-23"
+        )
+    ]
+
+@pytest.mark.parametrize("analysis, date", analysis_dates())
+def test_analysis_dates(analysis, date):
+    username = ENV["CANDIG_SITE_ADMIN_USER"]
+    password = ENV["CANDIG_SITE_ADMIN_PASSWORD"]
+    headers = {
+        "Authorization": f"Bearer {get_token(username=username, password=password)}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.get(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects/{analysis}", headers=headers)
+    assert response.status_code == 200
+    print(response.json())
+    assert response.json()["metadata"]["analysis_date"] == date
+
+
 ## Does Beacon return the correct level of authorized results?
 def beacon_access():
     return [
