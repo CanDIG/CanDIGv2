@@ -1,6 +1,3 @@
-[submodule "lib/toil/toil-docker"]
-	path = lib/toil/toil-docker
-	url = https://github.com/DataBiosphere/toil.git
 [submodule "lib/federation-service/federation_service"]
 	path = lib/federation/federation
 	url = https://github.com/CanDIG/federation_service

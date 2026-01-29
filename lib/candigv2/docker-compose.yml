@@ -27,10 +27,6 @@ secrets:
     file: $PWD/tmp/postgres/db-secret
     labels:
       - "candigv2=secret"
-  wes-dependency-resolver:
-    file: $PWD/etc/yml/${WES_DEPENDENCY_RESOLVER}.yml
-    labels:
-      - "candigv2=secret"
   keycloak-admin-password:
     file: $PWD/tmp/keycloak/admin-password
     labels:
