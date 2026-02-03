@@ -153,6 +153,7 @@ The file should contain an array of dictionaries, where each item represents a s
             },
             "metadata": {                     # Metadata about the file
                 "analysis_type": "sequence_variation",   # type of data represented
+                "analysis_date": "2025-04-21",
                 "analysis_attribute": {
                     "subtype": "mutation"
                 },
@@ -231,6 +232,7 @@ The file should contain an array of dictionaries, where each item represents a s
 - If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault [(see `Configuring s3 authorization`above)](#a-configure-connection-to-genomic-data-sources), the service will scan the S3 bucket to ensure the relevant files are present.
 - There is no validation that the genomic files exist locally or are mounted to htsget. If the local (`file:///`) method is used it is important to check all files are present before proceeding with ingest.
 - `analysis_sample_id` is the name that is used inside the analysis file that is used to refer to the sample/experiment. Some common ones we see are Normal, Tumour,or may be the same identifier used for the sample. If you are not sure what this is you may need to look into the bam/vcf to see what is used.
+- `analysis_date` is the date the institute received the file from the sequencing centre. Analysis date is required for all variant files, if one is not provided in the genomic json, the CanDIG software will look for a date inside the file. If one is still not found the ingest is rejected for any variant files without a date. 
 
 :::caution
 It is important to ensure no donor identifiable information is contained within the genomic files, such as in BAM/CRAM headers or VCF metadata
@@ -291,6 +293,7 @@ An example of a fully populated experiment and analysis object for a transcripto
             "analysis_id": "LOCAL-NA18537-counts",
             "metadata": {
                 "analysis_type": "sequence_annotation",
+                "analysis_date: "2024-04-21", 
                 "analysis_attribute": {
                     "subtype": "expression_count"
                     "reference": "hg38",
