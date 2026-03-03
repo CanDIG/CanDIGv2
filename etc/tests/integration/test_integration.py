@@ -727,6 +727,12 @@ def test_biosample_metadata():
     pprint.pprint(response.json())
     assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_ALL_0002" in response.json()["experiments"]["wgs"]
 
+    # there should be a run in this one:
+    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/biosamples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0090", headers=headers)
+    assert "runs" in response.json()
+    pprint.pprint(response.json())
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-RUN_0001" in response.json()["runs"]
+
 
 def test_ingest_rnaget():
     token = get_site_admin_token()
