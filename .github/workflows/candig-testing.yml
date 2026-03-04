@@ -25,12 +25,11 @@ jobs:
       - name: Install conda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          auto-update-conda: true
-          miniforge-variant: Miniforge
-          channels: conda-forge
-          activate-environment: base
-          use-mamba: true
+          miniconda-version: "latest"
+          channels: conda-forge, defaults
           use-only-tar-bz2: true
+          auto-update-conda: true
+          auto-activate-base: true
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Setup environment file
