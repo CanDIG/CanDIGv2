@@ -29,6 +29,27 @@ For example, a request which would ingest a sequence variation analysis would lo
       }
     }
   ],
+  "runs": [
+        {
+            "program_id": LOCAL-"SYNTH_01",
+            "run_id": "RUN_0001",
+            "experiment_id": "SEQ_0001",
+            "files": [
+                {
+                    "access_method": "file:////data/RUN_0001-1.fastq",
+                    "name": "RUN_0001-1.fastq"
+                },
+                {
+                    "access_method": "file:////data/RUN_0001-2.fastq",
+                    "name": "RUN_0001-2.fastq"
+                }
+            ],
+            "metadata": {
+                "run_date": "2023-03-21",
+                "filetype": "fastq"
+            }
+        }
+  ],
   "analyses": [
     {
       "program_id": "string",
