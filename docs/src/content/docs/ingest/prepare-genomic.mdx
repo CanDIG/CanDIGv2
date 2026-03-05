@@ -277,9 +277,9 @@ help create this file, so if you need help, [reach out to the CanDIG team](https
 
 Transcriptome matrices can be ingested into CanDIG. Files must be in `.tsv` format.
 
-| filetype                                        | expected file extension | expected `analysis_type` | expected `analysis_attribute`     |
+| filetype                                        | expected file extension | expected `analysis_type` | expected `analysis_attribute`s     |
 |-------------------------------------------------|-------------------------|--------------------------|-----------------------------------|
-| Matrix with genes as rows and counts as columns | `.tsv` `.tsv.gz`        | `sequence_annotation`    | see below                         |
+| Matrix with genes as rows and counts as columns | doesn't matter as long as it is a tab-delimited text file   | `sequence_annotation`    | see below                         |
 
 As there is no standard format for transcriptomic matrices, it is important to specify the following metadata as `analysis_attribute`s so that the file can be accurately parsed
 
