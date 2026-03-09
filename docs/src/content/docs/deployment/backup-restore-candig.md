@@ -31,6 +31,7 @@ docker exec -it candigv2_postgres-db_1 bash
 ```bash
 pg_dump -U admin -d genomic -f yyyy-mm-dd-genomic-backup.sql
 pg_dump -U admin -d clinical -f yyyy-mm-dd-clinical-backup.sql
+pg_dump -U admin -d drs -f yyyy-mm-dd-drs-backup.sql
 pg_dump -U admin -d rnaget_db -f yyyy-mm-dd-rnaget-backup.sql
 ```
 
@@ -47,6 +48,7 @@ You should copy these to a secure location outside of the running container and 
 ```bash
 docker cp candigv2_postgres-db_1:yyyy-mm-dd-genomic-backup.sql /desired/path/target
 docker cp candigv2_postgres-db_1:yyyy-mm-dd-clinical-backup.sql /desired/path/target
+docker cp candigv2_postgres-db_1:yyyy-mm-dd-drs-backup.sql /desired/path/target
 docker cp candigv2_postgres-db_1:yyyy-mm-dd-rnaget-backup.sql /desired/path/target
 ```
 
@@ -59,6 +61,7 @@ To restore the databases that we have backed up, assuming you have the CanDIG st
 ```bash
 docker stop candigv2_katsu_1
 docker stop candigv2_htsget_1
+docker stop candigv2_drs_1
 docker stop candigv2_rnaget_1
 ```
 
@@ -68,6 +71,7 @@ docker stop candigv2_rnaget_1
 docker cp /path/to/backup/yyyy-mm-dd-genomic-backup.sql candigv2_postgres-db_1:/yyyy-mm-dd-genomic-backup.sql
 docker cp /path/to/backup/yyyy-mm-dd-clinical-backup.sql candigv2_postgres-db_1:/yyyy-mm-dd-clinical-backup.sql
 docker cp /path/to/backup/yyyy-mm-dd-genomic-backup.sql candigv2_postgres-db_1:/yyyy-mm-dd-rnaget-backup.sql
+docker cp /path/to/backup/yyyy-mm-dd-drs-backup.sql candigv2_postgres-db_1:/yyyy-mm-dd-drs-backup.sql
 ```
 
 Next we need to delete the initialized databases so we can replace them with the backed up versions. 
@@ -91,6 +95,8 @@ DROP DATABASE clinical;
 CREATE DATABASE clinical;
 DROP DATABASE genomic;
 CREATE DATABASE genomic;
+DROP DATABASE drs;
+CREATE DATABASE drs;
 DROP DATABASE rnaget-db;
 CREATE DATABASE rnaget-db;
 \q
@@ -102,6 +108,7 @@ CREATE DATABASE rnaget-db;
 psql -U admin -d clinical < yyyy-mm-dd-clinical-backup.sql
 psql -U admin -d genomic < yyyy-mm-dd-genomic-backup.sql
 psql -U admin -d rnaget-db < yyyy-mm-dd-rnaget-backup.sql
+psql -U admin -d drs < yyyy-mm-dd-rnaget-backup.sql
 ```
 
 1. Exit the interactive terminal with the `exit` command.
