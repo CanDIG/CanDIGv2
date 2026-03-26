@@ -616,9 +616,12 @@ def test_ingest_not_admin_htsget():
     # when the user has program_curator role, they should be allowed
     print(response.text)
     assert response.status_code == 201
-    for program in response.json():
-        results = response.json()[program]
-        print(json.dumps(results["results"], indent=2))
+    resp = response.json()
+    resp.pop("last_updated")
+    resp.pop("complete")
+    for program in resp:
+        results = resp[program]
+        print(json.dumps(results, indent=2))
         for res in results["results"]:
             assert "error processing" not in res
     # clean up before the next test
@@ -653,9 +656,12 @@ def test_ingest_admin_htsget():
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
     # when the user has admin access, they should be allowed
     assert response.status_code == 201
-    for program in response.json():
-        results = response.json()[program]
-        print(json.dumps(results["results"], indent=2))
+    resp = response.json()
+    resp.pop("last_updated")
+    resp.pop("complete")
+    for program in resp:
+        results = resp[program]
+        print(json.dumps(results, indent=2))
         for res in results["results"]:
             assert "error processing" not in res
 
