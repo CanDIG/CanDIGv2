@@ -26,14 +26,16 @@ To backup the data stored in these databases:
 docker exec -it candigv2_postgres-db_1 bash
 ```
 
-1. Dump contents of the two databases to files. `-d` specifies the database to dump, `-f` specifies the filename. Below we use the date and the name of the database being backed up:
+1. Dump contents of the three databases to files. `-d` specifies the database to dump, `-f` specifies the filename. Below we use the date and the name of the database being backed up:
 
 ```bash
 pg_dump -U admin -d genomic -f yyyy-mm-dd-genomic-backup.sql
 pg_dump -U admin -d clinical -f yyyy-mm-dd-clinical-backup.sql
+pg_dump -U admin -d drs -f yyyy-mm-dd-drs-backup.sql
+pg_dump -U admin -d rnaget_db -f yyyy-mm-dd-rnaget-backup.sql
 ```
 
-You should then have two files, each with a complete copy of each of the databases. 
+You should then have three files, each with a complete copy of each of the databases. 
 
 You can now exit the container by entering
 
@@ -46,6 +48,8 @@ You should copy these to a secure location outside of the running container and 
 ```bash
 docker cp candigv2_postgres-db_1:yyyy-mm-dd-genomic-backup.sql /desired/path/target
 docker cp candigv2_postgres-db_1:yyyy-mm-dd-clinical-backup.sql /desired/path/target
+docker cp candigv2_postgres-db_1:yyyy-mm-dd-drs-backup.sql /desired/path/target
+docker cp candigv2_postgres-db_1:yyyy-mm-dd-rnaget-backup.sql /desired/path/target
 ```
 
 ## Restoring postgres databases
@@ -57,6 +61,8 @@ To restore the databases that we have backed up, assuming you have the CanDIG st
 ```bash
 docker stop candigv2_katsu_1
 docker stop candigv2_htsget_1
+docker stop candigv2_drs_1
+docker stop candigv2_rnaget_1
 ```
 
 1. Then we need to copy the `sql` backup files into the running postgres container
@@ -64,6 +70,8 @@ docker stop candigv2_htsget_1
 ```bash
 docker cp /path/to/backup/yyyy-mm-dd-genomic-backup.sql candigv2_postgres-db_1:/yyyy-mm-dd-genomic-backup.sql
 docker cp /path/to/backup/yyyy-mm-dd-clinical-backup.sql candigv2_postgres-db_1:/yyyy-mm-dd-clinical-backup.sql
+docker cp /path/to/backup/yyyy-mm-dd-genomic-backup.sql candigv2_postgres-db_1:/yyyy-mm-dd-rnaget-backup.sql
+docker cp /path/to/backup/yyyy-mm-dd-drs-backup.sql candigv2_postgres-db_1:/yyyy-mm-dd-drs-backup.sql
 ```
 
 Next we need to delete the initialized databases so we can replace them with the backed up versions. 
@@ -87,6 +95,10 @@ DROP DATABASE clinical;
 CREATE DATABASE clinical;
 DROP DATABASE genomic;
 CREATE DATABASE genomic;
+DROP DATABASE drs;
+CREATE DATABASE drs;
+DROP DATABASE rnaget-db;
+CREATE DATABASE rnaget-db;
 \q
 ```
 
@@ -95,15 +107,19 @@ CREATE DATABASE genomic;
 ```bash
 psql -U admin -d clinical < yyyy-mm-dd-clinical-backup.sql
 psql -U admin -d genomic < yyyy-mm-dd-genomic-backup.sql
+psql -U admin -d rnaget-db < yyyy-mm-dd-rnaget-backup.sql
+psql -U admin -d drs < yyyy-mm-dd-rnaget-backup.sql
 ```
 
 1. Exit the interactive terminal with the `exit` command.
 
-1. Restart the katsu and htsget services
+1. Restart the katsu,htsget, drs and rnaget services
 
 ```bash
 docker start candigv2_katsu_1
 docker start candigv2_htsget_1
+docker start candigv2_drs_1
+docker start candigv2_rnaget_1
 ```
 
 You should be able to see the restored data in the data portal.
@@ -123,7 +139,7 @@ Depending on your comfort levels, to update your data to be compatible with the 
 
 Secrets and Authorization data in CanDIG are stored within Vault. These should be backed up regularly so that they can be restored should there be a system crash and before the CanDIG stack is rebuilt. To back up Vault, run the command:
 
-```
+```bash
 make backup-vault
 ```
 
@@ -131,13 +147,13 @@ This command creates a tar ball at `tmp/vault/backup.tar.gz`. This should be sav
 
 To restore the vault backup, copy the backup tarball into the vault directory in the CanDIG stack and rename it to `restore.tar.gz`:
 
-```
+```bash
 cp /path/to/backup.tar.gz path/to/CanDIGv2/lib/vault/restore.tar.gz
 ```
 
 Then run
 
-```
+```bash
 make restore-vault
 ```
 
@@ -146,3 +162,8 @@ All previous secrets and authorizations should be restored to the stack. The tar
 ## Backing up logs
 
 Logs are stored in `tmp/logs`. The contents of this folder should be saved periodically.
+
+:::caution
+Logs can get very large and take up a lot of space on your system, we recommend you set up a cron job or otherwise regularly compress and backup logs to ensure your server doesn't run out of space
+:::
+
