@@ -601,7 +601,7 @@ def test_ingest_not_admin_htsget():
         "Content-Type": "application/json; charset=utf-8",
     }
     # since we're only ingesting for a quick test before we delete again, don't bother indexing
-    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest", headers=headers, json=test_data, params={"do_not_index": True})
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest", headers=headers, json=test_data)
     try:
         queue_id = response.json()["queue_id"]
     except Exception as e:
