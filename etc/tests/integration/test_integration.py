@@ -618,7 +618,8 @@ def test_ingest_not_admin_htsget():
     assert response.status_code == 201
     resp = response.json()
     resp.pop("last_updated")
-    assert resp.pop("complete")
+    complete = resp.pop("complete")
+    assert complete
     for program in resp:
         results = resp[program]
         print(json.dumps(results, indent=2))
@@ -658,7 +659,8 @@ def test_ingest_admin_htsget():
     assert response.status_code == 201
     resp = response.json()
     resp.pop("last_updated")
-    assert resp.pop("complete")
+    complete = resp.pop("complete")
+    assert complete
     for program in resp:
         results = resp[program]
         print(json.dumps(results, indent=2))
