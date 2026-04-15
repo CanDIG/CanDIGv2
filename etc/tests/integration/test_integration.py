@@ -930,7 +930,7 @@ def test_verify_htsget(object_id, file_name, user, password):
         "Content-Type": "application/json; charset=utf-8",
     }
 
-    response = requests.post(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
+    requests.post(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
 
     # verification should give us a False result
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{object_id}/verify", headers=headers)
@@ -939,7 +939,7 @@ def test_verify_htsget(object_id, file_name, user, password):
 
     # fix it back
     new_json["access_methods"][0]["access_url"]["url"] = old_url
-    response = requests.post(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
+    requests.post(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
 
     # verification should give us a True result
     response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{object_id}/verify", headers=headers)
