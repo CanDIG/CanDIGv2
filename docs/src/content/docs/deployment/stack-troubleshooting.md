@@ -162,3 +162,14 @@ ECS_IP_ADDR=127.0.0.1
 
 If you need more than one hosts entry for this, you can edit the `extra_hosts` entries in `lib/htsget/docker-compose.yml` and `lib/candig-ingest/docker-compose.yml`.
 
+## CanDIG performance (especially Vault/Tyk authorization) becomes unstable
+
+It is possible that the Vault audit log is getting too large. You can check the sizes of your Docker volumes with `docker system df -v`. If the `vault-data` volume is over 1GB in size, this is possibly the problem.
+
+We enabled the Vault audit log by default, but most authorization requests are logged in the Fluentd log, so the internal Vault log is redundant.
+
+If this happens, truncate the vault-audit log file:
+```bash
+docker exec candigv2_vault-runner_1 bash -c "tail /vault/vault-audit.log > /vault/vault-audit.log"
+```
+You can also try [backing up and restoring](https://candig.github.io/CanDIGv2/deployment/backup-restore-candig/#backing-up-secrets-and-authorization-data) your Vault containers.
