@@ -144,9 +144,9 @@ def stress_test(args):
         all_threads = []
         # We do BURST threads at once, except on the last iteration where we do
         # the n - (b*i) threads (i.e. the remainder)
-        num_threads = args.burst
-        if  args.burst * (i + 1) > args.n:
-            num_threads = args.n - (args.burst * i)
+        # num_threads = args.burst
+        # if  args.burst * (i + 1) > args.n:
+        #     num_threads = args.n - (args.burst * i)
         for _ in range(args.burst):
             t = threading.Thread(
                     target=make_single_request,
