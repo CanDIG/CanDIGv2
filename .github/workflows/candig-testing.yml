@@ -81,9 +81,6 @@ jobs:
               docker cp candigv2_candig-ingest_1:/home/candig/tmp tmp/ingest 2>&1
               mkdir tmp/index
               docker cp candigv2_htsget_1:/home/candig/tmp tmp/index 2>&1
-      - name: Save vault audit logs
-        if: always()
-        run: docker cp candigv2_vault-runner_1:/vault/vault-audit.log tmp/vault_audit.log 2>&1
       - name: Save container and error logs as artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -92,7 +89,6 @@ jobs:
           path: |
                 tmp/progress.txt
                 tmp/container_logs.txt
-                tmp/vault_audit.log
                 tmp/ingest
                 tmp/index
 

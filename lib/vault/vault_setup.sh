@@ -110,9 +110,9 @@ docker exec $vault sh -c "vault login ${key_root}"
 
 # configuration
 # audit file
-echo
-echo ">> enabling audit file"
-docker exec $vault sh -c "vault audit enable file file_path=/vault/vault-audit.log"
+# echo
+# echo ">> enabling audit file"
+# docker exec $vault sh -c "vault audit enable file file_path=/vault/vault-audit.log"
 
 # enable approle
 echo
