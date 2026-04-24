@@ -27,9 +27,10 @@ script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 portal_dir="$script_dir/lib/candig-data-portal/candig-data-portal"
 
 # Figure out what to overwrite
+extension="${src##*.}"
 case "$choice" in
-    header)   dest="$portal_dir/src/assets/images/logo.svg" ;;
-    footer) dest="$portal_dir/src/assets/images/logo-notext.png" ;;
+    header)   dest="$portal_dir/src/assets/images/logo.$extension" ;;
+    footer) dest="$portal_dir/src/assets/images/logo-notext.$extension" ;;
     -h|--help) usage ;;
     *) echo "Error: unknown target '$choice'" >&2; usage ;;
 esac
@@ -40,14 +41,20 @@ if [[ ! -f "$src" ]]; then
     exit 1
 fi
 
-if [[ ! -f "$dest" ]]; then
-    echo "Error: destination '$dest' does not exist (portal layout may have changed)" >&2
-    exit 1
-fi
+# if [[ ! -f "$dest" ]]; then
+#     echo "Error: destination '$dest' does not exist (portal layout may have changed)" >&2
+#     exit 1
+# fi
 
 # Copy and echo
 cp -- "$src" "$dest"
 echo "Replaced $dest with $src"
+
+# Make sure the file type of the input is used in the output
+case "$choice" in
+    header) grep -rl 'images\/logo\.[A-Za-z]\+' $portal_dir | xargs sed -i -e 's/images\/logo\.[a-zA-Z]\+/images\/logo.'$extension'/g' ;;
+    footer) grep -rl 'images\/logo-notext\.[A-Za-z]\+' $portal_dir | xargs sed -i -e 's/images\/logo-notext\.[a-zA-Z]\+/images\/logo-notext.'$extension'/g' ;;
+esac
 
 # If data-portal is currently running, recompose it
 docker ps | grep "candig-data-portal"
