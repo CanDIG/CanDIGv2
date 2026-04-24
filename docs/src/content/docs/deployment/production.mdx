@@ -64,10 +64,10 @@ The following default settings in the `.env` file should be changed when deployi
 | `CANDIG_AUTH_DOMAIN=<your.prod.auth.domain>`                                             | Update to correct prod auth domain  |
 | `CANDIG_SITE_LOCATION=<your-site-location>`                                              | e.g. UHN, BC-Dev The name of your site, should be unique within a federation.  |
 | `CANDIG_DEBUG_MODE=0`                                                                    | Turn off DEBUG mode  |
-| `CANDIG_PRODUCTION_MODE=1`                                                               | Turn on Production mode  |
 | `LOCAL_IP_ADDR=192.168.x.x`                                                              | May need to set to your public IP, not always needed |
 | `FEDERATION_SELF_SERVER_ID=<unique-node-name>`                                           |  e.g. UHN-prod, BCGSC-prod. Uniquely identifies your node within the CanDIG federation, can be `${CANDIG_SITE_LOCATION}` |
 | `FEDERATION_SELF_SERVER` - update province, province-code see [section below](#setting-location-information) | Ensures site displays properly on the map and can be federated |
+| `KEYCLOAK_PRODUCTION_MODE=1`                                                             | Turn on Production mode  |
 | `KEYCLOAK_CLIENT_ID=<your-keycloak-identifier>`                                          | Optional to change this, more for consistency than necessity |
 | `KEYCLOAK_PUBLIC_PROTO=https`                                                            | change to https for prod |
 | `KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_PROTO}://${CANDIG_AUTH_DOMAIN}`                   | Keycloak public url shouldn't have port|
