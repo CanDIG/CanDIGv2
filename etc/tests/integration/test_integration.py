@@ -753,11 +753,11 @@ def test_file_verification():
                 "analysis_id": f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-test-bad",
                 "main": {
                     "access_method": "file:////data/test-bad.vcf.gz",
-                    "name": "test.vcf.gz"
+                    "name": "test-bad.vcf.gz"
                 },
                 "index": {
                     "access_method": "file:////data/test-bad.vcf.gz.tbi",
-                    "name": "test.vcf.gz.tbi"
+                    "name": "test-bad.vcf.gz.tbi"
                 },
                 "metadata": {
                     "analysis_type": "sequence_variation",
