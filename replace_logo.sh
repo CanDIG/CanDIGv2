@@ -29,7 +29,7 @@ portal_dir="$script_dir/lib/candig-data-portal/candig-data-portal"
 # Figure out what to overwrite
 extension="${src##*.}"
 case "$choice" in
-    header)   dest="$portal_dir/src/assets/images/logo.$extension" ;;
+    header) dest="$portal_dir/src/assets/images/logo.$extension" ;;
     footer) dest="$portal_dir/src/assets/images/logo-notext.$extension" ;;
     -h|--help) usage ;;
     *) echo "Error: unknown target '$choice'" >&2; usage ;;
@@ -40,11 +40,6 @@ if [[ ! -f "$src" ]]; then
     echo "Error: source file '$src' does not exist" >&2
     exit 1
 fi
-
-# if [[ ! -f "$dest" ]]; then
-#     echo "Error: destination '$dest' does not exist (portal layout may have changed)" >&2
-#     exit 1
-# fi
 
 # Copy and echo
 cp -- "$src" "$dest"
