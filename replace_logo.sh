@@ -46,10 +46,18 @@ cp -- "$src" "$dest"
 echo "Replaced $dest with $src"
 
 # Make sure the file type of the input is used in the output
-case "$choice" in
-    header) grep -rl 'images\/logo\.[A-Za-z]\+' $portal_dir | xargs sed -i -e 's/images\/logo\.[a-zA-Z]\+/images\/logo.'$extension'/g' ;;
-    footer) grep -rl 'images\/logo-notext\.[A-Za-z]\+' $portal_dir | xargs sed -i -e 's/images\/logo-notext\.[a-zA-Z]\+/images\/logo-notext.'$extension'/g' ;;
-esac
+# Since sed works differently between the GNU and BSD versions, we'll execute different things depending
+if sed --version 2>/dev/null | grep -q GNU; then
+    case "$choice" in
+        header) grep -rl 'images\/logo\.[A-Za-z]\+' $portal_dir | xargs sed -i -e 's/images\/logo\.[a-zA-Z]\+/images\/logo.'$extension'/g' ;;
+        footer) grep -rl 'images\/logo-notext\.[A-Za-z]\+' $portal_dir | xargs sed -i -e 's/images\/logo-notext\.[a-zA-Z]\+/images\/logo-notext.'$extension'/g' ;;
+    esac
+else
+    case "$choice" in
+        header) grep -Erl 'images\/logo\.[A-Za-z]+' $portal_dir | xargs sed -i '' -E 's/images\/logo\.[a-zA-Z]+/images\/logo.'$extension'/g' ;;
+        footer) grep -Erl 'images\/logo-notext\.[A-Za-z]+' $portal_dir | xargs sed -i '' -E 's/images\/logo-notext\.[a-zA-Z]+/images\/logo-notext.'$extension'/g' ;;
+    esac
+fi
 
 # If data-portal is currently running, recompose it
 docker ps | grep "candig-data-portal"
