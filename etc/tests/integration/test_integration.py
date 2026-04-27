@@ -742,6 +742,74 @@ def test_biosample_metadata():
     assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-RUN_0001" in response.json()["runs"]
 
 
+def test_file_verification():
+    # add an analysis with bad files
+    test_data = {
+        "experiments": [],
+        "runs": [],
+        "analyses": [
+            {
+                "program_id": f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SYNTH_01",
+                "analysis_id": f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-test-bad",
+                "main": {
+                    "access_method": "file:////data/test-bad.vcf.gz",
+                    "name": "test.vcf.gz"
+                },
+                "index": {
+                    "access_method": "file:////data/test-bad.vcf.gz.tbi",
+                    "name": "test.vcf.gz.tbi"
+                },
+                "metadata": {
+                    "analysis_type": "sequence_variation",
+                    "analysis_date": "2024-10-23",
+                    "reference": "hg38"
+                },
+                "samples": [
+                    {
+                        "analysis_sample_id": "sample_tumour",
+                        "experiment_id": f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_0002"
+                    },
+                    {
+                        "analysis_sample_id": "sample_normal",
+                        "experiment_id": f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_0001"
+                    }
+                ]
+            }
+        ]
+    }
+
+    token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    response = requests.post(f"{ENV['CANDIG_URL']}/ingest/ingest", headers=headers, json=test_data)
+    try:
+        queue_id = response.json()["queue_id"]
+    except Exception as e:
+        print(f"Ingest was not successful: {type(e)} {str(e)}")
+        print(response.json())
+        assert False
+    response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+    while response.status_code == 200:
+        time.sleep(2)
+        response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
+
+    assert response.status_code == 201
+    resp = response.json()
+
+    # the bad analysis should be in the biosample output
+    samples = {"submitter_sample_ids": [f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0001"]}
+    response = requests.post(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/biosamples", headers=headers, json=samples)
+    assert response.status_code == 200
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-test-bad" in response.json()[0]["analyses"]["sequence_variation"]
+
+    # if verified_only is True, it shouldn't be in there
+    response = requests.post(f"{ENV['CANDIG_URL']}/drs/ga4gh/drs/v1/biosamples", headers=headers, json=samples, params={"verified_only": True})
+    assert response.status_code == 200
+    assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-test-bad" not in response.json()[0]["analyses"]["sequence_variation"]
+
+
 def test_ingest_rnaget():
     token = get_site_admin_token()
     headers = {
