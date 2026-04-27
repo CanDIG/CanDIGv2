@@ -60,7 +60,6 @@ else
 fi
 
 # If data-portal is currently running, recompose it
-docker ps | grep "candig-data-portal"
-if [ $? -eq 0 ]; then
-    make recompose-candig-data-portal
+if docker ps | grep "candig-data-portal"; then
+    (cd "$script_dir" && make recompose-candig-data-portal)
 fi
