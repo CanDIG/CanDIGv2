@@ -796,7 +796,6 @@ def test_file_verification():
         response = requests.get(f"{ENV['CANDIG_URL']}/ingest/status/{queue_id}", headers=headers)
 
     assert response.status_code == 201
-    resp = response.json()
 
     # the bad analysis should be in the biosample output
     samples = {"submitter_sample_ids": [f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0001"]}
