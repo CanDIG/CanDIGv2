@@ -1,5 +1,5 @@
 diff --git a/example.env b/example-production.env
-index 7577e53..f277ed0 100644
+index 64faf82..42b6a9b 100644
 --- a/example.env
 +++ b/example-production.env
 @@ -2,14 +2,16 @@
@@ -24,7 +24,7 @@ index 7577e53..f277ed0 100644
  LOCAL_IP_ADDR=
  # miniforge venv
  # options are [linux, darwin, arm64mac]
-@@ -20,38 +22,36 @@ CANDIG_USER_KEY=preferred_username
+@@ -22,38 +24,36 @@ KEEP_TEST_DATA=false
  # Federation
  FEDERATION_PORT=4232
  FEDERATION_SERVICE_URL=http://${CANDIG_INTERNAL_DOMAIN}:${FEDERATION_PORT}
