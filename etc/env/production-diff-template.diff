@@ -1,5 +1,5 @@
 diff --git a/example.env b/example-production.env
-index d49dfb5..f277ed0 100644
+index 3b3dd70..f277ed0 100644
 --- a/example.env
 +++ b/example-production.env
 @@ -2,14 +2,16 @@
@@ -79,13 +79,4 @@ index d49dfb5..f277ed0 100644
 -    #monitoring
  CANDIG_AUTH_MODULES=keycloak vault tyk opa federation
  CANDIG_DATA_MODULES=keycloak vault redis postgres logging
- 
-@@ -285,7 +284,7 @@ PROGRESS_FILE=${PWD}/tmp/progress.txt
- # install logging
- LOGFILE=tmp/progress.txt
- 
--CONDA_INSTALL=bin/miniconda3
-+CONDA_INSTALL=bin/miniforge
- 
- COMPOSE_IGNORE_ORPHANS=True
  
