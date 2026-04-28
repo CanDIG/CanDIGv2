@@ -1,5 +1,5 @@
 diff --git a/example.env b/example-production.env
-index 3b3dd70..f277ed0 100644
+index 7577e53..f277ed0 100644
 --- a/example.env
 +++ b/example-production.env
 @@ -2,14 +2,16 @@
@@ -24,7 +24,7 @@ index 3b3dd70..f277ed0 100644
  LOCAL_IP_ADDR=
  # miniforge venv
  # options are [linux, darwin, arm64mac]
-@@ -20,41 +22,38 @@ CANDIG_USER_KEY=preferred_username
+@@ -20,38 +22,36 @@ CANDIG_USER_KEY=preferred_username
  # Federation
  FEDERATION_PORT=4232
  FEDERATION_SERVICE_URL=http://${CANDIG_INTERNAL_DOMAIN}:${FEDERATION_PORT}
@@ -76,7 +76,4 @@ index 3b3dd70..f277ed0 100644
 +
  # site options
  CANDIG_MODULES=logging keycloak vault redis postgres drs htsget katsu rnaget query tyk opa candig-ingest federation candig-data-portal
--    #monitoring
  CANDIG_AUTH_MODULES=keycloak vault tyk opa federation
- CANDIG_DATA_MODULES=keycloak vault redis postgres logging
- 
