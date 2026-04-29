@@ -106,7 +106,7 @@ def test_tyk():
         "htsget": f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/htsget/v1/reads/service-info",
         "katsu": f"{ENV['CANDIG_ENV']['TYK_KATSU_API_LISTEN_PATH']}/v3/service-info",
         "rnaget": f"{ENV['CANDIG_ENV']['TYK_RNAGET_API_LISTEN_PATH']}/service-info",
-        "federation": f"federation/v1/service-info",
+        "federation": f"{ENV['CANDIG_ENV']['TYK_FEDERATION_API_LISTEN_PATH']}/v1/service-info",
         "opa": f"{ENV['CANDIG_ENV']['TYK_OPA_API_LISTEN_PATH']}/v1/data/service/service-info",
         "query": f"{ENV['CANDIG_ENV']['TYK_QUERY_API_LISTEN_PATH']}/service-info",
         "candig-ingest": f"{ENV['CANDIG_ENV']['TYK_INGEST_API_LISTEN_PATH']}/service-info",
@@ -1037,7 +1037,7 @@ def test_server_count():
         "Content-Type": "application/json; charset=utf-8",
     }
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/federation/v1/servers", headers=headers
+        f"{ENV['CANDIG_ENV']['FEDERATION_PUBLIC_URL']}/v1/servers", headers=headers
     )
     print(response.json())
     assert len(response.json()) > 0
@@ -1053,7 +1053,7 @@ def test_services_count():
         "Content-Type": "application/json; charset=utf-8",
     }
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/federation/v1/services", headers=headers
+        f"{ENV['CANDIG_ENV']['FEDERATION_PUBLIC_URL']}/v1/services", headers=headers
     )
     print(response.json())
     assert len(response.json()) > 0
@@ -1078,14 +1078,14 @@ def test_federation_call():
     }
 
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body
+        f"{ENV['CANDIG_ENV']['FEDERATION_PUBLIC_URL']}/v1/fanout", headers=headers, json=body
     )
     print(response.json())
     assert "results" in response.json()
 
     headers["federation"] = "true"
     response = requests.post(
-        f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body
+        f"{ENV['CANDIG_ENV']['FEDERATION_PUBLIC_URL']}/v1/fanout", headers=headers, json=body
     )
     print(response.json())
     assert "list" in str(type(response.json()))
