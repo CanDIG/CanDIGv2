@@ -708,11 +708,11 @@ def test_htsget_access_data(user, password, obj, access):
     }
     params = {"class": "header"}
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/data/{obj}",
+        f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}/htsget/v1/variants/data/{obj}",
         headers=headers,
         params=params,
     )
-    print(f"\n{ENV['CANDIG_URL']}/genomics/htsget/v1/variants/data/{obj}\n")
+    print(f"\n{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}/htsget/v1/variants/data/{obj}\n")
     assert (response.status_code == 200) == access
 
 
@@ -723,20 +723,20 @@ def test_biosample_metadata():
         "Authorization": f"Bearer {get_token(username=username, password=password)}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/biosamples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_NULL_0001", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}/htsget/v1/biosamples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_NULL_0001", headers=headers)
     pprint.pprint(response.json())
     assert "experiments" in response.json()
     assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_NULL_0001" in response.json()["experiments"]["wgs"]
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/biosamples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0072", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}/htsget/v1/biosamples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0072", headers=headers)
     assert "experiments" in response.json()
     assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_0072" in response.json()["experiments"]["wgs"]
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/biosamples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_ALL_0002", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}/htsget/v1/biosamples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_ALL_0002", headers=headers)
     assert "experiments" in response.json()
     pprint.pprint(response.json())
     assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SEQ_ALL_0002" in response.json()["experiments"]["wgs"]
 
     # there should be a run in this one:
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/biosamples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0090", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}/htsget/v1/biosamples/{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-SAMPLE_0090", headers=headers)
     assert "runs" in response.json()
     pprint.pprint(response.json())
     assert f"{ENV["CANDIG_ENV"]["CANDIG_SITE_LOCATION"]}-RUN_0001" in response.json()["runs"]
@@ -940,7 +940,7 @@ def test_beacon(user, password, search, can_access, cannot_access):
     }
     params = {"allele": search}
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/genomics/beacon/v2/g_variants",
+        f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}/beacon/v2/g_variants",
         headers=headers,
         params=params,
     )
@@ -1000,7 +1000,7 @@ def test_verify_htsget(object_id, file_name, user, password):
     requests.post(f"{ENV['CANDIG_ENV']['DRS_PUBLIC_URL']}/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
 
     # verification should give us a False result
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{object_id}/verify", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}/htsget/v1/{object_id}/verify", headers=headers)
     assert response.status_code == 200
     assert response.json()["result"] == False
 
@@ -1009,7 +1009,7 @@ def test_verify_htsget(object_id, file_name, user, password):
     requests.post(f"{ENV['CANDIG_ENV']['DRS_PUBLIC_URL']}/ga4gh/drs/v1/objects", headers=post_headers, json=new_json)
 
     # verification should give us a True result
-    response = requests.get(f"{ENV['CANDIG_URL']}/genomics/htsget/v1/{object_id}/verify", headers=headers)
+    response = requests.get(f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}/htsget/v1/{object_id}/verify", headers=headers)
     assert response.status_code == 200
     assert response.json()["result"] == True
 
@@ -1067,7 +1067,7 @@ def test_federation_call():
         "service": "htsget",
         "method": "GET",
         "payload": {},
-        "path": "beacon/v2/service-info",
+        "path": f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/beacon/v2/service-info",
     }
 
     token = get_site_admin_token()
