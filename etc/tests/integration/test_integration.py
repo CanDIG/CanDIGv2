@@ -1103,7 +1103,7 @@ def test_query_donors_all():
 
     params = {}
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/query", headers=headers, params=params
     ).json()
     print(response)
 
@@ -1166,7 +1166,7 @@ def test_query_donor_search():
         "treatment": "Radiation therapy"
     }
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/query", headers=headers, params=params
     ).json()
     pprint.pprint(response)
     assert response and len(response["results"]) == 10
@@ -1224,7 +1224,7 @@ def test_query_genomic():
         "assembly": "hg38"
     }
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/query", headers=headers, params=params
     )
     if len(response.json()["results"]) != 1:
         print(f"\n\nExpected 1 result from the genomic query using position 'chr21:5030000-5030847' but got {len(response.json()["results"])}")
@@ -1248,7 +1248,7 @@ def test_query_genomic():
         "assembly": "hg38"
     }
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/query", headers=headers, params=params
     )
 
     if len(response.json()["results"]) != 1:
@@ -1273,7 +1273,7 @@ def test_query_genomic():
         "assembly": "hg38"
     }
     response = requests.get(
-        f"{ENV['CANDIG_URL']}/query/query", headers=headers, params=params
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/query", headers=headers, params=params
     )
     if len(response.json()["results"]) != 1:
         print(f"\n\nExpected 1 results from the genomic query using gene name 'TPTE' but got {len(response.json()["results"])}")
