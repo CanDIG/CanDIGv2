@@ -2,8 +2,8 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi'
+import tailwindcss from "@tailwindcss/vite";
 import starlightUtils from "@lorenzo_lewis/starlight-utils";
-import starlightLinksValidator from 'starlight-links-validator';
 
 import icon from 'astro-icon';
 
@@ -11,6 +11,9 @@ import d2 from 'astro-d2';
 
 // https://astro.build/config
 export default defineConfig({
+    vite: {
+      plugins: [tailwindcss()],
+    },
     site: 'https://candig.github.io',
     base: 'CanDIGv2',
     integrations: [
@@ -37,21 +40,20 @@ export default defineConfig({
             icon: 'github', label: 'GitHub', href:'https://github.com/candig/CanDIGv2',
         },],
     plugins: [
-        starlightLinksValidator(),
         starlightUtils({
             navLinks: {
-                leading: { useSidebarLabelled: "headerLinks" },
-            },
-            multiSidebar: {
-                switcherStyle: "hidden"
-            }
+              leading: { useSidebarLabelled: "headerLinks" },
+          },
         }),
         starlightOpenAPI([
             {
                 base: 'technical/ingest-api',
                 label: 'ingest api',
                 schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-ingest/refs/heads/stable/ingest_openapi.yaml',
-                collapsed: true
+                collapsed: true,
+                snippets: {
+                    requestBody: true
+                }
             },
             {
                 base: 'technical/query-api',
@@ -68,7 +70,7 @@ export default defineConfig({
             {
                 base: 'technical/drs/drs-api',
                 label: 'drs api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/drs-service/refs/heads/stable/drs_server/drs_openapi.yaml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/drs-service/refs/heads/daisieh/openapi2/drs_server/drs_openapi.yaml',
                 collapsed: true
             },
             {
@@ -80,7 +82,7 @@ export default defineConfig({
             {
                 base: 'technical/htsget/operations',
                 label: 'htsget operations api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/stable/htsget_server/htsget_openapi.yaml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/daisieh/openapi/htsget_server/htsget_openapi.yaml',
                 collapsed: true
             },
         {
