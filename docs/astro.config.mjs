@@ -52,6 +52,7 @@ export default defineConfig({
                 schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-ingest/refs/heads/daisieh/openapi/ingest_openapi.yaml',
                 collapsed: false,
                 snippets: {
+                    operation: true,
                     requestBody: true
                 }
             },
