@@ -52,7 +52,8 @@ class TestInfrastructure:
         """Keycloak responds with valid configuration."""
         response = requests.get(
             f"{ENV['KEYCLOAK_PUBLIC_URL']}/auth/realms/{ENV['KEYCLOAK_REALM']}"
-            "/.well-known/openid-configuration"
+            "/.well-known/openid-configuration",
+            timeout=DEFAULT_TIMEOUT,
         )
         assert response.status_code == 200
         assert "grant_types_supported" in response.json()
@@ -62,6 +63,7 @@ class TestInfrastructure:
         response = requests.get(
             f"{ENV['CANDIG_URL']}/ingest/service-info",
             headers=_auth_headers(admin_token),
+            timeout=DEFAULT_TIMEOUT,
         )
         if response.status_code != 200:
             pytest.exit(
@@ -71,10 +73,16 @@ class TestInfrastructure:
 
     def test_site_admin(self, admin_token):
         """Provided token must be site admin."""
-        class Request:
-            headers = _auth_headers(admin_token)
-
-        assert authx.auth.is_site_admin(Request())
+        if authx.auth.OPA_URL is None:
+            return
+        response = requests.post(
+            authx.auth.OPA_URL + "/v1/data/permissions",
+            headers=_auth_headers(admin_token),
+            json={"input": {"token": admin_token}},
+            timeout=DEFAULT_TIMEOUT,
+        )
+        assert response.status_code == 200
+        assert response.json().get("result", {}).get("site_admin") is True
 
     def test_tyk(self, admin_token):
         """All enabled modules return 200 valid JSON via the Tyk gateway."""
