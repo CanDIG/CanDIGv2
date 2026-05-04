@@ -549,6 +549,20 @@ else
 	source ./env.sh; pytest -v --color=yes ./etc/tests/integration $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 endif
 
+#>>>
+# run production-safe integration tests
+#<<<
+.PHONY: test-integration-prod
+test-integration-prod:
+	mkdir -p tmp/test
+	@read -sp "Enter site admin bearer token: " SITE_ADMIN_TOKEN; \
+	echo ""; \
+	python ./settings.py; \
+	source ./env.sh; SITE_ADMIN_TOKEN="$$SITE_ADMIN_TOKEN" pytest -v --color=yes \
+		./etc/tests/integration/test_integration_prod.py \
+		$(ARGS) \
+		--report-log=./tmp/test/test-integration-prod_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
+
 # Run a single test by using its name and print out results whether failing or passing
 # note some tests are dependent on others so doesn't always work as expected
 # Helpful when debugging issues with a specific test
