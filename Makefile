@@ -555,10 +555,13 @@ endif
 .PHONY: test-integration-prod
 test-integration-prod:
 	mkdir -p tmp/test
-	@read -sp "Enter site admin bearer token: " SITE_ADMIN_TOKEN; \
-	echo ""; \
-	python ./settings.py; \
-	source ./env.sh; SITE_ADMIN_TOKEN="$$SITE_ADMIN_TOKEN" pytest -v --color=yes \
+	@if [ -z "$$SITE_ADMIN_TOKEN" ]; then \
+		echo "Error: SITE_ADMIN_TOKEN is not set."; \
+		echo "Usage: make test-integration-prod SITE_ADMIN_TOKEN=<token>"; \
+		exit 1; \
+	fi
+	@python ./settings.py
+	@source ./env.sh; SITE_ADMIN_TOKEN="$$SITE_ADMIN_TOKEN" pytest -v --color=yes \
 		./etc/tests/integration/test_integration_prod.py \
 		$(ARGS) \
 		--report-log=./tmp/test/test-integration-prod_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
