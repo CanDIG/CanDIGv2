@@ -1,6 +1,6 @@
 """
 Production-safe integration tests
-Run with make test-integration-prod
+Run with make test-integration-prod SITE_ADMIN_TOKEN=<token>
 """
 
 import os
