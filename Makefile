@@ -544,9 +544,9 @@ ifeq ($(ENABLE_ROPC),'AUTH_CODE')
 	source ./env.sh; python pytest-tokens.py
 endif
 ifeq ($(KEEP_TEST_DATA),true)
-	source ./env.sh; pytest -v --color=yes ./etc/tests/integration -k 'not test_clean_up' $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
+	source ./env.sh; pytest -v --color=yes ./etc/tests/integration/test_integration.py -k 'not test_clean_up' $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 else
-	source ./env.sh; pytest -v --color=yes ./etc/tests/integration $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
+	source ./env.sh; pytest -v --color=yes ./etc/tests/integration/test_integration.py $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 endif
 
 #>>>
