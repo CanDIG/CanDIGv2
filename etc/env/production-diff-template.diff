@@ -1,12 +1,15 @@
-diff --git a/example.env b/example-production.env
-index 64faf82..42b6a9b 100644
---- a/example.env
-+++ b/example-production.env
-@@ -2,14 +2,16 @@
+diff --git a/etc/env/example.env b/etc/env/example-production.env
+index ccc0445..42b6a9b 100644
+--- a/etc/env/example.env
++++ b/etc/env/example-production.env
+@@ -2,17 +2,16 @@
  # - - -
  
  # =============================================================================
 -# DEVELOPMENT CONFIGURATION
+-# Variables in this section are unlikely to need to be changed. 
+-# Please consult with a CanDIG developer before changing if you aren't 
+-# familiar with what the variable does.
 +# PRODUCTION CONFIGURATION
 +# Edit the values in this section when deploying a production instance.
 +# For details, please visit https://candig.github.io/CanDIGv2/deployment/production/#env-settings
@@ -24,7 +27,7 @@ index 64faf82..42b6a9b 100644
  LOCAL_IP_ADDR=
  # miniforge venv
  # options are [linux, darwin, arm64mac]
-@@ -22,38 +24,36 @@ KEEP_TEST_DATA=false
+@@ -25,35 +24,36 @@ KEEP_TEST_DATA=false
  # Federation
  FEDERATION_PORT=4232
  FEDERATION_SERVICE_URL=http://${CANDIG_INTERNAL_DOMAIN}:${FEDERATION_PORT}
@@ -67,9 +70,6 @@ index 64faf82..42b6a9b 100644
  
  # =============================================================================
 -# END DEVELOPMENT CONFIGURATION
--# Variables in this section are unlikely to need to be changed. 
--# Please consult with a CanDIG developer before changing if you aren't 
--# familiar with what the variable does.
 +# END PRODUCTION CONFIGURATION
  # =============================================================================
  
