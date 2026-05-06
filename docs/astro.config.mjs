@@ -68,7 +68,7 @@ export default defineConfig({
             {
                 base: 'technical/katsu-api',
                 label: 'katsu api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/katsu/refs/heads/develop/chord_metadata_service/mohpackets/docs/schemas/schema.yml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/katsu/refs/heads/schema_docs/chord_metadata_service/mohpackets/docs/schemas/schema_docs.yml',
                 collapsed: true,
                 snippets: {
                     requestBody: true
