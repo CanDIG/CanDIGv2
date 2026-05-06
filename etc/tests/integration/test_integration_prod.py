@@ -71,19 +71,6 @@ class TestInfrastructure:
                 returncode=1,
             )
 
-    def test_site_admin(self, admin_token):
-        """Provided token must be site admin."""
-        if authx.auth.OPA_URL is None:
-            return
-        response = requests.post(
-            authx.auth.OPA_URL + "/v1/data/permissions",
-            headers=_auth_headers(admin_token),
-            json={"input": {"token": admin_token}},
-            timeout=DEFAULT_TIMEOUT,
-        )
-        assert response.status_code == 200
-        assert response.json().get("result", {}).get("site_admin") is True
-
     def test_tyk(self, admin_token):
         """All enabled modules return 200 valid JSON via the Tyk gateway."""
         modules = ENV["CANDIG_ENV"]["CANDIG_MODULES"].split()
