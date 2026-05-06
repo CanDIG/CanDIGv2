@@ -6,7 +6,6 @@ Run with make test-integration-prod SITE_ADMIN_TOKEN=<token>
 import json
 import os
 import sys
-import authx.auth
 import pytest
 import requests
 
