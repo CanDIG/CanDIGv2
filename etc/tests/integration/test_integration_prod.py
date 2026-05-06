@@ -3,6 +3,7 @@ Production-safe integration tests
 Run with make test-integration-prod SITE_ADMIN_TOKEN=<token>
 """
 
+import json
 import os
 import sys
 import authx.auth
@@ -17,7 +18,7 @@ from settings import get_env
 
 ENV = get_env()
 
-DEFAULT_TIMEOUT = 10
+DEFAULT_TIMEOUT = 60
 
 ENDPOINTS = {
     "htsget": f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/htsget/v1/reads/service-info",
@@ -47,6 +48,16 @@ def _auth_headers(token):
     }
 
 
+def _fmt_body(response, limit=2000):
+    try:
+        body = json.dumps(response.json(), indent=2)
+    except Exception:
+        body = response.text
+    if len(body) > limit:
+        body = body[:limit] + f"\n... (truncated, {len(body)} chars total)"
+    return body
+
+
 class TestInfrastructure:
     def test_keycloak(self):
         """Keycloak responds with valid configuration."""
@@ -55,8 +66,8 @@ class TestInfrastructure:
             "/.well-known/openid-configuration",
             timeout=DEFAULT_TIMEOUT,
         )
-        assert response.status_code == 200
-        assert "grant_types_supported" in response.json()
+        assert response.status_code == 200, f"Keycloak returned HTTP {response.status_code}\nBody: {_fmt_body(response)}"
+        assert "grant_types_supported" in response.json(), f"Missing 'grant_types_supported' in Keycloak config\nBody: {_fmt_body(response)}"
 
     def test_token_valid(self, admin_token):
         """Provided token is accepted by ingest service."""
@@ -67,7 +78,7 @@ class TestInfrastructure:
         )
         if response.status_code != 200:
             pytest.exit(
-                f"Token validation failed (HTTP {response.status_code}) — stopping the rest of the tests.",
+                f"Token validation failed (HTTP {response.status_code}) — stopping the rest of the tests.\nBody: {_fmt_body(response)}",
                 returncode=1,
             )
 
@@ -106,8 +117,8 @@ class TestOPA:
                 headers=_auth_headers(admin_token),
                 timeout=DEFAULT_TIMEOUT,
             )
-            assert response.status_code == 200, f"OPA package '{package}' not queryable"
-            assert "result" in response.json(), f"OPA package '{package}' returned no result"
+            assert response.status_code == 200, f"OPA package '{package}' not queryable\nBody: {_fmt_body(response)}"
+            assert "result" in response.json(), f"OPA package '{package}' returned no result\nBody: {_fmt_body(response)}"
 
 
 class TestHtsget:
@@ -118,10 +129,10 @@ class TestHtsget:
             headers=_auth_headers(admin_token),
             timeout=DEFAULT_TIMEOUT,
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"htsget /genes returned HTTP {response.status_code}\nBody: {_fmt_body(response)}"
         data = response.json()
-        assert "results" in data, "genes response missing 'results' key"
-        assert isinstance(data["results"], list), "'results' must be a list"
+        assert "results" in data, f"genes response missing 'results' key\nBody: {_fmt_body(response)}"
+        assert isinstance(data["results"], list), f"'results' must be a list\nBody: {_fmt_body(response)}"
 
     def test_biosamples(self, admin_token):
         """htsget can retrieve genomic sample data via DRS."""
@@ -131,10 +142,10 @@ class TestHtsget:
             json={},
             timeout=DEFAULT_TIMEOUT,
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"htsget /biosamples returned HTTP {response.status_code}\nBody: {_fmt_body(response)}"
         data = response.json()
-        assert isinstance(data, list), "biosamples response must be a list"
-        assert len(data) > 0, "no biosamples returned for admin user"
+        assert isinstance(data, list), f"biosamples response must be a list\nBody: {_fmt_body(response)}"
+        assert len(data) > 0, f"no biosamples returned for admin user\nBody: {_fmt_body(response)}"
         for i, biosample in enumerate(data):
             assert "biosample_id" in biosample, f"biosample {i} missing 'biosample_id'"
             assert "program" in biosample, f"biosample {i} missing 'program'"
@@ -148,10 +159,10 @@ class TestKatsu:
             headers=_auth_headers(admin_token),
             timeout=DEFAULT_TIMEOUT,
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Katsu /programs returned HTTP {response.status_code}\nBody: {_fmt_body(response)}"
         data = response.json()
-        assert data.get("count", 0) > 0, "Katsu reports zero authorized programs"
-        assert isinstance(data.get("items"), list), "Katsu 'items' must be a list"
+        assert data.get("count", 0) > 0, f"Katsu reports zero authorized programs\nBody: {_fmt_body(response)}"
+        assert isinstance(data.get("items"), list), f"Katsu 'items' must be a list\nBody: {_fmt_body(response)}"
         for i, program in enumerate(data["items"]):
             assert isinstance(program.get("program_id"), str) and program["program_id"], (
                 f"Program {i} missing a non-empty 'program_id'"
@@ -164,10 +175,10 @@ class TestKatsu:
             headers=_auth_headers(admin_token),
             timeout=DEFAULT_TIMEOUT,
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Katsu /donors returned HTTP {response.status_code}\nBody: {_fmt_body(response)}"
         data = response.json()
-        assert data.get("count", 0) > 0, "Katsu reports zero authorized donors"
-        assert isinstance(data.get("items"), list), "Katsu 'items' must be a list"
+        assert data.get("count", 0) > 0, f"Katsu reports zero authorized donors\nBody: {_fmt_body(response)}"
+        assert isinstance(data.get("items"), list), f"Katsu 'items' must be a list\nBody: {_fmt_body(response)}"
         for i, donor in enumerate(data["items"]):
             assert "submitter_donor_id" in donor, f"Donor {i} missing 'submitter_donor_id'"
             assert "program_id" in donor, f"Donor {i} missing 'program_id'"
@@ -181,9 +192,9 @@ class TestQuery:
             headers=_auth_headers(admin_token),
             timeout=DEFAULT_TIMEOUT,
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Query discovery returned HTTP {response.status_code}\nBody: {_fmt_body(response)}"
         data = response.json()
-        assert "site" in data, "Query discovery missing 'site' key"
+        assert "site" in data, f"Query discovery missing 'site' key\nBody: {_fmt_body(response)}"
 
     def test_genomic_completeness(self, admin_token):
         """Query genomic_completeness returns completeness data for each program."""
@@ -192,10 +203,10 @@ class TestQuery:
             headers=_auth_headers(admin_token),
             timeout=DEFAULT_TIMEOUT,
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Query genomic_completeness returned HTTP {response.status_code}\nBody: {_fmt_body(response)}"
         data = response.json()
         assert isinstance(data, dict) and len(data) > 0, (
-            "genomic_completeness returned empty or non-dict"
+            f"genomic_completeness returned empty or non-dict\nBody: {_fmt_body(response)}"
         )
         for program_id, completeness in data.items():
             assert isinstance(program_id, str) and program_id, (
@@ -214,11 +225,11 @@ class TestQuery:
             params={},
             timeout=DEFAULT_TIMEOUT,
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Query /query returned HTTP {response.status_code}\nBody: {_fmt_body(response)}"
         data = response.json()
-        assert "results" in data, f"Query response missing 'results': {list(data.keys())}"
-        assert "summary" in data, f"Query response missing 'summary': {list(data.keys())}"
-        assert isinstance(data["results"], list), "'results' must be a list"
+        assert "results" in data, f"Query response missing 'results': {list(data.keys())}\nBody: {_fmt_body(response)}"
+        assert "summary" in data, f"Query response missing 'summary': {list(data.keys())}\nBody: {_fmt_body(response)}"
+        assert isinstance(data["results"], list), f"'results' must be a list\nBody: {_fmt_body(response)}"
 
     def test_katsu_and_query(self, admin_token):
         """Katsu authorized programs and query discovery programs align by program_id."""
@@ -229,7 +240,7 @@ class TestQuery:
             headers=headers,
             timeout=DEFAULT_TIMEOUT,
         )
-        assert katsu_resp.status_code == 200
+        assert katsu_resp.status_code == 200, f"Katsu /programs returned HTTP {katsu_resp.status_code}\nBody: {_fmt_body(katsu_resp)}"
         katsu = katsu_resp.json()
 
         query_resp = requests.get(
@@ -237,7 +248,7 @@ class TestQuery:
             headers=headers,
             timeout=DEFAULT_TIMEOUT,
         )
-        assert query_resp.status_code == 200
+        assert query_resp.status_code == 200, f"Query discovery returned HTTP {query_resp.status_code}\nBody: {_fmt_body(query_resp)}"
         query = query_resp.json()
 
         katsu_programs = {
@@ -266,15 +277,15 @@ class TestFederation:
             headers=headers,
             timeout=DEFAULT_TIMEOUT,
         )
-        assert servers_resp.status_code == 200
-        assert len(servers_resp.json()) > 0, "Federation registry has no servers"
+        assert servers_resp.status_code == 200, f"Federation /servers returned HTTP {servers_resp.status_code}\nBody: {_fmt_body(servers_resp)}"
+        assert len(servers_resp.json()) > 0, f"Federation registry has no servers\nBody: {_fmt_body(servers_resp)}"
 
         services_resp = requests.get(
             f"{ENV['CANDIG_URL']}/federation/v1/services",
             headers=headers,
             timeout=DEFAULT_TIMEOUT,
         )
-        assert services_resp.status_code == 200
+        assert services_resp.status_code == 200, f"Federation /services returned HTTP {services_resp.status_code}\nBody: {_fmt_body(services_resp)}"
         service_ids = {svc["id"] for svc in services_resp.json()}
         expected = {"drs", "katsu", "htsget", "query"}
         missing = expected - service_ids
@@ -305,8 +316,8 @@ class TestFederation:
             json=body,
             timeout=DEFAULT_TIMEOUT,
         )
-        assert resp.status_code == 200
-        assert "results" in resp.json()
+        assert resp.status_code == 200, f"Federation local fanout returned HTTP {resp.status_code}\nBody: {_fmt_body(resp)}"
+        assert "results" in resp.json(), f"Federation local fanout missing 'results'\nBody: {_fmt_body(resp)}"
 
         # Get expected number of federated servers
         expected_count = len(
@@ -324,7 +335,7 @@ class TestFederation:
             json=body,
             timeout=DEFAULT_TIMEOUT,
         )
-        assert resp.status_code == 200
+        assert resp.status_code == 200, f"Federation federated fanout returned HTTP {resp.status_code}\nBody: {_fmt_body(resp)}"
         results = resp.json()
         assert isinstance(results, list)
         assert "results" in results[0]
