@@ -69,12 +69,17 @@ class TestInfrastructure:
         assert "grant_types_supported" in response.json(), f"Missing 'grant_types_supported' in Keycloak config\nBody: {_fmt_body(response)}"
 
     def test_token_valid(self, admin_token):
-        """Provided token is accepted by ingest service."""
+        """Provided token is recognized as site admin by the ingest service."""
         response = requests.get(
-            f"{ENV['CANDIG_URL']}/ingest/service-info",
+            f"{ENV['CANDIG_URL']}/{ENV['CANDIG_ENV']['TYK_INGEST_API_LISTEN_PATH']}/user/pending",
             headers=_auth_headers(admin_token),
             timeout=DEFAULT_TIMEOUT,
         )
+        if response.status_code == 403:
+            pytest.exit(
+                "Token is not a site admin token — stopping the rest of the tests.",
+                returncode=1,
+            )
         if response.status_code != 200:
             pytest.exit(
                 f"Token validation failed (HTTP {response.status_code}) — stopping the rest of the tests.\nBody: {_fmt_body(response)}",
