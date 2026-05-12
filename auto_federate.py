@@ -57,9 +57,14 @@ servers = requests.get(f"{os.environ['CANDIG_URL']}/federation/v1/servers",
         headers=candig_headers).json()
 server_ids = [server['id'] for server in servers]
 
-success_payload = {
-    "text": f"{os.environ['FEDERATION_SELF_SERVER_ID']} successfully added: " +
-            f"{', '.join(server_ids)}"
-}
-requests.post(os.environ['HOOK_URL'], json=success_payload)
+if len(server_ids) > 1:
+    payload = {
+        "text": f"{os.environ['FEDERATION_SELF_SERVER_ID']} successfully added: " +
+                f"{', '.join(server_ids)}"
+    }
+else:
+    payload = {
+        "text": f"{os.environ['FEDERATION_SELF_SERVER_ID']} found no other servers"
+    }
+requests.post(os.environ['HOOK_URL'], json=payload)
 
