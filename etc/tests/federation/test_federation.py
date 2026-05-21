@@ -89,10 +89,10 @@ def test_all_service_info():
     }
     endpoints = {
         # all of these endpoints should return JSON
-        "htsget": f"ga4gh/drs/v1/service-info",
+        "htsget": f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/beacon/v2/service-info",
         "katsu": f"v3/service-info",
         # "rnaget": f"service-info",
-        "query": f"service-info",
+        "query": f"query/service-info",
     }
     responses = []
     for module in modules:
