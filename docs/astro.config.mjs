@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi'
 import starlightUtils from "@lorenzo_lewis/starlight-utils";
 import starlightLinksValidator from 'starlight-links-validator';
+import tailwindcss from '@tailwindcss/vite';
 
 import icon from 'astro-icon';
 
@@ -13,6 +14,9 @@ import d2 from 'astro-d2';
 export default defineConfig({
     site: 'https://candig.github.io',
     base: 'CanDIGv2',
+    vite: {
+        plugins: [tailwindcss()]
+    },
     integrations: [
         d2({output: "d2"}),
         icon({
@@ -50,43 +54,43 @@ export default defineConfig({
             {
                 base: 'technical/ingest-api',
                 label: 'ingest api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-ingest/refs/heads/stable/ingest_openapi.yaml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-ingest/refs/heads/develop/ingest_openapi.yaml',
                 collapsed: true
             },
             {
                 base: 'technical/query-api',
                 label: 'query api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-query/refs/heads/stable/query_server/openapi.yaml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/candigv2-query/refs/heads/develop/query_server/openapi.yaml',
                 collapsed: true
             },
             {
                 base: 'technical/katsu-api',
                 label: 'katsu api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/katsu/refs/heads/stable/chord_metadata_service/mohpackets/docs/schemas/schema.yml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/katsu/refs/heads/develop/chord_metadata_service/mohpackets/docs/schemas/schema_docs.yml',
                 collapsed: true
             },
             {
                 base: 'technical/drs/drs-api',
                 label: 'drs api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/drs-service/refs/heads/stable/drs_server/drs_openapi.yaml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/drs-service/refs/heads/develop/drs_server/drs_openapi.yaml',
                 collapsed: true
             },
             {
                 base: 'technical/htsget/beacon-api',
                 label: 'htsget beacon api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/stable/htsget_server/beacon_openapi.yaml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/develop/htsget_server/beacon_openapi.yaml',
                 collapsed: true
             },
             {
                 base: 'technical/htsget/operations',
                 label: 'htsget operations api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/stable/htsget_server/htsget_openapi.yaml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/htsget_app/refs/heads/develop/htsget_server/htsget_openapi.yaml',
                 collapsed: true
             },
         {
                 base: 'technical/federation-api',
                 label: 'federation api',
-                schema: 'https://raw.githubusercontent.com/CanDIG/federation_service/refs/heads/stable/candig_federation/federation.yaml',
+                schema: 'https://raw.githubusercontent.com/CanDIG/federation_service/refs/heads/develop/candig_federation/federation.yaml',
                 collapsed: true
             },
         ])
@@ -181,6 +185,7 @@ export default defineConfig({
                     [
                         { label: 'Architecture', slug: 'technical/architecture' },
                         { label: 'Docker and submods', slug: 'technical/docker-and-submodules' },
+                        { label: 'API docs', slug: 'technical/api-docs' },
                         ...openAPISidebarGroups,
                     ]
                 }
@@ -189,5 +194,5 @@ export default defineConfig({
             ]
         },
     ],
-        }), d2()]
+        })]
 });

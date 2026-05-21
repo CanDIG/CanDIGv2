@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
     --sl-text-5xl:1.618rem;
     --sl-text-4xl:1.5rem;
