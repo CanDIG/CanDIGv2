@@ -354,7 +354,7 @@ Next up, you might like to take a look at the documentation for [ingesting data]
 
 Below are some common issues that our users have encountered. If you run into any other issues not addressed here, please reach out via a github issue in this repo.
 
-On some machines (MacOS), if you get an error something like:
+On some machines (Linux/MacOS), if you get an error something like:
 
 ```bash
 Please ensure the value of $CANDIG_DOMAIN in your .env file points to this machine
@@ -362,7 +362,7 @@ This should either be: 1) your local IP address, as assigned by your local netwo
 2) a domain name that resolves to this IP address
 ```
 
-it may be necessary to add the following to `/etc/hosts`:
+Or repeated problems when trying to build keycloak, it may be necessary to add the following to `/etc/hosts`:
 
 In a terminal, run the following commands
 
