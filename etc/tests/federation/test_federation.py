@@ -358,7 +358,7 @@ def test_querying_site_query_authorized_remote_test_dataset():
     # Step 1: can we do a discovery query successfully to all sites?
     body = {
         "method": "GET",
-        "path": "discovery/programs",
+        "path": "query/discovery/programs",
         "payload": {},
         "service": "query"
     }
@@ -384,7 +384,7 @@ def test_querying_site_query_authorized_remote_test_dataset():
     programs -= {"TEST_FEDERATE"}
     body = {
         "method": "GET",
-        "path": "query",
+        "path": "query/query",
         "payload": {"exclude_programs": ",".join(programs)},
         "service": "query"
     }
@@ -417,7 +417,7 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
     # Step 1: can we do a discovery query successfully to all sites?
     body = {
         "method": "GET",
-        "path": "discovery/programs",
+        "path": "query/discovery/programs",
         "payload": {},
         "service": "query"
     }
@@ -443,7 +443,7 @@ def test_querying_site_query_unauthorized_remote_test_dataset():
     programs -= {"TEST_FEDERATE"}
     body = {
         "method": "GET",
-        "path": "query",
+        "path": "query/query",
         "payload": {"exclude_programs": ",".join(programs)},
         "service": "query"
     }
@@ -493,7 +493,7 @@ def test_remove_servers():
         "service": "htsget",
         "method": "GET",
         "payload": {},
-        "path": "beacon/v2/service-info",
+        "path": "htsget/beacon/v2/service-info",
     }
     response = requests.post(
         f"{ENV['CANDIG_URL']}/federation/v1/fanout", headers=headers, json=body
