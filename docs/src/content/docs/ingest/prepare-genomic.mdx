@@ -68,7 +68,8 @@ The volumes section in the docker compose file should look something like the fo
 
 ```yaml
 volumes :
-  - <whatever existing volumne>
+  - htsget-data:/data
+  - <whatever other existing volume>
   - /source/folder/path/dir1:/data/dir1:ro
   - /source/folder/path/dir2:/data/dir2:ro
   - /source/folder/path/dir3:/data/dir3:ro
