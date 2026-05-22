@@ -61,7 +61,7 @@ Once this configuration is completed, you can refer to files in the configured s
 To configure an NFS mount you will need to:
 
 1. Get permissions and assistance from system administrators to mount the volumes to the server running the CanDIG stack
-2. Add the relevant volumes to the [htsget_app docker-compose file](https://github.com/CanDIG/CanDIGv2/blob/stable/lib/htsget/docker-compose.yml), [drs docker-compose file](https://github.com/CanDIG/CanDIGv2/blob/develop/lib/drs/docker-compose.yml) and [candig-ingest docker-compose file](https://github.com/CanDIG/CanDIGv2/blob/develop/lib/candig-ingest/docker-compose.yml)
+2. Add the relevant volumes to the [htsget_app docker-compose file](https://github.com/CanDIG/CanDIGv2/blob/stable/lib/htsget/docker-compose.yml), [drs docker-compose file](https://github.com/CanDIG/CanDIGv2/blob/stable/lib/drs/docker-compose.yml), [rnaget docker-compose](https://github.com/CanDIG/CanDIGv2/blob/develop/lib/rnaget/docker-compose.yml) and [candig-ingest docker-compose file](https://github.com/CanDIG/CanDIGv2/blob/stable/lib/candig-ingest/docker-compose.yml)
 3. Ensure the relevant user inside the docker container has the right permissions to access the mounts and databases
 
 The volumes section in the docker compose file should look something like the following which will give read only access to each listed folder:
@@ -91,7 +91,7 @@ The paths will be something like (note the three slashes `///`):
 file:///data/dir1/my_bam_file.bam
 ```
 
-Repeat the same process as above with the drs and candig-ingest docker compose files.
+Repeat the same process as above with the drs, rnaget and candig-ingest docker compose files.
 
 </details>
 
