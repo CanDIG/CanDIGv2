@@ -299,7 +299,7 @@ class TestFederation:
         "service,path",
         [
             ("katsu", "v3/service-info"),
-            ("htsget", "htsget/v1/reads/service-info"),
+            ("htsget", f"{ENV['CANDIG_ENV']['TYK_HTSGET_API_LISTEN_PATH']}/htsget/v1/reads/service-info"),
         ],
     )
     def test_fanout(self, admin_token, service, path):
