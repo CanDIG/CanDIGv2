@@ -400,10 +400,36 @@ def clean_up_user(user_name):
     assert (delete_response.status_code == 200 or delete_response.status_code == HTTPStatus.NO_CONTENT or delete_response.status_code == HTTPStatus.NOT_FOUND)
 
 
+def clean_up_program_rnaget(program_id, headers):
+    """
+    Removes rnaget experiment_results
+    """
+    list_response = requests.get(
+        f"{ENV['CANDIG_ENV']['DRS_PUBLIC_URL']}/ga4gh/drs/v1/objects",
+        params={"program_id": program_id},
+        headers=headers,
+    )
+    if list_response.status_code != 200:
+        print(f"rnaget cleanup: skipping {program_id}, drs list status {list_response.status_code}")
+        return
+    for drs_obj in list_response.json() or []:
+        if drs_obj.get("description") not in ("wgs", "wts"):
+            continue
+        experiment_id = drs_obj.get("id")
+        if not experiment_id:
+            continue
+        delete_response = requests.delete(
+            f"{ENV['CANDIG_URL']}/rnaget/experiment/{experiment_id}",
+            headers=headers,
+        )
+        print(f"rnaget experiment {experiment_id} delete status: {delete_response.status_code}")
+        assert delete_response.status_code in (200, 204, HTTPStatus.NOT_FOUND)
+
+
 def clean_up_program(test_id):
     """
-    Deletes a program and all related objects in katsu, htsget and opa. Expected either
-    successful delete or not found if the programs are not ingested.
+    Deletes a program and all related objects in katsu, htsget, rnaget and opa.
+    Expected either successful delete or not found if the programs are not ingested.
     """
     print(f"deleting {test_id}")
     site_admin_token = get_site_admin_token()
@@ -411,6 +437,7 @@ def clean_up_program(test_id):
         "Authorization": f"Bearer {site_admin_token}",
         "Content-Type": "application/json; charset=utf-8",
     }
+    clean_up_program_rnaget(test_id, headers)
 
     # delete program
     delete_response = requests.delete(f"{ENV['CANDIG_ENV']['CANDIG_INGEST_PUBLIC_URL']}/program/{test_id}",
