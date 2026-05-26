@@ -544,10 +544,27 @@ ifeq ($(ENABLE_ROPC),'AUTH_CODE')
 	source ./env.sh; python pytest-tokens.py
 endif
 ifeq ($(KEEP_TEST_DATA),true)
-	source ./env.sh; pytest -v --color=yes ./etc/tests/integration -k 'not test_clean_up' $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
+	source ./env.sh; pytest -v --color=yes ./etc/tests/integration/test_integration.py -k 'not test_clean_up' $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 else
-	source ./env.sh; pytest -v --color=yes ./etc/tests/integration $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
+	source ./env.sh; pytest -v --color=yes ./etc/tests/integration/test_integration.py $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 endif
+
+#>>>
+# run production-safe integration tests
+#<<<
+.PHONY: test-integration-prod
+test-integration-prod:
+	mkdir -p tmp/test
+	@if [ -z "$$SITE_ADMIN_TOKEN" ]; then \
+		echo "Error: SITE_ADMIN_TOKEN is not set."; \
+		echo "Usage: make test-integration-prod SITE_ADMIN_TOKEN=<token>"; \
+		exit 1; \
+	fi
+	@python ./settings.py
+	@source ./env.sh; SITE_ADMIN_TOKEN="$$SITE_ADMIN_TOKEN" pytest -v --color=yes \
+		./etc/tests/integration/test_integration_prod.py \
+		$(ARGS) \
+		--report-log=./tmp/test/test-integration-prod_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 
 # Run a single test by using its name and print out results whether failing or passing
 # note some tests are dependent on others so doesn't always work as expected
