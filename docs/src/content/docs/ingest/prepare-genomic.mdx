@@ -61,7 +61,7 @@ Once this configuration is completed, you can refer to files in the configured s
 To configure an NFS mount you will need to:
 
 1. Get permissions and assistance from system administrators to mount the volumes to the server running the CanDIG stack
-2. Add the relevant volumes to the [htsget_app docker-compose file](https://github.com/CanDIG/CanDIGv2/blob/develop/lib/htsget/docker-compose.yml)
+2. Add the relevant volumes to the [htsget_app docker-compose file](https://github.com/CanDIG/CanDIGv2/blob/stable/lib/htsget/docker-compose.yml), [drs docker-compose file](https://github.com/CanDIG/CanDIGv2/blob/stable/lib/drs/docker-compose.yml), [rnaget docker-compose](https://github.com/CanDIG/CanDIGv2/blob/develop/lib/rnaget/docker-compose.yml) and [candig-ingest docker-compose file](https://github.com/CanDIG/CanDIGv2/blob/stable/lib/candig-ingest/docker-compose.yml)
 3. Ensure the relevant user inside the docker container has the right permissions to access the mounts and databases
 
 The volumes section in the docker compose file should look something like the following which will give read only access to each listed folder:
@@ -69,12 +69,13 @@ The volumes section in the docker compose file should look something like the fo
 ```yaml
 volumes :
   - htsget-data:/data
+  - <whatever other existing volume>
   - /source/folder/path/dir1:/data/dir1:ro
   - /source/folder/path/dir2:/data/dir2:ro
   - /source/folder/path/dir3:/data/dir3:ro
 ```
 
-After making this change you will need to recompose the htsget container.
+After making this change you will need to recompose the container.
 
 To test that htsget_app instance can see the mount as local files run:
 
@@ -89,6 +90,9 @@ The paths will be something like (note the three slashes `///`):
 ```json
 file:///data/dir1/my_bam_file.bam
 ```
+
+Repeat the same process as above with the drs, rnaget and candig-ingest docker compose files.
+
 </details>
 
 Once you have a confirmed the location for all genomic files, you can move on to creating the linking file where these file paths will be used to populate the `access_method`s in the genomic JSON file.
