@@ -433,6 +433,37 @@ def clean_up_program_htsget(program_id):
     assert delete_response.status_code == 200
 
 
+def clean_up_program_rnaget(program_id):
+    """
+    Removes rnaget experiment_results
+    """
+    site_admin_token = get_site_admin_token()
+    headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    list_response = requests.get(
+        f"{ENV['CANDIG_ENV']['DRS_PUBLIC_URL']}/ga4gh/drs/v1/objects",
+        params={"program_id": program_id},
+        headers=headers,
+    )
+    if list_response.status_code != 200:
+        print(f"rnaget cleanup: skipping {program_id}, drs list status {list_response.status_code}")
+        return
+    for drs_obj in list_response.json() or []:
+        if drs_obj.get("description") not in ("wgs", "wts"):
+            continue
+        experiment_id = drs_obj.get("id")
+        if not experiment_id:
+            continue
+        delete_response = requests.delete(
+            f"{ENV['CANDIG_URL']}/rnaget/experiment/{experiment_id}",
+            headers=headers,
+        )
+        print(f"rnaget experiment {experiment_id} delete status: {delete_response.status_code}")
+        assert delete_response.status_code in (200, 204, HTTPStatus.NOT_FOUND)
+
+
 def test_ingest_not_admin_katsu():
     """Test ingest of SYNTH_01 as CANDIG_NOT_ADMIN_USER, without and with program authorization."""
 
@@ -1339,10 +1370,16 @@ def test_query_completeness():
 
 
 def test_clean_up():
-    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01")
-    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02")
-    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_03")
-    clean_up_program(f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_04")
+    programs = [
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01",
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02",
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_03",
+        f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_04",
+    ]
+    for program in programs:
+        clean_up_program_rnaget(program)
+    for program in programs:
+        clean_up_program(program)
 
     clean_up_user(ENV['CANDIG_NOT_ADMIN_USER'])
     clean_up_user(ENV['CANDIG_NOT_ADMIN2_USER'])
