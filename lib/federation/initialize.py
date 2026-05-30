@@ -55,7 +55,7 @@ def main():
     server = get_default_server()
     if json.dumps(server['server'], sort_keys=True) not in json.dumps(response.json(), sort_keys=True):
         print("Adding our server to the federation")
-        requests.request("POST", url, headers=headers, json=server)
+        requests.request("POST", url, headers=headers, json=server, params={"as_self": True})
         response = requests.request("GET", url, headers=headers)
     print(response.text)
 
