@@ -32,6 +32,7 @@ services:
       INDEXING_PATH: /home/candig/tmp/indexer
       INDEXING_SWITCH_FILE: /home/candig/indexer_on
       SEARCH_PATH: /home/candig/tmp/search
+      FAILURE_PATH: /home/candig/tmp/failed
       TESTENV_URL: ${HTSGET_PRIVATE_URL}
       POSTGRES_DATABASE: "genomic"
       POSTGRES_HOST_FILE: "postgres-db"
