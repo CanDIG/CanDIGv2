@@ -2,7 +2,7 @@ name: Deploy redirect to GitHub Pages
 
 on:
   push:
-    branches: [develop, mshadbolt/remove-docs]
+    branches: [develop]
   workflow_dispatch:
 
 permissions:
