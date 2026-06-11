@@ -35,6 +35,7 @@ mkdir:
 	mkdir -p bin
 	mkdir -p $(CONDA_INSTALL)
 	mkdir -p tmp/secrets
+	mkdir -p tmp/backups
 
 
 #>>>
