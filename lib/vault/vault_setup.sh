@@ -4,6 +4,13 @@ set -Euo pipefail
 
 LOGFILE=tmp/progress.txt
 
+# Terminal colors
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+DEFAULT='\033[0m'
+
 # make sure we have all the env vars:
 source env.sh
 
@@ -32,18 +39,28 @@ docker cp lib/vault/tmp/vault-config.json $vault:/vault/config/
 # check to see if we need to restore a backup before initializing a fresh Vault:
 if [[ -f "lib/vault/restore.tar.gz" ]]; then
   echo ">> restoring vault from backup"
-  docker stop $vault
-  pwd=$(pwd)
-  cd lib/vault/tmp
-  tar -xzf $pwd/lib/vault/restore.tar.gz
-  cd $pwd
-  cp lib/vault/tmp/backup/keys.txt tmp/vault/
-  cp lib/vault/tmp/backup/service_stores.txt tmp/vault/
-  docker cp lib/vault/tmp/backup/keys.txt $vault_runner:/vault/config/
-  docker cp lib/vault/tmp/backup/backup.tar.gz $vault_runner:/vault/
-  docker exec $vault_runner bash -c "cd /vault; tar -xzf backup.tar.gz"
-  rm -R lib/vault/tmp/backup
-  mv lib/vault/restore.tar.gz lib/vault/restored.tar.gz
+
+  size="$(wc -c <"lib/vault/restore.tar.gz")"
+
+  if [[ $(($size)) < 50000 ]]; then
+    echo -e "🚨🚨🚨 ${RED}BAD RESTORE FILE${DEFAULT} 🚨🚨🚨"
+    echo "The backup you are restoring from is less than 50kb in size, which is suspiciously small."
+    echo "Creating new vault from scratch."
+    mv lib/vault/restore.tar.gz lib/vault/not_restored.tar.gz
+  else
+    docker stop $vault
+    pwd=$(pwd)
+    cd lib/vault/tmp
+    tar -xzf $pwd/lib/vault/restore.tar.gz
+    cd $pwd
+    cp lib/vault/tmp/backup/keys.txt tmp/vault/
+    cp lib/vault/tmp/backup/service_stores.txt tmp/vault/
+    docker cp lib/vault/tmp/backup/keys.txt $vault_runner:/vault/config/
+    docker cp lib/vault/tmp/backup/backup.tar.gz $vault_runner:/vault/
+    docker exec $vault_runner bash -c "cd /vault; tar -xzf backup.tar.gz"
+    rm -R lib/vault/tmp/backup
+    mv lib/vault/restore.tar.gz lib/vault/restored.tar.gz
+  fi
 fi
 
 # if vault isn't started, start it:
