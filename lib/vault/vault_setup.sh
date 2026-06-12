@@ -46,6 +46,12 @@ if [[ -f "lib/vault/restore.tar.gz" ]]; then
     echo -e "🚨🚨🚨 ${RED}BAD RESTORE FILE${DEFAULT} 🚨🚨🚨"
     echo "The backup you are restoring from is less than 50kb in size, which is suspiciously small."
     echo "Creating new vault from scratch."
+    pwd=$(pwd)
+    cd lib/vault/tmp
+    tar -xzf $pwd/lib/vault/restore.tar.gz
+    cd $pwd
+    cp lib/vault/tmp/backup/service_stores.txt tmp/vault/
+    rm -R lib/vault/tmp/backup
     mv lib/vault/restore.tar.gz lib/vault/not_restored.tar.gz
   else
     docker stop $vault
