@@ -45,19 +45,19 @@ if [[ -f "lib/vault/restore.tar.gz" ]]; then
   if [[ $(($size)) < 50000 ]]; then
     echo -e "🚨🚨🚨 ${RED}BAD RESTORE FILE${DEFAULT} 🚨🚨🚨"
     echo "The backup you are restoring from is less than 50kb in size, which is suspiciously small."
-    docker stop $vault
-    pwd=$(pwd)
-    cd lib/vault/tmp
-    tar -xzf $pwd/lib/vault/restore.tar.gz
-    cd $pwd
-    cp lib/vault/tmp/backup/keys.txt tmp/vault/
-    cp lib/vault/tmp/backup/service_stores.txt tmp/vault/
-    docker cp lib/vault/tmp/backup/keys.txt $vault_runner:/vault/config/
-    docker cp lib/vault/tmp/backup/backup.tar.gz $vault_runner:/vault/
-    docker exec $vault_runner bash -c "cd /vault; tar -xzf backup.tar.gz"
-    rm -R lib/vault/tmp/backup
-    mv lib/vault/restore.tar.gz lib/vault/restored.tar.gz
   fi
+  docker stop $vault
+  pwd=$(pwd)
+  cd lib/vault/tmp
+  tar -xzf $pwd/lib/vault/restore.tar.gz
+  cd $pwd
+  cp lib/vault/tmp/backup/keys.txt tmp/vault/
+  cp lib/vault/tmp/backup/service_stores.txt tmp/vault/
+  docker cp lib/vault/tmp/backup/keys.txt $vault_runner:/vault/config/
+  docker cp lib/vault/tmp/backup/backup.tar.gz $vault_runner:/vault/
+  docker exec $vault_runner bash -c "cd /vault; tar -xzf backup.tar.gz"
+  rm -R lib/vault/tmp/backup
+  mv lib/vault/restore.tar.gz lib/vault/restored.tar.gz
 fi
 
 # if vault isn't started, start it:
