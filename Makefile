@@ -648,3 +648,4 @@ restore-vault:
 	-$(MAKE) build-vault
 	-$(MAKE) compose-vault
 	-$(MAKE) compose-opa
+	-$(MAKE) compose-query
