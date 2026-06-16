@@ -35,6 +35,7 @@ mkdir:
 	mkdir -p bin
 	mkdir -p $(CONDA_INSTALL)
 	mkdir -p tmp/secrets
+	mkdir -p tmp/backups
 
 
 #>>>
@@ -637,6 +638,10 @@ backup-vault:
 # if there is a restore file available, restore it and then run compose-opa again
 restore-vault:
 	ls lib/vault/restore.tar.gz
+	@bash lib/vault/check_restore.sh
+	@if [[ $$? -eq 1 ]]; then \
+		exit 0; \
+	fi
 	-$(MAKE) clean-vault
 	-$(MAKE) secret-vault-approle-token
 	-$(MAKE) docker-volumes
