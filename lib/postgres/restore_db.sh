@@ -13,7 +13,7 @@ container=$(docker ps --format "{{.Names}}" | grep ${module}_1 | awk '{print $1}
 # look for database backup to restore
 restore=$(cat lib/$module/restore.txt)
 if [[ $? -eq 0 ]]; then
-    ls $restore
+    head $restore | grep -q "PostgreSQL database dump"
     if [[ $? -eq 0 ]]; then
         echo "restoring from backup file" $restore
         docker stop $container
@@ -24,5 +24,8 @@ if [[ $? -eq 0 ]]; then
         docker exec $postgres sh -c "rm /var/lib/postgresql/data/${module}_restore.sql"
         mv lib/$module/restore.txt lib/$module/restored.txt
         docker start $container
+    else
+        echo -e "🚨🚨🚨 Error! Restore file does not point to a valid sql dump file 🚨🚨🚨"
+        exit 1
     fi
 fi
