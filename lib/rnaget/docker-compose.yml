@@ -14,10 +14,10 @@ services:
       - CORS_ORIGINS="*"
       - BENTO_AUTHZ_SERVICE_URL=""
       - OPA_URL=${OPA_PRIVATE_URL}
-      - DB_HOST=postgres-db
+      - DB_HOST=${DB_PATH}
       - DB_PORT=5432
       - DB_USER=${DEFAULT_ADMIN_USER}
-      - DB_NAME=rnaget_db
+      - DB_NAME=${RNAGET_DB}
       - DB_PASSWORD_FILE=/run/secrets/db_password
       - WORKERS=2
     extra_hosts:

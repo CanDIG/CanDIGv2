@@ -6,4 +6,4 @@ LOGFILE=$PWD/tmp/progress.txt
 
 # This script runs before the container is composed.
 
-bash lib/postgres/restore_db.sh drs drs
+bash lib/postgres/restore_db.sh $DRS_DB drs
