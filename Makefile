@@ -165,6 +165,7 @@ build-%:
 clean-%: warn
 	echo "    started clean-$*"
 	source setup_hosts.sh
+	python settings.py; source env.sh; \
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
 	-docker volume rm `docker volume ls --filter name=$* -q`
@@ -666,3 +667,20 @@ restore-vault:
 	-$(MAKE) compose-vault
 	-$(MAKE) compose-opa
 	-$(MAKE) compose-query
+
+
+# back up all postgres databases
+backup-all-postgres:
+	$(foreach DB, $(CANDIG_DB_NAMES), bash lib/postgres/backup_db.sh $(DB);)
+	@echo
+	@echo -e "🚨🚨🚨 Copy these backup files to an archival location! 🚨🚨🚨"
+
+
+# for the given postgres-using module, if there is a restore file available, restore it
+restore-postgres-%:
+	@ls lib/$*/restore.txt && { make build-$*; make compose-$*; } || echo "To restore a database, a file at lib/$*/restore.txt needs to be created that contains the absolute path to the backup sql file."
+
+
+# restore all of the postgres databases
+restore-all-postgres:
+	$(foreach MODULE, $(CANDIG_DB_MODULES), $(MAKE) restore-postgres-$(MODULE);)
