@@ -19,6 +19,23 @@ CONDA = $(CONDA_INSTALL)/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/etc/profile.d/conda.sh
 
 
+# this target prompts the user to confirm that they understand; the .INTERMEDIATE target designates the touched file as needing to be cleaned up at the end of make.
+# it should only need to be run on non-debug-mode
+warn:
+ifeq ($(CANDIG_DEBUG_MODE), 0)
+	@if [ -e warn ]; \
+	then exit 0; \
+	else \
+	echo "Warning: This command will delete production data!"; \
+	echo "Please make sure you've backed up your data with 'make backup-vault' and 'make backup-all-postgres'."; \
+	echo Enter "I UNDERSTAND" to continue.; \
+	read line; if [[ $$line = "I UNDERSTAND" ]]; then touch warn; else exit 1; fi \
+	fi
+endif
+
+.INTERMEDIATE: warn
+
+
 .PHONY: all
 all:
 	@echo "CanDIGv2 Makefile Deployment"
@@ -145,7 +162,7 @@ build-%:
 # make clean-%
 
 #<<<
-clean-%:
+clean-%: warn
 	echo "    started clean-$*"
 	source setup_hosts.sh
 	export SERVICE_NAME=$*; \
@@ -163,7 +180,7 @@ clean-%:
 
 #<<<
 .PHONY: clean-all
-clean-all: clean-logs clean-compose clean-containers clean-secrets \
+clean-all: warn clean-logs clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images# clean-bin
 	rm -f tmp/containers.txt
 
@@ -174,7 +191,7 @@ clean-all: clean-logs clean-compose clean-containers clean-secrets \
 
 #<<<
 .PHONY: clean-authx
-clean-authx:
+clean-authx: warn
 	mv tmp/vault/service_stores.txt tmp/vault_service_stores.txt
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
 	-mkdir tmp/vault
@@ -183,7 +200,7 @@ clean-authx:
 
 # Empties error and progress logs
 .PHONY: clean-logs
-clean-logs:
+clean-logs: warn
 	> $(LOGFILE)
 
 #>>>
@@ -193,7 +210,7 @@ clean-logs:
 
 #<<<
 .PHONY: clean-bin
-clean-bin:
+clean-bin: warn
 	rm -f bin/*
 
 
@@ -203,7 +220,7 @@ clean-bin:
 
 #<<<
 .PHONY: clean-compose
-clean-compose:
+clean-compose: warn
 	source setup_hosts.sh; \
 	$(eval CANDIG_MODULES := $(filter-out logging,$(CANDIG_MODULES))) \
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) clean-$(MODULE);) \
