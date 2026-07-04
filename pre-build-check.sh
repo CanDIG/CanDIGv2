@@ -42,7 +42,7 @@ else
     echo "$DIFF_OUT"
     while [[ "$SILENT_MODE" != 1 ]]
     do
-        read -r -p 'Do you want to continue? (y/n)' choice
+        read -r -p 'Do you want to continue? (y/n) ' choice
         case "$choice" in
           n|N) exit 1;;
           y|Y) break;;
@@ -80,3 +80,18 @@ else
     fi
 fi
 
+# Check 7: (ONLY FOR PRODUCTION) Are there recent backups?
+if [[ $CANDIG_DEBUG_MODE == 0 ]]; then
+    echo
+    echo "Backup files located at ${BACKUP_LOCATION}:"
+    ls -l $BACKUP_LOCATION
+    while [[ "$SILENT_MODE" != 1 ]]
+    do
+        read -r -p 'Do these backups look correct and up to date? (y/n) ' choice
+        case "$choice" in
+          n|N) echo "You can create new backups with 'make backup-vault' and 'make backup-all-postgres'."; exit 1;;
+          y|Y) break;;
+          *) echo 'Response not valid';;
+        esac
+    done
+fi
