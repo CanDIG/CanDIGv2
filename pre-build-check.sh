@@ -84,7 +84,7 @@ fi
 if [[ $CANDIG_DEBUG_MODE == 0 ]]; then
     echo
     echo "Backup files located at ${BACKUP_LOCATION}:"
-    ls -lh $BACKUP_LOCATION
+    ls -lh $BACKUP_LOCATION | tail -n +2
     while [[ "$SILENT_MODE" != 1 ]]
     do
         read -r -p 'Do these backups look correct and up to date? (y/n) ' choice
