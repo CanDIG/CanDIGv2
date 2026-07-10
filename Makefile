@@ -671,9 +671,13 @@ restore-vault:
 
 # back up all postgres databases
 backup-all-postgres:
+ifndef $(CANDIG_DB_NAMES)
+	@echo "Your .env file needs to be updated from example.env: it does not contain CANDIG_DB_NAMES"
+else
 	$(foreach DB, $(CANDIG_DB_NAMES), bash lib/postgres/backup_db.sh $(DB);)
 	@echo
 	@echo -e "🚨🚨🚨 Copy these backup files to an archival location! 🚨🚨🚨"
+endif
 
 
 restore_valid.%:
@@ -694,4 +698,8 @@ restore-postgres-%: restore_valid.% ;
 
 # restore all of the postgres databases
 restore-all-postgres:
+ifndef $(CANDIG_DB_MODULES)
+	@echo "Your .env file needs to be updated from example.env: it does not contain CANDIG_DB_MODULES"
+else
 	$(foreach MODULE, $(CANDIG_DB_MODULES), $(MAKE) restore-postgres-$(MODULE);)
+endif
