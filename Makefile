@@ -676,8 +676,19 @@ backup-all-postgres:
 	@echo -e "🚨🚨🚨 Copy these backup files to an archival location! 🚨🚨🚨"
 
 
+restore_valid.%:
+	@if [ -e lib/$*/restore.txt ]; then \
+	restore=$(shell cat lib/$*/restore.txt); \
+	head $$restore | grep -q "PostgreSQL database dump"; \
+	if [[ $$? -eq 0 ]]; then touch restore_valid.$*; else \
+	echo "File $$restore does not exist or is not a valid sql file"; exit 1; fi; \
+	fi
+
+
+.INTERMEDIATE: restore_valid.%
+
 # for the given postgres-using module, if there is a restore file available, restore it
-restore-postgres-%:
+restore-postgres-%: restore_valid.% ;
 	@ls lib/$*/restore.txt && { make build-$*; make compose-$*; } || echo "To restore a database, a file at lib/$*/restore.txt needs to be created that contains the absolute path to the backup sql file."
 
 
