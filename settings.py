@@ -45,6 +45,7 @@ def get_env_value(key):
 
 def get_env():
     vars = {}
+    vars["CANDIG_ENV"] = INTERPOLATED_ENV
     vars["LOGFILE"] = get_env_value("LOGFILE")
     vars["CANDIG_URL"] = get_env_value("TYK_LOGIN_TARGET_URL")
     vars["CANDIG_CLIENT_ID"] = get_env_value("KEYCLOAK_CLIENT_ID")
@@ -63,6 +64,20 @@ def get_env():
     vars["CANDIG_DEBUG_MODE"] = get_env_value("CANDIG_DEBUG_MODE")
     vars["CANDIG_USER_KEY"] = get_env_value("CANDIG_USER_KEY")
     vars["VAULT_SERVICE_PUBLIC_URL"] = get_env_value("VAULT_SERVICE_PUBLIC_URL")
+    vars["POSTGRES_PASSWORD_FILE"] = os.path.abspath(f"tmp/postgres/db-secret")
+    vars["FEDERATION_SELF_SERVER_ID"] = get_env_value("FEDERATION_SELF_SERVER_ID")
+    vars["CANDIG_SITE_LOCATION"] = get_env_value("CANDIG_SITE_LOCATION")
+    vars["OIDC_CHAIN"] = get_env_value("OIDC_CHAIN").lower()
+    vars["KEYCLOAK_SERVICE_CLIENT_ID"] = get_env_value("KEYCLOAK_SERVICE_CLIENT_ID").lower()
+    vars["AUTH_ACCEPT_URL"] = get_env_value("AUTH_ACCEPT_URL")
+
+    # postgres envs
+    vars["DB_PATH"] = "postgres-db"
+    vars["DRS_DB"] = get_env_value("DRS_DB")
+    vars["HTSGET_DB"] = get_env_value("HTSGET_DB")
+    vars["KATSU_DB"] = get_env_value("KATSU_DB")
+    vars["RNAGET_DB"] = get_env_value("RNAGET_DB")
+
     # vars that come from files:
     if os.path.isfile("tmp/keycloak/client-secret"):
         with open("tmp/keycloak/client-secret") as f:
@@ -76,14 +91,6 @@ def get_env():
     if os.path.isfile("tmp/tyk/secret-key"):
         with open("tmp/tyk/secret-key") as f:
             vars["TYK_SECRET_KEY"] = f.read().splitlines().pop()
-    vars["POSTGRES_PASSWORD_FILE"] = os.path.abspath(f"tmp/postgres/db-secret")
-    vars["CANDIG_ENV"] = INTERPOLATED_ENV
-    vars["DB_PATH"] = "postgres-db"
-    vars["FEDERATION_SELF_SERVER_ID"] = get_env_value("FEDERATION_SELF_SERVER_ID")
-    vars["CANDIG_SITE_LOCATION"] = get_env_value("CANDIG_SITE_LOCATION")
-    vars["OIDC_CHAIN"] = get_env_value("OIDC_CHAIN").lower()
-    vars["KEYCLOAK_SERVICE_CLIENT_ID"] = get_env_value("KEYCLOAK_SERVICE_CLIENT_ID").lower()
-    vars["AUTH_ACCEPT_URL"] = get_env_value("AUTH_ACCEPT_URL")
 
     # test users (note that they must be all lowercase or keycloak setup fails):
     if get_env_value("DEFAULT_SITE_ADMIN_USER") is not None:
