@@ -112,7 +112,6 @@ build-all: mkdir
 
 # Setup the entire stack
 	$(MAKE) init-docker
-	pip install --upgrade setuptools
 	pip install -U -r etc/venv/requirements.txt
 	touch tmp/containers.txt
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
