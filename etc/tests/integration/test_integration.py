@@ -275,6 +275,33 @@ def test_user_authorizations(user, program):
     katsu_datasets = get_katsu_datasets(user)
     assert program in katsu_datasets
 
+    # check to see that the user is in the program's dac_authorization
+    response = requests.get(
+        f"{ENV['CANDIG_ENV']['CANDIG_INGEST_PUBLIC_URL']}/program/{program}/dac_authorization",
+        headers=headers
+    )
+    print(f"{response.text}")
+    assert response.status_code == 200
+    assert username in response.json()
+
+    # if we re-post the program, are the dacs still there?
+    prog_response = requests.get(
+        f"{ENV['CANDIG_ENV']['CANDIG_INGEST_PUBLIC_URL']}/program/{program}",
+        headers=headers
+    )
+    response = requests.post(
+        f"{ENV['CANDIG_ENV']['CANDIG_INGEST_PUBLIC_URL']}/program/{program}/dac_authorization",
+        headers=headers, json=prog_response.json()
+    )
+    response = requests.get(
+        f"{ENV['CANDIG_ENV']['CANDIG_INGEST_PUBLIC_URL']}/program/{program}/dac_authorization",
+        headers=headers
+    )
+
+    print(f"{response.text}")
+    assert response.status_code == 200
+    assert username in response.json()
+
     # remove the program
     response = requests.delete(
         f"{ENV['CANDIG_ENV']['CANDIG_INGEST_PUBLIC_URL']}/user/{safe_name}/dac_authorization/{program}",
