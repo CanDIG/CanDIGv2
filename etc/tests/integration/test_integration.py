@@ -362,6 +362,41 @@ def test_add_remove_site_admin():
     test_site_admin("CANDIG_NOT_ADMIN", False)
 
 
+def test_site_role_assignment():
+    site_admin_token = get_site_admin_token()
+    site_admin_headers = {
+        "Authorization": f"Bearer {site_admin_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    user1_token = get_token(username=ENV[f"CANDIG_NOT_ADMIN_USER"], password=ENV[f"CANDIG_NOT_ADMIN_PASSWORD"], access_token=True)
+    user1_headers = {
+        "Authorization": f"Bearer {user1_token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+
+    # assign site curator role to user1
+    response = requests.post(
+        f"{ENV['CANDIG_ENV']['CANDIG_INGEST_PUBLIC_URL']}/site-role/curator/user_id/{ENV['CANDIG_NOT_ADMIN_USER']}",
+        headers=site_admin_headers
+    )
+    assert response.status_code == 200
+
+    # user1 should not be able to assign site admin role
+    response = requests.post(
+        f"{ENV['CANDIG_ENV']['CANDIG_INGEST_PUBLIC_URL']}/site-role/admin/user_id/{ENV['CANDIG_NOT_ADMIN_USER']}",
+        headers=user1_headers
+    )
+    assert response.status_code == 403
+
+    # remove user1 from site curator
+    response = requests.delete(
+        f"{ENV['CANDIG_ENV']['CANDIG_INGEST_PUBLIC_URL']}/site-role/curator/user_id/{ENV['CANDIG_NOT_ADMIN_USER']}",
+        headers=site_admin_headers
+    )
+    assert response.status_code == 200
+
+
 ## Vault tests: can we add an aws access key and retrieve it?
 # def test_s3_credentials():
 #     site_admin_token = get_site_admin_token()
