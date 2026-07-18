@@ -1077,6 +1077,7 @@ def test_verify_htsget(object_id, file_name, user, password):
     }
     # get a GenomicDataDrsObject
     response = requests.get(f"{ENV['CANDIG_ENV']['DRS_PUBLIC_URL']}/ga4gh/drs/v1/objects/{file_name}", headers=headers)
+    print(response.text)
     assert response.status_code == 200
     new_json = response.json()
 
