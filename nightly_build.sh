@@ -49,9 +49,9 @@ fi
 source nightly_env.sh
 
 # Re-initialize conda
-make bin-conda
-source bin/miniconda3/etc/profile.d/conda.sh
-make init-conda
+#make bin-conda
+#source bin/miniforge/etc/profile.d/conda.sh
+#make init-conda
 conda activate candig
 make build-all BUILD_OPTS="--no-cache" ARGS="-s" >tmp/lastbuild.txt 2<&1
 
