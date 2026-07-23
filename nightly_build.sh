@@ -57,10 +57,10 @@ fi
 # Re-source in case anything changed in the .env / nightly_env.sh files
 source nightly_env.sh
 
-make bin-conda
-source bin/miniforge/etc/profile.d/conda.sh
-make init-conda
-conda activate candig
+# make bin-conda
+# source bin/miniforge/etc/profile.d/conda.sh
+# make init-conda
+# conda activate candig
 make build-all BUILD_OPTS="--no-cache" ARGS="-s" >tmp/lastbuild.txt 2>&1
 if [ $? -ne 0 ]; then
     fail "Build failed:\n\`\`\`$(tail tmp/lastbuild.txt)\`\`\`"
