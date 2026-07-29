@@ -93,6 +93,9 @@ fi
 if [[ $CANDIG_DEBUG_MODE == 0 ]]; then
     echo
     echo "Backup files located at ${BACKUP_LOCATION}:"
+    if [ ! -d $BACKUP_LOCATION ]; then
+        mkdir $BACKUP_LOCATION
+    fi
     ls -lh $BACKUP_LOCATION | tail -n +2
     while [[ "$SILENT_MODE" != 1 ]]
     do
