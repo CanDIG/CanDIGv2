@@ -630,7 +630,7 @@ start-all:
 #<<<
 
 .PHONY: rebuild-keep-data
-rebuild-keep-data:
+rebuild-keep-data: warn
 	# Remove the data modules from CANDIG_MODULES
 	$(eval REBUILD_CANDIG_MODULES := $(filter-out $(CANDIG_DATA_MODULES),$(CANDIG_MODULES)))
 	# Clean only the remaining modules
