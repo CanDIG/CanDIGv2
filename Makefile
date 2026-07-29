@@ -18,6 +18,8 @@ SHELL = bash
 CONDA = $(CONDA_INSTALL)/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/etc/profile.d/conda.sh
 
+migrate-env:
+	@bash etc/env/migrate_env.sh
 
 # this target prompts the user to confirm that they understand; the .INTERMEDIATE target designates the touched file as needing to be cleaned up at the end of make.
 # it should only need to be run on non-debug-mode
