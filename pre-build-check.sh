@@ -43,7 +43,11 @@ fi
 if [ "$DIFF_OUT" == "" ]; then
     echo "Your .env matches etc/env/example.env, continuing"
 else
-    echo "Your .env differs from etc/env/example.env:"
+    if [[ $CANDIG_DEBUG_MODE == 1 ]]; then
+        echo "Your .env differs from etc/env/example.env:"
+    else
+        echo "Your .env differs from etc/env/example-production.env:"
+    fi
     echo "$DIFF_OUT"
     while [[ "$SILENT_MODE" != 1 ]]
     do
