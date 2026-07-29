@@ -34,7 +34,12 @@ if [ "$TEST_SUBMODULES" -lt "2" ]; then
 fi
 
 # Check 4: .env matches
-DIFF_OUT=$(diff -I 'VENV_OS=.*' -I 'LOCAL_IP_ADDR=.*' -I '.*KEEP_TEST_DATA=.*' -bwB etc/env/example.env .env)
+if [[ $CANDIG_DEBUG_MODE == 1 ]]; then
+    DIFF_OUT=$(diff -I 'VENV_OS=.*' -I 'LOCAL_IP_ADDR=.*' -I '.*KEEP_TEST_DATA=.*' -bwB etc/env/example.env .env)
+else
+    DIFF_OUT=$(diff -I 'VENV_OS=.*' -I 'LOCAL_IP_ADDR=.*' -I '.*KEEP_TEST_DATA=.*' -bwB etc/env/example-production.env .env)
+fi
+
 if [ "$DIFF_OUT" == "" ]; then
     echo "Your .env matches etc/env/example.env, continuing"
 else
