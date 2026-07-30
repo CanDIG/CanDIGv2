@@ -27,14 +27,15 @@ services:
       VAULT_URL: ${VAULT_PRIVATE_URL}
       DRS_URL: ${DRS_PRIVATE_URL}
       DEBUG_MODE: ${CANDIG_DEBUG_MODE}
-      DB_PATH: "postgres-db"
+      DB_PATH: ${DB_PATH}
       SERVER_LOCAL_DATA: /app/htsget_server/data
       INDEXING_PATH: /home/candig/tmp/indexer
       INDEXING_SWITCH_FILE: /home/candig/indexer_on
       SEARCH_PATH: /home/candig/tmp/search
+      FAILURE_PATH: /home/candig/tmp/failed
       TESTENV_URL: ${HTSGET_PRIVATE_URL}
-      POSTGRES_DATABASE: "genomic"
-      POSTGRES_HOST_FILE: "postgres-db"
+      POSTGRES_DATABASE: ${HTSGET_DB}
+      POSTGRES_HOST_FILE: ${DB_PATH}
       POSTGRES_USERNAME: ${DEFAULT_ADMIN_USER}
       POSTGRES_PASSWORD_FILE: "/run/secrets/postgres-db-secret"
       AGGREGATE_COUNT_THRESHOLD: ${AGGREGATE_COUNT_THRESHOLD}

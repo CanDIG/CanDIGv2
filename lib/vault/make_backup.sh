@@ -16,5 +16,6 @@ cd $(pwd)/tmp/vault
 tar -cz backup > backup.tar.gz
 rm -R backup
 cd $pwd
+mv $(pwd)/tmp/vault/backup.tar.gz $(pwd)/$BACKUP_LOCATION/vault.tar.gz
 
 start=$(docker start $vault)

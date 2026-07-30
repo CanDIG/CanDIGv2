@@ -57,3 +57,15 @@ pnpm-debug.log*
 lib/minio/access-key
 lib/minio/secret-key
 lib/minio/aws-credentials
+
+# Ignore all hidden files and directories except git
+.*
+!/.github/
+!/.git/
+!.gitignore
+!.gitmodules
+
+# Ignore restore/restored files
+lib/*/restore.*
+lib/*/restored.*
+env-*

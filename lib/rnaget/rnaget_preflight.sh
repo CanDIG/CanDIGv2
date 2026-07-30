@@ -12,3 +12,5 @@ cp -r $PWD/lib/rnaget/opa_plugin/* $PWD/lib/rnaget/rnaget/lib/
 cp -r $PWD/lib/rnaget/create_db.sh $PWD/lib/rnaget/rnaget/
 cp -r $PWD/lib/rnaget/run.bash $PWD/lib/rnaget/rnaget/
 cp -r $PWD/lib/rnaget/Dockerfile $PWD/lib/rnaget/rnaget/
+
+bash lib/postgres/restore_db.sh $RNAGET_DB rnaget

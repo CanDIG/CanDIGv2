@@ -4,6 +4,13 @@ set -Euo pipefail
 
 LOGFILE=tmp/progress.txt
 
+# Terminal colors
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+DEFAULT='\033[0m'
+
 # make sure we have all the env vars:
 source env.sh
 
@@ -32,6 +39,13 @@ docker cp lib/vault/tmp/vault-config.json $vault:/vault/config/
 # check to see if we need to restore a backup before initializing a fresh Vault:
 if [[ -f "lib/vault/restore.tar.gz" ]]; then
   echo ">> restoring vault from backup"
+
+  size="$(wc -c <"lib/vault/restore.tar.gz")"
+
+  if (( size < 50000 )); then
+    echo -e "🚨🚨🚨 ${RED}BAD RESTORE FILE${DEFAULT} 🚨🚨🚨"
+    echo "The backup you are restoring from is less than 50kb in size, which is suspiciously small."
+  fi
   docker stop $vault
   pwd=$(pwd)
   cd lib/vault/tmp
@@ -110,9 +124,9 @@ docker exec $vault sh -c "vault login ${key_root}"
 
 # configuration
 # audit file
-echo
-echo ">> enabling audit file"
-docker exec $vault sh -c "vault audit enable file file_path=/vault/vault-audit.log"
+# echo
+# echo ">> enabling audit file"
+# docker exec $vault sh -c "vault audit enable file file_path=/vault/vault-audit.log"
 
 # enable approle
 echo

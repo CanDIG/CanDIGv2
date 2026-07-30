@@ -42,7 +42,7 @@ services:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
     healthcheck:
       test:
-        ["CMD", "curl", "${FEDERATION_SERVICE_URL}/federation/v1/service-info"]
+        ["CMD", "curl", "${FEDERATION_PRIVATE_URL}/v1/service-info"]
       interval: 30s
       timeout: 10s
       retries: 3

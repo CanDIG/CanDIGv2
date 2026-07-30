@@ -1,4 +1,4 @@
-ARG alpine_version
+ARG alpine_version=latest
 FROM alpine:${alpine_version}
 
 LABEL Maintainer="CanDIG Project"

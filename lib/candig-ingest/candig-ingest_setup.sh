@@ -25,17 +25,11 @@ docker restart $ingest
 # If present, create and authorize default site admin as CanDIG authorized user:
 site_admin_token=$(python site_admin_token.py)
 if [[ $CANDIG_SITE_ADMIN_USER != "" ]]; then
-  bash $PWD/exec_with_expected.sh "curl -si \"${CANDIG_URL}/ingest/service-info\" -H \"Authorization: Bearer ${site_admin_token}\"" "200 OK"
-  while [ $? -ne 0 ]
-  do
-    echo "..."
-      sleep 2
-      bash $PWD/exec_with_expected.sh "curl -si \"${CANDIG_URL}/ingest/service-info\" -H \"Authorization: Bearer ${site_admin_token}\"" "200 OK"
-  done
+  bash $PWD/poll_until_live.sh "${CANDIG_URL}/ingest/service-info" $site_admin_token
 
   echo ">> approving $CANDIG_SITE_ADMIN_USER as a CanDIG authorized user"
   bash $PWD/exec_with_expected.sh "curl -sX \"POST\" \"${CANDIG_URL}/ingest/user/pending/request\" -H \"Authorization: Bearer ${site_admin_token}\"" "$CANDIG_SITE_ADMIN_USER"
   bash $PWD/exec_with_expected.sh "curl -sX \"POST\" \"${CANDIG_URL}/ingest/user/pending/${CANDIG_SITE_ADMIN_USER}\" -H \"Authorization: Bearer ${site_admin_token}\"" "$CANDIG_SITE_ADMIN_USER"
 fi
 
-python $PWD/lib/candig-ingest/candigv2-ingest/generate_test_data.py --commit 5d9d97f07ac9c766e240800256c50960021fae0a --prefix $CANDIG_SITE_LOCATION --tmp tmp/data/synthdata --delete
+python $PWD/lib/candig-ingest/candigv2-ingest/generate_test_data.py --commit a7eab6d --prefix $CANDIG_SITE_LOCATION --tmp tmp/data/synthdata --delete

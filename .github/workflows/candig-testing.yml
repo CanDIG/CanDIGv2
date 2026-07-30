@@ -23,7 +23,7 @@ jobs:
        shell: bash -l {0}
     steps:
       - name: Install conda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           miniconda-version: "latest"
           channels: conda-forge, defaults
@@ -31,7 +31,7 @@ jobs:
           auto-update-conda: true
           auto-activate-base: true
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup environment file
         run: |
             cp etc/env/example.env example.env
@@ -47,7 +47,7 @@ jobs:
              make mkdir
       - name: Restore Conda environment cache
         id: cache-conda
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.CONDA }}
           key: ${{ runner.os }}-conda-${{ hashFiles('etc/venv/requirements.txt') }}
@@ -57,7 +57,7 @@ jobs:
         run: |
               make init-conda
       - name: Save Conda cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         if: steps.install-conda.outcome == 'success'
         with:
           path: ${{ env.CONDA }}
@@ -81,18 +81,14 @@ jobs:
               docker cp candigv2_candig-ingest_1:/home/candig/tmp tmp/ingest 2>&1
               mkdir tmp/index
               docker cp candigv2_htsget_1:/home/candig/tmp tmp/index 2>&1
-      - name: Save vault audit logs
-        if: always()
-        run: docker cp candigv2_vault-runner_1:/vault/vault-audit.log tmp/vault_audit.log 2>&1
       - name: Save container and error logs as artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Post-build error log
           path: |
                 tmp/progress.txt
                 tmp/container_logs.txt
-                tmp/vault_audit.log
                 tmp/ingest
                 tmp/index
 

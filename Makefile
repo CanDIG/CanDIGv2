@@ -2,6 +2,7 @@
 
 # import global variables
 env ?= .env
+env += etc/env/versions.env
 
 include $(env)
 export $(shell sed 's/=.*//' $(env))
@@ -16,6 +17,25 @@ SHELL = bash
 
 CONDA = $(CONDA_INSTALL)/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/etc/profile.d/conda.sh
+
+migrate-env:
+	@bash etc/env/migrate_env.sh
+
+# this target prompts the user to confirm that they understand; the .INTERMEDIATE target designates the touched file as needing to be cleaned up at the end of make.
+# it should only need to be run on non-debug-mode
+warn:
+ifeq ($(CANDIG_DEBUG_MODE), 0)
+	@if [ -e warn ]; \
+	then exit 0; \
+	else \
+	echo "Warning: This command will delete production data!"; \
+	echo "Please make sure you've backed up your data with 'make backup-vault' and 'make backup-all-postgres'."; \
+	echo Enter "I UNDERSTAND" to continue.; \
+	read line; if [[ $$line = "I UNDERSTAND" ]]; then touch warn; else exit 1; fi \
+	fi
+endif
+
+.INTERMEDIATE: warn
 
 
 .PHONY: all
@@ -34,6 +54,7 @@ mkdir:
 	mkdir -p bin
 	mkdir -p $(CONDA_INSTALL)
 	mkdir -p tmp/secrets
+	mkdir -p tmp/backups
 
 
 #>>>
@@ -93,7 +114,6 @@ build-all: mkdir
 
 # Setup the entire stack
 	$(MAKE) init-docker
-	pip install --upgrade setuptools
 	pip install -U -r etc/venv/requirements.txt
 	touch tmp/containers.txt
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) build-$(MODULE); $(MAKE) compose-$(MODULE);)
@@ -143,9 +163,10 @@ build-%:
 # make clean-%
 
 #<<<
-clean-%:
+clean-%: warn
 	echo "    started clean-$*"
 	source setup_hosts.sh
+	python settings.py; source env.sh; \
 	export SERVICE_NAME=$*; \
 	docker compose -f lib/candigv2/docker-compose.yml -f lib/$*/docker-compose.yml down || true
 	-docker volume rm `docker volume ls --filter name=$* -q`
@@ -161,7 +182,7 @@ clean-%:
 
 #<<<
 .PHONY: clean-all
-clean-all: clean-logs clean-compose clean-containers clean-secrets \
+clean-all: warn clean-logs clean-compose clean-containers clean-secrets \
 	clean-volumes clean-images# clean-bin
 	rm -f tmp/containers.txt
 
@@ -172,7 +193,7 @@ clean-all: clean-logs clean-compose clean-containers clean-secrets \
 
 #<<<
 .PHONY: clean-authx
-clean-authx:
+clean-authx: warn
 	mv tmp/vault/service_stores.txt tmp/vault_service_stores.txt
 	$(foreach MODULE, $(CANDIG_AUTH_MODULES), $(MAKE) clean-$(MODULE);)
 	-mkdir tmp/vault
@@ -181,7 +202,7 @@ clean-authx:
 
 # Empties error and progress logs
 .PHONY: clean-logs
-clean-logs:
+clean-logs: warn
 	> $(LOGFILE)
 
 #>>>
@@ -191,7 +212,7 @@ clean-logs:
 
 #<<<
 .PHONY: clean-bin
-clean-bin:
+clean-bin: warn
 	rm -f bin/*
 
 
@@ -201,7 +222,7 @@ clean-bin:
 
 #<<<
 .PHONY: clean-compose
-clean-compose:
+clean-compose: warn
 	source setup_hosts.sh; \
 	$(eval CANDIG_MODULES := $(filter-out logging,$(CANDIG_MODULES))) \
 	$(foreach MODULE, $(CANDIG_MODULES), $(MAKE) clean-$(MODULE);) \
@@ -543,10 +564,27 @@ ifeq ($(ENABLE_ROPC),'AUTH_CODE')
 	source ./env.sh; python pytest-tokens.py
 endif
 ifeq ($(KEEP_TEST_DATA),true)
-	source ./env.sh; pytest -v --color=yes ./etc/tests/integration -k 'not test_clean_up' $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
+	source ./env.sh; pytest -v --color=yes ./etc/tests/integration/test_integration.py -k 'not test_clean_up' $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 else
-	source ./env.sh; pytest -v --color=yes ./etc/tests/integration $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
+	source ./env.sh; pytest -v --color=yes ./etc/tests/integration/test_integration.py $(ARGS) --report-log=./tmp/test/test-integration_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 endif
+
+#>>>
+# run production-safe integration tests
+#<<<
+.PHONY: test-integration-prod
+test-integration-prod:
+	mkdir -p tmp/test
+	@if [ -z "$$SITE_ADMIN_TOKEN" ]; then \
+		echo "Error: SITE_ADMIN_TOKEN is not set."; \
+		echo "Usage: make test-integration-prod SITE_ADMIN_TOKEN=<token>"; \
+		exit 1; \
+	fi
+	@python ./settings.py
+	@source ./env.sh; SITE_ADMIN_TOKEN="$$SITE_ADMIN_TOKEN" pytest -v --color=yes \
+		./etc/tests/integration/test_integration_prod.py \
+		$(ARGS) \
+		--report-log=./tmp/test/test-integration-prod_$(shell date +"%Y-%m-%d_%Hh%Mm%Ss").jsonl
 
 # Run a single test by using its name and print out results whether failing or passing
 # note some tests are dependent on others so doesn't always work as expected
@@ -594,7 +632,7 @@ start-all:
 #<<<
 
 .PHONY: rebuild-keep-data
-rebuild-keep-data:
+rebuild-keep-data: warn
 	# Remove the data modules from CANDIG_MODULES
 	$(eval REBUILD_CANDIG_MODULES := $(filter-out $(CANDIG_DATA_MODULES),$(CANDIG_MODULES)))
 	# Clean only the remaining modules
@@ -619,9 +657,50 @@ backup-vault:
 # if there is a restore file available, restore it and then run compose-opa again
 restore-vault:
 	ls lib/vault/restore.tar.gz
+	@bash lib/vault/check_restore.sh
+	@if [[ $$? -eq 1 ]]; then \
+		exit 0; \
+	fi
 	-$(MAKE) clean-vault
 	-$(MAKE) secret-vault-approle-token
 	-$(MAKE) docker-volumes
 	-$(MAKE) build-vault
 	-$(MAKE) compose-vault
 	-$(MAKE) compose-opa
+	-$(MAKE) compose-query
+
+
+# back up all postgres databases
+backup-all-postgres:
+ifndef CANDIG_DB_NAMES
+	@echo "Your .env file needs to be updated from example.env: it does not contain CANDIG_DB_NAMES"
+else
+	$(foreach DB, $(CANDIG_DB_NAMES), bash lib/postgres/backup_db.sh $(DB);)
+	@echo
+	@echo -e "🚨🚨🚨 Copy these backup files to an archival location! 🚨🚨🚨"
+endif
+
+
+restore_valid.%:
+	@if [ -e lib/$*/restore.txt ]; then \
+	restore=$(shell cat lib/$*/restore.txt); \
+	head $$restore | grep -q "PostgreSQL database dump"; \
+	if [[ $$? -eq 0 ]]; then touch restore_valid.$*; else \
+	echo "File $$restore does not exist or is not a valid sql file"; exit 1; fi; \
+	fi
+
+
+.INTERMEDIATE: restore_valid.%
+
+# for the given postgres-using module, if there is a restore file available, restore it
+restore-postgres-%: restore_valid.% ;
+	@ls lib/$*/restore.txt && { make build-$*; make compose-$*; } || echo "To restore a database, a file at lib/$*/restore.txt needs to be created that contains the absolute path to the backup sql file."
+
+
+# restore all of the postgres databases
+restore-all-postgres:
+ifndef CANDIG_DB_MODULES
+	@echo "Your .env file needs to be updated from example.env: it does not contain CANDIG_DB_MODULES"
+else
+	$(foreach MODULE, $(CANDIG_DB_MODULES), $(MAKE) restore-postgres-$(MODULE);)
+endif

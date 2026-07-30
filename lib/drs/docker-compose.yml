@@ -8,7 +8,7 @@ services:
       context: $PWD/lib/drs/drs
       args:
         venv_python: "${VENV_PYTHON}"
-    image: ${DOCKER_REGISTRY}/drs:${HTSGET_VERSION:-latest}
+    image: ${DOCKER_REGISTRY}/drs:${DRS_VERSION:-latest}
     labels:
       - "candigv2=drs"
     volumes:
@@ -27,11 +27,10 @@ services:
       OPA_URL: ${OPA_PRIVATE_URL}
       VAULT_URL: ${VAULT_PRIVATE_URL}
       DEBUG_MODE: ${CANDIG_DEBUG_MODE}
-      DB_PATH: "postgres-db"
+      DB_PATH: ${DB_PATH}
       SERVER_LOCAL_DATA: /app/drs_server/data
-      TESTENV_URL: ${HTSGET_PRIVATE_URL}
-      POSTGRES_DATABASE: "genomic"
-      POSTGRES_HOST_FILE: "postgres-db"
+      POSTGRES_DATABASE: ${DRS_DB}
+      POSTGRES_HOST_FILE: ${DB_PATH}
       POSTGRES_USERNAME: ${DEFAULT_ADMIN_USER}
       POSTGRES_PASSWORD_FILE: "/run/secrets/postgres-db-secret"
       SERVICE_NAME: ${SERVICE_NAME}
