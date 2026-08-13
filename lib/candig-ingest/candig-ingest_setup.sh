@@ -32,6 +32,6 @@ if [[ $CANDIG_SITE_ADMIN_USER != "" ]]; then
   bash $PWD/exec_with_expected.sh "curl -sX \"POST\" \"${CANDIG_URL}/ingest/user/pending/${CANDIG_SITE_ADMIN_USER}\" -H \"Authorization: Bearer ${site_admin_token}\"" "$CANDIG_SITE_ADMIN_USER"
 fi
 
-if [[ $CANDIG_DEBUG_MODE == 0 ]]; then
+if [[ $CANDIG_DEBUG_MODE == 1 ]]; then
   python $PWD/lib/candig-ingest/candigv2-ingest/generate_test_data.py --commit a7eab6d --prefix $CANDIG_SITE_LOCATION --tmp tmp/data/synthdata --delete
 fi
