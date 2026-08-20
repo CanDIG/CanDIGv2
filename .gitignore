@@ -68,4 +68,5 @@ lib/minio/aws-credentials
 # Ignore restore/restored files
 lib/*/restore.*
 lib/*/restored.*
+
 env-*
