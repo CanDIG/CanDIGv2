@@ -34,11 +34,20 @@ if [ "$TEST_SUBMODULES" -lt "2" ]; then
 fi
 
 # Check 4: .env matches
-DIFF_OUT=$(diff -I 'VENV_OS=.*' -I 'LOCAL_IP_ADDR=.*' -I '.*KEEP_TEST_DATA=.*' -bwB etc/env/example.env .env)
+if [[ $CANDIG_DEBUG_MODE == 1 ]]; then
+    DIFF_OUT=$(diff -I 'VENV_OS=.*' -I 'LOCAL_IP_ADDR=.*' -I '.*KEEP_TEST_DATA=.*' -bwB etc/env/example.env .env)
+else
+    DIFF_OUT=$(diff -I 'VENV_OS=.*' -I 'LOCAL_IP_ADDR=.*' -I '.*KEEP_TEST_DATA=.*' -bwB etc/env/example-production.env .env)
+fi
+
 if [ "$DIFF_OUT" == "" ]; then
     echo "Your .env matches etc/env/example.env, continuing"
 else
-    echo "Your .env differs from etc/env/example.env:"
+    if [[ $CANDIG_DEBUG_MODE == 1 ]]; then
+        echo "Your .env differs from etc/env/example.env:"
+    else
+        echo "Your .env differs from etc/env/example-production.env:"
+    fi
     echo "$DIFF_OUT"
     while [[ "$SILENT_MODE" != 1 ]]
     do
@@ -84,6 +93,9 @@ fi
 if [[ $CANDIG_DEBUG_MODE == 0 ]]; then
     echo
     echo "Backup files located at ${BACKUP_LOCATION}:"
+    if [ ! -d $BACKUP_LOCATION ]; then
+        mkdir $BACKUP_LOCATION
+    fi
     ls -lh $BACKUP_LOCATION | tail -n +2
     while [[ "$SILENT_MODE" != 1 ]]
     do

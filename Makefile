@@ -18,6 +18,25 @@ SHELL = bash
 CONDA = $(CONDA_INSTALL)/bin/conda
 CONDA_ENV_SETTINGS = $(CONDA_INSTALL)/etc/profile.d/conda.sh
 
+migrate-env:
+	@bash etc/env/migrate_env.sh
+
+# this target prompts the user to confirm that they understand; the .INTERMEDIATE target designates the touched file as needing to be cleaned up at the end of make.
+# it should only need to be run on non-debug-mode
+warn:
+ifeq ($(CANDIG_DEBUG_MODE), 0)
+	@if [ -e warn ]; \
+	then exit 0; \
+	else \
+	echo "Warning: This command will delete production data!"; \
+	echo "Please make sure you've backed up your data with 'make backup-vault' and 'make backup-all-postgres'."; \
+	echo Enter "I UNDERSTAND" to continue.; \
+	read line; if [[ $$line = "I UNDERSTAND" ]]; then touch warn; else exit 1; fi \
+	fi
+endif
+
+.INTERMEDIATE: warn
+
 
 # this target prompts the user to confirm that they understand; the .INTERMEDIATE target designates the touched file as needing to be cleaned up at the end of make.
 # it should only need to be run on non-debug-mode
@@ -630,7 +649,7 @@ start-all:
 #<<<
 
 .PHONY: rebuild-keep-data
-rebuild-keep-data:
+rebuild-keep-data: warn
 	# Remove the data modules from CANDIG_MODULES
 	$(eval REBUILD_CANDIG_MODULES := $(filter-out $(CANDIG_DATA_MODULES),$(CANDIG_MODULES)))
 	# Clean only the remaining modules
