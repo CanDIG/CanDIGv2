@@ -650,6 +650,8 @@ start-all:
 
 .PHONY: rebuild-keep-data
 rebuild-keep-data: warn
+	# Make sure all of our containers are running
+	$(MAKE) start-all
 	# Remove the data modules from CANDIG_MODULES
 	$(eval REBUILD_CANDIG_MODULES := $(filter-out $(CANDIG_DATA_MODULES),$(CANDIG_MODULES)))
 	# Clean only the remaining modules
