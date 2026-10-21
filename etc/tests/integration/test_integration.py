@@ -1006,32 +1006,34 @@ def test_analysis_dates(analysis, date):
 ## Does Beacon return the correct level of authorized results?
 def beacon_access():
     return [
-        (
+        (   # user1 can access multisample_2, HG02102
             "CANDIG_NOT_ADMIN_USER",
             "CANDIG_NOT_ADMIN_PASSWORD",
-            "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
+            "TPTE",
             [f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_01"],
             [f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02"],
+            117
         ),
-        (   # user2 can access NA18537-vcf, multisample_1, HG02102
+        (   # user2 can access NA18537-vcf, multisample_1
             "CANDIG_NOT_ADMIN2_USER",
             "CANDIG_NOT_ADMIN2_PASSWORD",
-            "NC_000021.9:g.5030847T>A", # chr21	5030847	.	T	A
+            "TPTE",
             [f"{ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']}-SYNTH_02"],
             [],
+            114
         )
     ]
 
 
-@pytest.mark.parametrize("user, password, search, can_access, cannot_access", beacon_access())
-def test_beacon(user, password, search, can_access, cannot_access):
+@pytest.mark.parametrize("user, password, search, can_access, cannot_access, count", beacon_access())
+def test_beacon(user, password, search, can_access, cannot_access, count):
     username = ENV[user]
     password = ENV[password]
     headers = {
         "Authorization": f"Bearer {get_token(username=username, password=password)}",
         "Content-Type": "application/json; charset=utf-8",
     }
-    params = {"allele": search}
+    params = {"geneId": search, "fullSearch": True}
     response = requests.get(
         f"{ENV['CANDIG_ENV']['HTSGET_PUBLIC_URL']}/beacon/v2/g_variants",
         headers=headers,
@@ -1044,7 +1046,18 @@ def test_beacon(user, password, search, can_access, cannot_access):
         assert c in str(response.json())
     for c in cannot_access:
         assert c not in str(response.json())
-    # print(response.json())
+
+    full_search_url = response.json()["beaconResultUrl"]
+    response = requests.get(full_search_url, headers=headers)
+    tries = 0
+    while "status" in response.json():
+        time.sleep(2)
+        response = requests.get(full_search_url, headers=headers)
+        tries = tries + 1
+        if tries > 120:
+            print("search is taking too long")
+    pprint.pprint(response.json())
+    assert response.json()['responseSummary']['numTotalResults'] == count
 
 
 def verify_samples():
