@@ -29,7 +29,7 @@ jobs:
           channels: conda-forge, defaults
           use-only-tar-bz2: true
           auto-update-conda: true
-          auto-activate-base: true
+          auto-activate: true
       - name: Check out repository code
         uses: actions/checkout@v6
       - name: Setup environment file
