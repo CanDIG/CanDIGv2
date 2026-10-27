@@ -28,6 +28,7 @@ services:
       CANDIG_USER_KEY: ${CANDIG_USER_KEY}
       DEBUG_MODE: ${CANDIG_DEBUG_MODE}
       DAEMON_PATH: /home/candig/tmp
+      TOUCH_FILE: /home/candig/tmp/last_touch.txt
       CANDIG_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
     extra_hosts:
       - "${CANDIG_DOMAIN}:${LOCAL_IP_ADDR}"
