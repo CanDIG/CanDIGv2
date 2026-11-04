@@ -1397,6 +1397,34 @@ def test_query_genomic():
     assert response and len(response.json()["results"]) == 1
 
 
+# Does a donor's genomic data list WTS experiments under transcriptomes and the RNA files under annotations?
+def test_query_transcriptome_annotations():
+    token = get_token(username=ENV['CANDIG_NOT_ADMIN_USER'],
+                      password=ENV['CANDIG_NOT_ADMIN_PASSWORD'])
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8",
+    }
+    # same request the data portal's patient page makes; SAMPLE_0009 only has a WTS experiment
+    site = ENV['CANDIG_ENV']['CANDIG_SITE_LOCATION']
+    params = {
+        "donors": f"{site}-DONOR_0003",
+        "genomic_data_types": "any"
+    }
+    response = requests.get(
+        f"{ENV['CANDIG_ENV']['QUERY_INTERNAL_URL']}/query", headers=headers, params=params
+    )
+    assert response.status_code == 200
+    samples = {case["submitter_sample_id"]: case for case in response.json()["genomic"]}
+    if f"{site}-SAMPLE_0009" not in samples:
+        print(f"\n\nExpected {site}-SAMPLE_0009 in the genomic results but got:")
+        pprint.pprint(response.json()["genomic"])
+    assert f"{site}-SAMPLE_0009" in samples
+    case = samples[f"{site}-SAMPLE_0009"]
+    assert f"{site}-SEQ_0009" in case["transcriptomes"]
+    assert f"{site}-NA18537-counts" in case["annotations"]
+
+
 # Can we use a discovery query to get counts of donors we do not have access to?
 def test_query_discovery():
     token = get_token(username=ENV['CANDIG_SITE_ADMIN_USER'],
