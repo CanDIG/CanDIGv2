@@ -25,6 +25,7 @@ services:
       KEYCLOAK_PRODUCTION_MODE: ${KEYCLOAK_PRODUCTION_MODE}
       KEYCLOAK_HTTPS_PORT: ${KEYCLOAK_HTTPS_PORT}
       JAVA_OPTS_KC_HEAP: "-XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=65"
+      JAVA_OPTS_APPEND: "-XX:-UseBASE64Intrinsics" # Mitigates Keycloak CVE-2026-114938
     secrets:
       - keycloak-admin-password
     ports:
